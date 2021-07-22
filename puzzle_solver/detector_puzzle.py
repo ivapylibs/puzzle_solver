@@ -44,11 +44,11 @@ class detector_puzzle(inImage):
   #
   def measure(self, I):
     if self.processor:
-      mask = self.processor.apply(I)
+      self.Ip = self.processor.apply(I)
     else:
       raise Exception('Processor has not been initialized yet')
 
-    seg_img_list = self.get_segmented_mask(mask)
+    seg_img_list = self.get_segmented_mask(self.Ip)
     seg_img_pair_list = self.get_matched_pairs(seg_img_list)
     self.movement_list = self.get_movement(seg_img_pair_list)
 
@@ -77,7 +77,7 @@ class detector_puzzle(inImage):
     # Filter out some contours according to length threshold
     for c in cnts:
       # Draw the contours
-      cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
+      # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
       area = cv2.contourArea(c)
 
       # Filtered by the area threshold

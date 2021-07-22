@@ -24,13 +24,11 @@
 #
 import operator
 import numpy as np
-
-import improcessor.basic as improcessor
-
 import cv2
 import os
-
 import matplotlib.pyplot as plt
+
+import improcessor.basic as improcessor
 import puzzle_solver.detector_puzzle as detector_puzzle
 
 #==[1] Build up a puzzle solver
