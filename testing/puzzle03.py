@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #=============================== puzzle03 ==============================
 #
 # @brief    Code to create a puzzle detector and working on well-separated puzzles
@@ -29,7 +30,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-import puzzle_solver.detector_puzzle as detector_puzzle
+import puzzle.detector_puzzle as detector_puzzle
 
 import improcessor.basic as improcessor
 import trackpointer.centroidMulti as tracker

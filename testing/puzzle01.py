@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #=============================== puzzle01 ==============================
 #
 # @brief    Code to create a puzzle detector and working on well-separated puzzles
@@ -28,7 +29,7 @@ import os
 import matplotlib.pyplot as plt
 
 import improcessor.basic as improcessor
-import puzzle_solver.detector_puzzle as detector_puzzle
+import puzzle.detector_puzzle as detector_puzzle
 
 #==[1] Build up a puzzle solver
 
