@@ -21,10 +21,10 @@
 #
 #====================== puzzle.piece.matchDifferent ======================
 
-from puzzle.piece.base import base
+from puzzle.piece.matcher import matcher
 
 
-class matchSimilar(base):
+class matchSimilar(matcher):
 
   #=========================== matchDifferent ==========================
   #
@@ -34,7 +34,7 @@ class matchSimilar(base):
   # at instantiation.
   #
   def __init__(self, tau=-float('inf')):
-    super(base, self).__init__(tau)
+    super(matcher, self).__init__(tau)
 
   #=========================== setMeasurement ==========================
   #
@@ -42,7 +42,7 @@ class matchSimilar(base):
   #         piece.
   #
   def setMeasurement(self, y):
-    super(base, self).setMeasurement(y)
+    super(matcher, self).setMeasurement(y)
     self.x = self.process(y);
 
   #============================== compare ==============================

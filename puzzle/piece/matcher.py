@@ -1,40 +1,43 @@
-#=========================== puzzle.piece.base ===========================
+#========================= puzzle.piece.matcher =========================
 #
-# @brief    The base class for puzzle piece specification or description
-#           encapsulation.
+# @brief    Derived class from puzzle piece template that adds
+#           operations for comparing puzzle pieces and performing puzzle
+#           solving.  This class is a base-type class and most of the
+#           member functions will do nothing and require overloading.
+#           The ones that don't should be for some generic
+#           functionality.
 #
-#=========================== puzzle.piece.base ===========================
+#========================= puzzle.piece.matcher =========================
 
 #
-# @file     base.m
+# @file     matcher.m
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/24
+# @date     2021/07/25
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
 #!  Tab is set to 4 spaces with conversion to spaces.
 #
-#=========================== puzzle.piece.base ===========================
+#========================= puzzle.piece.matcher =========================
 
+import puzzle.piece.template as template
 
-class base:
+#
+#========================= puzzle.piece.matcher =========================
+#
 
-  #================================ base ===============================
+class matcher(template):
+
+  #============================== matcher ==============================
   #
-  # @brief  Constructor for the puzzle.piece.base class.
+  # @brief  Constructor for the puzzle.piece.matcher class.
   #
   def __init__(self, tau = float("NaN")):
-    self.x = []     # @< The local description of the puzzle piece.
-    self.y = []     # @< The puzzle piece source data.
-    self.tau = tau  # @< Threshold to use when comparing, if given.
 
-  #============================== setSource ============================
-  #
-  # @brief  Pass along the source data describing the puzzle piece.
-  #
-  def setSource(self, y):
-    self.y = y
+    __init__(self, AAAA)
+
+    self.tau = tau  # @< Threshold to use when comparing, if given.
 
   #============================== process ==============================
   #
@@ -69,4 +72,4 @@ class base:
     bComp = false
 
 #
-#=========================== puzzle.piece.base ===========================
+#========================= puzzle.piece.matcher =========================
