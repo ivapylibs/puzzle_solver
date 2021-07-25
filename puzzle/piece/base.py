@@ -24,16 +24,16 @@ class base:
   #
   # @brief  Constructor for the puzzle.piece.base class.
   #
-  def __init__(self):
+  def __init__(self, tau = float("NaN")):
     self.x = []     # @< The local description of the puzzle piece.
-    self.y = []     # @< The puzzle piece measurement data.
+    self.y = []     # @< The puzzle piece source data.
+    self.tau = tau  # @< Threshold to use when comparing, if given.
 
-  #=========================== setMeasurement ==========================
+  #============================== setSource ============================
   #
-  # @brief  Pass along to the instance a measurement of the puzzle
-  #         piece.
+  # @brief  Pass along the source data describing the puzzle piece.
   #
-  def setMeasurement(self, y):
+  def setSource(self, y):
     self.y = y
 
   #============================== process ==============================

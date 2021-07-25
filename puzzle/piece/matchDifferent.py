@@ -1,7 +1,7 @@
 #====================== puzzle.piece.matchDifferent ======================
 #
-# @brief    Sub-classes of this  ass branch use similarity scores for
-#           determining wheter two puzzle pieces match.
+# @brief    Sub-classes of this derived class branch use similarity
+#           scores for determining wheter two puzzle pieces match.
 #
 # Difference scores are interpreted as smaller being more likely to be a
 # match and bigger being less likely to be a match. There will usually
@@ -33,8 +33,8 @@ class matchSimilar(base):
   # @todo Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self):
-    super(base, self).__init__()
+  def __init__(self, tau=-float('inf')):
+    super(base, self).__init__(tau)
 
   #=========================== setMeasurement ==========================
   #
@@ -56,7 +56,7 @@ class matchSimilar(base):
     # Need to figure out how to process next step which checks whether
     # the score is indicative of similarity or not. For now, going with
     # false result.
-    return (bComp = false)
+    return (diffScore < self.tau)
 
 #
 #====================== puzzle.piece.matchDifferent ======================
