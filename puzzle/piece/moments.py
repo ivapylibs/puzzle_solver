@@ -60,5 +60,9 @@ class moments(matchSimilar):
     # SOMETHING DIFFERENT NEED TO BE DONE?
     # WHAT MEMBER FUNCTIONS SHOULD BE OVERLOADED?
 
+  # WHAT ELSE SHOULD BE HERE IN THE INTERFACE?
+  # BUILD OUT AS NEEDED FROM THE REMOVAL OF CODE FROM THE
+  # DETECTOR_PUZZLE CLASS TO HERE.
+
 #
 #================================ moments ================================
