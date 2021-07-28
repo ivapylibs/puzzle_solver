@@ -50,11 +50,15 @@ class fromMask:
   def __init__(self, theMask = [], theImage = [])
 
     self.pieces = []        # @< The puzzle pieces.
-    pass
 
-    # Remainder of this constructor needs to be coded up.
-    # Is processing automatic or triggered by calling scope?
-    # If automatic, then need proper logic in member functions.
+    if theMask and theImage
+      self.setMaskAndImage(theMask, theImage)
+      # HAVE PROCESS CALLED HERE EXPLICITLY, OR EXPECT TO BE
+      # AUTOMATICALLY DONE IN setMaskAndImage FUNCTION?
+      # Is processing automatic or triggered by calling scope?
+      # If triggered externally, this would be the calling scope, so add.
+      #   Or use third binary argument indicating a process call.
+      # If automatic, then need proper logic in member functions.
 
   #============================== setMask ==============================
   #
@@ -95,7 +99,7 @@ class fromMask:
       self.process()
       # Should more be done?
       # Is processing automatic or triggered by calling scope?
-      # If automatic, then not need for flag. Remove it.
+      # If automatic, then no need for flag. Remove it.
 
   #============================== process ==============================
   #
@@ -105,6 +109,16 @@ class fromMask:
   # the puzzle piece information.
   #
   def process(self):
+    # Parse the mask to get the connection components. Hopefully they are
+    # returned in some sensible ordering that can be discerned.
+
+    # Best is to make a new class called puzzle.parser since it can
+    # probably be recycled here and elsewhere. It should be a perceiver
+    # instance. Figure out best way to handle it.
+
+    # Once the mask has been parsed, extract information from the color
+    # image to instantiate the puzzle piece template elements the define
+    # the entire puzzle.  Can only give the 
 
   #=========================== explodedPuzzle ==========================
   #
