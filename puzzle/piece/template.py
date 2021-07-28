@@ -139,18 +139,22 @@ class template:
 
   #============================== display ==============================
   #
-  # @brief  Display the puzzle piece contents.
+  # @brief  Display the puzzle piece contents in an image window.
+  #
+  # @param[in]  fh  The figure label/handle if available (optional).
   #
   def display(self, fh = []):
 
-    if not ax:
-      fh = mplot.figure(fh)
-
+    fh = mplot.figure(fh)
     mplot.imshow(self.y.image, extent = [0, 1, 0, 1])
 
-    # From googling, the above code seems to do what is described below.
+    # figure acts like Matlab's figure.
+    # imshow with extents acts like imagesc, so image will scale with
+    # window size. Correct code if wrong interpretation.
+
+    # From googling, the above code seems to do what is described.
     # If works, delete the notes and this comment. If not, correct based
-    # on notes.
+    # on notes below.
 
     # Need to figure this out.  Should a figure label/handler be given?
     # If not given, then create a new handle, display data and
@@ -164,6 +168,7 @@ class template:
     # opened in such a way that it is not native resolution?
     # I think so. We want outcome like in Matlab where small things are
     # still plotted reasonably large for easy visualization.
+
 
 
   #======================= buildFromMaskAndImage =======================

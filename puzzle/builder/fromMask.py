@@ -36,7 +36,7 @@
 #======================== puzzle.builder.fromMask ========================
 #
 
-class fromMask:
+class fromMask(puzzle.board):
 
 
   #============================== fromMask =============================
@@ -49,7 +49,7 @@ class fromMask:
   #
   def __init__(self, theMask = [], theImage = [])
 
-    self.pieces = []        # @< The puzzle pieces.
+    __init(super,puzzle.board)()
 
     if theMask and theImage
       self.setMaskAndImage(theMask, theImage)
