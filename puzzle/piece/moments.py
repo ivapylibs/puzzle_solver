@@ -45,7 +45,7 @@ class moments(matchSimilar):
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
-  def sval = score(self, yM)
+  def score(self, yM):
     pass
     # PUT THE COMPARISON PART HERE.
 
@@ -54,7 +54,8 @@ class moments(matchSimilar):
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
-  def bComp = compare(self, yM)
+  def compare(self, yM):
+    pass
 
     # IS IT POSSIBLE TO USE THE SUPER CLASS MEMBER FUNCTION, OR DOES
     # SOMETHING DIFFERENT NEED TO BE DONE?

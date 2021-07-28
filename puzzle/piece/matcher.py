@@ -21,7 +21,7 @@
 #
 #========================= puzzle.piece.matcher =========================
 
-import puzzle.piece.template as template
+from puzzle.piece.template import template
 
 #
 #========================= puzzle.piece.matcher =========================
@@ -35,7 +35,7 @@ class matcher(template):
   #
   def __init__(self, tau = float("NaN")):
 
-    __init__(self, AAAA)
+    super(matcher, self).__init__(template)
 
     self.tau = tau  # @< Threshold to use when comparing, if given.
 
@@ -47,8 +47,8 @@ class matcher(template):
   #
   # This member function should be overloaded.
   #
-  def xM = process(self, yM):
-    xM = yM
+  def process(self, yM):
+    pass
 
   #=============================== score ===============================
   #
@@ -58,7 +58,7 @@ class matcher(template):
   # This member function should be overloaded. Currently returns NaN to
   # indicate that a score cannot be computed.
   #
-  def sval = score(self, yM)
+  def score(self, yM):
     sval = float("NaN")
 
   #============================== compare ==============================
@@ -68,8 +68,8 @@ class matcher(template):
   # This member function should be overloaded. Currently returns false
   # so that all comparisons fail.
   #
-  def bComp = compare(self, yM)
-    bComp = false
+  def compare(self, yM):
+    bComp = False
 
 #
 #========================= puzzle.piece.matcher =========================

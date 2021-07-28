@@ -46,7 +46,7 @@ class template:
   # @param[in]  rc          The coordinate location
   # @param[in]  theta       The orientation of the puzzle piece (default = 0)
   #
-  def placeInImage(self, theImage, rc, theta = 0)
+  def placeInImage(self, theImage, rc, theta = 0):
 
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.

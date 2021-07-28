@@ -32,7 +32,7 @@
 
 #==== Imports
 #
-from BASE.CLASS.PACKAGE import OPTIONAL.PROBABLY.DONT.DO
+from trackpointer.centroidMulti import centroidMulti
 
 #==== Helper 
 #
@@ -40,13 +40,14 @@ from BASE.CLASS.PACKAGE import OPTIONAL.PROBABLY.DONT.DO
 # DEFINE ENUMERATED TYPE HERE FOR scoreType.
 # SCORE_DIFFERENCE, SCORE_SIMILAR for SURE.
 #
-
+SCORE_DIFFERENCE = 0
+SCORE_SIMILAR = 1
 #
 #================================ manager ================================
 #
 
 
-class manager (SUPERCLASS???):
+class manager (centroidMulti):
 # SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
 # MATCH. WHAT SHOULD THE SUPERCLASS BE? IT MIGHT BE THAT CREATING A NEW
 # TRACKPOINTER CLASS WITH SOME LIMITED FUNCTIONALITY IS IN ORDER.
@@ -62,7 +63,7 @@ class manager (SUPERCLASS???):
   # at instantiation.
   #
   def __init__(self, WHAT):
-    super(SUPERCLASS, self).__init__(WHAT)
+    super(manager, self).__init__(WHAT)
 
     self.scoreType = SCORE_DIFFERENCE
 
@@ -75,7 +76,7 @@ class manager (SUPERCLASS???):
   # @brief  Process the passed imagery to recover puzzle pieces and
   #         manage their track states.
   #
-  def measure(self, I)
+  def measure(self, I):
     pass
     # WRITE THIS FUNCTION.
     # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE

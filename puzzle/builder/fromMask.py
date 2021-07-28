@@ -1,7 +1,7 @@
 #======================== puzzle.builder.fromMask ========================
 #
 # @brief    Create digital puzzles from a puzzle partition mask and a
-#           source iamge with a similar aspect ratio.
+#           source image with a similar aspect ratio.
 #
 # The mask is white or "true" where the puzzle piece regions are and is
 # black or "false" where the boundaries are. For an image and mask pair
@@ -47,7 +47,7 @@ class fromMask:
   # @param[in]  theMask     The puzzle template mask. (optional)
   # @param[in]  theImage    The puzzle image source. (optional)
   #
-  def __init__(self, theMask = [], theImage = [])
+  def __init__(self, theMask = [], theImage = []):
 
     self.pieces = []        # @< The puzzle pieces.
     pass
@@ -62,7 +62,7 @@ class fromMask:
   #
   # @param[in]  theMask     The puzzle template mask. (optional)
   #
-  def setMask(self, theMask)
+  def setMask(self, theMask):
 
     self.mask = theMask
     # Should more be done?
@@ -86,12 +86,12 @@ class fromMask:
   # @param[in]  theImage    The puzzle image source. 
   # @param[in]  doParse     perform follow-up parsing? (optional boolean)
   #
-  def setMaskAndImage(self, theMask, theImage, doParse = false):
+  def setMaskAndImage(self, theMask, theImage, doParse = False):
 
     self.mask = theMask
     self.image = theImage
 
-    if (doParse)
+    if doParse:
       self.process()
       # Should more be done?
       # Is processing automatic or triggered by calling scope?
@@ -105,13 +105,13 @@ class fromMask:
   # the puzzle piece information.
   #
   def process(self):
-
+    pass
   #=========================== explodedPuzzle ==========================
   #
   # @brief  Create an exploded version of the puzzle. It is an image
   #         with no touching pieces.
   #
-  # The value fo an exploded puzzle image is that it can be used to
+  # The value for an exploded puzzle image is that it can be used to
   # generate a simulated puzzle scenario that can be passed to a puzzle
   # solver. It can also be used to define a quasi-puzzle problem, where
   # the objective is to place the pieces in grid ordering like the
@@ -127,30 +127,34 @@ class fromMask:
   #
   def explodedPuzzle(self, bgColor):
 
-    #--[1] First figure out how big the exploded image should be based
-    #      on the puzzle image dimensions, the number of puzzle pieces
-    #      across rows and columns, and the chosen spacing.
-    [nr, nc] = image size.
+    # @todo
+    # Will implement it later
+    pass
 
-    dr = 0 # ADDITIONAL ROWS TO ADD. ACCUMULATE.
-    dc = 0 # ADDITIONAL COLUMNS TO ADD. ACCUMULATE.
-
-    nr = nr + dr
-    nc = nc + dc
-
-    epImage = image of size nr x nc with bgColor.
-
-    #--[2] Place image data into the exploded puzzle image.
+    # #--[1] First figure out how big the exploded image should be based
+    # #      on the puzzle image dimensions, the number of puzzle pieces
+    # #      across rows and columns, and the chosen spacing.
+    # [nr, nc] = image size.
     #
-    for loop over pieces
-      x = self.piece[ii].r 
-      p = self.piece[i]].p
-
-      dr = x + [dx, dy] .* p
-
-      self.piece[ii].placeInImage(epImage, x)
-
-      # ABOVE IS JUST PSEUDOCODE. NEEDS CORRECTION.
+    # dr = 0 # ADDITIONAL ROWS TO ADD. ACCUMULATE.
+    # dc = 0 # ADDITIONAL COLUMNS TO ADD. ACCUMULATE.
+    #
+    # nr = nr + dr
+    # nc = nc + dc
+    #
+    # epImage = image of size nr x nc with bgColor.
+    #
+    # #--[2] Place image data into the exploded puzzle image.
+    # #
+    # for loop over pieces
+    #   x = self.piece[ii].r
+    #   p = self.piece[i]].p
+    #
+    #   dr = x + [dx, dy] .* p
+    #
+    #   self.piece[ii].placeInImage(epImage, x)
+    #
+    #   # ABOVE IS JUST PSEUDOCODE. NEEDS CORRECTION.
 
 #
 #======================== puzzle.builder.fromMask ========================
