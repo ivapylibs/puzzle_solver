@@ -1,8 +1,9 @@
 #========================= puzzle.piece.template =========================
 #
 # @brief    The base class for puzzle piece specification or description
-#           encapsulation. This simply stores the template image for a
-#           puzzle piece in its canonical orientation.
+#           encapsulation. This simply stores the template image and
+#           related data for a puzzle piece in its canonical
+#           orientation.
 #
 #========================= puzzle.piece.template =========================
 
@@ -18,6 +19,24 @@
 #
 #========================= puzzle.piece.template =========================
 
+#============================= Dependencies ==============================
+
+import numpy as np
+from dataclasses import dataclass
+
+#=========================== Helper Components ===========================
+
+@dataclass
+class puzzleTemplate:
+  icoords: list[int]    # @< Linear index coordinates.
+  rcoords: np.ndarray   # @< Puzzle piece linear image coordinates 
+  rcolors: np.ndarray   # @< Puzzle piece linear color/appearance 
+  image: np.ndarray     # @< Template image with BG default fill.
+
+
+#
+#========================= puzzle.piece.template =========================
+#
 
 class template:
 
@@ -26,9 +45,11 @@ class template:
   # @brief  Constructor for the puzzle.piece.base class.
   #
   def __init__(self, y = [], r = [], p = []):
-    self.y = y      # @< The puzzle piece source data, if given.
-    self.r = r      # @< The puzzle piece location in pixels, if given.
-    self.p = p      # @< The puzzle piece discrete grid piece coordinates.
+    self.y = y          # @< The puzzle piece template source data, if given.
+    self.rLoc = r       # @< The puzzle piece location in pixels, if given.
+    self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
+
+    # @note     Excluding orientation for now. Can add later.
 
   #============================== setSource ============================
   #
@@ -36,7 +57,14 @@ class template:
   #
   def setSource(self, y, r):
     self.y = y
+
+  #============================ setPlacement ===========================
+  #
+  # @brief  Provide pixel placement location information.
+  #
+  def setPlacement(self, r, p = []):
     self.r = r
+    self.p = p
 
   #============================ placeInImage ===========================
   #
