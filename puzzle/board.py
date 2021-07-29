@@ -50,6 +50,15 @@ class board:
 
     self.pieces = thePieces     # @< The puzzle pieces.
 
+  #================================ size ===============================
+  #
+  # @brief  Return the number of pieces on the board.
+  #
+  # @param[out] nPieces     The number of pieces on the board.
+  #
+  def nPieces = size(self)
+    return length(self.pieces)
+
   #============================== extents ==============================
   #
   # @brief  Iterate through the puzzle pieces to figure out the tight
@@ -85,12 +94,13 @@ class board:
   def toImage(self, theImage)
 
     COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.
-    MIGHT ALSO NEED OFFSET.
+    MIGHT ALSO NEED OFFSET SO THAT TOP-LEFT EXTENT STARTS AT (0,0).
 
     if not theImage:
       CREATE IMAGE WITH PROPER DIMENSIONS.
     else:
       CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
+      SHOULD BE EQUAL OR BIGGER, NOT LESS.
 
     for piece in self.pieces
       POPULATE IMAGE WITH PUZZLE PIECE VISUAL.
@@ -108,6 +118,11 @@ class board:
 
     mplot.figure(fh)
     mplot.imshow(theImage, extent=[0,1,0,1])
+
+    # @todo     Generating new image each time is time inefficient.
+    #       
+    MOST LIKELY WANT TO STORE FIGURE AND IMAGE IF GENERATED, THEN TEST
+    IT AVAILABLE.
 
 #
 #============================== puzzle.board =============================
