@@ -80,9 +80,11 @@ class board:
   #
   def boundingBox(self):
 
+    bbox = np.full((2,2), (0, 0))
+
     for piece in self.pieces:
       piece
-      bbox = np.full((2,2), (0, 0))
+
     return bbox
 
   #=========================== pieceLocations ==========================
