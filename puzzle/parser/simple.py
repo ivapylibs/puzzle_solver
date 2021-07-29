@@ -21,7 +21,7 @@
 #============================== Dependencies =============================
 #
 
-# IMPORT WHAT?
+# IMPORT WHAT? MOST LIKELY numpy, opencv
 
 #
 #========================== puzzle.parser.simple =========================
@@ -50,14 +50,21 @@ class simple(perceiver.simple):
 
 
     #--[2] Package all of the information into individual puzzle pieces.
+    #
 
 
     #--[3] Instantiate a puzzle board for the pieces.
+    #
 
 
-    #--[4] 
-
-
+    #--[4] Copy locations to this perceiver.
+    #
+    self.tpts = self.board.pieceLocations()
+    if self.board.size() > 0:
+      self.haveObs = true
+      self.haveState = true
+      self.haveRun = true
+      # @note   Is this right? Review meanings and correct/confirm.
 
 
   #========================= buildBasicPipeline ========================
@@ -77,6 +84,5 @@ class simple(perceiver.simple):
   # do the equivalent.
 
     
-
-
+#
 #========================== puzzle.parser.simple =========================
