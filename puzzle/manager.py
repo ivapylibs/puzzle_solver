@@ -12,7 +12,7 @@
 # and what regions are tagged to those changes.
 #
 # As an example, this manager can get all similarity (or difference)
-# scores are use them for generating assignments instead of greedily
+# scores and use them for generating assignments instead of greedily
 # creating assignments for each puzzle piece independently of the other
 # pieces.
 #
@@ -54,6 +54,8 @@ class manager (centroidMulti):
 # LIKE ONE CALLED multiRegions or regionsMulti or something like that.
 # IT TAKES IN AN IMAGE (POSSIBLY ALREADY BINARIZED) AND RECOVERS THE
 # DISTINCT REGIONS ASSOCIATED TO IT.
+
+# 2021/07/28
 
   #=============================== manager ==============================
   #

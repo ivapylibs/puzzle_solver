@@ -45,25 +45,26 @@ class simple(perceiver.simple):
   #
   # @brief      Process data from mask layer and image
   #
-  def measure(self, I, LM)
+  def measure(self, I, LM = [])
 
     self.I = I
     self.Mask = LM
 
-    #--[1] Parse mask to get distinct objects from it.  Query image to
-    #       get appearance information from the objects.
-
-
-    #--[2] Package all of the information into individual puzzle pieces.
+    #--[1] Parse image and mask to get distinct candidate puzzle objects
+    #      from it. Generates mask or revises existing mask.
     #
+    self.detector.process(I, LM)
+    detState = self.detector.getState()
 
-
-    #--[3] Instantiate a puzzle board for the pieces.
+    #--[2] Parse detector output to reconstitute recognized puzzle
+    #      pieces into a board.
     #
-
+    self.tracker.process(I, detState.mask???)
+    self.board = self.tracker.getState()
 
     #--[4] Copy locations to this perceiver.
     #
+    # IS LINE BELOW EVEN CORRECT BASE ON CLASS?
     self.tpts = self.board.pieceLocations()
     if self.board.size() > 0:
       self.haveObs = true
