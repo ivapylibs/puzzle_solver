@@ -85,6 +85,17 @@ class board:
       bbox = np.full((2,2), (0, 0))
     return bbox
 
+  #=========================== pieceLocations ==========================
+  #
+  # @brief      Returns list/array of puzzle piece locations.
+  #
+  def pLocs = pieceLocations(self)
+
+    pLocs = numpy array of size 2 x #pieces (rows x cols)
+
+    for ii = 1 : length(self.pieces)
+      pLocs(:, piece_num) = self.pieces(ii).getLocation()
+
   #============================== toImage ==============================
   #
   # @brief  Uses puzzle piece locations to create an image for
