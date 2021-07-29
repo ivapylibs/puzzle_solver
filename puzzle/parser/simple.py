@@ -27,6 +27,7 @@
 #========================== puzzle.parser.simple =========================
 #
 
+# It might be better to make subclass of centroidMulti
 class simple(perceiver.simple):
 
   #=============================== simple ==============================
@@ -37,6 +38,7 @@ class simple(perceiver.simple):
 
     __init__(super,perceiver.simple)(theDetector, theTracker, [], theParams)
     self.board = puzzle.board()
+    self.Mask = []
 
 
   #============================== measure ==============================
@@ -44,6 +46,9 @@ class simple(perceiver.simple):
   # @brief      Process data from mask layer and image
   #
   def measure(self, I, LM)
+
+    self.I = I
+    self.Mask = LM
 
     #--[1] Parse mask to get distinct objects from it.  Query image to
     #       get appearance information from the objects.
