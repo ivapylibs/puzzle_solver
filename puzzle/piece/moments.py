@@ -8,13 +8,19 @@
 # @file     moments.m
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/24
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/24 [created]
+#           2021/07/28 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
 #!  Tab is set to 4 spaces with conversion to spaces.
 #
 #================================ moments ================================
+
+import cv2
+import math
+import numpy as np
 
 from puzzle.piece.matchSimilar import matchSimilar
 
@@ -34,35 +40,53 @@ class moments(matchSimilar):
   #=========================== process ==========================
   #
   # @brief  Compute moments from the raw puzzle data.
+  #         See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
+  #
+  # @param[in]  y    a dataclass saving a piece's info
+  #
+  # @param[out]  huMoments    a list of huMoments value
   #
   def process(self, y):
-    pass
-    # PUT CODE HERE FOR THE MOMENTS OR CONTOUR EXTRACTION.
-    # WHATEVER WORKS FOR OPENCV.
+
+    moments = cv2.moments(y.image)
+    huMoments = cv2.HuMoments(moments)
+    for i in range(7):
+      huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(abs(huMoments[i]))
+
+    return huMoments
 
   #=============================== score ===============================
   #
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
-  def sval = score(self, yM)
-    pass
-    # PUT THE COMPARISON PART HERE.
+  # @param[in]  yM    a dataclass saving a passed puzzle piece's info
+  #
+  # @param[out]  distance    score between passed puzzle piece data and
+  #                          stored puzzle piece.
+  #
+  def score(self, yM):
+
+    huMoments_A= self.process(self.y)
+    huMoments_B= self.process(yM)
+
+    distance = np.sum(np.abs(huMoments_B-huMoments_A))
+
+    return distance
 
 
   #============================== compare ==============================
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
-  def bComp = compare(self, yM)
+  # @param[in]  yM    a dataclass saving a passed puzzle piece's info
+  #
+  # @param[out]       directly call the function from the super class
+  #
+  def compare(self, yM):
 
-    # IS IT POSSIBLE TO USE THE SUPER CLASS MEMBER FUNCTION, OR DOES
-    # SOMETHING DIFFERENT NEED TO BE DONE?
-    # WHAT MEMBER FUNCTIONS SHOULD BE OVERLOADED?
+    return super().compare(yM)
 
-  # WHAT ELSE SHOULD BE HERE IN THE INTERFACE?
-  # BUILD OUT AS NEEDED FROM THE REMOVAL OF CODE FROM THE
-  # DETECTOR_PUZZLE CLASS TO HERE.
 
 #
 #================================ moments ================================

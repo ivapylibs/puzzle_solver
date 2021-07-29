@@ -25,19 +25,19 @@
 
 
 #============================== Dependencies =============================
-%
+
 # Imports go here. Aim for the bare minimum. 
 
 # Make sure to include in dependencies for this package.
 # Delete this comment when done.
 
-
+import numpy as np
+import matplotlib.pyplot as mplot
 #
 #============================== puzzle.board =============================
 #
 
 class board:
-
 
   #================================ board ==============================
   #
@@ -46,7 +46,7 @@ class board:
   #
   # @param[in]  thePieces   The puzzle pieces. (optional)
   #
-  def __init__(self, thePieces = []) 
+  def __init__(self, thePieces = []):
 
     self.pieces = thePieces     # @< The puzzle pieces.
 
@@ -66,7 +66,7 @@ class board:
   #
   # @param[out] lengths     The bounding box side lengths.
   #
-  def lengths = extents(self)
+  def extents(self):
     lengths = np.array([0,0])
 
     return lengths
@@ -78,8 +78,11 @@ class board:
   #
   # @param[out] bbox        The bounding box coordinates.
   #
-  def boundingBox(self)
-    bbox = np.full((2,2), (0, 0));
+  def boundingBox(self):
+
+    for piece in self.pieces:
+      piece
+      bbox = np.full((2,2), (0, 0))
     return bbox
 
   #============================== toImage ==============================
@@ -93,18 +96,17 @@ class board:
   #
   def toImage(self, theImage)
 
-    COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.
-    MIGHT ALSO NEED OFFSET SO THAT TOP-LEFT EXTENT STARTS AT (0,0).
+    # @todo
+    # COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.
+    # MIGHT ALSO NEED OFFSET SO THAT TOP-LEFT EXTENT STARTS AT (0,0).
 
-    if not theImage:
-      CREATE IMAGE WITH PROPER DIMENSIONS.
-    else:
-      CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
-      SHOULD BE EQUAL OR BIGGER, NOT LESS.
+    # if not theImage:
+    #   CREATE IMAGE WITH PROPER DIMENSIONS.
+    # else:
+    #   CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
+    #   SHOULD BE EQUAL OR BIGGER, NOT LESS.
 
-    for piece in self.pieces
-      POPULATE IMAGE WITH PUZZLE PIECE VISUAL.
-
+    pass
 
   #============================== display ==============================
   #
@@ -121,8 +123,11 @@ class board:
 
     # @todo     Generating new image each time is time inefficient.
     #       
-    MOST LIKELY WANT TO STORE FIGURE AND IMAGE IF GENERATED, THEN TEST
-    IT AVAILABLE.
+    # MOST LIKELY WANT TO STORE FIGURE AND IMAGE IF GENERATED, THEN TEST
+    # IF AVAILABLE. THIS INTRODUCTES PROBLEMS THOUGH SINCE KEEP TRACK OF
+    # DIRTY STATUS REQUIRES KNOWLEDGE ABOUT PUZZLE PIECES AND SOME FORM
+    # OF COMMUNICATION OR COORDINATION. NOT WORTH THE EFFORT RIGHT NOW.
+    #
 
 #
 #============================== puzzle.board =============================

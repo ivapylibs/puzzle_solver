@@ -42,21 +42,21 @@ class matchSimilar(matcher):
   #         piece.
   #
   def setMeasurement(self, y):
-    super(matcher, self).setMeasurement(y)
-    self.x = self.process(y);
+    super().setMeasurement(y)
+    self.y = self.process(y)
 
   #============================== compare ==============================
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
-  def bComp = compare(self, yM)
+  def compare(self, yM):
     xM = self.process(yM)
 
-    simScore = self.score(xM);
+    simScore = self.score(xM)
     # Need to figure out how to process next step which checks whether
     # the score is indicative of similarity or not. For now, going with
     # false result.
-    return (diffScore > self.tau)
+    return simScore > self.tau
 
 #
 #======================= puzzle.piece.matchSimilar =======================
