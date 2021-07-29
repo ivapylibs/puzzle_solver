@@ -60,6 +60,7 @@ class matcher(template):
   #
   def score(self, yM):
     sval = float("NaN")
+    return sval
 
   #============================== compare ==============================
   #
@@ -70,6 +71,6 @@ class matcher(template):
   #
   def compare(self, yM):
     bComp = False
-
+    return bComp
 #
 #========================= puzzle.piece.matcher =========================

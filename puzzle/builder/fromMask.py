@@ -48,7 +48,7 @@ class fromMask(board):
   # @param[in]  theMask     The puzzle template mask. (optional)
   # @param[in]  theImage    The puzzle image source. (optional)
   #
-  def __init__(self, theMask = None, theImage = None):
+  def __init__(self, theMask = [], theImage = []):
 
     super(fromMask, self).__init__()
 

@@ -42,8 +42,8 @@ class matchSimilar(matcher):
   #         piece.
   #
   def setMeasurement(self, y):
-    super(matcher, self).setMeasurement(y)
-    self.x = self.process(y);
+    super().setMeasurement(y)
+    self.y = self.process(y)
 
   #============================== compare ==============================
   #

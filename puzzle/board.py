@@ -39,7 +39,6 @@ import matplotlib.pyplot as mplot
 
 class board:
 
-
   #================================ board ==============================
   #
   # @brief  Constructor for puzzle board. Can pass contents at
@@ -71,7 +70,10 @@ class board:
   # @param[out] bbox        The bounding box coordinates.
   #
   def boundingBox(self):
-    bbox = np.full((2,2), (0, 0))
+
+    for piece in self.pieces:
+      piece
+      bbox = np.full((2,2), (0, 0))
     return bbox
 
   #============================== toImage ==============================
