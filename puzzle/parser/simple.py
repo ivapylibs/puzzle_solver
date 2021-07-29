@@ -6,6 +6,8 @@
 #           layer mask and an image. It's only job is to recover said
 #           information from an image. No attempt is made to do anything
 #           else, such as associate over time or anything like that.
+#           For flexibility, this class is a perceiver. There will be
+#           many ways to instantiate a simple parser.
 #
 #========================== puzzle.parser.simple =========================
 
@@ -53,13 +55,20 @@ class simple(perceiver.simple):
     #--[1] Parse image and mask to get distinct candidate puzzle objects
     #      from it. Generates mask or revises existing mask.
     #
-    self.detector.process(I, LM)
+    # @note Is process the right thing to call. Why not measure? Is it
+    #       because this is a perceiver? I think so. We are decoupling
+    #       the individual steps in this implementation.
+    if LM:
+      self.detector.process(I, LM)
+    else:
+      self.detector.process(I)
+
     detState = self.detector.getState()
 
     #--[2] Parse detector output to reconstitute recognized puzzle
     #      pieces into a board.
     #
-    self.tracker.process(I, detState.mask???)
+    self.tracker.process(I, detState.x)
     self.board = self.tracker.getState()
 
     #--[4] Copy locations to this perceiver.
