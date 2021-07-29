@@ -50,6 +50,14 @@ class board:
 
     self.pieces = thePieces     # @< The puzzle pieces.
 
+  #=============================== clear ===============================
+  #
+  # @brief  Clear the puzzle pieces from the board.
+  #
+  function clear(self)
+
+    self.pieces = []
+
   #================================ size ===============================
   #
   # @brief  Return the number of pieces on the board.
@@ -67,7 +75,11 @@ class board:
   # @param[out] lengths     The bounding box side lengths.
   #
   def extents(self):
-    lengths = np.array([0,0])
+
+    # BASICALLY, CALL boundingBox, GET THE BBOX
+    # COMPUTE DIFFERENCES TO CONVERT INTO SIDE LENGTHS.
+    # RETURN LENGTHS
+    pass 
 
     return lengths
 
@@ -84,6 +96,7 @@ class board:
 
     for piece in self.pieces:
       piece
+      # PROCESS TO GET MIN X, MIN Y, MAX X, and MAX X
 
     return bbox
 
