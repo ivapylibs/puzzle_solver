@@ -88,6 +88,25 @@ class simple(perceiver.simple):
   # pairing.  We may not need it in the end since other processes will
   # do the equivalent.
 
+
+  # @note The preference over the above, for the moment is to create a
+  # set of static methods here that perform simple image processing
+  # operations to extract the mask.  Options include:
+  #
+  # imageToMask_Threshold
+  # imageToMask_GrowSelection
+  #
+  # These should work for most of the basic images to be used for
+  # testing purposes.
+  #
+  # If needed, some outer class can be made to automatically implement
+  # these, then pass on the image and mask.  Otherwise, just rely on the
+  # calling scope to properly implement.  Calling scope makes sense
+  # since immediate anticipated use is for test scripts more so than
+  # actual operation and final solution.
+  #
+
+
     
 #
 #========================== puzzle.parser.simple =========================
