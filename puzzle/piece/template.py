@@ -33,7 +33,8 @@ import matplotlib.pyplot as mplot
 @dataclass
 class puzzleTemplate:
   size:    np.ndarray   # @< tight bbox size of puzzle piece image.
-  icoords: list[int]    # @< Linear index coordinates.
+  # Yunzhi: We may not need it
+  # icoords: list[int]    # @< Linear index coordinates.
   rcoords: np.ndarray   # @< Puzzle piece linear image coordinates.
   appear:  np.ndarray   # @< Puzzle piece linear color/appearance. 
   image:   np.ndarray   # @< Template image with BG default fill.
@@ -161,20 +162,25 @@ class template:
   #         instantiate a puzzle piece template.
   #
   @staticmethod
-  def buildFromMaskAndImage(theMask, theImage, rLoc = []):
+  def buildFromMaskAndImage(theMask, theImage, rLoc = None):
 
     y = puzzleTemplate()
 
     # Populate dimensions.
-    y.size  = np.size(theMask)
+    y.size = theMask.shape
 
-    # Populate coordinate/indexing information.
-    y.icoords = np.find(theMask)
-    y.rcoords = ind2sub(y.icoords, y.size)
+    # @todo
+    # Python may not be so complicated
+    # # Populate coordinate/indexing information.
+    # y.icoords = find(theMasK)
+    # y.rcoords = ind2sub(y.icoords, y.size)
+    #
+    # # Populate appearance
+    # linImage = reshape(theImage, [prod(imsize), size(theImage, 2)])
+    # y.appear = linImage[y.icoords, :]
 
-    # Populate appearance
-    linImage = reshape(theImage, [prod(imsize), size(theImage,2)])
-    y.appear   = linImage[y.icoords,:]
+    y.rcoords = np.nonzero(theMask) # 2 (row,col) x N
+    y.appear = theImage[y.rcoords]
 
     # Store template image.
     # @note     For now, not concerned about bad image data outside of mask.
@@ -185,7 +191,7 @@ class template:
     else:
       thePiece = template(y, rLoc)
 
-    pass
+    return thePiece
 
 #
 #========================= puzzle.piece.template =========================
