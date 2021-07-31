@@ -32,7 +32,7 @@
 # Delete this comment when done.
 
 import numpy as np
-import matplotlib.pyplot as mplot
+import matplotlib.pyplot as plt
 #
 #============================== puzzle.board =============================
 #
@@ -151,8 +151,8 @@ class board:
 
     theImage = self.toImage()
 
-    mplot.figure(fh)
-    mplot.imshow(theImage, extent=[0,1,0,1])
+    plt.figure(fh)
+    plt.imshow(theImage, extent=[0,1,0,1])
 
     # @todo     Generating new image each time is time inefficient.
     #       

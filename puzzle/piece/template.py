@@ -26,7 +26,7 @@
 import numpy as np
 from dataclasses import dataclass
 
-import matplotlib.pyplot as mplot
+import matplotlib.pyplot as plt
 
 #=========================== Helper Components ===========================
 
@@ -50,7 +50,7 @@ class template:
   # @brief  Constructor for the puzzle.piece.base class.
   #
   def __init__(self, y = None, r = (0, 0)):
-    self.y = y          # @< The puzzle piece template source data, if given.
+    self.y = y          # @< The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate
     self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
 
     # self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
@@ -72,7 +72,7 @@ class template:
   def setMeasurement(self, y):
 
     # @todo
-    # Not sure what to do here
+    # Yunzhi: Not sure what to do here
 
     pass
 
@@ -114,15 +114,13 @@ class template:
     # image coordinates.
     rcoords = self.rLoc + self.y.rcoords
       
-    # Dump color/appearance information into the image.
+    # Dump color/appearance information into the image (It will override the original image).
     theImage[rcoords[0,:], rcoords[1,:], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED. WOULD REQUIRE HAVING A
     # ROTATED IMAGE TEMPLATE AS A MEMBER VARIABLE.
-    # Yunzhi: update the image next?
-    pass    # REPLACE WITH ACTUAL CODE.
 
   #============================== display ==============================
   #
@@ -132,8 +130,8 @@ class template:
   #
   def display(self, fh = []):
 
-    fh = mplot.figure(fh)
-    mplot.imshow(self.y.image, extent = [0, 1, 0, 1])
+    fh = plt.figure(fh)
+    plt.imshow(self.y.image, extent = [0, 1, 0, 1])
 
     # figure acts like Matlab's figure.
     # imshow with extents acts like imagesc, so image will scale with

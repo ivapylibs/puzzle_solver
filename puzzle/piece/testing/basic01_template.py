@@ -16,7 +16,7 @@
 
 
 #==[0] Prep environment
-import matplotlib as mplot
+import matplotlib as plt
 import numpy as np
 
 from puzzle.piece.template import template
@@ -47,8 +47,8 @@ thePiece.placeInImage(bigImage)
 thePiece.placeInImageAt(bigImage, np.array([70,30]))
 
 # Display the resulting image. Should have three puzzle pieces in it.
-mplot.figure()
-mplot.imshow(bigImage, extent = [0, 1, 0, 1])
+plt.figure()
+plt.imshow(bigImage, extent = [0, 1, 0, 1])
 
 
 #

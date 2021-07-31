@@ -35,7 +35,7 @@ class matcher(template):
   #
   def __init__(self, tau = float("NaN")):
 
-    super(matcher, self).__init__(template)
+    super(matcher, self).__init__(y=template)
 
     self.tau = tau  # @< Threshold to use when comparing, if given.
 
@@ -61,7 +61,7 @@ class matcher(template):
   def score(self, yM):
     # sval = float("NaN")
     # return sval
-    # Yunzhi: since this function should be overloaded. It is better to raise a error here.
+    # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError
 
   #============================== compare ==============================
@@ -72,7 +72,7 @@ class matcher(template):
   # so that all comparisons fail.
   #
   def compare(self, yM):
-    # Yunzhi: since this function should be overloaded. It is better to raise a error here.
+    # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError
 #
 #========================= puzzle.piece.matcher =========================
