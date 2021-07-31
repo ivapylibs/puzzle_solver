@@ -54,7 +54,7 @@ class board:
   #
   # @brief  Clear the puzzle pieces from the board.
   #
-  function clear(self)
+  def clear(self):
 
     self.pieces = []
 
@@ -64,8 +64,10 @@ class board:
   #
   # @param[out] nPieces     The number of pieces on the board.
   #
-  def nPieces = size(self)
-    return length(self.pieces)
+  def size(self):
+
+    nPieces = len(self.pieces)
+    return nPieces
 
   #============================== extents ==============================
   #
@@ -81,7 +83,6 @@ class board:
     # RETURN LENGTHS
     pass 
 
-    return lengths
 
   #============================ boundingBox ============================
   #
@@ -92,25 +93,31 @@ class board:
   #
   def boundingBox(self):
 
-    bbox = np.full((2,2), (0, 0))
+    # @todo
+    # bbox = np.full((2,2), (0, 0))
+    #
+    # for piece in self.pieces:
+    #   piece
+    #   # PROCESS TO GET MIN X, MIN Y, MAX X, and MAX X
+    #
+    # return bbox
 
-    for piece in self.pieces:
-      piece
-      # PROCESS TO GET MIN X, MIN Y, MAX X, and MAX X
-
-    return bbox
+    pass
 
   #=========================== pieceLocations ==========================
   #
   # @brief      Returns list/array of puzzle piece locations.
   #
-  def pLocs = pieceLocations(self)
+  # @param[out] pLocs
+  def pieceLocations(self):
 
-    pLocs = numpy array of size 2 x #pieces (rows x cols)
-
-    for ii = 1 : length(self.pieces)
-      pLocs(:, piece_num) = self.pieces(ii).getLocation()
-
+    # @ todo
+    # pLocs = numpy array of size 2 x #pieces (rows x cols)
+    #
+    # for ii = 1 : length(self.pieces)
+    #   pLocs(:, piece_num) = self.pieces(ii).getLocation()
+    #
+    pass
   #============================== toImage ==============================
   #
   # @brief  Uses puzzle piece locations to create an image for
@@ -120,7 +127,7 @@ class board:
   #
   # @param[in]  theImage    The image to insert pieces into.
   #
-  def toImage(self, theImage)
+  def toImage(self, theImage):
 
     # @todo
     # COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.

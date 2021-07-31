@@ -24,21 +24,22 @@
 #
 
 # IMPORT WHAT? MOST LIKELY numpy, opencv
-
+import perceiver.simple as perceiverSimple
+import puzzle
 #
 #========================== puzzle.parser.simple =========================
 #
 
 # It might be better to make subclass of centroidMulti
-class simple(perceiver.simple):
+class simple(perceiverSimple.simple):
 
   #=============================== simple ==============================
   #
   # @brief  Constructor for the simple puzzler parser. Lacks a filter.
   #
-  def __init__(self, theDetector, theTracker, theParams = [])
+  def __init__(self, theDetector, theTracker, theParams = []):
 
-    __init__(super,perceiver.simple)(theDetector, theTracker, [], theParams)
+    super(simple, self).__init__(theDetector, theTracker, [], theParams)
     self.board = puzzle.board()
     self.Mask = []
 
@@ -47,7 +48,7 @@ class simple(perceiver.simple):
   #
   # @brief      Process data from mask layer and image
   #
-  def measure(self, I, LM = [])
+  def measure(self, I, LM = []):
 
     self.I = I
     self.Mask = LM
@@ -76,9 +77,9 @@ class simple(perceiver.simple):
     # IS LINE BELOW EVEN CORRECT BASE ON CLASS?
     self.tpts = self.board.pieceLocations()
     if self.board.size() > 0:
-      self.haveObs = true
-      self.haveState = true
-      self.haveRun = true
+      self.haveObs = True
+      self.haveState = True
+      self.haveRun = True
       # @note   Is this right? Review meanings and correct/confirm.
 
 
@@ -87,34 +88,36 @@ class simple(perceiver.simple):
   # @brief      Creates a simple puzzle parser employing a very basic
   #             (practically trivial) processing pipeline for 
   @staticmethod
-  def buildBasicPipeline:
+  def buildBasicPipeline():
 
-  # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
-  # file is not yet created for fully known at this moment.
-  #
-  # @todo   Figure out where to place this static factory method so that
-  # test and puzzle solver code is easy to implement. It is really a
-  # wrapper for a data processing scheme that leads to a (I, LM)
-  # pairing.  We may not need it in the end since other processes will
-  # do the equivalent.
+    # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
+    # file is not yet created for fully known at this moment.
+    #
+    # @todo   Figure out where to place this static factory method so that
+    # test and puzzle solver code is easy to implement. It is really a
+    # wrapper for a data processing scheme that leads to a (I, LM)
+    # pairing.  We may not need it in the end since other processes will
+    # do the equivalent.
 
 
-  # @note The preference over the above, for the moment is to create a
-  # set of static methods here that perform simple image processing
-  # operations to extract the mask.  Options include:
-  #
-  # imageToMask_Threshold
-  # imageToMask_GrowSelection
-  #
-  # These should work for most of the basic images to be used for
-  # testing purposes.
-  #
-  # If needed, some outer class can be made to automatically implement
-  # these, then pass on the image and mask.  Otherwise, just rely on the
-  # calling scope to properly implement.  Calling scope makes sense
-  # since immediate anticipated use is for test scripts more so than
-  # actual operation and final solution.
-  #
+    # @note The preference over the above, for the moment is to create a
+    # set of static methods here that perform simple image processing
+    # operations to extract the mask.  Options include:
+    #
+    # imageToMask_Threshold
+    # imageToMask_GrowSelection
+    #
+    # These should work for most of the basic images to be used for
+    # testing purposes.
+    #
+    # If needed, some outer class can be made to automatically implement
+    # these, then pass on the image and mask.  Otherwise, just rely on the
+    # calling scope to properly implement.  Calling scope makes sense
+    # since immediate anticipated use is for test scripts more so than
+    # actual operation and final solution.
+    #
+
+    pass
 
 
     

@@ -32,12 +32,12 @@ import matplotlib.pyplot as mplot
 
 @dataclass
 class puzzleTemplate:
-  size:    np.ndarray   # @< tight bbox size of puzzle piece image.
+  size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
   # Yunzhi: We may not need it
   # icoords: list[int]    # @< Linear index coordinates.
-  rcoords: np.ndarray   # @< Puzzle piece linear image coordinates.
-  appear:  np.ndarray   # @< Puzzle piece linear color/appearance. 
-  image:   np.ndarray   # @< Template image with BG default fill.
+  rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
+  appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
+  image:   np.ndarray = np.array([])  # @< Template image with BG default fill.
 
 #
 #========================= puzzle.piece.template =========================

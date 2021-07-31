@@ -59,8 +59,10 @@ class matcher(template):
   # indicate that a score cannot be computed.
   #
   def score(self, yM):
-    sval = float("NaN")
-    return sval
+    # sval = float("NaN")
+    # return sval
+    # Yunzhi: since this function should be overloaded. It is better to raise a error here.
+    raise NotImplementedError
 
   #============================== compare ==============================
   #
@@ -70,7 +72,7 @@ class matcher(template):
   # so that all comparisons fail.
   #
   def compare(self, yM):
-    bComp = False
-    return bComp
+    # Yunzhi: since this function should be overloaded. It is better to raise a error here.
+    raise NotImplementedError
 #
 #========================= puzzle.piece.matcher =========================

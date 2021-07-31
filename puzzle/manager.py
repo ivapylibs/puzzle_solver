@@ -38,7 +38,7 @@
 #
 from trackpointer.centroidMulti import centroidMulti
 from dataclasses import dataclass
-
+import puzzle
 #==== Helper 
 #
 
@@ -106,52 +106,52 @@ class manager(puzzle.parser.fromLayer):
   #
   def measure(self, I, M):
     pass
-    # WRITE THIS FUNCTION.
-    # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE
-    # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
-    # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
-    # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
+    # # WRITE THIS FUNCTION.
+    # # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE
+    # # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
+    # # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
+    # # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
+    # #
+    # # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
+    # # WHATEVER WORKS FOR OPENCV.
     #
-    # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
-    # WHATEVER WORKS FOR OPENCV.
-
-    # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
-    # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
-
-    # 1] Extract pieces and generate a measured board. Done in
-    #    superclass member function. Also populates a measured board.
+    # # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
+    # # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
     #
-    super(manager, self).measure(I,  M)
-
-    # 3] COMPARE TO GROUND TRUTH (PAIRWISE TESTS)
-    # 4] GENERATE ASSOCIATIONS
+    # # 1] Extract pieces and generate a measured board. Done in
+    # #    superclass member function. Also populates a measured board.
+    # #
+    # super(manager, self).measure(I,  M)
     #
-    self.matchPieces()
-    #       BOTH COMBINED AS PART OF A MEMBER FUNCTION
+    # # 3] COMPARE TO GROUND TRUTH (PAIRWISE TESTS)
+    # # 4] GENERATE ASSOCIATIONS
+    # #
+    # self.matchPieces()
+    # #       BOTH COMBINED AS PART OF A MEMBER FUNCTION
+    # #
+    # # 5] STORE AND CLOSE OUT
+    # #
+    # #       SHOULD GENERATE A PUZZLE.BOARD AS FINAL ANSWER.
+    # loop through pAssignments
+    #   if valid assignment
+    #     add to list. (MIGHT BE ONE LINE OF CODE IN PYTHON. NOT SURE)
+    #   call final object to be iPieces, indices to assigned pieces.
     #
-    # 5] STORE AND CLOSE OUT 
+    # self.bAssigned = self.bMeas.getSubset(iPieces)
     #
-    #       SHOULD GENERATE A PUZZLE.BOARD AS FINAL ANSWER.
-    loop through pAssignments
-      if valid assignment
-        add to list. (MIGHT BE ONE LINE OF CODE IN PYTHON. NOT SURE)
-      call final object to be iPieces, indices to assigned pieces.
-
-    self.bAssigned = self.bMeas.getSubset(iPieces)
-
-    # IF DONE RIGHT, THE SUPER CLASS CAN DO ABOUT 50% OF THE ABOVE AND
-    # THIS CLASS HAS SOME SPECIALIZED PROCESSING FOR THE PUZZLE PIECES
-    # FOR THE OTHER 50% (NOTE: THE PERCENT SPLIT COULD BE DIFFERENT).
-    #
-    # 2021/07/29: [IGNORE THIS IGNORE THIS]
-    # LOOKS LIKE THE SUPER CLASS SHOULD ONLY BE HELPING WITH STEP 1. IT
-    # IS OK TO JUST CODE AS MEMBER FUNCTION HERE AND WORRY ABOUT
-    # ALTERNATIVES LATER.  
-    #
-    # 2021/07/29: IF SUPERCLASS IS PUZZLE.PARSER.FROMLAYERS, THEN STEPS
-    # 1 AND 2 ARE DONE BY THE SUPERCLASS MEASURE FUNCTION.  THIS ONE
-    # WILL THEN DO STEPS 3, 4 AND 5 IN THIS CODEBASE.
-    #
+    # # IF DONE RIGHT, THE SUPER CLASS CAN DO ABOUT 50% OF THE ABOVE AND
+    # # THIS CLASS HAS SOME SPECIALIZED PROCESSING FOR THE PUZZLE PIECES
+    # # FOR THE OTHER 50% (NOTE: THE PERCENT SPLIT COULD BE DIFFERENT).
+    # #
+    # # 2021/07/29: [IGNORE THIS IGNORE THIS]
+    # # LOOKS LIKE THE SUPER CLASS SHOULD ONLY BE HELPING WITH STEP 1. IT
+    # # IS OK TO JUST CODE AS MEMBER FUNCTION HERE AND WORRY ABOUT
+    # # ALTERNATIVES LATER.
+    # #
+    # # 2021/07/29: IF SUPERCLASS IS PUZZLE.PARSER.FROMLAYERS, THEN STEPS
+    # # 1 AND 2 ARE DONE BY THE SUPERCLASS MEASURE FUNCTION.  THIS ONE
+    # # WILL THEN DO STEPS 3, 4 AND 5 IN THIS CODEBASE.
+    # #
 
   #============================== correct ==============================
   #

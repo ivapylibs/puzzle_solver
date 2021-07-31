@@ -31,14 +31,13 @@
 # Make sure to include in dependencies for this package.
 # Delete this comment when done.
 
-from puzzle import board
+from puzzle.board import board
 
 #
 #======================== puzzle.builder.fromMask ========================
 #
 
 class fromMask(board):
-
 
   #============================== fromMask =============================
   #

@@ -13,7 +13,9 @@
 # @file     matchSimilar.m
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/24
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/24 [created]
+#           2021/07/30 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -50,12 +52,10 @@ class matchSimilar(matcher):
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
   def compare(self, yM):
-    xM = self.process(yM)
 
-    simScore = self.score(xM)
-    # Need to figure out how to process next step which checks whether
-    # the score is indicative of similarity or not. For now, going with
-    # false result.
+    # score is to calculate the similarity while it will call the feature extraction process inside
+    simScore = self.score(yM)
+
     return simScore > self.tau
 
 #

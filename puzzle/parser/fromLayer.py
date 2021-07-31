@@ -31,7 +31,7 @@ from trackpointer.centroidMulti import centroidMulti
 #======================== puzzle.parser.fromLayer ========================
 #
 
-class fromLayer (centroidMulti):
+class fromLayer(centroidMulti):
 
   #============================= fromLayer =============================
   #
@@ -39,7 +39,10 @@ class fromLayer (centroidMulti):
   #
   def __init__(self):
     super(fromLayer, self).__init__()
-    self.bMeas   = puzzle.board             # @< The measured board.
+
+    # @ todo
+    # Need double check
+    # self.bMeas   = puzzle.board             # @< The measured board.
 
   #============================== measure ==============================
   #
@@ -72,15 +75,15 @@ class fromLayer (centroidMulti):
   # @param[in]  I   Source image.
   # @param[in]  M   Layer mask (binary).
   #
-  def mask2regions(self, I, M)
+  def mask2regions(self, I, M):
 
     # Find all connected components.
     # Get image coordinates, centroid, bounding box, top left corner,
     # etc. as needed.
 
     # Using region data to extract the image color information.
-
-    return regions
+    # return regions
+    pass
 
   #========================== regions2pieces ===========================
   #
@@ -88,11 +91,13 @@ class fromLayer (centroidMulti):
   #
   def regions2pieces(self, regions):
 
-    # Use all of these elements to instantiate a puzzle piece.
-    for loop over found items (is it by index or as list?)
-      repackage found region data into puzzle piece.
+    # # Use all of these elements to instantiate a puzzle piece.
+    # for loop over found items (is it by index or as list?)
+    #   repackage found region data into puzzle piece.
+    #
+    # return pieces
 
-    return pieces
+    pass
 
   #============================== correct ==============================
   #
