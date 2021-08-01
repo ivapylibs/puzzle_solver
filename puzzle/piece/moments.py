@@ -5,7 +5,7 @@
 #================================ moments ================================
 
 #
-# @file     moments.m
+# @file     moments.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
@@ -31,7 +31,8 @@ class moments(matchSimilar):
   #
   # @brief  Constructor for the puzzle piece matchSimilar class.
   #
-  # @todo Decide later if initialization/calibration data can be passed
+  # @todo
+  # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
   def __init__(self):

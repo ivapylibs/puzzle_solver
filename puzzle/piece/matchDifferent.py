@@ -10,7 +10,7 @@
 #====================== puzzle.piece.matchDifferent ======================
 
 #
-# @file     matchDifferent.m
+# @file     matchDifferent.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
@@ -25,14 +25,14 @@
 
 from puzzle.piece.matcher import matcher
 
-
 class matchSimilar(matcher):
 
   #=========================== matchDifferent ==========================
   #
   # @brief  Constructor for the puzzle piece matchDifferent class.
   #
-  # @todo Decide later if initialization/calibration data can be passed
+  # @todo
+  # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
   def __init__(self, tau=-float('inf')):

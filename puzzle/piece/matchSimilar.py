@@ -10,7 +10,7 @@
 #======================= puzzle.piece.matchSimilar =======================
 
 #
-# @file     matchSimilar.m
+# @file     matchSimilar.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
@@ -32,7 +32,8 @@ class matchSimilar(matcher):
   #
   # @brief  Constructor for the puzzle piece matchSimilar class.
   #
-  # @todo Decide later if initialization/calibration data can be passed
+  # @todo
+  # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
   def __init__(self, tau=float('inf')):

@@ -21,18 +21,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from puzzle.piece.template import template
+
 #==[1] Create raw puzzle piece data.
 #
 theMask = np.full((20,20), False, dtype=bool)
 theMask[4:14,7:12] = True
 
+# Or should it be an OpenCV image instance?
 theImage = np.zeros((20,20,3))
 theImage[4:14,7:12,:] = np.full((1,1,3), [200,100,100])
-  # Or should it be an OpenCV image instance?
-
 
 thePiece = template.buildFromMaskAndImage(theMask, theImage)
-
 
 #==[2] Test creation
 #

@@ -10,10 +10,12 @@
 #========================= puzzle.piece.matcher =========================
 
 #
-# @file     matcher.m
+# @file     matcher.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/25
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/25 [created]
+#           2021/07/31 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -61,6 +63,8 @@ class matcher(template):
   def score(self, yM):
     # sval = float("NaN")
     # return sval
+
+    # @note
     # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError
 
@@ -72,6 +76,7 @@ class matcher(template):
   # so that all comparisons fail.
   #
   def compare(self, yM):
+    # @note
     # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError
 #
