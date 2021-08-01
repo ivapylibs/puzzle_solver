@@ -15,6 +15,21 @@
 #======================== puzzle.builder.fromMask ========================
 
 #
+#
+# @note     THIS CLASS NAME MIGHT BE WRONG.  CONSIDER CHANGING IT!!!
+#           IN FACT, THIS ENTIRE CLASS MAY BE UNNECESSARY BASED ON THE
+#           ARRANGEMENT, ADJACENT, INTERLOCKING, AND GRIDDED CLASSES. 
+#           NEED TO THINK IT THROUGH A BIT MORE - PAV 2021/08/01
+#
+#           MAIN ISSUE IS THAT THE PROCESSING HERE IS EASY TO DO BASED
+#           ON CORE CLASSES. THE MORE IMPORTANT PART OF THESE CLASSES
+#           HAS TO DO WITH HOIW THEY DEFINE WHAT A SOLUTION IS AND HOW
+#           ONE MIGHT SCORE OR ASSESS PROGRESS FOR THE PUZZLE. THIS IS
+#           SOMETHING I WILL NEED TO CONSULT WITH ADAN ON.
+#
+#
+
+#
 # @file     fromMask.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
