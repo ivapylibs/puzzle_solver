@@ -15,7 +15,9 @@
 # @file     board.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/28  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/28 [created]
+#           2021/08/01 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -67,6 +69,7 @@ class board:
   def size(self):
 
     nPieces = len(self.pieces)
+
     return nPieces
 
   #============================== extents ==============================
@@ -78,10 +81,11 @@ class board:
   #
   def extents(self):
 
-    # BASICALLY, CALL boundingBox, GET THE BBOX
-    # COMPUTE DIFFERENCES TO CONVERT INTO SIDE LENGTHS.
-    # RETURN LENGTHS
-    pass 
+    # [[min x, min y], [max x, max y]]
+    bbox = self.boundingBox()
+    lengths = bbox[1]-bbox[0]
+
+    return lengths
 
 
   #============================ boundingBox ============================
@@ -93,37 +97,49 @@ class board:
   #
   def boundingBox(self):
 
-    # @todo
-    # bbox = np.full((2,2), (0, 0))
-    #
-    # for piece in self.pieces:
-    #   piece
-    #   # PROCESS TO GET MIN X, MIN Y, MAX X, and MAX X
-    #
-    # return bbox
+    if self.size() == 0:
+      # @todo
+      # Yunzhi: Not sure what to do here
+      print('No pieces exist')
+      exit()
+    else:
+      # process to get min x, min y, max x, and max y
+      bbox = np.array([[float('inf'), float('inf')], [0, 0]])
 
-    pass
+      # piece is a puzzleTemplate instance, see template.py for details.
+      for piece in self.pieces:
+        # top left coordinate
+        tl = piece.rLoc
+        # bottom right coordinate
+        br = piece.rLoc + piece.size
+
+        bbox[0] = np.min([bbox[0], tl], axis=0)
+        bbox[1] = np.max([bbox[0], br], axis=0)
+
+      return bbox
+
 
   #=========================== pieceLocations ==========================
   #
   # @brief      Returns list/array of puzzle piece locations.
   #
-  # @param[out] pLocs
+  # @param[out] pLocs list/array of puzzle piece locations.
+  #
   def pieceLocations(self):
 
-    # @ todo
-    # pLocs = numpy array of size 2 x #pieces (rows x cols)
-    #
-    # for ii = 1 : length(self.pieces)
-    #   pLocs(:, piece_num) = self.pieces(ii).getLocation()
-    #
-    pass
+    pLocs = []
+    for piece in self.pieces:
+      pLocs.append(piece.rLoc)
+
+    # from N x 2 to 2 x N
+    pLocs = np.array(pLocs).reshape(2,-1)
+
+    return pLocs
+
   #============================== toImage ==============================
   #
   # @brief  Uses puzzle piece locations to create an image for
   #         visualizing them.  If given an image, then will place in it.
-  #
-  # @todo   Figure out what to do if image too small. Expand it or abort?
   #
   # @param[in]  theImage    The image to insert pieces into.
   #
@@ -139,7 +155,31 @@ class board:
     #   CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
     #   SHOULD BE EQUAL OR BIGGER, NOT LESS.
 
-    pass
+    if not theImage:
+      # CREATE IMAGE WITH PROPER DIMENSIONS.
+      lengths = self.extents()
+      img = np.zeros(lengths)
+      for piece in self.pieces:
+        # @todo
+        # Yunzhi: Need double check if we do not need return value here
+        piece.placeInImage(img)
+    else:
+      # CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
+      # SHOULD BE EQUAL OR BIGGER, NOT LESS.
+      lengths = self.extents()
+      if (theImage.shape-lengths>0).all():
+        for piece in self.pieces:
+          # @todo
+          # Yunzhi: Need double check if we do not need return value here
+          piece.placeInImage(theImage)
+      else:
+        # @todo
+        #  Figure out what to do if image too small. Expand it or abort?
+        #  Yunzhi: Currently abort.
+        print('The image is too small. Please try again.')
+        exit()
+
+    return img
 
   #============================== display ==============================
   #
@@ -147,20 +187,31 @@ class board:
   #
   # Display in an image the puzzle board.  
   #
-  def display(self, fh = []):
+  def display(self, fh = None):
 
-    theImage = self.toImage()
-
-    plt.figure(fh)
-    plt.imshow(theImage, extent=[0,1,0,1])
-
-    # @todo     Generating new image each time is time inefficient.
-    #       
+    # @note
+    #
+    # Generating new image each time is time inefficient.
+    #
     # MOST LIKELY WANT TO STORE FIGURE AND IMAGE IF GENERATED, THEN TEST
     # IF AVAILABLE. THIS INTRODUCTES PROBLEMS THOUGH SINCE KEEP TRACK OF
     # DIRTY STATUS REQUIRES KNOWLEDGE ABOUT PUZZLE PIECES AND SOME FORM
     # OF COMMUNICATION OR COORDINATION. NOT WORTH THE EFFORT RIGHT NOW.
     #
+
+    theImage = self.toImage()
+
+    if fh:
+      # See https://stackoverflow.com/a/7987462/5269146
+      fh = plt.figure(fh.number)
+      # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
+    else:
+      fh = plt.figure()
+    plt.imshow(theImage, extent=[0, 1, 0, 1])
+    plt.show()
+
+    return fh
+
 
 #
 #============================== puzzle.board =============================
