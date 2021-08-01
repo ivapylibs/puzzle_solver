@@ -103,24 +103,50 @@ class template:
   #============================ placeInImage ===========================
   #
   # @brief  Insert the puzzle piece into the image at the given location.
-  #         
-  # @param[in]  theImage    The source image to put puzzle piece into.
-  # @param[in]  rc          The coordinate location
-  # @param[in]  theta       The orientation of the puzzle piece (default = 0)
   #
-  def placeInImageAt(self, theImage):
+  # @param[in]  theImage    The source image to put puzzle piece into.
+  #
+  def placeInImage(self, theImage):
 
     # Remap coordinates from own image sprite coordinates to bigger
     # image coordinates.
-    rcoords = self.rLoc + self.y.rcoords
-      
+    rcoords = self.rLoc.reshape(-1,1) + self.y.rcoords
+
     # Dump color/appearance information into the image (It will override the original image).
-    theImage[rcoords[0,:], rcoords[1,:], :] = self.y.appear
+    theImage[rcoords[0, :], rcoords[1, :], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED. WOULD REQUIRE HAVING A
     # ROTATED IMAGE TEMPLATE AS A MEMBER VARIABLE.
+
+  #============================ placeInImageAt ===========================
+  #
+  # @brief  Insert the puzzle piece into the image at the given location.
+  #         
+  # @param[in]  theImage    The source image to put puzzle piece into.
+  # @param[in]  rc          The coordinate location
+  # @param[in]  theta       The orientation of the puzzle piece (default = 0)
+  #
+  def placeInImageAt(self, theImage, rc, theta = 0, isCenter = False):
+
+    if not theta:
+      theta = 0
+
+      # If specification is at center, then compute offset to top-left corner.
+    if isCenter:
+      rc = rc - np.ceil(self.y.size / 2)
+      # Remap coordinates from own image sprite coordinates to bigger
+      # image coordinates.
+    rcoords = rc.reshape(-1,1) + self.y.rcoords
+
+    # Dump color/appearance information into the image.
+    theImage[rcoords[0, :], rcoords[1, :], :] = self.y.appear
+
+    # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
+    # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.
+
+    pass  # REPLACE WITH ACTUAL CODE.
 
   #============================== display ==============================
   #
@@ -128,10 +154,15 @@ class template:
   #
   # @param[in]  fh  The figure label/handle if available (optional).
   #
-  def display(self, fh = []):
-
-    fh = plt.figure(fh)
+  def display(self, fh = None):
+    if fh:
+      # See https://stackoverflow.com/a/7987462/5269146
+      fh = plt.figure(fh.number)
+      # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
+    else:
+      fh = plt.figure()
     plt.imshow(self.y.image, extent = [0, 1, 0, 1])
+    plt.show()
 
     # figure acts like Matlab's figure.
     # imshow with extents acts like imagesc, so image will scale with
