@@ -15,8 +15,9 @@
 # @file     simple.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO ELSE?
-# @date     2021/07/28  [created]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/28 [created]
+#           2021/08/01 [modified]
 #
 #========================== puzzle.parser.simple =========================
 
@@ -30,7 +31,6 @@ from puzzle.board import board
 #========================== puzzle.parser.simple =========================
 #
 
-# It might be better to make subclass of centroidMulti
 class simple(perceiverSimple.simple):
 
   #=============================== simple ==============================
@@ -47,6 +47,9 @@ class simple(perceiverSimple.simple):
   #============================== measure ==============================
   #
   # @brief      Process data from mask layer and image
+  #
+  # @param[in]  I   The puzzle image source.
+  # @param[in]  LM  The puzzle template mask.
   #
   def measure(self, I, LM = []):
 
@@ -70,6 +73,16 @@ class simple(perceiverSimple.simple):
     #      pieces into a board.
     #
     self.tracker.process(I, detState.x)
+
+    # @todo
+    # Yunzhi:
+    # 1. the state obtained in the tracker (centroid or centroidMulti)
+    # (self.tpt = tpt (the center point of a segmented region) & self.haveMeas = haveMeas)
+    # which is different from the board instance. Should we do something else?
+    # 2. A typical process should be instantiating the puzzle pieces. That is
+    # something already done by puzzle.builder.fromMask?
+    # So what are we doing here? What is the difference?
+
     self.board = self.tracker.getState()
 
     #--[4] Copy locations to this perceiver.

@@ -133,7 +133,10 @@ class fromMask(board):
 
     # Once the mask has been parsed, extract information from the color
     # image to instantiate the puzzle piece template elements the define
-    # the entire puzzle.  Can only give the 
+    # the entire puzzle.
+
+    # @todo
+    # Yunzhi: call puzzle.parser.fromLayer to instantiate the puzzle piece template
 
     pass
 
