@@ -23,10 +23,12 @@
 #================================ manager ================================
 
 #
-# @file     manager.m
+# @file     manager.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/26
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/26 [created]
+#           2021/08/01 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -36,15 +38,12 @@
 
 #==== Imports
 #
-from trackpointer.centroidMulti import centroidMulti
 from dataclasses import dataclass
 import puzzle
 #==== Helper 
 #
 
 # DEFINE ENUMERATED TYPE HERE FOR scoreType.
-# SCORE_DIFFERENCE, SCORE_SIMILAR for SURE.
-#
 SCORE_DIFFERENCE = 0
 SCORE_SIMILAR = 1
 
@@ -57,25 +56,28 @@ class managerParms:
 #
 
 class manager(puzzle.parser.fromLayer):
-# SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
-# MATCH. WHAT SHOULD THE SUPERCLASS BE? IT MIGHT BE THAT CREATING A NEW
-# TRACKPOINTER CLASS WITH SOME LIMITED FUNCTIONALITY IS IN ORDER.
-# LIKE ONE CALLED multiRegions or regionsMulti or something like that.
-# IT TAKES IN AN IMAGE (POSSIBLY ALREADY BINARIZED) AND RECOVERS THE
-# DISTINCT REGIONS ASSOCIATED TO IT.
+  # SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
+  # MATCH. WHAT SHOULD THE SUPERCLASS BE? IT MIGHT BE THAT CREATING A NEW
+  # TRACKPOINTER CLASS WITH SOME LIMITED FUNCTIONALITY IS IN ORDER.
+  # LIKE ONE CALLED multiRegions or regionsMulti or something like that.
+  # IT TAKES IN AN IMAGE (POSSIBLY ALREADY BINARIZED) AND RECOVERS THE
+  # DISTINCT REGIONS ASSOCIATED TO IT.
 
-# 2021/07/28
-#
-# ELSEWHERE I HAD NOTED IT SHOULD BE A PERCEIVER AND POSSIBLE EVEN A
-# SUB-CLASS OF PUZZLE.PARSER.SIMPLE.  I TAKE THAT BACK. IT SHOULD BE A
-# TRACKPOINTER FOR NOW. WHETHER IT IS DERIVED FROM CENTROIDMULTI IS
-# ANOTHER STORY. DOESN'T HURT RIGHT NOW. LATER ON MIGHT REQUIRE A
-# CHANGE.
-#
+  # 2021/07/28
+  #
+  # ELSEWHERE I HAD NOTED IT SHOULD BE A PERCEIVER AND POSSIBLE EVEN A
+  # SUB-CLASS OF PUZZLE.PARSER.SIMPLE.  I TAKE THAT BACK. IT SHOULD BE A
+  # TRACKPOINTER FOR NOW. WHETHER IT IS DERIVED FROM CENTROIDMULTI IS
+  # ANOTHER STORY. DOESN'T HURT RIGHT NOW. LATER ON MIGHT REQUIRE A
+  # CHANGE.
+  #
 
-# 2021/07/29
-# WILL END UP A SUB-CLASS OF PUZZLE.PARSER.FROMLAYER DOING REPLACEMENT
-# NOW.
+  # 2021/07/29
+  # WILL END UP A SUB-CLASS OF PUZZLE.PARSER.FROMLAYER DOING REPLACEMENT
+  # NOW.
+
+  # @note
+  # Yunzhi: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
   #=============================== manager ==============================
   #
@@ -88,7 +90,7 @@ class manager(puzzle.parser.fromLayer):
     super(manager, self).__init__()
 
     if not theParms:
-      theParms = managerParms;
+      theParms = managerParms
 
     self.solution = solution              # @< The solution puzzle board.
     self.scoreType = theParms.scoreType   # @< The type of comparator.
@@ -105,21 +107,22 @@ class manager(puzzle.parser.fromLayer):
   #         manage their track states.
   #
   def measure(self, I, M):
-    pass
-    # # WRITE THIS FUNCTION.
-    # # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE
-    # # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
-    # # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
-    # # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
-    # #
-    # # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
-    # # WHATEVER WORKS FOR OPENCV.
+
+    # @todo
+    # WRITE THIS FUNCTION.
+    # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE
+    # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
+    # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
+    # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
     #
-    # # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
-    # # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
+    # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
+    # WHATEVER WORKS FOR OPENCV.
     #
-    # # 1] Extract pieces and generate a measured board. Done in
-    # #    superclass member function. Also populates a measured board.
+    # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
+    # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
+    #
+    # # 1] and 2] Extract pieces and generate a measured board. Done in
+    # #    superclass member function.
     # #
     # super(manager, self).measure(I,  M)
     #
@@ -152,6 +155,7 @@ class manager(puzzle.parser.fromLayer):
     # # 1 AND 2 ARE DONE BY THE SUPERCLASS MEASURE FUNCTION.  THIS ONE
     # # WILL THEN DO STEPS 3, 4 AND 5 IN THIS CODEBASE.
     # #
+    pass
 
   #============================== correct ==============================
   #
@@ -166,14 +170,11 @@ class manager(puzzle.parser.fromLayer):
   # @brief  TO FILL OUT.
   #
   def process(self, y):
-    pass
+
+    # @todo
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
+    # self.measure()
 
-  # WHAT ELSE SHOULD BE HERE IN THE INTERFACE?
-  # BUILD OUT AS NEEDED FROM THE REMOVAL OF CODE FROM THE
-  # DETECTOR_PUZZLE CLASS TO HERE.
-  # MAKE SURE TO THINK ABOUT WHAT MIGHT BE GENERAL AND FIT IN THE SUPERCLASS.
-  # ANYTHING SPECIALIZED IS BEST FOR THIS CLASS.
-
+    pass
 #
 #================================ manager ================================

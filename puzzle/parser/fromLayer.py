@@ -9,10 +9,12 @@
 #======================== puzzle.parser.fromLayer ========================
 
 #
-# @file     fromLayer.m
+# @file     fromLayer.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/29
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/29 [created]
+#           2021/08/01 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -23,7 +25,7 @@
 #==== Imports
 #
 from trackpointer.centroidMulti import centroidMulti
-
+from puzzle.board import board
 #==== Helper 
 #
 
@@ -40,9 +42,7 @@ class fromLayer(centroidMulti):
   def __init__(self):
     super(fromLayer, self).__init__()
 
-    # @ todo
-    # Need double check
-    # self.bMeas   = puzzle.board             # @< The measured board.
+    self.bMeas   = board()             # @< The measured board.
 
   #============================== measure ==============================
   #
@@ -77,6 +77,7 @@ class fromLayer(centroidMulti):
   #
   def mask2regions(self, I, M):
 
+    # @todo
     # Find all connected components.
     # Get image coordinates, centroid, bounding box, top left corner,
     # etc. as needed.
@@ -91,7 +92,8 @@ class fromLayer(centroidMulti):
   #
   def regions2pieces(self, regions):
 
-    # # Use all of these elements to instantiate a puzzle piece.
+    # @todo
+    # Use all of these elements to instantiate a puzzle piece.
     # for loop over found items (is it by index or as list?)
     #   repackage found region data into puzzle piece.
     #
@@ -114,13 +116,6 @@ class fromLayer(centroidMulti):
   def process(self, y):
     pass
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-
-  # WHAT ELSE SHOULD BE HERE IN THE INTERFACE?
-  # BUILD OUT AS NEEDED FROM THE REMOVAL OF CODE FROM THE
-  # DETECTOR_PUZZLE CLASS TO HERE.
-  # MAKE SURE TO THINK ABOUT WHAT MIGHT BE GENERAL AND FIT IN THE SUPERCLASS.
-  # ANYTHING SPECIALIZED IS BEST FOR THIS CLASS.
-
 
 
 #

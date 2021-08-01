@@ -25,7 +25,7 @@
 
 # IMPORT WHAT? MOST LIKELY numpy, opencv
 import perceiver.simple as perceiverSimple
-import puzzle
+from puzzle.board import board
 #
 #========================== puzzle.parser.simple =========================
 #
@@ -40,7 +40,7 @@ class simple(perceiverSimple.simple):
   def __init__(self, theDetector, theTracker, theParams = []):
 
     super(simple, self).__init__(theDetector, theTracker, [], theParams)
-    self.board = puzzle.board()
+    self.board = board()
     self.Mask = []
 
 

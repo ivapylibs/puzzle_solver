@@ -18,7 +18,9 @@
 # @file     fromMask.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2021/07/25  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/07/25 [created]
+#           2021/08/01 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -57,6 +59,8 @@ class fromMask(board):
       self.setMask(theMask)
     elif theMask:
       self.setImage(theImage)
+
+      # @note
       # HAVE PROCESS CALLED HERE EXPLICITLY, OR EXPECT TO BE
       # AUTOMATICALLY DONE IN setMaskAndImage FUNCTION?
       # Is processing automatic or triggered by calling scope?
@@ -73,6 +77,8 @@ class fromMask(board):
   def setMask(self, theMask):
 
     self.mask = theMask
+
+    # @note
     # Should more be done?
     # Is processing automatic or triggered by calling scope?
 
@@ -83,6 +89,7 @@ class fromMask(board):
   def setImage(self, theImage):
 
     self.image = theImage
+    # @note
     # Should more be done?
     # Is processing automatic or triggered by calling scope?
 
@@ -101,6 +108,8 @@ class fromMask(board):
 
     if doParse:
       self.process()
+
+      # @note
       # Should more be done?
       # Is processing automatic or triggered by calling scope?
       # If automatic, then no need for flag. Remove it.
@@ -114,8 +123,7 @@ class fromMask(board):
   #
   def process(self):
 
-    pass
-
+    # @todo
     # Parse the mask to get the connection components. Hopefully they are
     # returned in some sensible ordering that can be discerned.
 
@@ -127,6 +135,7 @@ class fromMask(board):
     # image to instantiate the puzzle piece template elements the define
     # the entire puzzle.  Can only give the 
 
+    pass
 
   #=========================== explodedPuzzle ==========================
   #
@@ -150,8 +159,7 @@ class fromMask(board):
   def explodedPuzzle(self, bgColor):
 
     # @todo
-    # Will implement it later
-    pass
+    # Yunzhi: Will implement it later
 
     # #--[1] First figure out how big the exploded image should be based
     # #      on the puzzle image dimensions, the number of puzzle pieces
@@ -178,5 +186,6 @@ class fromMask(board):
     #
     #   # ABOVE IS JUST PSEUDOCODE. NEEDS CORRECTION.
 
+    pass
 #
 #======================== puzzle.builder.fromMask ========================
