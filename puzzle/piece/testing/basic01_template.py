@@ -48,7 +48,8 @@ thePiece.placeInImageAt(bigImage, np.array([70,30]))
 
 # Display the resulting image. Should have three puzzle pieces in it.
 plt.figure()
-plt.imshow(bigImage, extent = [0, 1, 0, 1])
+# plt.imshow(bigImage, extent = [0, 1, 0, 1])
+plt.imshow(bigImage)
 plt.show()
 
 #

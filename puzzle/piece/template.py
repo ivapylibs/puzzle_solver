@@ -163,7 +163,9 @@ class template:
       # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     else:
       fh = plt.figure()
-    plt.imshow(self.y.image, extent = [0, 1, 0, 1])
+
+    # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
+    plt.imshow(self.y.image)
     plt.show()
 
     return fh
