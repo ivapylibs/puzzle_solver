@@ -52,6 +52,16 @@ class board:
 
     self.pieces = thePieces     # @< The puzzle pieces.
 
+  #=========================== addPiece ==========================
+  #
+  # @brief      Add puzzle piece instance to the board
+  #
+  # @param[in]  piece a puzzle piece instance
+  #
+  def addPiece(self, piece):
+
+    self.pieces.append(piece)
+
   #=============================== clear ===============================
   #
   # @brief  Clear the puzzle pieces from the board.
@@ -87,7 +97,6 @@ class board:
 
     return lengths
 
-
   #============================ boundingBox ============================
   #
   # @brief  Iterate through the puzzle pieces to figure out the tight
@@ -111,7 +120,7 @@ class board:
         # top left coordinate
         tl = piece.rLoc
         # bottom right coordinate
-        br = piece.rLoc + piece.size
+        br = piece.rLoc + piece.size()
 
         bbox[0] = np.min([bbox[0], tl], axis=0)
         bbox[1] = np.max([bbox[0], br], axis=0)
@@ -148,20 +157,12 @@ class board:
   def toImage(self, theImage = None):
 
     # @todo
-    # COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.
-    # MIGHT ALSO NEED OFFSET SO THAT TOP-LEFT EXTENT STARTS AT (0,0).
-
-    # if not theImage:
-    #   CREATE IMAGE WITH PROPER DIMENSIONS.
-    # else:
-    #   CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
-    #   SHOULD BE EQUAL OR BIGGER, NOT LESS.
+    # Might also need offset so that top-left extent starts at (0,0).
 
     if theImage:
-      # CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
-      # SHOULD BE EQUAL OR BIGGER, NOT LESS.
-      lengths = self.extents()
-      if (theImage.shape-lengths>0).all():
+      # Check dimensions ok and act accordingly, should be equal or bigger, not less.
+      lengths = self.boundingBox()[1].astype('int')
+      if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
           # @todo
           # Yunzhi: Need double check if we do not need return value here
@@ -173,9 +174,9 @@ class board:
         print('The image is too small. Please try again.')
         exit()
     else:
-      # CREATE IMAGE WITH PROPER DIMENSIONS.
-      lengths = self.extents()
-      theImage = np.zeros(lengths)
+      # Create image with proper dimensions.
+      lengths = self.boundingBox()[1].astype('int')
+      theImage = np.zeros((lengths[0],lengths[1],3))
       for piece in self.pieces:
         # @todo
         # Yunzhi: Need double check if we do not need return value here
@@ -211,8 +212,12 @@ class board:
       # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     else:
       fh = plt.figure()
-    plt.imshow(theImage, extent=[0, 1, 0, 1])
-    plt.show()
+    # @note
+    # Yunzhi: extent is used to change the axis tick, we should use figsize
+    # See https://stackoverflow.com/a/66315574/5269146
+    # plt.imshow(theImage, extent=[0, 1, 0, 1])
+    plt.imshow(theImage)
+    # plt.show()
 
     return fh
 
