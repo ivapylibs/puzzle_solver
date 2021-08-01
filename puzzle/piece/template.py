@@ -65,7 +65,7 @@ class template:
   def size(self):
     return self.y.size
 
-  #================================ size ===============================
+  #================================ setMeasurement ===============================
   #
   # @brief  Pass along to the instance a measurement of the puzzle
   #         piece.
@@ -114,7 +114,7 @@ class template:
     rcoords = self.rLoc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image (It will override the original image).
-    theImage[rcoords[0, :], rcoords[1, :], :] = self.y.appear
+    theImage[rcoords[0], rcoords[1], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
@@ -142,7 +142,7 @@ class template:
     rcoords = rc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image.
-    theImage[rcoords[0, :], rcoords[1, :], :] = self.y.appear
+    theImage[rcoords[0], rcoords[1], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
@@ -198,8 +198,7 @@ class template:
     # y.appear = linImage[y.icoords, :]
 
     y.rcoords = np.nonzero(theMask) # 2 (row,col) x N
-    y.appear = theImage[y.rcoords]
-
+    y.appear = theImage[y.rcoords[0],y.rcoords[1], :]
     # Store template image.
     # @note
     # For now, not concerned about bad image data outside of mask.
