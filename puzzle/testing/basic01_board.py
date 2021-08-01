@@ -72,22 +72,18 @@ print('Board piece locations: ', theBoard.pieceLocations())
 
 #==[5] Obtain as image and display in window.
 #
+#==[5.1] Directly use the baord display function
 fh = theBoard.display()
 
-plt.figure(fh.number)
-plt.scatter(thePiece_1.rLoc[0],thePiece_1.rLoc[1],color='green',marker='+')
-plt.scatter(thePiece_2.rLoc[0],thePiece_2.rLoc[1],color='green',marker='+')
+#==[5.2] Use the image insertion routine to synthesize an image
+# 5.1 and 5.2 should see the same result.
+plt.figure()
+bigImage = np.zeros((90,60,3))
+thePiece_1.placeInImage(bigImage)
+thePiece_2.placeInImage(bigImage)
+
+plt.imshow(bigImage)
 plt.show()
-
-# @ todo
-# Yunzhi: Not sure about the exact meaning of the notes below.
-# run display function
-#   plot piece locations in displayed image.
-#   hold on.
-#   mark with green + or something that pops
-#
-#   image in first window and second window will be the same.
-
 
 #
 #============================= basic01_board =============================
