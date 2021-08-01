@@ -152,7 +152,9 @@ class template:
   #
   # @brief  Display the puzzle piece contents in an image window.
   #
-  # @param[in]  fh  The figure label/handle if available (optional).
+  # @param[in]  fh  The figure label/handle if available. (optional)
+  #
+  # @param[out] fh  The handle of the image.
   #
   def display(self, fh = None):
     if fh:
@@ -174,6 +176,8 @@ class template:
   # @param[in]  theMask    The individual mask.
   # @param[in]  theImage   The source image.
   # @param[in]  rLoc       The puzzle piece location in the whole image.
+  #
+  # @param[out] thePiece   The puzzle piece instance.
   #
   @staticmethod
   def buildFromMaskAndImage(theMask, theImage, rLoc = None):

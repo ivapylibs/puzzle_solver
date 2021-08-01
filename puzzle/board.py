@@ -141,9 +141,11 @@ class board:
   # @brief  Uses puzzle piece locations to create an image for
   #         visualizing them.  If given an image, then will place in it.
   #
-  # @param[in]  theImage    The image to insert pieces into.
+  # @param[in]  theImage    The image to insert pieces into. (optional)
   #
-  def toImage(self, theImage):
+  # @param[out] theImage    The image to insert pieces into.
+  #
+  def toImage(self, theImage = None):
 
     # @todo
     # COMPUTE EXTENTS OF BOARD OR USE BOUNDING BOX.
@@ -155,15 +157,7 @@ class board:
     #   CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
     #   SHOULD BE EQUAL OR BIGGER, NOT LESS.
 
-    if not theImage:
-      # CREATE IMAGE WITH PROPER DIMENSIONS.
-      lengths = self.extents()
-      img = np.zeros(lengths)
-      for piece in self.pieces:
-        # @todo
-        # Yunzhi: Need double check if we do not need return value here
-        piece.placeInImage(img)
-    else:
+    if theImage:
       # CHECK DIMENSIONS OK AND ACT ACCORDINGLY.
       # SHOULD BE EQUAL OR BIGGER, NOT LESS.
       lengths = self.extents()
@@ -178,14 +172,24 @@ class board:
         #  Yunzhi: Currently abort.
         print('The image is too small. Please try again.')
         exit()
+    else:
+      # CREATE IMAGE WITH PROPER DIMENSIONS.
+      lengths = self.extents()
+      theImage = np.zeros(lengths)
+      for piece in self.pieces:
+        # @todo
+        # Yunzhi: Need double check if we do not need return value here
+        piece.placeInImage(theImage)
 
-    return img
+    return theImage
 
   #============================== display ==============================
   #
   # @brief  Display the puzzle board as an image.
   #
-  # Display in an image the puzzle board.  
+  # @param[in]  fh  The figure label/handle if available (optional).
+  #
+  # @param[out] fh  The handle of the image.
   #
   def display(self, fh = None):
 
