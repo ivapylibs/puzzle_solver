@@ -8,7 +8,7 @@
 #========================= puzzle.piece.template =========================
 
 #
-# @file     template.m
+# @file     template.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 @dataclass
 class puzzleTemplate:
   size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
+  # @todo
   # Yunzhi: We may not need it
   # icoords: list[int]    # @< Linear index coordinates.
   rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
@@ -125,28 +126,27 @@ class template:
   # @brief  Insert the puzzle piece into the image at the given location.
   #         
   # @param[in]  theImage    The source image to put puzzle piece into.
-  # @param[in]  rc          The coordinate location
-  # @param[in]  theta       The orientation of the puzzle piece (default = 0)
+  # @param[in]  rc          The coordinate location.
+  # @param[in]  theta       The orientation of the puzzle piece (default = 0).
   #
   def placeInImageAt(self, theImage, rc, theta = 0, isCenter = False):
 
     if not theta:
       theta = 0
 
-      # If specification is at center, then compute offset to top-left corner.
+    # If specification is at center, then compute offset to top-left corner.
     if isCenter:
       rc = rc - np.ceil(self.y.size / 2)
-      # Remap coordinates from own image sprite coordinates to bigger
-      # image coordinates.
+
+    # Remap coordinates from own image sprite coordinates to bigger image coordinates.
     rcoords = rc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image.
     theImage[rcoords[0, :], rcoords[1, :], :] = self.y.appear
 
+    # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.
-
-    pass  # REPLACE WITH ACTUAL CODE.
 
   #============================== display ==============================
   #
@@ -164,31 +164,16 @@ class template:
     plt.imshow(self.y.image, extent = [0, 1, 0, 1])
     plt.show()
 
-    # figure acts like Matlab's figure.
-    # imshow with extents acts like imagesc, so image will scale with
-    # window size. Correct code if wrong interpretation.
-
-    # From googling, the above code seems to do what is described.
-    # If works, delete the notes and this comment. If not, correct based
-    # on notes below.
-
-    # Need to figure this out.  Should a figure label/handler be given?
-    # If not given, then create a new handle, display data and
-    # return the handle?
-    # Sounds reasonable.
-    # What about some kind of display plot scaling parameter?
-    
-    # Should the template class have an optional parms structure that
-    # indicates how much to scale, with default value of 2 or 3x
-    # upscaling?  How does matplotlibs plot things? Can the plot be
-    # opened in such a way that it is not native resolution?
-    # I think so. We want outcome like in Matlab where small things are
-    # still plotted reasonably large for easy visualization.
+    return fh
 
   #======================= buildFromMaskAndImage =======================
   #
   # @brief  Given a mask (individual) and an image of same base dimensions, use to
   #         instantiate a puzzle piece template.
+  #
+  # @param[in]  theMask    The individual mask.
+  # @param[in]  theImage   The source image.
+  # @param[in]  rLoc       The puzzle piece location in the whole image.
   #
   @staticmethod
   def buildFromMaskAndImage(theMask, theImage, rLoc = None):
@@ -198,8 +183,8 @@ class template:
     # Populate dimensions.
     y.size = theMask.shape
 
-    # @todo
-    # Python may not be so complicated
+    # @note
+    # Yunzhi: Python may not be so complicated
     # # Populate coordinate/indexing information.
     # y.icoords = find(theMasK)
     # y.rcoords = ind2sub(y.icoords, y.size)
@@ -212,7 +197,8 @@ class template:
     y.appear = theImage[y.rcoords]
 
     # Store template image.
-    # @note     For now, not concerned about bad image data outside of mask.
+    # @note
+    # For now, not concerned about bad image data outside of mask.
     y.image = theImage
 
     if not rLoc:
