@@ -29,7 +29,7 @@ theMask[4:14,7:12] = True
 
 # Or should it be an OpenCV image instance?
 theImage = np.zeros((20,20,3))
-theImage[4:14,7:12,:] = np.full((1,1,3), [200,100,100])
+theImage[4:14,7:12,:] = np.full((1,1,3), [1,0,1])
 
 thePiece = template.buildFromMaskAndImage(theMask, theImage)
 

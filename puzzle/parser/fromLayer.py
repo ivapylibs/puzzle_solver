@@ -81,13 +81,16 @@ class fromLayer(centroidMulti):
   # @param[in]  I   Source image.
   # @param[in]  M   Layer mask (binary).
   #
-  # @param[out] regions   A list of regions.
+  # @param[out] regions   A list of regions (mask, segmented image, location in the source image).
   #
   def mask2regions(self, I, M):
 
+    # Convert mask to an image
+    mask = M.astype('uint8')
+
     # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
     # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
-    cnts = cv2.findContours(M.copy(), cv2.RETR_TREE,
+    cnts = cv2.findContours(mask, cv2.RETR_TREE,
                             cv2.CHAIN_APPROX_SIMPLE)
     # For OpenCV 4+
     cnts = cnts[0]
@@ -95,7 +98,7 @@ class fromLayer(centroidMulti):
     # @todo
     # Yunzhi: create a param class for it
     # areaThreshold for contours
-    areaThreshold = 100
+    areaThreshold = 20
 
     desired_cnts = []
 
@@ -116,17 +119,18 @@ class fromLayer(centroidMulti):
     regions = []
     # Get the individual part
     for c in desired_cnts:
-      seg_img = np.zeros(M.shape[:2], dtype="uint8")  # reset a blank image every time
+      seg_img = np.zeros(mask.shape[:2], dtype="uint8")  # reset a blank image every time
       # cv2.polylines(seg_img, [c], True, (255, 255, 255), thickness=3)
       cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
-      # Convert to binary image
-      seg_img = cv2.threshold(seg_img, 127, 255, cv2.THRESH_BINARY)
+      # # Convert to boolen image
+      # _, seg_img = cv2.threshold(seg_img, 127, 255, cv2.THRESH_BINARY)
+      # seg_img = seg_img>0
 
       # Get ROI
       x, y, w, h = cv2.boundingRect(c)
 
-      regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:]))
+      regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y]))
 
       # cv2.imshow("Segments", seg_img)
       # cv2.waitKey(0)
@@ -138,7 +142,7 @@ class fromLayer(centroidMulti):
   #
   # @brief  Convert the region information into puzzle pieces.
   #
-  # @param[in]  regions   a list of region pairs(mask, ).
+  # @param[in]  regions   a list of region pairs (mask, segmented image, location in the source image).
   #
   # @param[out]  pieces   a list of puzzle pieces instances.
   #
@@ -148,7 +152,11 @@ class fromLayer(centroidMulti):
     for region in regions:
       theMask = region[0]
       theImage = region[1]
-      thePiece = template.buildFromMaskAndImage(theMask, theImage)
+      rLoc = region[2]
+      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = [rLoc[0],rLoc[1]])
+
+      # @todo
+      # Have to update from MatLab coordinate system to OpenCV one later
       pieces.append(thePiece)
 
     return pieces

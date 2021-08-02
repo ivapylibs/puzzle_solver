@@ -107,11 +107,11 @@ class template:
   #
   # @param[in]  theImage    The source image to put puzzle piece into.
   #
-  def placeInImage(self, theImage):
+  def placeInImage(self, theImage, offset=[0,0]):
 
     # Remap coordinates from own image sprite coordinates to bigger
     # image coordinates.
-    rcoords = self.rLoc.reshape(-1,1) + self.y.rcoords
+    rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image (It will override the original image).
     theImage[rcoords[0], rcoords[1], :] = self.y.appear

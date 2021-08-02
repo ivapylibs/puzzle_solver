@@ -101,6 +101,7 @@ class detector_puzzle(inImage):
     for c in desired_cnts:
       seg_img = np.zeros(mask.shape[:2], dtype="uint8")  # reset a blank image every time
       cv2.polylines(seg_img, [c], True, (255, 255, 255), thickness=3)
+      # cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
       seg_img_list.append(seg_img)
 
 

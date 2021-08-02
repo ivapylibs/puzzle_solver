@@ -123,7 +123,7 @@ class board:
         br = piece.rLoc + piece.size()
 
         bbox[0] = np.min([bbox[0], tl], axis=0)
-        bbox[1] = np.max([bbox[0], br], axis=0)
+        bbox[1] = np.max([bbox[1], br], axis=0)
 
       return bbox
 
@@ -161,12 +161,13 @@ class board:
 
     if theImage:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
-      lengths = self.boundingBox()[1].astype('int')
+      lengths = self.extents().astype('int')
+      bbox = self.boundingBox().astype('int')
       if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
           # @todo
           # Yunzhi: Need double check if we do not need return value here
-          piece.placeInImage(theImage)
+          piece.placeInImage(theImage, offset=-bbox[0])
       else:
         # @todo
         #  Figure out what to do if image too small. Expand it or abort?
@@ -175,12 +176,13 @@ class board:
         exit()
     else:
       # Create image with proper dimensions.
-      lengths = self.boundingBox()[1].astype('int')
+      lengths = self.extents().astype('int')
+      bbox = self.boundingBox().astype('int')
       theImage = np.zeros((lengths[0],lengths[1],3))
       for piece in self.pieces:
         # @todo
         # Yunzhi: Need double check if we do not need return value here
-        piece.placeInImage(theImage)
+        piece.placeInImage(theImage, offset=-bbox[0])
 
     return theImage
 
