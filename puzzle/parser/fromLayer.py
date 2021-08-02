@@ -24,7 +24,12 @@
 
 #==== Imports
 #
+
+import cv2
+import numpy as np
+
 from trackpointer.centroidMulti import centroidMulti
+from puzzle.piece.template import template
 from puzzle.board import board
 #==== Helper 
 #
@@ -42,7 +47,7 @@ class fromLayer(centroidMulti):
   def __init__(self):
     super(fromLayer, self).__init__()
 
-    self.bMeas   = board()             # @< The measured board.
+    self.bMeas = board()             # @< The measured board.
 
   #============================== measure ==============================
   #
@@ -71,35 +76,82 @@ class fromLayer(centroidMulti):
   #=========================== mask2regions ============================
   #
   # @brief      Convert the selection mask into a bunch of regions.
+  #             Mainly based on findContours function.
   #
   # @param[in]  I   Source image.
   # @param[in]  M   Layer mask (binary).
   #
+  # @param[out] regions   A list of regions.
+  #
   def mask2regions(self, I, M):
 
-    # @todo
-    # Find all connected components.
-    # Get image coordinates, centroid, bounding box, top left corner,
-    # etc. as needed.
+    # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
+    # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
+    cnts = cv2.findContours(M.copy(), cv2.RETR_TREE,
+                            cv2.CHAIN_APPROX_SIMPLE)
+    # For OpenCV 4+
+    cnts = cnts[0]
 
-    # Using region data to extract the image color information.
-    # return regions
-    pass
+    # @todo
+    # Yunzhi: create a param class for it
+    # areaThreshold for contours
+    areaThreshold = 100
+
+    desired_cnts = []
+
+    # Filter out some contours according to length threshold
+    for c in cnts:
+      # Draw the contours
+      # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
+      area = cv2.contourArea(c)
+
+      # @todo
+      # Yunzhi: this basic processing may be put somewhere else
+      # Filtered by the area threshold
+      if area > areaThreshold:
+        desired_cnts.append(c)
+
+    # print('size of desired_cnts is', len(desired_cnts))
+
+    regions = []
+    # Get the individual part
+    for c in desired_cnts:
+      seg_img = np.zeros(M.shape[:2], dtype="uint8")  # reset a blank image every time
+      # cv2.polylines(seg_img, [c], True, (255, 255, 255), thickness=3)
+      cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
+
+      # Convert to binary image
+      seg_img = cv2.threshold(seg_img, 127, 255, cv2.THRESH_BINARY)
+
+      # Get ROI
+      x, y, w, h = cv2.boundingRect(c)
+
+      regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:]))
+
+      # cv2.imshow("Segments", seg_img)
+      # cv2.waitKey(0)
+
+    return regions
+
 
   #========================== regions2pieces ===========================
   #
   # @brief  Convert the region information into puzzle pieces.
   #
+  # @param[in]  regions   a list of region pairs(mask, ).
+  #
+  # @param[out]  pieces   a list of puzzle pieces instances.
+  #
   def regions2pieces(self, regions):
 
-    # @todo
-    # Use all of these elements to instantiate a puzzle piece.
-    # for loop over found items (is it by index or as list?)
-    #   repackage found region data into puzzle piece.
-    #
-    # return pieces
+    pieces = []
+    for region in regions:
+      theMask = region[0]
+      theImage = region[1]
+      thePiece = template.buildFromMaskAndImage(theMask, theImage)
+      pieces.append(thePiece)
 
-    pass
+    return pieces
 
   #============================== correct ==============================
   #
