@@ -6,7 +6,7 @@
 #============================ basic02_parser ===========================
 
 #
-# @file     basic01_parser.py
+# @file     basic02_parser.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2017/08/01  [created]
@@ -38,12 +38,12 @@ theLayer.measure(theImage,theMask)
 
 theBoard = theLayer.bMeas
 
-#==[4] Display the original image. Should see two circle pieces.
+#==[4] Display the original image. Should see some puzzle pieces.
 #
 plt.imshow(theImage)
 plt.show()
 
-#==[5] Display the resulting image. Should have two circle pieces in a cropped region.
+#==[5] Display the resulting image. Should have some puzzle pieces in a cropped region.
 #
 fh = theBoard.display()
 plt.show()
