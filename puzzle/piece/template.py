@@ -38,7 +38,7 @@ class puzzleTemplate:
   # icoords: list[int]    # @< Linear index coordinates.
   rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
   appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
-  image:   np.ndarray = np.array([])  # @< Template image with BG default fill.
+  image:   np.ndarray = np.array([],dtype='uint8')  # @< Template image with BG default fill.
 
 #
 #========================= puzzle.piece.template =========================

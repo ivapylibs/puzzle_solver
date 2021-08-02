@@ -27,16 +27,16 @@ from puzzle.board import board
 #
 theMask = np.full((20,20), False, dtype=bool)
 theMask[4:14,7:12] = True
-theImage = np.zeros((20,20,3))
-theImage[4:14,7:12,:] = np.full((1,1,3), [1,0,1])
+theImage = np.zeros((20,20,3),dtype='uint8')
+theImage[4:14,7:12,:] = np.full((1,1,3), [200,0,200])
 
 thePiece_1 = template.buildFromMaskAndImage(theMask, theImage)
 thePiece_1.setPlacement(np.array([10,10]))
 
 theMask = np.full((40,10), False, dtype=bool)
 theMask[5:35, 2:8] = True
-theImage = np.zeros((40,10,3))
-theImage[5:35, 2:8,:] = np.full((1,1,3), [0,1,1])
+theImage = np.zeros((40,10,3),dtype='uint8')
+theImage[5:35, 2:8,:] = np.full((1,1,3), [0,200,200])
 
 thePiece_2 = template.buildFromMaskAndImage(theMask, theImage)
 thePiece_2.setPlacement(np.array([50,50]))
@@ -76,9 +76,9 @@ print('Board piece locations: ', theBoard.pieceLocations())
 fh = theBoard.display()
 
 #==[5.2] Use the image insertion routine to synthesize an image
-# 5.1 and 5.2 should see the same result.
+# 5.1 and 5.2 should see the similar result while 5.1 is a cropped view.
 plt.figure()
-bigImage = np.zeros((90,60,3))
+bigImage = np.zeros((90,60,3),dtype='uint8')
 thePiece_1.placeInImage(bigImage)
 thePiece_2.placeInImage(bigImage)
 

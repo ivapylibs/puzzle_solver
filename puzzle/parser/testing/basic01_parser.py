@@ -1,7 +1,7 @@
 #============================ basic01_parser ===========================
 #
 # @brief    Test script for the most basic functionality of parser
-#           class.
+#           class. (Two circles)
 #
 #============================ basic01_parser ===========================
 

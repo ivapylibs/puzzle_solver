@@ -153,10 +153,10 @@ class fromLayer(centroidMulti):
       theMask = region[0]
       theImage = region[1]
       rLoc = region[2]
-      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = [rLoc[0],rLoc[1]])
-
       # @todo
       # Have to update from MatLab coordinate system to OpenCV one later
+      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = [rLoc[1],rLoc[0]])
+
       pieces.append(thePiece)
 
     return pieces

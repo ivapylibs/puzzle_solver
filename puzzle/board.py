@@ -156,17 +156,12 @@ class board:
   #
   def toImage(self, theImage = None):
 
-    # @todo
-    # Might also need offset so that top-left extent starts at (0,0).
-
-    if theImage:
+    if theImage is not None:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
       lengths = self.extents().astype('int')
       bbox = self.boundingBox().astype('int')
       if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
-          # @todo
-          # Yunzhi: Need double check if we do not need return value here
           piece.placeInImage(theImage, offset=-bbox[0])
       else:
         # @todo
@@ -178,10 +173,9 @@ class board:
       # Create image with proper dimensions.
       lengths = self.extents().astype('int')
       bbox = self.boundingBox().astype('int')
-      theImage = np.zeros((lengths[0],lengths[1],3))
+      theImage = np.zeros((lengths[0],lengths[1],3),dtype='uint8')
       for piece in self.pieces:
-        # @todo
-        # Yunzhi: Need double check if we do not need return value here
+
         piece.placeInImage(theImage, offset=-bbox[0])
 
     return theImage
