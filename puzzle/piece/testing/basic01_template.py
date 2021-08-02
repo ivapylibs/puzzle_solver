@@ -42,8 +42,10 @@ thePiece.display()
 bigImage = np.zeros((200,200,3))
 
 thePiece.placeInImage(bigImage)
+# OpenCV style
 thePiece.setPlacement(np.array([50,50]))
 thePiece.placeInImage(bigImage)
+# OpenCV style
 thePiece.placeInImageAt(bigImage, np.array([70,30]))
 
 # Display the resulting image. Should have three puzzle pieces in it.

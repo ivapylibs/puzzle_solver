@@ -49,6 +49,19 @@ class fromLayer(centroidMulti):
 
     self.bMeas = board()             # @< The measured board.
 
+
+  #============================== getState =============================
+  #
+  # @brief  Return the track-pointer state. Override the original one.
+  #
+  # @param[out] tstate  The board measurement.
+  #
+  def getState(self):
+
+    tstate = self.bMeas
+
+    return tstate
+
   #============================== measure ==============================
   #
   # @brief  Process the passed imagery to recover puzzle pieces and
@@ -71,6 +84,12 @@ class fromLayer(centroidMulti):
     #
     self.bMeas.clear()
     self.bMeas.pieces = pieces
+
+    if len(self.bMeas.pieces) == 0:
+      self.haveMeas = False
+    else:
+      self.tpt = self.bMeas.pieceLocations()
+      self.haveMeas = True
 
 
   #=========================== mask2regions ============================
@@ -120,14 +139,9 @@ class fromLayer(centroidMulti):
     # Get the individual part
     for c in desired_cnts:
       seg_img = np.zeros(mask.shape[:2], dtype="uint8")  # reset a blank image every time
-      # cv2.polylines(seg_img, [c], True, (255, 255, 255), thickness=3)
       cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
-      # # Convert to boolen image
-      # _, seg_img = cv2.threshold(seg_img, 127, 255, cv2.THRESH_BINARY)
-      # seg_img = seg_img>0
-
-      # Get ROI
+      # Get ROI, OpenCV style
       x, y, w, h = cv2.boundingRect(c)
 
       regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y]))
@@ -155,7 +169,7 @@ class fromLayer(centroidMulti):
       rLoc = region[2]
       # @todo
       # Have to update from MatLab coordinate system to OpenCV one later
-      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = [rLoc[1],rLoc[0]])
+      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = rLoc)
 
       pieces.append(thePiece)
 
@@ -171,11 +185,14 @@ class fromLayer(centroidMulti):
 
   #=========================== process ==========================
   #
-  # @brief  TO FILL OUT.
+  # @brief  Run the tracking pipeline for image measurement.
   #
-  def process(self, y):
-    pass
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
+  # @param[in]  I   Source image.
+  # @param[in]  M   Layer mask (binary)
+  #
+  def process(self, I, M):
+
+    self.measure(I, M)
 
 
 #

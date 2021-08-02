@@ -114,7 +114,7 @@ class template:
     rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image (It will override the original image).
-    theImage[rcoords[0], rcoords[1], :] = self.y.appear
+    theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
@@ -142,7 +142,7 @@ class template:
     rcoords = rc.reshape(-1,1) + self.y.rcoords
 
     # Dump color/appearance information into the image.
-    theImage[rcoords[0], rcoords[1], :] = self.y.appear
+    theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
@@ -187,7 +187,8 @@ class template:
     y = puzzleTemplate()
 
     # Populate dimensions.
-    y.size = theMask.shape
+    # Updated to OpenCV style
+    y.size = [theMask.shape[1], theMask.shape[0]]
 
     # @note
     # Yunzhi: Python may not be so complicated
@@ -199,8 +200,10 @@ class template:
     # linImage = reshape(theImage, [prod(imsize), size(theImage, 2)])
     # y.appear = linImage[y.icoords, :]
 
-    y.rcoords = np.nonzero(theMask) # 2 (row,col) x N
-    y.appear = theImage[y.rcoords[0],y.rcoords[1], :]
+    y.rcoords = list(np.nonzero(theMask)) # 2 (row,col) x N
+    # Updated to OpenCV style -> (x,y)
+    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+    y.appear = theImage[y.rcoords[1],y.rcoords[0], :]
     # Store template image.
     # @note
     # For now, not concerned about bad image data outside of mask.

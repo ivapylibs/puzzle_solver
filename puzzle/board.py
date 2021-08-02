@@ -141,7 +141,7 @@ class board:
       pLocs.append(piece.rLoc)
 
     # from N x 2 to 2 x N
-    pLocs = np.array(pLocs).reshape(2,-1)
+    pLocs = np.array(pLocs).reshape(-1,2).T
 
     return pLocs
 
@@ -173,7 +173,7 @@ class board:
       # Create image with proper dimensions.
       lengths = self.extents().astype('int')
       bbox = self.boundingBox().astype('int')
-      theImage = np.zeros((lengths[0],lengths[1],3),dtype='uint8')
+      theImage = np.zeros((lengths[1],lengths[0],3),dtype='uint8')
       for piece in self.pieces:
 
         piece.placeInImage(theImage, offset=-bbox[0])
