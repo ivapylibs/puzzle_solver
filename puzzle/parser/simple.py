@@ -23,8 +23,6 @@
 
 #============================== Dependencies =============================
 #
-
-# IMPORT WHAT? MOST LIKELY numpy, opencv
 import perceiver.simple as perceiverSimple
 from puzzle.board import board
 #
@@ -71,24 +69,12 @@ class simple(perceiverSimple.simple):
 
     #--[2] Parse detector output to reconstitute recognized puzzle
     #      pieces into a board.
-    #
-    self.tracker.process(I, detState.x)
 
-    # @todo
-    # Yunzhi:
-    # 1. the state obtained in the tracker (centroid or centroidMulti)
-    # (self.tpt = tpt (the center point of a segmented region) & self.haveMeas = haveMeas)
-    # which is different from the board instance. Should we do something else?
-    # 2. A typical process should be instantiating the puzzle pieces. That is
-    # something already done by puzzle.builder.fromMask?
-    # So what are we doing here? What is the difference?
+    # Here detState.x is a mask
+    self.tracker.process(I, detState.x)
 
     self.board = self.tracker.getState()
 
-    #--[4] Copy locations to this perceiver.
-    #
-    # IS LINE BELOW EVEN CORRECT BASE ON CLASS?
-    self.tpts = self.board.pieceLocations()
     if self.board.size() > 0:
       self.haveObs = True
       self.haveState = True
