@@ -51,6 +51,9 @@ class template:
     self.y = y          # @< The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate
     self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
 
+    self.id = None  # @< The puzzle piece id in the measured board. Be set up by the board.
+    self.id_sol = None   # @< The assigned puzzle piece id in the solution board. Be set up by the board.
+
     # self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
     # @note     Opting not to use discrete grid puzzle piece description.
     # @note     Excluding orientation for now. Can add later. Or sub-class it.

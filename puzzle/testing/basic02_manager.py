@@ -51,15 +51,22 @@ theManager = manager(theBoardSol)
 
 theManager.measure(theImageMea,theMaskMea)
 
-#==[4] Display the original image. Should see some puzzle pieces.
+#==[4] Display. Should see some ids on the puzzle pieces
+# while the id in the assignment board refer to the id in the solution board.
 #
-plt.imshow(theImageSol)
-plt.show()
+bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
+bsolImage = theManager.solution.toImage(ID_DISPLAY = True)
+bAssignedImage = theManager.bAssigned.toImage(ID_DISPLAY = True, ID_SOLUTION = True)
 
-#==[4] Display the resulting image. Should have some puzzle pieces in a cropped region.
-#
-fh = theManager.bAssigned.display()
-plt.show()
+plt.figure()
+f, axarr = plt.subplots(1,3)
+axarr[0].imshow(bMeasImage)
+axarr[0].title.set_text('Measurement')
+axarr[1].imshow(bsolImage)
+axarr[1].title.set_text('Solution')
+axarr[2].imshow(bAssignedImage)
+axarr[2].title.set_text('Assignment')
 
+plt.show()
 #
 #============================= basic02_manager =============================

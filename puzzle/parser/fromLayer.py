@@ -86,7 +86,10 @@ class fromLayer(centroidMulti):
 
     # @todo
     # Should be updated to add the pieces one by one. So the label can be managed.
-    self.bMeas.pieces = pieces
+    # self.bMeas.pieces = pieces
+
+    for piece in pieces:
+      self.bMeas.addPiece(piece)
 
     if len(self.bMeas.pieces) == 0:
       self.haveMeas = False

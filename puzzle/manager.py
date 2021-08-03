@@ -125,20 +125,32 @@ class manager(fromLayer):
     # Compare with ground truth/generate associates
     self.matchPieces()
 
-    # Generate a new board for association
+    # # Generate a new board for association
+    #
+    # iPieces = []
+    # for assignment in self.pAssignments:
+    #   theMoment = moments(self.bMeas.pieces[assignment[0]].y,5)
+    #   ret = theMoment.compare(self.solution.pieces[assignment[1]].y)
+    #   if ret:
+    #     iPieces.append(assignment[0])
+    #
+    # # @todo
+    # # Currently, assume all the measured puzzle pieces could find a match.
+    #
+    # self.bAssigned = self.bMeas.getSubset(iPieces)
 
-    iPieces = []
+    # Generate a new board for association
+    pFilteredAssignments = []
     for assignment in self.pAssignments:
-      theMoment = moments(self.bMeas.pieces[assignment[0]].y,5)
-      aa = theMoment.score(self.solution.pieces[assignment[1]].y)
+      theMoment = moments(self.bMeas.pieces[assignment[0]].y, 20)
       ret = theMoment.compare(self.solution.pieces[assignment[1]].y)
       if ret:
-        iPieces.append(assignment[0])
+        pFilteredAssignments.append(assignment)
 
     # @todo
     # Currently, assume all the measured puzzle pieces could find a match.
-    aa =self.bMeas.getSubset(iPieces)
-    self.bAssigned = self.bMeas.getSubset(iPieces)
+
+    self.bAssigned = self.bMeas.getAssigned(pFilteredAssignments)
 
     # @todo
     # This part may need to be updated in the future.

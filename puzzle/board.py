@@ -32,7 +32,7 @@
 
 # Make sure to include in dependencies for this package.
 # Delete this comment when done.
-
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 #
@@ -48,10 +48,10 @@ class board:
   #
   # @param[in]  thePieces   The puzzle pieces. (optional)
   #
-  def __init__(self, thePieces = []):
+  def __init__(self, thePieces = [], id_count = 0):
 
     self.pieces = thePieces     # @< The puzzle pieces.
-
+    self.id_count = id_count
   #=========================== addPiece ==========================
   #
   # @brief      Add puzzle piece instance to the board
@@ -59,7 +59,8 @@ class board:
   # @param[in]  piece   A puzzle piece instance
   #
   def addPiece(self, piece):
-
+    piece.id = self.id_count
+    self.id_count +=1
     self.pieces.append(piece)
 
   #=============================== clear ===============================
@@ -72,15 +73,28 @@ class board:
 
   #=============================== getSubset ===============================
   #
-  # @brief  Return a new baord consisting of a subset of pieces.
+  # @brief  Return a new board consisting of a subset of pieces.
   #
   # @param[in]  subset   A list of indexes for the subset.
   #
-  # @param[out]  bSubset   A new baord consisting of a subset of pieces.
-  #
   def getSubset(self, subset):
 
-    bSubset = board(np.array(self.pieces)[subset])
+    bSubset = board(np.array(self.pieces)[subset], len(subset))
+
+    return bSubset
+
+  # =============================== getAssigned ===============================
+  #
+  # @brief  Return a new board consisting of a subset of pieces.
+  #
+  # @param[in]  pAssignments   A list of assignments for the subset.
+  #
+  def getAssigned(self, pAssignments):
+
+    for assignment in pAssignments:
+      # assignment[1] is for the solution board, where the instance shares the same id as the index
+      self.pieces[assignment[0]].id_sol = assignment[1]
+    bSubset = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
 
     return bSubset
 
@@ -169,7 +183,7 @@ class board:
   #
   # @param[out] theImage    The image to insert pieces into.
   #
-  def toImage(self, theImage = None):
+  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False):
 
     if theImage is not None:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
@@ -177,7 +191,16 @@ class board:
       bbox = self.boundingBox().astype('int')
       if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
-          piece.placeInImage(theImage, offset=-bbox[0])
+          if ID_DISPLAY == True:
+            piece.placeInImage(theImage, offset=-bbox[0])
+            pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0] / 2),
+                   int(piece.rLoc[1] - bbox[0][1] + piece.size()[1] / 2))
+            if ID_SOLUTION == True:
+              cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                          1, (255, 255, 255), 2, cv2.LINE_AA)
+            else:
+              cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                          1, (255, 255, 255), 2, cv2.LINE_AA)
       else:
         # @todo
         #  Figure out what to do if image too small. Expand it or abort?
@@ -190,8 +213,16 @@ class board:
       bbox = self.boundingBox().astype('int')
       theImage = np.zeros((lengths[1],lengths[0],3),dtype='uint8')
       for piece in self.pieces:
-
         piece.placeInImage(theImage, offset=-bbox[0])
+        if ID_DISPLAY == True:
+          pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0]/2),
+                 int(piece.rLoc[1] - bbox[0][1] + piece.size()[1]/2))
+          if ID_SOLUTION == True:
+            cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (255, 255, 255), 2, cv2.LINE_AA)
+          else:
+            cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (255, 255, 255), 2, cv2.LINE_AA)
 
     return theImage
 
@@ -203,7 +234,7 @@ class board:
   #
   # @param[out] fh  The handle of the image.
   #
-  def display(self, fh = None):
+  def display(self, fh = None, ID_DISPLAY = False):
 
     # @note
     #
@@ -215,13 +246,15 @@ class board:
     # OF COMMUNICATION OR COORDINATION. NOT WORTH THE EFFORT RIGHT NOW.
     #
 
-    theImage = self.toImage()
 
     if fh:
       # See https://stackoverflow.com/a/7987462/5269146
       fh = plt.figure(fh.number)
     else:
       fh = plt.figure()
+
+    theImage = self.toImage(ID_DISPLAY=ID_DISPLAY )
+
     # @note
     # Yunzhi: extent is used to change the axis tick, we should use figsize
     # See https://stackoverflow.com/a/66315574/5269146
