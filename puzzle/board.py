@@ -59,6 +59,7 @@ class board:
   # @param[in]  piece   A puzzle piece instance
   #
   def addPiece(self, piece):
+
     piece.id = self.id_count
     self.id_count +=1
     self.pieces.append(piece)
@@ -70,6 +71,7 @@ class board:
   def clear(self):
 
     self.pieces = []
+    self.id_count = 0
 
   #=============================== getSubset ===============================
   #

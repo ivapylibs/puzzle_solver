@@ -25,6 +25,7 @@
 
 import numpy as np
 from dataclasses import dataclass
+import cv2
 
 import matplotlib.pyplot as plt
 
@@ -37,6 +38,7 @@ class puzzleTemplate:
   appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
   image:   np.ndarray = np.array([],dtype='uint8')  # @< Template image with BG default fill.
   mask:     np.ndarray = np.array([],dtype='uint8') # @< Template mask.
+  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template contour.
 #
 #========================= puzzle.piece.template =========================
 #
@@ -191,6 +193,12 @@ class template:
     y.size = [theMask.shape[1], theMask.shape[0]]
 
     y.mask = theMask.astype('uint8')
+
+    # Create a contour of the mask
+    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                            cv2.CHAIN_APPROX_SIMPLE)
+    y.contour = np.zeros_like(y.mask).astype('uint8')
+    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
     y.rcoords = list(np.nonzero(theMask)) # 2 (row,col) x N
     # Updated to OpenCV style -> (x,y)

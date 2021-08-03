@@ -49,7 +49,7 @@ class moments(matchDifferent):
   #
   def process(self, y):
 
-    moments = cv2.moments(y.mask)
+    moments = cv2.moments(y.contour)
     huMoments = cv2.HuMoments(moments)
     for i in range(7):
       huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(1e-06+abs(huMoments[i]))
