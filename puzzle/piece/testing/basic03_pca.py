@@ -1,25 +1,25 @@
-#============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 #
 # @brief    Test script for the most basic functionality of moments. Create
 #           two puzzles (rotate 1 for 90 degree) and compare them by moments
 #           feature.
 #
-#============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 
 #
-# @file     basic02_moments.py
+# @file     basic03_pca.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/02  [created]
+# @date     2021/08/03  [created]
 #
-#============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 
 
 #==[0] Prep environment
 import numpy as np
 
 from puzzle.piece.template import template
-from puzzle.piece.moments import moments
+from puzzle.piece.pca import pca
 
 #==[1] Create raw puzzle piece data.
 #
@@ -46,9 +46,9 @@ thePiece_2.display()
 
 #==[3] Create a moments instance and compare puzzle 1 and 2. Should see True.
 #
-theMoment = moments(thePiece_1.y, 5)
+theMoment = pca(thePiece_1.y, 5)
 
-ret = theMoment.compare(thePiece_2.y)
+ret = theMoment.score(thePiece_2.y)
 print(ret)
 
 

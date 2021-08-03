@@ -29,7 +29,7 @@ class moments(matchDifferent):
 
   #=============================== moments ==============================
   #
-  # @brief  Constructor for the puzzle piece matchSimilar class.
+  # @brief  Constructor for the puzzle piece matchDifferent class.
   #
   # @todo
   # Decide later if initialization/calibration data can be passed
