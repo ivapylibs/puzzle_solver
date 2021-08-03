@@ -41,8 +41,10 @@
 from dataclasses import dataclass
 import itertools
 
-from puzzle.parser.fromLayer import fromLayer
+import numpy as np
 
+from puzzle.parser.fromLayer import fromLayer
+from puzzle.piece.moments import moments
 #==== Helper 
 #
 
@@ -52,7 +54,7 @@ SCORE_SIMILAR = 1
 
 @dataclass
 class managerParms:
-  scoreType: int = SCORE_SIMILAR
+  scoreType: int = SCORE_DIFFERENCE
 
 #
 #================================ manager ================================
@@ -102,7 +104,7 @@ class manager(fromLayer):
 
     self.solution = solution              # @< The solution puzzle board.
     self.scoreType = theParms.scoreType   # @< The type of comparator.
-    self.pAssignments = []                # @< Assignments: measurement of all the pairwise comparisons.
+    self.pAssignments = []                # @< Assignments: meas to sol.
     self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
   #============================== predict ==============================
@@ -116,19 +118,6 @@ class manager(fromLayer):
   #
   def measure(self, I, M):
 
-    # @todo
-    # WRITE THIS FUNCTION.
-    # DIFFERENTIATE BETWEEN SIMILARITY VERSUS DIFFERENCES AND HAVE
-    # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
-    # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
-    # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
-
-    # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
-    # WHATEVER WORKS FOR OPENCV.
-    #
-    # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
-    # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
-
     # Call measure function from fromLayer to generate a measured board
     # self.bMeas
     super().measure(I,  M)
@@ -136,31 +125,80 @@ class manager(fromLayer):
     # Compare with ground truth/generate associates
     self.matchPieces()
 
-    # STORE AND CLOSE OUT -> SHOULD GENERATE A PUZZLE.BOARD AS FINAL ANSWER.
+    # Generate a new board for association
+
     iPieces = []
-    for idx, assignment in enumerate(self.pAssignments):
-      # @todo
-      # criteria is related to similarity or difference
-      if assignment >0:
-        iPieces.append(idx)
+    for assignment in self.pAssignments:
+      theMoment = moments(self.bMeas.pieces[assignment[0]].y,5)
+      aa = theMoment.score(self.solution.pieces[assignment[1]].y)
+      ret = theMoment.compare(self.solution.pieces[assignment[1]].y)
+      if ret:
+        iPieces.append(assignment[0])
 
     # @todo
-    # getSubset has not implemented yet in the board class
+    # Currently, assume all the measured puzzle pieces could find a match.
+    aa =self.bMeas.getSubset(iPieces)
     self.bAssigned = self.bMeas.getSubset(iPieces)
 
-    pass
+    # @todo
+    # This part may need to be updated in the future.
+    # In some complex scenarios (occlusion or more), the measured piece may not have a match.
+    # Maybe we need to assign each piece with a label.
+
 
   #=========================== matchPieces ==========================
   #
-  # @brief  Match all the puzzle pieces with the ground truth in a pairwise manner.
+  # @brief  Match all the measured puzzle pieces with the ground truth in a pairwise manner
+  #         to get meas to sol.
   #
   def matchPieces(self):
-    # @todo
 
-    pair_list = [[x,y] for x in self.bMeas.pieces for y in self.solution.pieces]
-    for pair in pair_list:
-      pass
+    scoreTable = np.zeros((self.bMeas.size(),self.solution.size()))
+    for idx_x, bMea in enumerate(self.bMeas.pieces):
+      for idx_y, bSol in enumerate(self.solution.pieces):
 
+        # Create a moments instance
+        theMoment = moments(bMea.y)
+        # ret = theMoment.compare(bSol.y)
+        ret = theMoment.score(bSol.y)
+        scoreTable[idx_x][idx_y] = ret
+
+    # The measured piece will be assigned a solution piece
+    # However, for some measured piece, they may not have a match according to the threshold.
+    self.pAssignments = self.greedyAssignment(scoreTable)
+
+
+  #=========================== greedyAssignment ==========================
+  #
+  # @brief  Run the greedyAssignment for the score table.
+  #
+  # @param[in]  scoreTable   The score table for the pairwise comparison.
+  #
+  # @param[out]  matched_indices   The matched pairs. N x 2
+  #
+  def greedyAssignment(self, scoreTable):
+    matched_indices = []
+    if scoreTable.shape[1] == 0:
+      return np.array(matched_indices, np.int32).reshape(-1, 2)
+    for i in range(scoreTable.shape[0]):
+      if self.scoreType == SCORE_DIFFERENCE:
+        j = scoreTable[i].argmin()
+        # @todo
+        # The threshold needs to be decided by the feature method
+        if scoreTable[i][j] < 1e16:
+          scoreTable[:, j] = 1e18
+          matched_indices.append([i, j])
+      else:
+        j = scoreTable[i].argmax()
+        # @todo
+        # The threshold needs to be decided by the feature method
+        if scoreTable[i][j] > 10:
+          scoreTable[:, j] = 100
+          matched_indices.append([i, j])
+
+    matched_indices = np.array(matched_indices, np.int32).reshape(-1, 2)
+
+    return matched_indices
 
   #============================== correct ==============================
   #

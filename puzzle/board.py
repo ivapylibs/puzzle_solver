@@ -56,7 +56,7 @@ class board:
   #
   # @brief      Add puzzle piece instance to the board
   #
-  # @param[in]  piece a puzzle piece instance
+  # @param[in]  piece   A puzzle piece instance
   #
   def addPiece(self, piece):
 
@@ -70,6 +70,20 @@ class board:
 
     self.pieces = []
 
+  #=============================== getSubset ===============================
+  #
+  # @brief  Return a new baord consisting of a subset of pieces.
+  #
+  # @param[in]  subset   A list of indexes for the subset.
+  #
+  # @param[out]  bSubset   A new baord consisting of a subset of pieces.
+  #
+  def getSubset(self, subset):
+
+    bSubset = board(np.array(self.pieces)[subset])
+
+    return bSubset
+
   #================================ size ===============================
   #
   # @brief  Return the number of pieces on the board.
@@ -81,6 +95,7 @@ class board:
     nPieces = len(self.pieces)
 
     return nPieces
+
 
   #============================== extents ==============================
   #

@@ -83,6 +83,9 @@ class fromLayer(centroidMulti):
     # 3] Package into a board.
     #
     self.bMeas.clear()
+
+    # @todo
+    # Should be updated to add the pieces one by one. So the label can be managed.
     self.bMeas.pieces = pieces
 
     if len(self.bMeas.pieces) == 0:
