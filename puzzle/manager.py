@@ -147,15 +147,8 @@ class manager(fromLayer):
       if ret:
         pFilteredAssignments.append(assignment)
 
-    # @todo
-    # Currently, assume all the measured puzzle pieces could find a match.
-
     self.bAssigned = self.bMeas.getAssigned(pFilteredAssignments)
 
-    # @todo
-    # This part may need to be updated in the future.
-    # In some complex scenarios (occlusion or more), the measured piece may not have a match.
-    # Maybe we need to assign each piece with a label.
 
 
   #=========================== matchPieces ==========================

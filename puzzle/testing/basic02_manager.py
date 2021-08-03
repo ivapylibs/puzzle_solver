@@ -52,7 +52,7 @@ theManager = manager(theBoardSol)
 theManager.measure(theImageMea,theMaskMea)
 
 #==[4] Display. Should see some ids on the puzzle pieces
-# while the id in the assignment board refer to the id in the solution board.
+# while the ids in the assignment board refer to the ids in the solution board.
 #
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
 bsolImage = theManager.solution.toImage(ID_DISPLAY = True)

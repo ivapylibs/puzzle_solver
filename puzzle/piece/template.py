@@ -160,10 +160,10 @@ class template:
     if fh:
       # See https://stackoverflow.com/a/7987462/5269146
       fh = plt.figure(fh.number)
-      # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     else:
       fh = plt.figure()
 
+    # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
     plt.imshow(self.y.image)
     plt.show()
