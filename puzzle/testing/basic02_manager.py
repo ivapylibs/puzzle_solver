@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 #============================= basic02_manager =============================
 #
-# @brief    Tests the core functionality of the puzzle.board class.
+# @brief    Tests the core functionality of the puzzle.manager class. The manager
+#           will have access to measurement and solution images & masks to generate
+#           associations between them. 
 #
 #
 #============================= basic02_manager =============================
