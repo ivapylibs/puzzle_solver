@@ -61,9 +61,6 @@ class matcher(template):
   # indicate that a score cannot be computed.
   #
   def score(self, yM):
-    # sval = float("NaN")
-    # return sval
-
     # @note
     # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError

@@ -43,9 +43,9 @@ class moments(matchDifferent):
   # @brief  Compute moments from the raw puzzle data.
   #         See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
   #
-  # @param[in]  y    a dataclass saving a piece's info
+  # @param[in]  y    A puzzleTemplate instance saving a piece's info
   #
-  # @param[out]  huMoments    a list of huMoments value
+  # @param[out]  huMoments    A list of huMoments value
   #
   def process(self, y):
 
@@ -61,9 +61,9 @@ class moments(matchDifferent):
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
-  # @param[in]  yM    a dataclass saving a passed puzzle piece's info
+  # @param[in]  yM    A puzzleTemplate instance saving a passed puzzle piece's info
   #
-  # @param[out]  distance    score between passed puzzle piece data and
+  # @param[out]  distance    The distance between passed puzzle piece data and
   #                          stored puzzle piece.
   #
   def score(self, yM):
@@ -75,18 +75,6 @@ class moments(matchDifferent):
 
     return distance
 
-
-  #============================== compare ==============================
-  #
-  # @brief  Compare a measured puzzle piece to this particular one. 
-  #
-  # @param[in]  yM    a puzzleTemplate instance saving a passed puzzle piece's info
-  #
-  # @param[out]       directly call the function from the super class
-  #
-  def compare(self, yM):
-
-    return super().compare(yM)
 
 
 #

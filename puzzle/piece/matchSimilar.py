@@ -39,17 +39,13 @@ class matchSimilar(matcher):
   def __init__(self, y=None, tau=float('inf')):
     super(matchSimilar, self).__init__(y, tau)
 
-  # #=========================== setMeasurement ==========================
-  # #
-  # # @brief  Pass along to the instance a measurement of the puzzle
-  # #         piece.
-  # #
-  # def setMeasurement(self, y):
-  #   pass
-
   #============================== compare ==============================
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
+  #
+  # @param[in]  yM    A puzzleTemplate instance saving a passed puzzle piece's info
+  #
+  # @param[out]      Return comparison result
   #
   def compare(self, yM):
 

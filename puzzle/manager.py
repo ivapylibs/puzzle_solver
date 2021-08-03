@@ -39,7 +39,10 @@
 #==== Imports
 #
 from dataclasses import dataclass
-import puzzle
+import itertools
+
+from puzzle.parser.fromLayer import fromLayer
+
 #==== Helper 
 #
 
@@ -49,13 +52,15 @@ SCORE_SIMILAR = 1
 
 @dataclass
 class managerParms:
-  scoreType:int = SCORE_DIFFERENCE
+  scoreType: int = SCORE_SIMILAR
 
 #
 #================================ manager ================================
 #
 
-class manager(puzzle.parser.fromLayer):
+class manager(fromLayer):
+
+  # @note
   # SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
   # MATCH. WHAT SHOULD THE SUPERCLASS BE? IT MIGHT BE THAT CREATING A NEW
   # TRACKPOINTER CLASS WITH SOME LIMITED FUNCTIONALITY IS IN ORDER.
@@ -92,9 +97,12 @@ class manager(puzzle.parser.fromLayer):
     if not theParms:
       theParms = managerParms
 
+    # @todo
+    # Yunzhi: we have to simulate a gt here. It is designed to be done in builder?
+
     self.solution = solution              # @< The solution puzzle board.
     self.scoreType = theParms.scoreType   # @< The type of comparator.
-    self.pAssignments = []                # @< Assignments: meas to sol.
+    self.pAssignments = []                # @< Assignments: measurement of all the pairwise comparisons.
     self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
   #============================== predict ==============================
@@ -114,48 +122,45 @@ class manager(puzzle.parser.fromLayer):
     # BOOLEAN CHECK FOR THAT FLAG HERE TO HAVE ASSIGNMENT CONDITIONED ON
     # SIMILARITY VS DIFFERENCE (ONE MINIMIZES SCORE, ONE MAXIMIZES
     # SCORE), SO DIFFERENCE SHOULD BE IN DIRECTION OF SCORE COMPARISONS.
-    #
+
     # PUT CODE HERE FOR PUZZLE PIECE MANAGEMENT AND TRACKING.
     # WHATEVER WORKS FOR OPENCV.
     #
     # THIS PROCESSING IS USUALLY BROKEN INTO PHASES. THEY SHOULD HAVE
     # THEIR OWN MEMBER FUNCTIONS FOR OVERLOADING AS NEEDED.
-    #
-    # # 1] and 2] Extract pieces and generate a measured board. Done in
-    # #    superclass member function.
-    # #
-    # super(manager, self).measure(I,  M)
-    #
-    # # 3] COMPARE TO GROUND TRUTH (PAIRWISE TESTS)
-    # # 4] GENERATE ASSOCIATIONS
-    # #
-    # self.matchPieces()
-    # #       BOTH COMBINED AS PART OF A MEMBER FUNCTION
-    # #
-    # # 5] STORE AND CLOSE OUT
-    # #
-    # #       SHOULD GENERATE A PUZZLE.BOARD AS FINAL ANSWER.
-    # loop through pAssignments
-    #   if valid assignment
-    #     add to list. (MIGHT BE ONE LINE OF CODE IN PYTHON. NOT SURE)
-    #   call final object to be iPieces, indices to assigned pieces.
-    #
-    # self.bAssigned = self.bMeas.getSubset(iPieces)
-    #
-    # # IF DONE RIGHT, THE SUPER CLASS CAN DO ABOUT 50% OF THE ABOVE AND
-    # # THIS CLASS HAS SOME SPECIALIZED PROCESSING FOR THE PUZZLE PIECES
-    # # FOR THE OTHER 50% (NOTE: THE PERCENT SPLIT COULD BE DIFFERENT).
-    # #
-    # # 2021/07/29: [IGNORE THIS IGNORE THIS]
-    # # LOOKS LIKE THE SUPER CLASS SHOULD ONLY BE HELPING WITH STEP 1. IT
-    # # IS OK TO JUST CODE AS MEMBER FUNCTION HERE AND WORRY ABOUT
-    # # ALTERNATIVES LATER.
-    # #
-    # # 2021/07/29: IF SUPERCLASS IS PUZZLE.PARSER.FROMLAYERS, THEN STEPS
-    # # 1 AND 2 ARE DONE BY THE SUPERCLASS MEASURE FUNCTION.  THIS ONE
-    # # WILL THEN DO STEPS 3, 4 AND 5 IN THIS CODEBASE.
-    # #
+
+    # Call measure function from fromLayer to generate a measured board
+    # self.bMeas
+    super().measure(I,  M)
+
+    # Compare with ground truth/generate associates
+    self.matchPieces()
+
+    # STORE AND CLOSE OUT -> SHOULD GENERATE A PUZZLE.BOARD AS FINAL ANSWER.
+    iPieces = []
+    for idx, assignment in enumerate(self.pAssignments):
+      # @todo
+      # criteria is related to similarity or difference
+      if assignment >0:
+        iPieces.append(idx)
+
+    # @todo
+    # getSubset has not implemented yet in the board class
+    self.bAssigned = self.bMeas.getSubset(iPieces)
+
     pass
+
+  #=========================== matchPieces ==========================
+  #
+  # @brief  Match all the puzzle pieces with the ground truth in a pairwise manner.
+  #
+  def matchPieces(self):
+    # @todo
+
+    pair_list = [[x,y] for x in self.bMeas.pieces for y in self.solution.pieces]
+    for pair in pair_list:
+      pass
+
 
   #============================== correct ==============================
   #
@@ -167,13 +172,14 @@ class manager(puzzle.parser.fromLayer):
 
   #=========================== process ==========================
   #
-  # @brief  TO FILL OUT.
+  # @brief  Run the tracking pipeline for image measurement.
   #
-  def process(self, y):
+  # @param[in]  I   Source image.
+  # @param[in]  M   Layer mask (binary)
+  #
+  def process(self, I, M):
 
-    # @todo
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-    # self.measure()
+    self.measure(I, M)
 
     pass
 #
