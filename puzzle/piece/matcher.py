@@ -35,9 +35,9 @@ class matcher(template):
   #
   # @brief  Constructor for the puzzle.piece.matcher class.
   #
-  def __init__(self, tau = float("NaN")):
+  def __init__(self, y = None, tau = float("NaN")):
 
-    super(matcher, self).__init__(y=template)
+    super(matcher, self).__init__(y)
 
     self.tau = tau  # @< Threshold to use when comparing, if given.
 

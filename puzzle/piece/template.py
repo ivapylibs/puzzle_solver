@@ -33,13 +33,10 @@ import matplotlib.pyplot as plt
 @dataclass
 class puzzleTemplate:
   size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
-  # @todo
-  # Yunzhi: We may not need it
-  # icoords: list[int]    # @< Linear index coordinates.
   rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
   appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
   image:   np.ndarray = np.array([],dtype='uint8')  # @< Template image with BG default fill.
-
+  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template mask.
 #
 #========================= puzzle.piece.template =========================
 #
@@ -70,12 +67,12 @@ class template:
   # @brief  Pass along to the instance a measurement of the puzzle
   #         piece.
   #
-  def setMeasurement(self, y):
+  # @param[in]  thePiece    A measurement of the puzzle piece.
+  #
+  def setMeasurement(self, thePiece):
 
-    # @todo
-    # Yunzhi: Not sure what to do here
-
-    pass
+    self.y = thePiece.y
+    self.rLoc = thePiece.rLoc
 
 
   #============================== setSource ============================
@@ -190,15 +187,7 @@ class template:
     # Updated to OpenCV style
     y.size = [theMask.shape[1], theMask.shape[0]]
 
-    # @note
-    # Yunzhi: Python may not be so complicated
-    # # Populate coordinate/indexing information.
-    # y.icoords = find(theMasK)
-    # y.rcoords = ind2sub(y.icoords, y.size)
-    #
-    # # Populate appearance
-    # linImage = reshape(theImage, [prod(imsize), size(theImage, 2)])
-    # y.appear = linImage[y.icoords, :]
+    y.mask = theMask.astype('uint8')
 
     y.rcoords = list(np.nonzero(theMask)) # 2 (row,col) x N
     # Updated to OpenCV style -> (x,y)

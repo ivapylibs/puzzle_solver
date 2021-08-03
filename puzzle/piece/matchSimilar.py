@@ -36,17 +36,16 @@ class matchSimilar(matcher):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self, tau=float('inf')):
-    super(matcher, self).__init__(tau)
+  def __init__(self, y=None, tau=float('inf')):
+    super(matchSimilar, self).__init__(y, tau)
 
-  #=========================== setMeasurement ==========================
-  #
-  # @brief  Pass along to the instance a measurement of the puzzle
-  #         piece.
-  #
-  def setMeasurement(self, y):
-    super().setMeasurement(y)
-    self.y = self.process(y)
+  # #=========================== setMeasurement ==========================
+  # #
+  # # @brief  Pass along to the instance a measurement of the puzzle
+  # #         piece.
+  # #
+  # def setMeasurement(self, y):
+  #   pass
 
   #============================== compare ==============================
   #

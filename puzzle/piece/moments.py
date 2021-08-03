@@ -22,10 +22,10 @@ import cv2
 import math
 import numpy as np
 
-from puzzle.piece.matchSimilar import matchSimilar
+from puzzle.piece.matchDifferent import matchDifferent
 
 
-class moments(matchSimilar):
+class moments(matchDifferent):
 
   #=============================== moments ==============================
   #
@@ -35,8 +35,8 @@ class moments(matchSimilar):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self):
-    super(matchSimilar, self).__init__()
+  def __init__(self, y =None, tau=float('inf')):
+    super(moments, self).__init__(y, tau)
 
   #=========================== process ==========================
   #
@@ -49,10 +49,10 @@ class moments(matchSimilar):
   #
   def process(self, y):
 
-    moments = cv2.moments(y.image)
+    moments = cv2.moments(y.mask)
     huMoments = cv2.HuMoments(moments)
     for i in range(7):
-      huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(abs(huMoments[i]))
+      huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(1e-06+abs(huMoments[i]))
 
     return huMoments
 
@@ -80,7 +80,7 @@ class moments(matchSimilar):
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
-  # @param[in]  yM    a dataclass saving a passed puzzle piece's info
+  # @param[in]  yM    a puzzleTemplate instance saving a passed puzzle piece's info
   #
   # @param[out]       directly call the function from the super class
   #
