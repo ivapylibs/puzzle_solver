@@ -44,6 +44,10 @@ class arrangement (puzzle.board):
   #
   def __init__(self_, solBoard = [], tauDist = 3):
 
+    SHOULD tauDist BE REPLACED WITH A PARAMETER STRUCTURE?
+    I THINK SO SINCE SUB-CLASSES MAY HAVE THEIR OWN PARAMETERS.
+    FOR SURE ADJACENCY DOES.
+
     self.solution = solBoard
     self.tauDist = tauDist
 
@@ -235,7 +239,7 @@ class arrangement (puzzle.board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(self, fileName, tauDist = None)
+  def buildFromFile_ImageAndMask(self, fileName, tauDist = None)
 
     OPEN FILE / LOAD DATA
     SHOULD BE A IMAGE, MASK, AND tauDist (OPTIONAL).
@@ -264,7 +268,7 @@ class arrangement (puzzle.board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(self, fileName, tauDist = None)
+  def buildFromFiles_ImageAndMask(self, fileName, tauDist = None)
 
     I = LOAD IMAGE 
     M = LOAD MASK
