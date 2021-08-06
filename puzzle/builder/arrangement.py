@@ -232,7 +232,7 @@ class arrangement (board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(self, fileName, tauDist = None):
+  def buildFromFile_Puzzle(fileName, tauDist = None):
 
     # @note
     # Yunzhi: I suggest to use .json file
@@ -276,7 +276,7 @@ class arrangement (board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(self, fileName, tauDist = None):
+  def buildFromFile_ImageAndMask(fileName, tauDist = None):
 
     # @todo
     # OPEN FILE / LOAD DATA
@@ -308,7 +308,7 @@ class arrangement (board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(self, imFile, maskFile, tauDist = None):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, tauDist = None):
 
     # @todo
     # I = LOAD IMAGE
@@ -340,7 +340,7 @@ class arrangement (board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(self, theImage, theMask, tauDist = None):
+  def buildFrom_ImageAndMask(theImage, theMask, tauDist = None):
 
     # @todo
     # pParser = BUILD FROMLAYER PUZZLE PARSER.
@@ -368,7 +368,7 @@ class arrangement (board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(self, theImage, theProcessor, theDetector = None):
+  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector = None):
 
     # @todo
     # if not theDetector:
