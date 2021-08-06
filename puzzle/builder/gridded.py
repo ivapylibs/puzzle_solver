@@ -19,39 +19,46 @@
 # @file     gridded.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO ELSE?
-# @date     2021/08/04  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/08/04 [created]
+#           2021/08/05 [modified]
 #
 #========================= puzzle.builder.gridded ========================
 
 #===== Environment / Dependencies
 #
-
+from puzzle.builder.arrangement import arrangement
+from puzzle.builder.adjacent import paramSpec
+from puzzle.builder.interlocking import interlocking
 #===== Helper Elements
 #
 
-paramSpec class definition with inheritance
 
 #
 #====================== puzzle.builder.interlocking ======================
 #
 
-class gridded (puzzle.builder.interlocking):
+class gridded(interlocking):
 
   #============================== adjacent =============================
   #
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self_, solBoard = [], theParms = paramSpec()):
+  def __init__(self, solBoard = [], theParams = paramSpec):
 
-    __init_super__(self_, solBoard, theParms)
+    super(gridded, self).__init__(solBoard, theParams)
 
-    self.adjMat = identity matrix of trues. num pieces x num pieces.
-      YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
-      MATRIX SHOULD BE SYMMETRIC.
-    self.ilMat = identity matrix of trues. num pieces x num pieces.
-    self.gc = numpy.zero array of size 2 x num pieces.
+    # @ todo
+    # self.adjMat = identity matrix of Trues. num pieces x num pieces.
+    #   YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
+    #   MATRIX SHOULD BE SYMMETRIC.
+    #
+    # self.ilMat = identity matrix of Trues. num pieces x num pieces.
+    #
+
+    # self.gc = np.zero array of size 2 x num pieces.
+
     # @< Will store the calibrated grid location of the puzzle piece.
 
     self.__processGrid()
@@ -67,18 +74,20 @@ class gridded (puzzle.builder.interlocking):
   # are weird puzzles that can be thought of with a mix of adjacent and
   # interlocking.
   #
-  def __processInterlocking(self):
+  def __processGrid(self):
 
-    THIS ONE SHOULD BE COMPLETELY OVERLOADED.
-    TEST TO INTERLOCKING
-    TEST COORDINATES TO DETERMINE GRIDDING.
-    ORDERED FROM TOP LEFT OR FROM BOTTOM LEFT? YOU PICK AND BE CONSISTENT.
+    # THIS ONE SHOULD BE COMPLETELY OVERLOADED.
+    # TEST TO INTERLOCKING
+    # TEST COORDINATES TO DETERMINE GRIDDING.
+    # ORDERED FROM TOP LEFT OR FROM BOTTOM LEFT? YOU PICK AND BE CONSISTENT.
+    #
+    # NEED TO SET
+    # self.adjMat
+    # self.ilMat
+    # self.gc the grid coordinates. I THINK MY NOTES HAD A DIFFERENT
+    # VARIABLE NAME. WILL POST TO ISSUE IF I HAVE A STRONG OPINION.
 
-    NEED TO SET
-    self.adjMat
-    self.ilMat
-    self.gc the grid coordinates. I THINK MY NOTES HAD A DIFFERENT
-    VARIABLE NAME. WILL POST TO ISSUE IF I HAVE A STRONG OPINION.
+    pass
 
   # OTHER CODE / MEMBER FUNCTIONS
   #
@@ -88,7 +97,7 @@ class gridded (puzzle.builder.interlocking):
   #
   # OTHER CODE / MEMBER FUNCTIONS
 
-  #======================== buildFromFile_Puzzle =======================
+  # ======================== buildFromFile_Puzzle =======================
   #
   # @brief      Load a saved arrangement calibration/solution puzzle board.
   #
@@ -102,13 +111,14 @@ class gridded (puzzle.builder.interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms = paramSpec())
+  def buildFromFile_Puzzle(fileName, theParms=paramSpec):
 
-    YOU SHOULD KNOW THE DEAL BY NOW.
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_Puzzle(fileName, theParms)
+    thePuzzle = gridded(aPuzzle.solution, theParms)
+
     return thePuzzle
 
-  #===================== buildFromFile_ImageAndMask ====================
+  # ===================== buildFromFile_ImageAndMask ====================
   #
   # @brief      Load a saved arrangement calibration/solution stored as
   #             an image and a mask.
@@ -123,13 +133,14 @@ class gridded (puzzle.builder.interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(self, fileName, theParms = paramSpec())
+  def buildFromFile_ImageAndMask(fileName, theParms=paramSpec):
 
-    YOU SHOULD KNOW THE DEAL BY NOW.
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
+    thePuzzle = gridded(aPuzzle.solution, theParms)
+
     return thePuzzle
 
-  #==================== buildFromFiles_ImageAndMask ====================
+  # ==================== buildFromFiles_ImageAndMask ====================
   #
   # @brief      Load a saved arrangement calibration/solution stored as
   #             separate image and mask files.
@@ -145,13 +156,14 @@ class gridded (puzzle.builder.interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(self, fileName, tauDist = None)
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramSpec):
 
-    YOU SHOULD KNOW THE DEAL BY NOW.
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
+    thePuzzle = gridded(aPuzzle.solution, theParms)
+
     return thePuzzle
 
-  #======================= buildFrom_ImageAndMask ======================
+  # ======================= buildFrom_ImageAndMask ======================
   #
   # @brief      Given an image and an image mask, parse both to recover
   #             the puzzle calibration/solution.
@@ -160,19 +172,20 @@ class gridded (puzzle.builder.interlocking):
   # submitted data to create a puzzle board instance. That instance is
   # the calibration/solution.
   #
-  # @param[in]  theMask     The puzzle piece mask information.
   # @param[in]  theImage    The puzzle image data.
+  # @param[in]  theMask     The puzzle piece mask information.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(self, theImage, theMask)
+  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramSpec):
 
-    YOU SHOULD KNOW THE DEAL BY NOW.
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
+    thePuzzle = gridded(aPuzzle.solution, theParms)
+
     return thePuzzle
 
-  #===================== buildFrom_ImageProcessing =====================
+  # ===================== buildFrom_ImageProcessing =====================
   #
   # @brief      Given an image with regions clearly separated by some
   #             color or threshold, parse it to recover the puzzle
@@ -188,10 +201,11 @@ class gridded (puzzle.builder.interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(self, theImage, theMask, theDetector = None)
+  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector=None, theParms=paramSpec):
 
-    YOU SHOULD KNOW THE DEAL BY NOW.
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
+    thePuzzle = gridded(aPuzzle.solution, theParms)
+
     return thePuzzle
 
 #

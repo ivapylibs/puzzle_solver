@@ -43,14 +43,10 @@ class interlocking(adjacent):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = []):
+  def __init__(self, solBoard = [], theParams = paramSpec):
 
     # @todo
-    # CODING THIS ONE AS THOUGH THERE IS A PARMS STRUCT
-    # if not theParams:
-    #   theParams = paramSpec()
-    #
-    # super(adjacent, self).__init__(solBoard, theParams)
+    super(adjacent, self).__init__(solBoard, theParams)
     #
     #
     # self.adjMat = identity matrix of Trues. num pieces x num pieces.
@@ -60,8 +56,6 @@ class interlocking(adjacent):
     # self.ilMat = identity matrix of Trues. num pieces x num pieces.
     #
     # self.__processInterlocking()
-
-    pass
 
   #======================== processInterlocking ========================
   #

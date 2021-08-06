@@ -51,21 +51,17 @@ class adjacent(arrangement):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = []):
+  def __init__(self, solBoard = [], theParams = paramSpec):
 
+    super(adjacent, self).__init__(solBoard, theParams)
 
     # @todo
-    # CODING THIS ONE AS THOUGH THERE IS A Params STRUCT
-    # if not theParams:
-    #   theParams = paramSpec
-    #
-    # super(adjacent, self).__init__(solBoard, theParams)
     #
     # self.adjMat = identity matrix of Trues. num pieces x num pieces.
     #   YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
     #   MATRIX SHOULD BE SYMMETRIC.
     # self.__processAdjacency()
-    pass
+
 
   #========================== processAdjacency =========================
   #
