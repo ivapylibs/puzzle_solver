@@ -27,8 +27,7 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement
-from puzzle.builder.adjacent import paramSpec
+from puzzle.builder.arrangement import arrangement, paramSpec
 from puzzle.builder.interlocking import interlocking
 #===== Helper Elements
 #
@@ -45,7 +44,7 @@ class gridded(interlocking):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec):
+  def __init__(self, solBoard = [], theParams = paramSpec()):
 
     super(gridded, self).__init__(solBoard, theParams)
 
@@ -197,11 +196,12 @@ class gridded(interlocking):
   #
   # @param[in]  theImage        The puzzle image data.
   # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector=None, theParms=paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramSpec):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
     thePuzzle = gridded(aPuzzle.solution, theParms)

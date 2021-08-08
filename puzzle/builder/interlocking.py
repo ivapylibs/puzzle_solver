@@ -27,8 +27,8 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement
-from puzzle.builder.adjacent import adjacent, paramSpec
+from puzzle.builder.arrangement import arrangement, paramSpec
+from puzzle.builder.adjacent import adjacent
 #===== Helper Elements
 #
 
@@ -43,7 +43,7 @@ class interlocking(adjacent):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec):
+  def __init__(self, solBoard = [], theParams = paramSpec()):
 
     # @todo
     super(adjacent, self).__init__(solBoard, theParams)
@@ -199,11 +199,12 @@ class interlocking(adjacent):
   #
   # @param[in]  theImage        The puzzle image data.
   # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector=None, theParms=paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramSpec):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
     thePuzzle = interlocking(aPuzzle.solution, theParms)

@@ -29,15 +29,9 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement
-from dataclasses import dataclass
+from puzzle.builder.arrangement import arrangement, paramSpec
 #===== Helper Elements
 #
-
-@dataclass
-class paramSpec:
-  # @todo
-  pass
 
 #
 #======================== puzzle.builder.adjacent ========================
@@ -51,7 +45,7 @@ class adjacent(arrangement):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec):
+  def __init__(self, solBoard = [], theParams = paramSpec()):
 
     super(adjacent, self).__init__(solBoard, theParams)
 
@@ -199,11 +193,12 @@ class adjacent(arrangement):
   #
   # @param[in]  theImage        The puzzle image data.
   # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector = None, theParms = paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParms = paramSpec):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
     thePuzzle = adjacent(aPuzzle.solution, theParms)
