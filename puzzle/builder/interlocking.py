@@ -27,10 +27,19 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.adjacent import adjacent
+
+import numpy as np
+from dataclasses import dataclass
+
+from puzzle.board import board
+from puzzle.builder.arrangement import arrangement
+from puzzle.builder.adjacent import adjacent, paramAdj
 #===== Helper Elements
 #
+
+@dataclass
+class paramInter(paramAdj):
+  tauInter: float = 20
 
 #
 #====================== puzzle.builder.interlocking ======================
@@ -43,23 +52,21 @@ class interlocking(adjacent):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramArrange):
+  def __init__(self, solBoard = [], theParams = paramInter):
 
-    # @todo
-    super(adjacent, self).__init__(solBoard, theParams)
-    #
-    #
-    # self.adjMat = identity matrix of Trues. num pieces x num pieces.
-    #   YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
-    #   MATRIX SHOULD BE SYMMETRIC.
-    #
-    # self.ilMat = identity matrix of Trues. num pieces x num pieces.
-    #
-    # self.__processInterlocking()
+    super(interlocking, self).__init__(solBoard, theParams)
+
+    if isinstance(solBoard, board):
+      self.ilMat = np.eye(solBoard.size()).astype('bool')
+    else:
+      print('Not initialized properly')
+      exit()
+
+    self.__processInterlocking()
 
   #======================== processInterlocking ========================
   #
-  # @brief  Process the calibration board and determine what pieces are
+  # @brief  Process the solution board and determine what pieces are
   #         interlocking or adjacent. 
   #
   # Some pieces might be close to each other but not really
@@ -69,9 +76,11 @@ class interlocking(adjacent):
   #
   def __processInterlocking(self):
 
-    super().__processAdjacency()
+    # @todo
+    # Yunzhi: Wait for further development
 
     self.ilMat = self.adjMat
+
 
     # @note
     # For now interlocking and adjacency will be the same.
@@ -113,10 +122,10 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms=paramArrange):
+  def buildFromFile_Puzzle(fileName, theParams=paramInter):
 
-    aPuzzle = arrangement.buildFromFile_Puzzle(fileName, theParms)
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
+    thePuzzle = interlocking(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -135,10 +144,10 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParms=paramArrange):
+  def buildFromFile_ImageAndMask(fileName, theParams=paramInter):
 
-    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName)
+    thePuzzle = interlocking(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -158,10 +167,10 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramArrange):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=paramInter):
 
-    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
+    thePuzzle = interlocking(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -180,10 +189,10 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramArrange):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams=paramInter):
 
-    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
+    thePuzzle = interlocking(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -204,10 +213,10 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramArrange):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=paramInter):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
-    thePuzzle = interlocking(aPuzzle.solution, theParms)
+    thePuzzle = interlocking(aPuzzle.solution, theParams)
 
     return thePuzzle
 

@@ -27,11 +27,19 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.interlocking import interlocking
+
+import numpy as np
+from dataclasses import dataclass
+
+from puzzle.board import board
+from puzzle.builder.arrangement import arrangement
+from puzzle.builder.interlocking import interlocking, paramInter
 #===== Helper Elements
 #
 
+@dataclass
+class paramGrid(paramInter):
+  tauInter: float = 20
 
 #
 #====================== puzzle.builder.interlocking ======================
@@ -44,19 +52,15 @@ class gridded(interlocking):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramArrange):
+  def __init__(self, solBoard = [], theParams = paramGrid):
 
     super(gridded, self).__init__(solBoard, theParams)
 
-    # @ todo
-    # self.adjMat = identity matrix of Trues. num pieces x num pieces.
-    #   YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
-    #   MATRIX SHOULD BE SYMMETRIC.
-    #
-    # self.ilMat = identity matrix of Trues. num pieces x num pieces.
-    #
-
-    # self.gc = np.zero array of size 2 x num pieces.
+    if isinstance(solBoard, board):
+      self.gc = np.zero(2, solBoard.size())
+    else:
+      print('Not initialized properly')
+      exit()
 
     # @< Will store the calibrated grid location of the puzzle piece.
 
@@ -64,7 +68,7 @@ class gridded(interlocking):
 
   #============================ processGrid ============================
   #
-  # @brief  Process the calibration board and determine what pieces are
+  # @brief  Process the solution board and determine what pieces are
   #         interlocking and the grid ordering. Grid ordering helps to
   #         determine adjacency.
   #
@@ -75,6 +79,7 @@ class gridded(interlocking):
   #
   def __processGrid(self):
 
+    # @todo
     # THIS ONE SHOULD BE COMPLETELY OVERLOADED.
     # TEST TO INTERLOCKING
     # TEST COORDINATES TO DETERMINE GRIDDING.
@@ -110,10 +115,10 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms=paramArrange):
+  def buildFromFile_Puzzle(fileName, theParams=paramGrid):
 
-    aPuzzle = arrangement.buildFromFile_Puzzle(fileName, theParms)
-    thePuzzle = gridded(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
+    thePuzzle = gridded(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -132,10 +137,10 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParms=paramArrange):
+  def buildFromFile_ImageAndMask(fileName, theParams=paramGrid):
 
-    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
-    thePuzzle = gridded(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName)
+    thePuzzle = gridded(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -155,10 +160,10 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramArrange):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=paramGrid):
 
-    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
-    thePuzzle = gridded(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
+    thePuzzle = gridded(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -177,10 +182,10 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramArrange):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams=paramGrid):
 
-    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
-    thePuzzle = gridded(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
+    thePuzzle = gridded(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -201,10 +206,10 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramArrange):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=paramGrid):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
-    thePuzzle = gridded(aPuzzle.solution, theParms)
+    thePuzzle = gridded(aPuzzle.solution, theParams)
 
     return thePuzzle
 

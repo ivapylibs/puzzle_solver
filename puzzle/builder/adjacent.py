@@ -67,7 +67,7 @@ class adjacent(arrangement):
 
   #========================== processAdjacency =========================
   #
-  # @brief  Process the calibration board and determine what pieces are
+  # @brief  Process the solution board and determine what pieces are
   #         adjacent or "close enough." It will determine the adjacency
   #         matrix.
   #
@@ -79,7 +79,7 @@ class adjacent(arrangement):
     for ii in range(self.solution.size()):
       for jj in range(ii+1,self.solution.size()):
 
-        if self.testAdjacent(ii, jj, self.params.tauAdj):
+        if self.solution.testAdjacent(ii, jj, self.params.tauAdj):
           self.adjMat[ii,jj] = True
           self.adjMat[jj,ii] = True
 

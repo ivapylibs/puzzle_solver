@@ -65,9 +65,9 @@ class arrangement(board):
     self.params = theParams # @<A distance threshold for considering a piece
     # to be correctly placed.
 
-    # Initialize with a solBoard but will update in the further processing
-    self.pieces = solBoard.pieces
-    self.id_count = solBoard.id_count
+    # # Initialize with a solBoard but will update in the further processing
+    # self.pieces = solBoard.pieces
+    # self.id_count = solBoard.id_count
 
     # @todo
     # Yunzhi: I think for each arrangement instance, there should be
