@@ -73,7 +73,7 @@ print('The score of the estimated board:', theArrange.scoreBoard(theBoardSol))
 #
 print('The checklist of each puzzle piece given the location:', theArrange.piecesInPlace(pLoc))
 
-#==[2.5] Test progress. Should see 1.
+#==[2.5] Test progress. Should see 100%.
 #
 print('The current progress:', theArrange.progress(theBoardSol))
 

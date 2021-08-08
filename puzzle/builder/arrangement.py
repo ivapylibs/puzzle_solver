@@ -275,7 +275,7 @@ class arrangement(board):
   def buildFromFile_Puzzle(fileName, tauDist = None):
 
     theBoard = None
-    with open(fileName,'r') as fp:
+    with open(fileName,'rb') as fp:
       data = pickle.load(fp)
 
       if hasattr(data, 'board'):
@@ -314,7 +314,7 @@ class arrangement(board):
     I = None
     M = None
 
-    with open(fileName,'r') as fp:
+    with open(fileName,'rb') as fp:
       data = pickle.load(fp)
 
       if hasattr(data, 'I'):
@@ -353,8 +353,13 @@ class arrangement(board):
   @staticmethod
   def buildFromFiles_ImageAndMask(imFile, maskFile, tauDist = None):
 
-    I = plt.imread(imFile)
-    M = plt.imread(maskFile)
+    I = cv2.imread(imFile)
+    M = cv2.imread(maskFile, cv2.IMREAD_GRAYSCALE)
+
+    # Sometimes the value in M may not be strictly 0 or 255
+    if np.bitwise_and(M > 0, M < 255).any():
+      _, M = cv2.threshold(M, 10, 255, cv2.THRESH_BINARY)
+
 
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
       if tauDist is not None:
