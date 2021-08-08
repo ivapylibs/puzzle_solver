@@ -165,16 +165,23 @@ class board:
   #
   # @brief      Returns list/array of puzzle piece locations.
   #
-  # @param[out] pLocs list/array of puzzle piece locations.
+  # @param[out] pLocs   A dict of puzzle piece id & location.
   #
   def pieceLocations(self):
 
-    pLocs = []
-    for piece in self.pieces:
-      pLocs.append(piece.rLoc)
+    # @note
+    # Previously, return a list/array of puzzle piece locations.
+    # pLocs = []
+    # for piece in self.pieces:
+    #   pLocs.append(piece.rLoc)
+    #
+    # # from N x 2 to 2 x N
+    # pLocs = np.array(pLocs).reshape(-1,2).T
 
-    # from N x 2 to 2 x N
-    pLocs = np.array(pLocs).reshape(-1,2).T
+    pLocs = {}
+    for piece in self.pieces:
+      pLocs[piece.id] = piece.rLoc
+
 
     return pLocs
 

@@ -94,7 +94,15 @@ class fromLayer(centroidMulti):
     if len(self.bMeas.pieces) == 0:
       self.haveMeas = False
     else:
-      self.tpt = self.bMeas.pieceLocations()
+      # @todo
+      # Yunzhi: Eventually, tpt should be updated with a dict or class instance
+
+      # self.tpt = self.bMeas.pieceLocations()
+      self.tpt = []
+      for id, loc in self.bMeas.pieceLocations().items():
+        self.tpt.append(loc)
+      self.tpt = np.array(self.tpt).reshape(-1, 2).T
+
       self.haveMeas = True
 
 
