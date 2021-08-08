@@ -27,11 +27,25 @@
 
 #===== Environment / Dependencies
 #
+import cv2
+import matplotlib.pyplot as plt
 import numpy as np
+from dataclasses import dataclass
+import pickle
 
 from puzzle.board import board
+from puzzle.parser.fromLayer import fromLayer
+import puzzle.parser.simple as perceiver
+
+import improcessor.basic as improcessor
+import detector.inImage as detector
+
 #===== Helper Elements
 #
+
+@dataclass
+class paramSpec:
+  tauDist: int = 3
 
 #
 #======================= puzzle.builder.arrangement ======================
@@ -45,16 +59,11 @@ class arrangement (board):
   # @brief  Constructor for the puzzle.builder.arrangement class.
   #
   #
-  def __init__(self, solBoard = [], tauDist = 3):
+  def __init__(self, solBoard = [], theParams = paramSpec()):
     super(arrangement,self).__init__()
 
-    # @note
-    # SHOULD tauDist BE REPLACED WITH A PARAMETER STRUCTURE?
-    # I THINK SO SINCE SUB-CLASSES MAY HAVE THEIR OWN PARAMETERS.
-    # FOR SURE ADJACENCY DOES.
-
     self.solution = solBoard
-    self.tauDist = tauDist # @<A distance threshold for considering a piece
+    self.tauDist = theParams.tauDist # @<A distance threshold for considering a piece
     # to be correctly placed.
 
     # @note
@@ -84,9 +93,9 @@ class arrangement (board):
   # The locations are assumed to be ordered according to puzzle piece
   # ordering in the calibrated puzzle board.
   #
-  # @param[in]  pLoc        Ordered (by association) puzzle piece locations.
+  # @param[in]  pLoc       A dict of puzzle piece id & location.
   #
-  # @param[out] theVects   The puzzle piece to solution vectors.
+  # @param[out] theVects   A dict of puzzle piece id & solution vectors.
   #
   def corrections(self, pLoc):
     # @note
@@ -94,18 +103,28 @@ class arrangement (board):
     # DOES length(self.solution) or is it size(self.solution) == size(pLoc,2)
     # WHAT SHOULD RETURN IN CASE OF FAILURE? A NONE. CALLING SCOPE SHOULD
     # CHECK FOR A NONE RETURN VALUE.
-    # @note
-    # Yunzhi: I suggest to use a dictionary instead. Now, every puzzle piece instance
-    # has a id label. So no need to check the size.
 
-    # @todo
+    # @note
     # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
     # theVects = pLocTrue - pLoc
     #
     # RETURN theVects
     # SIMPLIFY PYTHON AS DESIRED.
 
-    pass
+    theVects = {}
+    pLocTrue = self.solution.pieceLocations()
+    if len(pLocTrue) == len(pLoc):
+      for id in pLoc:
+        # @todo
+        # Need double check if the id or id_sol will always be marched with the solution ?
+        # I prefer id as build has access to the solution from the very beginning
+        theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
+    else:
+      # @todo
+      # Not decided what to do else if the size does not match yet
+      print('Error of unmatched puzzle piece number!')
+
+    return theVects
 
   #============================= distances =============================
   #
@@ -117,16 +136,11 @@ class arrangement (board):
   # The locations are assumed to be ordered according to puzzle piece
   # ordering in the calibrated puzzle board.
   #
-  # @param[in]  pLoc        Ordered (by association) puzzle piece locations.
+  # @param[in]  pLoc        A dict of puzzle piece id & location.
   #
-  # @param[out] theDists    The puzzle piece distance to solution.
+  # @param[out] theDists    A dict of puzzle piece id & distance to the solution.
   #
   def distances(self, pLoc):
-    # @note
-    # CHECK THAT pLoc HAS SAME CARDINALITY AS puzzle board.
-    # DOES length(self.solution) or is it size(self.solution) == size(pLoc,2)
-    # WHAT SHOULD RETURN IN CASE OF FAILURE? INF FOR ALL DISTANCES TO
-    # CALIBRATED PUZZLE? ONLY PARTIAL CHECK + INF FOR REMAINING?
 
     # @todo
     # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
@@ -134,7 +148,20 @@ class arrangement (board):
     #
     # RETURN the distances.
 
-    pass
+    theDists = {}
+    pLocTrue = self.solution.pieceLocations()
+    if len(pLocTrue) == len(pLoc):
+      for id in pLoc:
+        # @todo
+        # Need double check if the id or id_sol will always be marched with the solution ?
+        # I prefer id as build has access to the solution from the very beginning
+        theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
+    else:
+      # @todo
+      # Not decided what to do else if the size does not match yet
+      print('Error of unmatched puzzle piece number!')
+
+    return theDists
 
   #========================== scoreByLocation ==========================
   #
@@ -148,19 +175,20 @@ class arrangement (board):
   # are assumed to be ordered according to puzzle piece ordering in the
   # calibrated puzzle board.
   #
-  # @param[in]  pLoc        Ordered (by association) puzzle piece locations.
+  # @param[in]  pLoc        A dict of puzzle piece id & location.
   #
   # @param[out] theScore    The score for the given board.
   #
   def scoreByLocation(self, pLoc):
 
-    # @todo
-    # Need double check
-
     errDists = self.distances(pLoc)
-    score = np.sum(errDists)
 
-    return score
+    theScore = []
+    for _, errDist in errDists.items():
+      theScore.append(errDist)
+    theScore = np.sum(errDists)
+
+    return theScore
 
   #============================= scoreBoard ============================
   #
@@ -179,22 +207,23 @@ class arrangement (board):
   #
   def scoreBoard(self, theBoard):
 
-    # @todo
-    # if size(theBoard) == size(self.solution):
-    #   pLocs = theBoard.locations()    MAY NEED TO WRITE. RETURNS ARRAY.
-    #   return self.scoreByLocation(pLocs)
-    # else:
-    #   return INFINITY
-    #   IF NOT INFINITY, THEN WHAT?
+    if theBoard.size() == self.solution.size():
+      pLocs = theBoard.pieceLocations()
+      theScore = self.scoreByLocation(pLocs)
+    else:
+      theScore = float('inf')
 
-    pass
+    return theScore
 
   #=========================== piecesInPlace ===========================
   #
   # @brief  Return boolean array indicating whether the piece is
   #         correctly in place or not.
   #
-  # @param[in]  pLoc        Ordered (by association) puzzle piece locations.
+  # @param[in]  pLoc        A dict of puzzle piece id & location.
+  #
+  # @param[out] theScores    A dict of id & bool variable indicating
+  #                         whether the piece is correctly in place or not.
   #
   def piecesInPlace(self, pLoc):
 
@@ -202,7 +231,13 @@ class arrangement (board):
     # Threshold on the scoreByLocation.
     # return boolean array
 
-    pass
+    errDists = self.distances(pLoc)
+
+    theScores = {}
+    for id, errDist in errDists.items():
+      theScores[id] = errDist < self.tauDist
+
+    return theScores
 
   #============================== progress =============================
   #
@@ -227,39 +262,31 @@ class arrangement (board):
   # ``tauDist`` is found, then it is applied to the # arrangement
   # instance.
   #
-  # @param[in]  fileName    The python file to load.
+  # @param[in]  fileName    The python file (.obj) to load
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
   def buildFromFile_Puzzle(fileName, tauDist = None):
 
-    # @note
-    # Yunzhi: I suggest to use .json file
+    theBoard = None
+    with open(fileName,'r') as fp:
+      data = pickle.load(fp)
 
-    # @todo
-    # OPEN FILE / LOAD DATA
-    # SHOULD BE A BOARD.
-    # MATLAB ALLOWS OPENING FILE INTO A STRUCTURE. LIKE:
-    # data = load(file)
-    # data.puzzle will exist if puzzle variable saved.
-    # data.tauDist will exist if tauDist variable saved.
-    #
-    # in matlab would check with isfield(data, 'NAME')
-    # FIGURE OUT EQUIVALENT IMPLEMENTATION
-    #
-    # if not tauDist:
-    #   CHECK IF FILE CONTAINS tauDist. OVERWRITE ARGUMENT IF SO.
-    #   LEAVE ALONG OTHERWISE
-    #
-    # if tauDist:
-    #   thePuzzle = arrangement(theBoard, tauDist)
-    # else:
-    #   thePuzzle = arrangement(theBoard)
+      if hasattr(data, 'board'):
+        theBoard = data.board
+      if tauDist is None and hasattr(data, 'tauDist'):
+        tauDist = data.tauDist
 
-    # return thePuzzle
+    if isinstance(theBoard, board):
+      if tauDist is not None:
+        thePuzzle = arrangement(theBoard, paramSpec(tauDist))
+      else:
+        thePuzzle = arrangement(theBoard)
+    else:
+      print('There is no board instance saved in the file!')
 
-    pass
+    return thePuzzle
 
   #===================== buildFromFile_ImageAndMask ====================
   #
@@ -271,26 +298,35 @@ class arrangement (board):
   # variable ``tauDist`` is found, then it is applied to the arrangement
   # instance.
   #
-  # @param[in]  fileName    The python file to load.
+  # @param[in]  fileName    The python file (.obj) to load.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
   def buildFromFile_ImageAndMask(fileName, tauDist = None):
 
-    # @todo
-    # OPEN FILE / LOAD DATA
-    # SHOULD BE A IMAGE, MASK, AND tauDist (OPTIONAL).
-    #
-    # if not tauDist:
-    #   CHECK IF FILE CONTAINS tauDist. OVERWRITE ARGUMENT IF SO.
-    #   LEAVE ALONG OTHERWISE
-    #
-    # thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
-    #
-    # return thePuzzle
+    I = None
+    M = None
 
-    pass
+    with open(fileName,'r') as fp:
+      data = pickle.load(fp)
+
+      if hasattr(data, 'I'):
+        I = data.I
+      if hasattr(data, 'M'):
+        M = data.M
+      if tauDist is None and hasattr(data, 'tauDist'):
+        tauDist = data.tauDist
+
+    if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
+      if tauDist is not None:
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramSpec(tauDist))
+      else:
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
+    else:
+      print('There is no Image or Mask saved in the file!')
+
+    return thePuzzle
 
   #==================== buildFromFiles_ImageAndMask ====================
   #
@@ -302,28 +338,26 @@ class arrangement (board):
   # ``tauDist`` is found, then it is applied to the arrangement
   # instance.
   #
-  # @param[in]  imFile      The image file to load.
-  # @param[in]  maskFile    The mask file to load.
+  # @param[in]  imFile      The image file (.png) to load.
+  # @param[in]  maskFile    The mask file (.png) to load.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
   def buildFromFiles_ImageAndMask(imFile, maskFile, tauDist = None):
 
-    # @todo
-    # I = LOAD IMAGE
-    # M = LOAD MASK
-    # POSSIBLE DO CONVERSION ON MASK TO BOOLEAN.
-    #
-    # if not tauDist:
-    #   CHECK IF FILE CONTAINS tauDist. OVERWRITE ARGUMENT IF SO.
-    #   LEAVE ALONG OTHERWISE
-    #
-    # thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
-    #
-    # return thePuzzle
+    I = plt.imread(imFile)
+    M = plt.imread(maskFile)
 
-    pass
+    if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
+      if tauDist is not None:
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramSpec(tauDist))
+      else:
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
+    else:
+      print('There is no Image or Mask saved in the file!')
+
+    return thePuzzle
 
   #======================= buildFrom_ImageAndMask ======================
   #
@@ -342,15 +376,14 @@ class arrangement (board):
   @staticmethod
   def buildFrom_ImageAndMask(theImage, theMask, tauDist = None):
 
-    # @todo
-    # pParser = BUILD FROMLAYER PUZZLE PARSER.
-    #
-    # pParser.process(theImage, theMask)
-    #
-    # thePuzzle = arrangement(pParser.getMeasurement())
-    # return thePuzzle
+    pParser = fromLayer()
+    pParser.process(theImage, theMask)
+    if tauDist is not None:
+      thePuzzle = arrangement(pParser.getState(), paramSpec(tauDist))
+    else:
+      thePuzzle = arrangement(pParser.getState())
 
-    pass
+    return thePuzzle
 
   #===================== buildFrom_ImageProcessing =====================
   #
@@ -364,27 +397,31 @@ class arrangement (board):
   #
   # @param[in]  theImage        The puzzle image data.
   # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
   #
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor, theDetector = None):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None):
 
-    # @todo
-    # if not theDetector:
-    #   CHECK IF COLOR IMAGE:
-    #     theDetector = IMPROCESSOR THAT CONVERTS TO GRAYSCALE, APPLY OTSU
-    #       THRESHOLD OR OTHER ADAPTIVE THRESHOLD METHOD.
-    #   else GRAYSCALE:
-    #     theDetector = IMPROCESSOR THAT APPLIES OTSU THRESHOLD OR OTHER ADAPTIVE THRESHOLD METHOD.
-    #
-    # pParser = BUILD SIMPLE PERCEIVER PUZZLE PARSER with theDetector and fromLayers.
-    #
-    # pParser.process(theImage)
-    # thePuzzle = arrangement(pParser.getMeasurement())
-    # return thePuzzle
+    if theDetector is None and theProcessor is None:
+      if theImage.ndim == 3:
+        theProcessor = improcessor.basic(cv2.cvtColor,(cv2.COLOR_BGR2GRAY,),\
+                           improcessor.basic.thresh,((0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU),))
+        theDetector = detector.inImage(theProcessor)
+      elif theImage.ndim == 2:
+        theProcessor = improcessor.basic(improcessor.basic.thresh, ((0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU),))
+        theDetector = detector.inImage(theProcessor)
+    elif theDetector is None and theProcessor is not None:
+      theDetector = detector.inImage(theProcessor)
 
-    pass
+    theLayer = fromLayer()
+    pParser = perceiver.simple(theDetector=theDetector , theTracker=theLayer, theParams=None)
+
+    pParser.process(theImage)
+    thePuzzle = arrangement(pParser.board)
+
+    return thePuzzle
 
 #
 #======================= puzzle.builder.arrangement ======================
