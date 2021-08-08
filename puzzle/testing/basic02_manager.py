@@ -39,7 +39,7 @@ _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = fromLayer()
-theLayer.measure(theImageSol,theMaskSol)
+theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.bMeas
 
 #==[2] Create image & mask for measurement
@@ -60,7 +60,6 @@ bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
 bsolImage = theManager.solution.toImage(ID_DISPLAY = True)
 bAssignedImage = theManager.bAssigned.toImage(ID_DISPLAY = True, ID_SOLUTION = True)
 
-plt.figure()
 f, axarr = plt.subplots(1,3)
 axarr[0].imshow(bMeasImage)
 axarr[0].title.set_text('Measurement')

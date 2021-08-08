@@ -45,7 +45,7 @@ theLayer = fromLayer()
 
 #--[1.3] Package up into a perceiver.
 
-boardPer=perceiver.simple(theDetector=binDet , theTracker=theLayer, theParams=None)
+boardPer = perceiver.simple(theDetector=binDet, theTracker=theLayer, theParams=None)
 
 #==[2] Create image
 #
