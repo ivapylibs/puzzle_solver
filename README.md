@@ -14,3 +14,10 @@ invoked, presuming that pip installation has been performed.  If no
 modifications to the source code will be performed then the ``-e`` flag
 is not necessary (e.g., use the flag if the underlying code will be
 modified).
+
+## Dependencies
+
+Requires the installation of the following python packages:
+
+- ```numpy```
+- ```matplotlib```

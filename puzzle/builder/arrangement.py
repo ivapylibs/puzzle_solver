@@ -45,14 +45,13 @@ import detector.inImage as detector
 
 @dataclass
 class paramSpec:
-  tauDist: int = 3
+  tauDist: int = 50
 
 #
 #======================= puzzle.builder.arrangement ======================
 #
 
-class arrangement (board):
-
+class arrangement(board):
 
   #============================ arrangement ============================
   #
@@ -186,7 +185,7 @@ class arrangement (board):
     theScore = []
     for _, errDist in errDists.items():
       theScore.append(errDist)
-    theScore = np.sum(errDists)
+    theScore = np.sum(theScore)
 
     return theScore
 
@@ -247,11 +246,17 @@ class arrangement (board):
   # @param[in]  theBoard    A puzzle board in 1-1 ordered correspondence
   #                         with solution.
   #
+  # @param[out] thePercentage The progress.
+  #
   def progress(self, theBoard):
-    pLocs   = theBoard.locations()
+    pLocs   = theBoard.pieceLocations()
     inPlace = self.piecesInPlace(pLocs)
 
-    return np.count_nonzero(inPlace) / len(inPlace)
+    val_list = [val for _, val in inPlace.items()]
+
+    thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(inPlace))
+
+    return thePercentage
 
   #======================== buildFromFile_Puzzle =======================
   #
@@ -285,6 +290,7 @@ class arrangement (board):
         thePuzzle = arrangement(theBoard)
     else:
       print('There is no board instance saved in the file!')
+      exit()
 
     return thePuzzle
 
@@ -325,6 +331,7 @@ class arrangement (board):
         thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
     else:
       print('There is no Image or Mask saved in the file!')
+      exit()
 
     return thePuzzle
 
@@ -356,6 +363,7 @@ class arrangement (board):
         thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
     else:
       print('There is no Image or Mask saved in the file!')
+      exit()
 
     return thePuzzle
 

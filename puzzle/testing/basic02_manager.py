@@ -40,7 +40,7 @@ _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 #
 theLayer = fromLayer()
 theLayer.process(theImageSol,theMaskSol)
-theBoardSol = theLayer.bMeas
+theBoardSol = theLayer.getState()
 
 #==[2] Create image & mask for measurement
 #
