@@ -29,9 +29,17 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement, paramSpec
+import numpy as np
+from dataclasses import dataclass
+
+from puzzle.builder.arrangement import arrangement, paramArrange
+from puzzle.board import board
 #===== Helper Elements
 #
+
+@dataclass
+class paramAdj(paramArrange):
+  tauAdj: float = 20
 
 #
 #======================== puzzle.builder.adjacent ========================
@@ -45,16 +53,16 @@ class adjacent(arrangement):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec()):
+  def __init__(self, solBoard = [], theParams = paramAdj()):
 
     super(adjacent, self).__init__(solBoard, theParams)
 
-    # @todo
-    #
-    # self.adjMat = identity matrix of Trues. num pieces x num pieces.
-    #   YES IT IS MEMORY WASTEFUL, BUT WE CAN FIX LATER.
-    #   MATRIX SHOULD BE SYMMETRIC.
-    # self.__processAdjacency()
+    if isinstance(solBoard, board):
+      self.adjMat = np.eye(solBoard.size()).astype('bool')
+    else:
+      print('Not initialized properly')
+      exit()
+    self.__processAdjacency()
 
 
   #========================== processAdjacency =========================
@@ -68,21 +76,13 @@ class adjacent(arrangement):
   #
   def __processAdjacency(self):
 
-    # @todo
-    # for ii = 1 to num pieces:
-    #   self.adjMat(ii,ii) = True
-    #
-    #   for jj = ii+1 to num pieces:
-    #     if self.testAdjacent(ii, jj, self.param.tauAdj):
-    #       self.adjMat(ii,jj) = True
-    #       self.adjMat(jj,ii) = True
-    #
+    for ii in range(self.solution.size()):
+      for jj in range(ii+1,self.solution.size()):
 
-    # @todo
-    # the puzzle.board class needs to have a member function
-    # call testAdjacent that tests the pieces for adjacency.
+        if self.testAdjacent(ii, jj, self.params.tauAdj):
+          self.adjMat[ii,jj] = True
+          self.adjMat[jj,ii] = True
 
-    pass
 
   # OTHER CODE / MEMBER FUNCTIONS
   #
@@ -107,10 +107,10 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms = paramSpec):
+  def buildFromFile_Puzzle(fileName, theParams = paramAdj):
 
-    aPuzzle  = arrangement.buildFromFile_Puzzle(fileName, theParms)
-    thePuzzle = adjacent(aPuzzle.solution, theParms)
+    aPuzzle  = arrangement.buildFromFile_Puzzle(fileName)
+    thePuzzle = adjacent(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -129,10 +129,10 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParms = paramSpec):
+  def buildFromFile_ImageAndMask(fileName, theParams = paramAdj):
 
-    aPuzzle  = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
-    thePuzzle = adjacent(aPuzzle.solution, theParms)
+    aPuzzle  = arrangement.buildFromFile_ImageAndMask(fileName)
+    thePuzzle = adjacent(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -152,10 +152,10 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms = paramSpec):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams = paramAdj):
 
-    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
-    thePuzzle = adjacent(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
+    thePuzzle = adjacent(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -174,10 +174,10 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParms = paramSpec):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams = paramAdj):
 
-    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
-    thePuzzle = adjacent(aPuzzle.solution, theParms)
+    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
+    thePuzzle = adjacent(aPuzzle.solution, theParams)
 
     return thePuzzle
 
@@ -198,10 +198,10 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParms = paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParams = paramAdj):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
-    thePuzzle = adjacent(aPuzzle.solution, theParms)
+    thePuzzle = adjacent(aPuzzle.solution, theParams)
 
     return thePuzzle
 

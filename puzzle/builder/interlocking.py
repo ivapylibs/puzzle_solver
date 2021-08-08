@@ -27,7 +27,7 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement, paramSpec
+from puzzle.builder.arrangement import arrangement, paramArrange
 from puzzle.builder.adjacent import adjacent
 #===== Helper Elements
 #
@@ -43,7 +43,7 @@ class interlocking(adjacent):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec()):
+  def __init__(self, solBoard = [], theParams = paramArrange):
 
     # @todo
     super(adjacent, self).__init__(solBoard, theParams)
@@ -113,7 +113,7 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms=paramSpec):
+  def buildFromFile_Puzzle(fileName, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFile_Puzzle(fileName, theParms)
     thePuzzle = interlocking(aPuzzle.solution, theParms)
@@ -135,7 +135,7 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParms=paramSpec):
+  def buildFromFile_ImageAndMask(fileName, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
     thePuzzle = interlocking(aPuzzle.solution, theParms)
@@ -158,7 +158,7 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramSpec):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
     thePuzzle = interlocking(aPuzzle.solution, theParms)
@@ -180,7 +180,7 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramSpec):
+  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
     thePuzzle = interlocking(aPuzzle.solution, theParms)
@@ -204,7 +204,7 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
     thePuzzle = interlocking(aPuzzle.solution, theParms)

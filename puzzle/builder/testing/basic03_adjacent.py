@@ -1,17 +1,17 @@
-#============================ basic02_builder ===========================
+#============================ basic03_adjacent ===========================
 #
 # @brief    Test script for the most basic functionality of arrangement class.
 #           Build an arrangement instance from different sources.
 #
-#============================ basic02_builder ===========================
+#============================ basic03_adjacent ===========================
 
 #
-# @file     basic02_builder.py
+# @file     basic03_adjacent.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/08  [created]
 #
-#============================ basic02_builder ===========================
+#============================ basic03_adjacent ===========================
 
 
 #==[0] Prep environment
@@ -22,7 +22,7 @@ import cv2
 import pickle
 from dataclasses import dataclass
 from puzzle.parser.fromLayer import fromLayer
-from puzzle.builder.arrangement import arrangement
+from puzzle.builder.adjacent import adjacent
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -82,30 +82,30 @@ del theData_save
 #==[2.1] Test buildFromFile_Puzzle
 #
 
-theArrangement_1 = arrangement.buildFromFile_Puzzle(cpath + '/data/board.obj')
+theAdj_1 = adjacent.buildFromFile_Puzzle(cpath + '/data/board.obj')
 
-bsolArrangement_1 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_1 = theAdj_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolArrangement_1)
 axarr[0, 1].title.set_text('Solution board from arrangement 1')
 
 #==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theArrangement_2 = arrangement.buildFromFile_ImageAndMask(cpath + '/data/image.obj')
+theAdj_2 = adjacent.buildFromFile_ImageAndMask(cpath + '/data/image.obj')
 
-bsolArrangement_2 = theArrangement_2.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_2 = theAdj_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolArrangement_2)
 axarr[0, 2].title.set_text('Solution board from arrangement 2')
 
 #==[2.3] Test buildFromFiles_ImageAndMask
 #
 
-theArrangement_3 = arrangement.buildFromFiles_ImageAndMask(
+theAdj_3 = adjacent.buildFromFiles_ImageAndMask(
 cpath + '/../../testing/data/shapes_color_six_image_solution.png',
 cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolArrangement_3 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_3 = theAdj_1.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolArrangement_3)
 axarr[1, 0].title.set_text('Solution board from arrangement 3')
 
@@ -113,23 +113,27 @@ axarr[1, 0].title.set_text('Solution board from arrangement 3')
 #==[2.4] Test buildFrom_ImageAndMask
 #
 
-theArrangement_4 = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theAdj_4 = adjacent.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolArrangement_4 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_4 = theAdj_1.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolArrangement_4)
 axarr[1, 1].title.set_text('Solution board from arrangement 4')
 
 #==[2.5] Test buildFrom_ImageProcessing
 #
 
-theArrangement_5 = arrangement.buildFrom_ImageProcessing(theImageSol)
+theAdj_5 = adjacent.buildFrom_ImageProcessing(theImageSol)
 
-bsolArrangement_5 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_5 = theAdj_1.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolArrangement_5)
 axarr[1, 2].title.set_text('Solution board from arrangement 5')
 
 # Should see 6 same boards
 plt.show()
 
+#==[3] Display the adjacent matrix. Should see an identity matrix.
 #
-#============================ basic02_builder ===========================
+print(theAdj_1.adjMat)
+
+#
+#============================ basic03_adjacent ===========================

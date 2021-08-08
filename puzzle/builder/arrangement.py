@@ -44,8 +44,8 @@ import detector.inImage as detector
 #
 
 @dataclass
-class paramSpec:
-  tauDist: int = 50
+class paramArrange:
+  tauDist: int = 20 # @< The threshold of whether two puzzle pieces are correctly matched.
 
 #
 #======================= puzzle.builder.arrangement ======================
@@ -58,12 +58,24 @@ class arrangement(board):
   # @brief  Constructor for the puzzle.builder.arrangement class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec()):
+  def __init__(self, solBoard = [], theParams = paramArrange):
     super(arrangement,self).__init__()
 
     self.solution = solBoard
-    self.tauDist = theParams.tauDist # @<A distance threshold for considering a piece
+    self.params = theParams # @<A distance threshold for considering a piece
     # to be correctly placed.
+
+    # Initialize with a solBoard but will update in the further processing
+    self.pieces = solBoard.pieces
+    self.id_count = solBoard.id_count
+
+    # @todo
+    # Yunzhi: I think for each arrangement instance, there should be
+    # two boards input: One for the solution and one for the current estimation.
+    # By default, the current estimation could be the same as the solution.
+    # But we need another member function to edit it later.
+
+
 
     # @note
     # WHAT DO WE NEED? ADDING TWO ARGUMENTS FOR NOW.
@@ -234,7 +246,7 @@ class arrangement(board):
 
     theScores = {}
     for id, errDist in errDists.items():
-      theScores[id] = errDist < self.tauDist
+      theScores[id] = errDist < self.params.tauDist
 
     return theScores
 
@@ -285,7 +297,7 @@ class arrangement(board):
 
     if isinstance(theBoard, board):
       if tauDist is not None:
-        thePuzzle = arrangement(theBoard, paramSpec(tauDist))
+        thePuzzle = arrangement(theBoard, paramArrange(tauDist))
       else:
         thePuzzle = arrangement(theBoard)
     else:
@@ -326,7 +338,7 @@ class arrangement(board):
 
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
       if tauDist is not None:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramSpec(tauDist))
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramArrange(tauDist))
       else:
         thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
     else:
@@ -363,7 +375,7 @@ class arrangement(board):
 
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
       if tauDist is not None:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramSpec(tauDist))
+        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramArrange(tauDist))
       else:
         thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
     else:
@@ -392,7 +404,7 @@ class arrangement(board):
     pParser = fromLayer()
     pParser.process(theImage, theMask)
     if tauDist is not None:
-      thePuzzle = arrangement(pParser.getState(), paramSpec(tauDist))
+      thePuzzle = arrangement(pParser.getState(), paramArrange(tauDist))
     else:
       thePuzzle = arrangement(pParser.getState())
 
@@ -415,7 +427,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, tauDist = None):
 
     if theDetector is None and theProcessor is None:
       if theImage.ndim == 3:
@@ -432,7 +444,11 @@ class arrangement(board):
     pParser = perceiver.simple(theDetector=theDetector , theTracker=theLayer, theParams=None)
 
     pParser.process(theImage)
-    thePuzzle = arrangement(pParser.board)
+
+    if tauDist is not None:
+      thePuzzle = arrangement(pParser.board, paramArrange(tauDist))
+    else:
+      thePuzzle = arrangement(pParser.board)
 
     return thePuzzle
 

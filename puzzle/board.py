@@ -93,14 +93,34 @@ class board:
   #
   # @param[in]  pAssignments   A list of assignments for the subset.
   #
+  # @param[out] theBoard   A new board with assignment.
+  #
   def getAssigned(self, pAssignments):
 
     for assignment in pAssignments:
       # assignment[1] is for the solution board, where the instance shares the same id as the index
       self.pieces[assignment[0]].id_sol = assignment[1]
-    bSubset = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
+    theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
 
-    return bSubset
+    return theBoard
+
+  # =============================== testAdjacent ===============================
+  #
+  # @brief  Check if two puzzle pieces are adjacent or not
+  #
+  # @param[in]  index_A   The index of the puzzle piece A.
+  # @param[in]  index_B   The index of the puzzle piece B.
+  # @param[in]  tauAdj    The threshold of the distance.
+  #
+  # @param[out] theFlag   The flag signalling whether two puzzle pieces are adjacent or not.
+  #
+  def testAdjacent(self, index_A, index_B, tauAdj):
+
+    # @todo
+    # Need a better check based on shape instead of simple distance
+    theFlag = np.linalg.norm(np.array(self.pieces[index_A].rLoc)-np.array(self.pieces[index_B].rLoc))<tauAdj
+
+    return theFlag
 
   #================================ size ===============================
   #

@@ -27,7 +27,7 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.builder.arrangement import arrangement, paramSpec
+from puzzle.builder.arrangement import arrangement, paramArrange
 from puzzle.builder.interlocking import interlocking
 #===== Helper Elements
 #
@@ -44,7 +44,7 @@ class gridded(interlocking):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramSpec()):
+  def __init__(self, solBoard = [], theParams = paramArrange):
 
     super(gridded, self).__init__(solBoard, theParams)
 
@@ -110,7 +110,7 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParms=paramSpec):
+  def buildFromFile_Puzzle(fileName, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFile_Puzzle(fileName, theParms)
     thePuzzle = gridded(aPuzzle.solution, theParms)
@@ -132,7 +132,7 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParms=paramSpec):
+  def buildFromFile_ImageAndMask(fileName, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParms)
     thePuzzle = gridded(aPuzzle.solution, theParms)
@@ -155,7 +155,7 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramSpec):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParms)
     thePuzzle = gridded(aPuzzle.solution, theParms)
@@ -177,7 +177,7 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramSpec):
+  def buildFrom_ImageAndMask(theImage, theMask, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParms)
     thePuzzle = gridded(aPuzzle.solution, theParms)
@@ -201,7 +201,7 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramSpec):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParms=paramArrange):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
     thePuzzle = gridded(aPuzzle.solution, theParms)
