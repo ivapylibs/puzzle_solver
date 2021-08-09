@@ -33,17 +33,28 @@ class simple:
 
   #=============================== simple ==============================
   #
+  # @brief  Constructor for the simple puzzle solver.  Assumes existence
+  #         of solution state and current puzzle state, with both
+  #         already sequentially ordered to match.
   #
   def __init__(self, theSol, thePuzzle):
-    pass
 
-    self.desired = theSol
-    self.current = thePuzzle
+    self.desired = theSol               # @< Desired/solution puzzle state.
+    self.current = thePuzzle            # @< Actual puzzle state.
+    self.match   = 1:theSol.length()    # @< Mapping from current to desired.
 
   #============================== takeTurn =============================
   #
+  # @brief  Perform a single puzzle solving action, which move a piece
+  #         to its correct location.
   #
   def takeTurn(self):
+
+    # Check current puzzle against desired for correct placement boolean
+    # Find lowest false instance
+    # Establish were it must be placed to be correct.
+    # Move to that location.
+
     pass
 
 #
