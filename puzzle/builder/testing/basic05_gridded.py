@@ -131,9 +131,9 @@ axarr[1, 2].title.set_text('Solution board from Grid 5')
 # Should see 6 same boards
 plt.show()
 
-#==[3] Display the Grid matrix. Should see an identity matrix.
+#==[3] Display the Interlocking matrix. Should see an identity matrix.
 #
-print('Interlocking coordinates: \n', theGrid_1.ilMat)
+print('Interlocking matrix: \n', theGrid_1.ilMat)
 print('Grid coordinates: \n', theGrid_1.gc)
 
 #
