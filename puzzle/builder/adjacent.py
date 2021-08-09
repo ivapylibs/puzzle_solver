@@ -40,7 +40,7 @@ from puzzle.board import board
 
 @dataclass
 class paramAdj(paramArrange):
-  tauAdj: float = 10
+  tauAdj: float = 30
 
 #
 #======================== puzzle.builder.adjacent ========================
