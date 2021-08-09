@@ -44,7 +44,7 @@ from puzzle.builder.interlocking import interlocking, paramInter
 
 @dataclass
 class paramGrid(paramInter):
-  tauGrid: float = 20
+  tauGrid: float = 30
 
 #
 #====================== puzzle.builder.interlocking ======================

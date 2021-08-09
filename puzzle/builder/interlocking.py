@@ -40,7 +40,7 @@ from puzzle.builder.adjacent import adjacent, paramAdj
 
 @dataclass
 class paramInter(paramAdj):
-  tauInter: float = 20
+  tauInter: float = 30
 
 #
 #====================== puzzle.builder.interlocking ======================

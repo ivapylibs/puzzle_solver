@@ -39,9 +39,9 @@ class dataImage:
 
 #==[1] Create image & mask for solution
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_adjacent.png')
 
-theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png', cv2.IMREAD_GRAYSCALE)
+theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_adjacent.png', cv2.IMREAD_GRAYSCALE)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
@@ -131,9 +131,9 @@ axarr[1, 2].title.set_text('Solution board from Adjacent 5')
 # Should see 6 same boards
 plt.show()
 
-#==[3] Display the adjacent matrix. Should see an identity matrix.
+#==[3] Display the adjacent matrix. Should see 20 Trues (2*7+6).
 #
 print('Adjacent matrix: \n', theAdj_1.adjMat)
-
+print('The number of Trues:', np.sum(theAdj_1.adjMat))
 #
 #============================ basic03_adjacent ===========================
