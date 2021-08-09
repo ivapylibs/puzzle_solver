@@ -30,6 +30,7 @@
 
 import numpy as np
 from dataclasses import dataclass
+import pickle
 
 from puzzle.board import board
 from puzzle.builder.arrangement import arrangement
@@ -122,10 +123,21 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParams=paramInter):
+  def buildFromFile_Puzzle(fileName, tauInter=None):
 
     aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
-    thePuzzle = interlocking(aPuzzle.solution, theParams)
+
+    with open(fileName, 'rb') as fp:
+      data = pickle.load(fp)
+
+    if tauInter is None and hasattr(data, 'tauInter'):
+      tauInter = data.tauInter
+
+    if tauInter is not None:
+      thePuzzle = interlocking(aPuzzle.solution, paramInter(tauInter))
+    else:
+      thePuzzle = interlocking(aPuzzle.solution, paramInter())
+
 
     return thePuzzle
 

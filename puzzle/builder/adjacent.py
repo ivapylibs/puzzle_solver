@@ -31,6 +31,7 @@
 #
 import numpy as np
 from dataclasses import dataclass
+import pickle
 
 from puzzle.builder.arrangement import arrangement, paramArrange
 from puzzle.board import board
@@ -39,7 +40,7 @@ from puzzle.board import board
 
 @dataclass
 class paramAdj(paramArrange):
-  tauAdj: float = 20
+  tauAdj: float = 10
 
 #
 #======================== puzzle.builder.adjacent ========================
@@ -107,10 +108,21 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParams = paramAdj):
+  def buildFromFile_Puzzle(fileName, tauAdj = None):
 
     aPuzzle  = arrangement.buildFromFile_Puzzle(fileName)
-    thePuzzle = adjacent(aPuzzle.solution, theParams)
+
+    with open(fileName,'rb') as fp:
+      data = pickle.load(fp)
+
+    if tauAdj is None and hasattr(data, 'tauAdj'):
+      tauAdj = data.tauAdj
+
+    if tauAdj is not None:
+      thePuzzle = adjacent(aPuzzle.solution, paramAdj(tauAdj))
+    else:
+      thePuzzle = adjacent(aPuzzle.solution, paramAdj())
+
 
     return thePuzzle
 

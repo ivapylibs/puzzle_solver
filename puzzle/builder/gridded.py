@@ -30,6 +30,11 @@
 
 import numpy as np
 from dataclasses import dataclass
+import pickle
+
+import scipy.cluster.hierarchy as hcluster
+
+from puzzle.utils.dataProcessing import updateLabel
 
 from puzzle.board import board
 from puzzle.builder.arrangement import arrangement
@@ -39,7 +44,7 @@ from puzzle.builder.interlocking import interlocking, paramInter
 
 @dataclass
 class paramGrid(paramInter):
-  tauInter: float = 20
+  tauGrid: float = 20
 
 #
 #====================== puzzle.builder.interlocking ======================
@@ -57,12 +62,11 @@ class gridded(interlocking):
     super(gridded, self).__init__(solBoard, theParams)
 
     if isinstance(solBoard, board):
-      self.gc = np.zero(2, solBoard.size())
+      # @< Will store the calibrated grid location of the puzzle piece.
+      self.gc = np.zeros((2, solBoard.size()))
     else:
       print('Not initialized properly')
       exit()
-
-    # @< Will store the calibrated grid location of the puzzle piece.
 
     self.__processGrid()
 
@@ -79,19 +83,23 @@ class gridded(interlocking):
   #
   def __processGrid(self):
 
-    # @todo
-    # THIS ONE SHOULD BE COMPLETELY OVERLOADED.
-    # TEST TO INTERLOCKING
-    # TEST COORDINATES TO DETERMINE GRIDDING.
-    # ORDERED FROM TOP LEFT OR FROM BOTTOM LEFT? YOU PICK AND BE CONSISTENT.
-    #
-    # NEED TO SET
-    # self.adjMat
-    # self.ilMat
-    # self.gc the grid coordinates. I THINK MY NOTES HAD A DIFFERENT
-    # VARIABLE NAME. WILL POST TO ISSUE IF I HAVE A STRONG OPINION.
+    pLoc = self.solution.pieceLocations()
 
-    pass
+    x_list = np.array([rLoc[0] for _, rLoc  in pLoc.items()]).reshape(-1,1)
+    y_list = np.array([rLoc[1] for _, rLoc  in pLoc.items()]).reshape(-1,1)
+
+    # Check the puzzle shape size to determine the thresh here
+    x_thresh = np.mean([piece.y.size[0] for piece in self.solution.pieces])
+    x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")
+    x_label = updateLabel(x_list, x_label)
+
+    y_thresh = np.mean([piece.y.size[1] for piece in self.solution.pieces])
+    y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
+    y_label = updateLabel(y_list, y_label)
+
+    for ii in range(self.solution.size()):
+      # The order is in line with the one saving in self.solution.pieces
+      self.gc[:,ii]= x_label[ii], y_label[ii]
 
   # OTHER CODE / MEMBER FUNCTIONS
   #
@@ -115,10 +123,21 @@ class gridded(interlocking):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, theParams=paramGrid):
+  def buildFromFile_Puzzle(fileName, tauGrid= None):
 
     aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
-    thePuzzle = gridded(aPuzzle.solution, theParams)
+
+    with open(fileName, 'rb') as fp:
+      data = pickle.load(fp)
+
+    if tauGrid is None and hasattr(data, 'tauGrid'):
+      tauGrid = data.tauGrid
+
+    if tauGrid is not None:
+      thePuzzle = gridded(aPuzzle.solution, paramGrid(tauGrid))
+    else:
+      thePuzzle = gridded(aPuzzle.solution, paramGrid())
+
 
     return thePuzzle
 
