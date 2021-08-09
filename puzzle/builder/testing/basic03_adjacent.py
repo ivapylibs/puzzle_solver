@@ -133,7 +133,7 @@ plt.show()
 
 #==[3] Display the adjacent matrix. Should see an identity matrix.
 #
-print(theAdj_1.adjMat)
+print('Adjacent matrix: \n', theAdj_1.adjMat)
 
 #
 #============================ basic03_adjacent ===========================

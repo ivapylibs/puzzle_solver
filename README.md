@@ -21,3 +21,4 @@ Requires the installation of the following python packages:
 
 - ```numpy```
 - ```matplotlib```
+- ```scipy```

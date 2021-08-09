@@ -133,7 +133,7 @@ plt.show()
 
 #==[3] Display the interlocking matrix. Should see an identity matrix.
 #
-print(theInter_1.ilMat)
+print('Interlocking matrix: \n',theInter_1.ilMat)
 
 #
 #============================ basic04_interlocking ===========================
