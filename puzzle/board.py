@@ -36,6 +36,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.spatial.distance import cdist
 
 #
 #============================== puzzle.board =============================
@@ -116,9 +117,15 @@ class board:
   #
   def testAdjacent(self, index_A, index_B, tauAdj):
 
-    # @todo
-    # Need a better check based on shape instead of simple distance
-    theFlag = np.linalg.norm(np.array(self.pieces[index_A].rLoc)-np.array(self.pieces[index_B].rLoc))<tauAdj
+
+    # Based on the nearest points on the contours
+
+    pts_A = np.array(np.flip(np.where(self.pieces[index_A].y.contour),axis=0)) + self.pieces[index_A].rLoc.reshape(-1,1)
+    pts_B = np.array(np.flip(np.where(self.pieces[index_B].y.contour),axis=0)) + self.pieces[index_B].rLoc.reshape(-1,1)
+
+    dists = cdist(pts_A.T, pts_B.T, 'euclidean')
+
+    theFlag = dists.min() < tauAdj
 
     return theFlag
 
