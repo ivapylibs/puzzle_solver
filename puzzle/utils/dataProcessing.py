@@ -24,10 +24,12 @@
 import numpy as np
 
 
-# ================================ board ==============================
+# ================================ updateLabel ==============================
 #
 # @brief  Update the label according to the ranking of all the elements'
-#         mean value.
+#         (with the same label) mean value.
+#         E.g., x_list = [28,137,263,269,33,151] / x_label = [2,3,1,1,2,3] ->
+#         x_label_updated = [0,1,2,2,0,1]
 #
 #
 # @param[in]  x_list   The value list.
