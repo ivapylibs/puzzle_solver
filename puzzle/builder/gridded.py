@@ -88,12 +88,15 @@ class gridded(interlocking):
     x_list = np.array([rLoc[0] for _, rLoc  in pLoc.items()]).reshape(-1,1)
     y_list = np.array([rLoc[1] for _, rLoc  in pLoc.items()]).reshape(-1,1)
 
-    # Check the puzzle shape size to determine the thresh here
-    x_thresh = np.mean([piece.y.size[0] for piece in self.solution.pieces])
+    # @note
+    # Check the puzzle shape size to determine the thresh here.
+    # It is based on the assumption that all the puzzle pieces are of similar sizes.
+
+    x_thresh = np.mean([piece.y.size[0] for piece in self.solution.pieces])/2
     x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")
     x_label = updateLabel(x_list, x_label)
 
-    y_thresh = np.mean([piece.y.size[1] for piece in self.solution.pieces])
+    y_thresh = np.mean([piece.y.size[1] for piece in self.solution.pieces])/2
     y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
     y_label = updateLabel(y_list, y_label)
 
