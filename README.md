@@ -22,3 +22,6 @@ Requires the installation of the following python packages:
 - ```numpy```
 - ```matplotlib```
 - ```scipy```
+- ```opencv-python >= 4.0.0.21```
+
+You can install them by `pip install -r requirements.txt`
