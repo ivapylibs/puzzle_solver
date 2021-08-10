@@ -1,7 +1,7 @@
 #============================ basic02_builder ===========================
 #
 # @brief    Test script for the most basic functionality of arrangement class.
-#           Build an arrangement instance from different sources.
+#           Build an arrangement instance from different sources. (6 shapes img)
 #
 #============================ basic02_builder ===========================
 
@@ -41,7 +41,7 @@ class dataImage:
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')
 
-theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png', cv2.IMREAD_GRAYSCALE)
+theMaskSol = cv2.cvtColor(theImageSol,cv2.COLOR_BGR2GRAY)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
@@ -57,24 +57,25 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
 axarr[0, 0].title.set_text('Source solution board')
 
-
-#==[1.3] Save theBoardSol
+# ==[1.3] Save theBoardSol
 #
-theData_save = dataBoard(theBoardSol)
+if not os.path.exists(cpath + '/data/board_6p.obj'):
+  theData_save = dataBoard(theBoardSol)
 
-with open(cpath + '/data/board.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/board_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
-#==[1.4] Save theImageSol & theMaskSol
+# ==[1.4] Save theImageSol & theMaskSol
 #
-theData_save = dataImage(theImageSol, theMaskSol)
+if not os.path.exists(cpath + '/data/image_6p.obj'):
+  theData_save = dataImage(theImageSol, theMaskSol)
 
-with open(cpath + '/data/image.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/image_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
 #==[2] Create an arrangement instance
 #
@@ -82,7 +83,7 @@ del theData_save
 #==[2.1] Test buildFromFile_Puzzle
 #
 
-theArrangement_1 = arrangement.buildFromFile_Puzzle(cpath + '/data/board.obj')
+theArrangement_1 = arrangement.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolArrangement_1 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolArrangement_1)
@@ -91,7 +92,7 @@ axarr[0, 1].title.set_text('Solution board from arrangement 1')
 #==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theArrangement_2 = arrangement.buildFromFile_ImageAndMask(cpath + '/data/image.obj')
+theArrangement_2 = arrangement.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolArrangement_2 = theArrangement_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolArrangement_2)

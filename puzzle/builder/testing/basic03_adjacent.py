@@ -2,6 +2,7 @@
 #
 # @brief    Test script for the most basic functionality of Adjacent class.
 #           Build an Adjacent instance from different sources.
+#           (6 shapes img)
 #
 #============================ basic03_adjacent ===========================
 
@@ -41,7 +42,7 @@ class dataImage:
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_adjacent.png')
 
-theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_adjacent.png', cv2.IMREAD_GRAYSCALE)
+theMaskSol = cv2.cvtColor(theImageSol,cv2.COLOR_BGR2GRAY)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
@@ -57,24 +58,25 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
 axarr[0, 0].title.set_text('Source solution board')
 
-
-#==[1.3] Save theBoardSol
+# ==[1.3] Save theBoardSol
 #
-theData_save = dataBoard(theBoardSol)
+if not os.path.exists(cpath + '/data/board_6p.obj'):
+  theData_save = dataBoard(theBoardSol)
 
-with open(cpath + '/data/board.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/board_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
-#==[1.4] Save theImageSol & theMaskSol
+# ==[1.4] Save theImageSol & theMaskSol
 #
-theData_save = dataImage(theImageSol, theMaskSol)
+if not os.path.exists(cpath + '/data/image_6p.obj'):
+  theData_save = dataImage(theImageSol, theMaskSol)
 
-with open(cpath + '/data/image.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/image_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
 #==[2] Create an Adjacent instance
 #
