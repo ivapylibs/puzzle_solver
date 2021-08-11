@@ -107,7 +107,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png',
 cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolGrid_3 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Solution board from Grid 3')
 
@@ -117,7 +117,7 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolGrid_4 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Solution board from Grid 4')
 
@@ -126,7 +126,7 @@ axarr[1, 1].title.set_text('Solution board from Grid 4')
 
 theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
 
-bsolGrid_5 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Solution board from Grid 5')
 

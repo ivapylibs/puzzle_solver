@@ -49,6 +49,9 @@ cv2.rectangle(theImageSol,(20+30,20+30),(20+30+30,20+30+30),(0,255,0),2)
 theMaskSol = cv2.cvtColor(theImageSol,cv2.COLOR_BGR2GRAY)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
+cv2.imwrite(cpath+'/data/touchbox_img.png',theImageSol)
+cv2.imwrite(cpath+'/data/touchbox_mask.png',theMaskSol)
+
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = fromLayer()
@@ -110,11 +113,11 @@ axarr[0, 2].title.set_text('Solution board from Grid 2')
 #
 
 theGrid_3 = gridded.buildFromFiles_ImageAndMask(
-cpath + '/../../testing/data/shapes_color_six_image_solution.png',
-cpath + '/../../testing/data/shapes_color_six_image_solution.png'
+cpath + '/data/touchbox_img.png',
+cpath + '/data/touchbox_mask.png'
 )
 
-bsolGrid_3 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Solution board from Grid 3')
 
@@ -124,7 +127,7 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolGrid_4 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Solution board from Grid 4')
 
@@ -133,17 +136,19 @@ axarr[1, 1].title.set_text('Solution board from Grid 4')
 
 theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
 
-bsolGrid_5 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Solution board from Grid 5')
 
 # Should see 6 same boards
 plt.show()
+print('Should see 6 same boards.')
 
 #==[3] Display the Interlocking matrix. Should see a matrix full of True.
 #
 print('Interlocking matrix: \n', theGrid_1.ilMat)
 print('Grid coordinates: \n', theGrid_1.gc)
+print('Should see a matrix full of True.')
 
 #
 #============================ basic06_gridded ===========================

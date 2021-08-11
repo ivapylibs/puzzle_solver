@@ -106,7 +106,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png',
 cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolArrangement_3 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_3 = theArrangement_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolArrangement_3)
 axarr[1, 0].title.set_text('Solution board from arrangement 3')
 
@@ -116,7 +116,7 @@ axarr[1, 0].title.set_text('Solution board from arrangement 3')
 
 theArrangement_4 = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolArrangement_4 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_4 = theArrangement_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolArrangement_4)
 axarr[1, 1].title.set_text('Solution board from arrangement 4')
 
@@ -125,12 +125,13 @@ axarr[1, 1].title.set_text('Solution board from arrangement 4')
 
 theArrangement_5 = arrangement.buildFrom_ImageProcessing(theImageSol)
 
-bsolArrangement_5 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
+bsolArrangement_5 = theArrangement_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolArrangement_5)
 axarr[1, 2].title.set_text('Solution board from arrangement 5')
 
 # Should see 6 same boards
 plt.show()
 
+print('Should see 6 same boards')
 #
 #============================ basic02_builder ===========================

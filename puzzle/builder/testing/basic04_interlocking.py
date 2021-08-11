@@ -84,7 +84,7 @@ if not os.path.exists(cpath + '/data/image_6p.obj'):
 #==[2.1] Test buildFromFile_Puzzle
 #
 
-theInter_1 = interlocking.buildFromFile_Puzzle(cpath + '/data/board.obj')
+theInter_1 = interlocking.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolInterlocking_1 = theInter_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolInterlocking_1)
@@ -93,7 +93,7 @@ axarr[0, 1].title.set_text('Solution board from Interlocking 1')
 #==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theInter_2 = interlocking.buildFromFile_ImageAndMask(cpath + '/data/image.obj')
+theInter_2 = interlocking.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolInterlocking_2 = theInter_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolInterlocking_2)
@@ -107,7 +107,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png',
 cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolInterlocking_3 = theInter_1.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_3 = theInter_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolInterlocking_3)
 axarr[1, 0].title.set_text('Solution board from Interlocking 3')
 
@@ -117,7 +117,7 @@ axarr[1, 0].title.set_text('Solution board from Interlocking 3')
 
 theInter_4 = interlocking.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolInterlocking_4 = theInter_1.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_4 = theInter_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolInterlocking_4)
 axarr[1, 1].title.set_text('Solution board from Interlocking 4')
 
@@ -126,16 +126,16 @@ axarr[1, 1].title.set_text('Solution board from Interlocking 4')
 
 theInter_5 = interlocking.buildFrom_ImageProcessing(theImageSol)
 
-bsolInterlocking_5 = theInter_1.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_5 = theInter_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolInterlocking_5)
 axarr[1, 2].title.set_text('Solution board from Interlocking 5')
 
 # Should see 6 same boards
 plt.show()
-
+print('Should see 6 same boards.')
 #==[3] Display the interlocking matrix. Should see an identity matrix.
 #
 print('Interlocking matrix: \n',theInter_1.ilMat)
-
+print('Should see an identity matrix.')
 #
 #============================ basic04_interlocking ===========================
