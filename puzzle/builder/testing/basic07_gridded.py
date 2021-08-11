@@ -24,6 +24,7 @@ import pickle
 from dataclasses import dataclass
 
 import improcessor.basic as improcessor
+from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.builder.gridded import gridded
 
@@ -40,9 +41,13 @@ class dataImage:
   I: np.ndarray = None
   M: np.ndarray = None
 
-#==[1] Read the source image.
+#==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
+
+theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+
 
 #==[1.1] Create an improcesser to obtain the mask.
 #
@@ -52,8 +57,12 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                   cv2.Canny, (30, 200,),
                   improcessor.basic.thresh, ((10,255,cv2.THRESH_BINARY),))
 
-theMaskSol = improc.apply(theImageSol)
+theDet = fromSketch(improc)
+theDet.process(theMaskSol_src.copy())
+theMaskSol = theDet.getState().x
 
+cv2.imwrite(cpath+'/data/balloon_15_img.png', theImageSol)
+cv2.imwrite(cpath+'/data/balloon_15_mask.png', theMaskSol)
 
 #==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
@@ -114,11 +123,11 @@ axarr[0, 2].title.set_text('Solution board from Grid 2')
 #
 
 theGrid_3 = gridded.buildFromFiles_ImageAndMask(
-cpath + '/../../testing/data/shapes_color_six_image_solution.png',
-cpath + '/../../testing/data/shapes_color_six_image_solution.png'
+cpath + '/data/balloon_15_img.png',
+cpath + '/data/balloon_15_mask.png'
 )
 
-bsolGrid_3 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Solution board from Grid 3')
 
@@ -128,16 +137,16 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolGrid_4 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Solution board from Grid 4')
 
-#==[2.5] Test buildFrom_ImageProcessing
+#==[2.5] Test buildFrom_Sketch
 #
 
-theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
+theGrid_5 = gridded.buildFrom_Sketch(theImageSol, theMaskSol_src, theDetector=theDet)
 
-bsolGrid_5 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Solution board from Grid 5')
 
