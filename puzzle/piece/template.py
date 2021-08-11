@@ -118,6 +118,12 @@ class template:
     # Dump color/appearance information into the image (It will override the original image).
     theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
+    # May have to re-draw the contour for better visualization
+    rcoords = list(np.where(self.y.contour))
+    rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+    rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + rcoords
+    theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED. WOULD REQUIRE HAVING A
@@ -146,6 +152,12 @@ class template:
     # Dump color/appearance information into the image.
     theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
+    # May have to re-draw the contour for better visualization
+    rcoords = list(np.where(self.y.contour))
+    rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+    rcoords =  self.rLoc.reshape(-1,1) + rcoords
+    theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.
@@ -167,7 +179,9 @@ class template:
 
     # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
-    plt.imshow(self.y.image)
+    theImage = np.zeros_like(self.y.image)
+    theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
+    plt.imshow(theImage)
     plt.show()
 
     return fh
