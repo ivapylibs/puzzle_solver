@@ -49,7 +49,7 @@ class simple(perceiverSimple.simple):
   # @param[in]  I   The puzzle image source.
   # @param[in]  LM  The puzzle template mask.
   #
-  def measure(self, I, LM = []):
+  def measure(self, I, LM = None):
 
     self.I = I
     self.Mask = LM
@@ -60,8 +60,8 @@ class simple(perceiverSimple.simple):
     # @note Is process the right thing to call. Why not measure? Is it
     #       because this is a perceiver? I think so. We are decoupling
     #       the individual steps in this implementation.
-    if LM:
-      self.detector.process(I, LM)
+    if self.Mask is not None:
+      self.detector.process(I, self.Mask)
     else:
       self.detector.process(I)
 
@@ -81,6 +81,12 @@ class simple(perceiverSimple.simple):
       self.haveRun = True
       # @note   Is this right? Review meanings and correct/confirm.
 
+  def process(self, I, LM = None):
+
+    self.predict()
+    self.measure(I, LM)
+    self.correct()
+    self.adapt()
 
   #========================= buildBasicPipeline ========================
   #

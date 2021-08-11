@@ -27,12 +27,19 @@
 
 import cv2
 import numpy as np
+from dataclasses import dataclass
+
+from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 from trackpointer.centroidMulti import centroidMulti
 from puzzle.piece.template import template
 from puzzle.board import board
 #==== Helper 
 #
+
+@dataclass
+class paramPuzzle:
+  areaThreshold: float = 20
 
 #
 #======================== puzzle.parser.fromLayer ========================
@@ -44,11 +51,12 @@ class fromLayer(centroidMulti):
   #
   # @brief  Constructor for the puzzle piece layer parsing class.
   #
-  def __init__(self):
+  def __init__(self, theParams = paramPuzzle):
     super(fromLayer, self).__init__()
 
     self.bMeas = board()             # @< The measured board.
 
+    self.params = theParams
 
   #============================== getState =============================
   #
@@ -123,15 +131,23 @@ class fromLayer(centroidMulti):
 
     # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
     # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
-    cnts = cv2.findContours(mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
     # For OpenCV 4+
-    cnts = cnts[0]
+    cnts, hierarchy = cv2.findContours(mask, cv2.RETR_TREE,
+                            cv2.CHAIN_APPROX_SIMPLE)
 
-    # @todo
-    # Yunzhi: create a param class for it
-    # areaThreshold for contours
-    areaThreshold = 20
+    hierarchy = hierarchy[0]
+
+    # Filter out the outermost contour
+    # See https://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html
+    keep = []
+    for i in range(hierarchy.shape[0]):
+      if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:,3] == i) >= 2:
+          pass
+      else:
+        keep.append(i)
+
+    cnts= np.array(cnts)
+    cnts = cnts[keep]
 
     desired_cnts = []
 
@@ -144,7 +160,8 @@ class fromLayer(centroidMulti):
       # @todo
       # Yunzhi: this basic processing may be put somewhere else
       # Filtered by the area threshold
-      if area > areaThreshold:
+
+      if area > self.params.areaThreshold:
         desired_cnts.append(c)
 
     # print('size of desired_cnts is', len(desired_cnts))
@@ -158,10 +175,19 @@ class fromLayer(centroidMulti):
       # Get ROI, OpenCV style
       x, y, w, h = cv2.boundingRect(c)
 
-      regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y]))
+      # @note
+      # Seems not useful
+      # # Double check if ROI has a large IoU with the previous ones
+      # skipflag = False
+      # for region in regions:
+      #   aa = bb_intersection_over_union(region[3], [x,y,x+w,y+h])
+      #   if bb_intersection_over_union(region[3], [x,y,x+w,y+h])>0.5:
+      #     skipflag = True
+      #     break
+      # if not skipflag:
+      #   regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y],[x,y,x+w,y+h]))
 
-      # cv2.imshow("Segments", seg_img)
-      # cv2.waitKey(0)
+      regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
 
     return regions
 

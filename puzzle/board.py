@@ -221,7 +221,7 @@ class board:
   #
   # @param[out] theImage    The image to insert pieces into.
   #
-  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False):
+  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False, COLOR= (255, 255, 255)):
 
     if theImage is not None:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
@@ -235,10 +235,10 @@ class board:
                    int(piece.rLoc[1] - bbox[0][1] + piece.size()[1] / 2))
             if ID_SOLUTION == True:
               cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                          1, (255, 255, 255), 2, cv2.LINE_AA)
+                          min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
             else:
               cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                          1, (255, 255, 255), 2, cv2.LINE_AA)
+                          min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
       else:
         # @todo
         #  Figure out what to do if image too small. Expand it or abort?
@@ -257,10 +257,10 @@ class board:
                  int(piece.rLoc[1] - bbox[0][1] + piece.size()[1]/2))
           if ID_SOLUTION == True:
             cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (255, 255, 255), 2, cv2.LINE_AA)
+                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
           else:
             cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (255, 255, 255), 2, cv2.LINE_AA)
+                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
 
     return theImage
 

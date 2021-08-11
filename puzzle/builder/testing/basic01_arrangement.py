@@ -29,7 +29,7 @@ cpath = fpath.rsplit('/', 1)[0]
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')
 
-theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png', cv2.IMREAD_GRAYSCALE)
+theMaskSol = cv2.cvtColor(theImageSol,cv2.COLOR_BGR2GRAY)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
 #==[1.1] Extract info from theImage & theMask to obtain a board instance

@@ -431,6 +431,7 @@ class arrangement(board):
 
     if theDetector is None and theProcessor is None:
       if theImage.ndim == 3:
+        # May not be enough
         theProcessor = improcessor.basic(cv2.cvtColor,(cv2.COLOR_BGR2GRAY,),\
                            improcessor.basic.thresh,((0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU),))
         theDetector = detector.inImage(theProcessor)
@@ -444,6 +445,50 @@ class arrangement(board):
     pParser = perceiver.simple(theDetector=theDetector , theTracker=theLayer, theParams=None)
 
     pParser.process(theImage)
+
+    if tauDist is not None:
+      thePuzzle = arrangement(pParser.board, paramArrange(tauDist))
+    else:
+      thePuzzle = arrangement(pParser.board)
+
+    return thePuzzle
+
+  # ===================== buildFrom_Sketch =====================
+  #
+  # @brief      Given an image with regions clearly separated by some
+  #             color or threshold, parse it to recover the puzzle
+  #             calibration/solution. Can source alternative detector.
+  #
+  # Instantiates a puzzle parser that gets applied to the submitted data
+  # to create a puzzle board instance. That instance is the
+  # calibration/solution.
+  #
+  # @param[in]  theImage        The puzzle image data.
+  # @param[in]  theMask         The puzzle mask data.
+  # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
+  #
+  # @param[out] thePuzzle   The arrangement puzzle board instance.
+  #
+  @staticmethod
+  def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, tauDist=None):
+
+    if theDetector is None and theProcessor is None:
+      if theImage.ndim == 3:
+        # May not be enough
+        theProcessor = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,), \
+                                         improcessor.basic.thresh, ((0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU),))
+        theDetector = detector.inImage(theProcessor)
+      elif theImage.ndim == 2:
+        theProcessor = improcessor.basic(improcessor.basic.thresh, ((0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU),))
+        theDetector = detector.inImage(theProcessor)
+    elif theDetector is None and theProcessor is not None:
+      theDetector = detector.inImage(theProcessor)
+
+    theLayer = fromLayer()
+    pParser = perceiver.simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
+
+    pParser.process(theImage, theMask)
 
     if tauDist is not None:
       thePuzzle = arrangement(pParser.board, paramArrange(tauDist))

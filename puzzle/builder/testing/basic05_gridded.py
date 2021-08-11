@@ -2,6 +2,7 @@
 #
 # @brief    Test script for the most basic functionality of Grid class.
 #           Build a gridded instance from different sources.
+#           (6 shapes img)
 #
 #============================ basic05_gridded ===========================
 
@@ -41,7 +42,7 @@ class dataImage:
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')
 
-theMaskSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png', cv2.IMREAD_GRAYSCALE)
+theMaskSol = cv2.cvtColor(theImageSol,cv2.COLOR_BGR2GRAY)
 _ , theMaskSol = cv2.threshold(theMaskSol,10,255,cv2.THRESH_BINARY)
 
 #==[1.1] Extract info from theImage & theMask to obtain a board instance
@@ -57,24 +58,25 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
 axarr[0, 0].title.set_text('Source solution board')
 
-
-#==[1.3] Save theBoardSol
+# ==[1.3] Save theBoardSol
 #
-theData_save = dataBoard(theBoardSol)
+if not os.path.exists(cpath + '/data/board_6p.obj'):
+  theData_save = dataBoard(theBoardSol)
 
-with open(cpath + '/data/board.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/board_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
-#==[1.4] Save theImageSol & theMaskSol
+# ==[1.4] Save theImageSol & theMaskSol
 #
-theData_save = dataImage(theImageSol, theMaskSol)
+if not os.path.exists(cpath + '/data/image_6p.obj'):
+  theData_save = dataImage(theImageSol, theMaskSol)
 
-with open(cpath + '/data/image.obj', 'wb') as fp:
-  pickle.dump(theData_save, fp)
+  with open(cpath + '/data/image_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-del theData_save
+  del theData_save
 
 #==[2] Create an Grid instance
 #
@@ -82,7 +84,7 @@ del theData_save
 #==[2.1] Test buildFromFile_Puzzle
 #
 
-theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board.obj')
+theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolGrid_1)
@@ -91,7 +93,7 @@ axarr[0, 1].title.set_text('Solution board from Grid 1')
 #==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image.obj')
+theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
@@ -105,7 +107,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png',
 cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolGrid_3 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Solution board from Grid 3')
 
@@ -115,7 +117,7 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolGrid_4 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Solution board from Grid 4')
 
@@ -124,7 +126,7 @@ axarr[1, 1].title.set_text('Solution board from Grid 4')
 
 theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
 
-bsolGrid_5 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Solution board from Grid 5')
 
