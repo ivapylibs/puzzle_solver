@@ -62,7 +62,7 @@ theBoardSol = theLayer.getState()
 #==[1.2] Display the solution board
 #
 f, axarr = plt.subplots(2,3)
-bSource = theBoardSol.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bSource = theBoardSol.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[0, 0].imshow(bSource)
 axarr[0, 0].title.set_text('Source solution board')
 
@@ -96,7 +96,7 @@ if not os.path.exists(cpath + '/data/image_4touch.obj'):
 
 theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_4touch.obj')
 
-bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[0, 1].imshow(bsolGrid_1)
 axarr[0, 1].title.set_text('Solution board from Grid 1')
 
@@ -105,7 +105,7 @@ axarr[0, 1].title.set_text('Solution board from Grid 1')
 
 theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_4touch.obj')
 
-bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[0, 2].imshow(bsolGrid_2)
 axarr[0, 2].title.set_text('Solution board from Grid 2')
 
@@ -117,7 +117,7 @@ cpath + '/data/touchbox_img.png',
 cpath + '/data/touchbox_mask.png'
 )
 
-bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Solution board from Grid 3')
 
@@ -127,7 +127,7 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Solution board from Grid 4')
 
@@ -136,7 +136,7 @@ axarr[1, 1].title.set_text('Solution board from Grid 4')
 
 theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
 
-bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True, COUNTOUR_DISPLAY = False)
+bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY = False)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Solution board from Grid 5')
 
