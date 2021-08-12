@@ -109,7 +109,7 @@ class template:
   #
   # @param[in]  theImage    The source image to put puzzle piece into.
   #
-  def placeInImage(self, theImage, offset=[0,0]):
+  def placeInImage(self, theImage, offset=[0,0], COUNTOUR_DISPLAY = True):
 
     # Remap coordinates from own image sprite coordinates to bigger
     # image coordinates.
@@ -119,10 +119,11 @@ class template:
     theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
     # May have to re-draw the contour for better visualization
-    rcoords = list(np.where(self.y.contour))
-    rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
-    rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + rcoords
-    theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+    if COUNTOUR_DISPLAY:
+      rcoords = list(np.where(self.y.contour))
+      rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+      rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + rcoords
+      theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
@@ -137,7 +138,7 @@ class template:
   # @param[in]  rc          The coordinate location.
   # @param[in]  theta       The orientation of the puzzle piece (default = 0).
   #
-  def placeInImageAt(self, theImage, rc, theta = 0, isCenter = False):
+  def placeInImageAt(self, theImage, rc, theta = 0, isCenter = False, COUNTOUR_DISPLAY = True):
 
     if not theta:
       theta = 0
@@ -153,10 +154,11 @@ class template:
     theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
     # May have to re-draw the contour for better visualization
-    rcoords = list(np.where(self.y.contour))
-    rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
-    rcoords =  self.rLoc.reshape(-1,1) + rcoords
-    theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+    if COUNTOUR_DISPLAY:
+      rcoords = list(np.where(self.y.contour))
+      rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+      rcoords =  self.rLoc.reshape(-1,1) + rcoords
+      theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
     # @todo
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT

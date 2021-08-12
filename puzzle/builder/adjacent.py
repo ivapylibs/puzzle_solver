@@ -54,7 +54,7 @@ class adjacent(arrangement):
   # @brief  Constructor for the puzzle.builder.adjacent class.
   #
   #
-  def __init__(self, solBoard = [], theParams = paramAdj()):
+  def __init__(self, solBoard = [], theParams = paramAdj):
 
     super(adjacent, self).__init__(solBoard, theParams)
 
@@ -108,20 +108,20 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, tauAdj = None):
+  def buildFromFile_Puzzle(fileName, theParams = None):
 
     aPuzzle  = arrangement.buildFromFile_Puzzle(fileName)
 
     with open(fileName,'rb') as fp:
       data = pickle.load(fp)
 
-    if tauAdj is None and hasattr(data, 'tauAdj'):
-      tauAdj = data.tauAdj
+    if hasattr(data, 'tauAdj'):
+      theParams = paramAdj(tauAdj = data.tauAdj)
 
-    if tauAdj is not None:
-      thePuzzle = adjacent(aPuzzle.solution, paramAdj(tauAdj))
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
     else:
-      thePuzzle = adjacent(aPuzzle.solution, paramAdj())
+      thePuzzle = adjacent(aPuzzle.solution)
 
 
     return thePuzzle
@@ -141,10 +141,14 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParams = paramAdj):
+  def buildFromFile_ImageAndMask(fileName, theParams = None):
 
-    aPuzzle  = arrangement.buildFromFile_ImageAndMask(fileName)
-    thePuzzle = adjacent(aPuzzle.solution, theParams)
+    aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParams)
+
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = adjacent(aPuzzle.solution)
 
     return thePuzzle
 
@@ -164,10 +168,14 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams = paramAdj):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams = None):
 
-    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
-    thePuzzle = adjacent(aPuzzle.solution, theParams)
+    aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
+
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = adjacent(aPuzzle.solution)
 
     return thePuzzle
 
@@ -186,10 +194,14 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParams = paramAdj):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams = None):
 
-    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
-    thePuzzle = adjacent(aPuzzle.solution, theParams)
+    aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
+
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = adjacent(aPuzzle.solution)
 
     return thePuzzle
 
@@ -210,10 +222,41 @@ class adjacent(arrangement):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParams = paramAdj):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParams = None):
 
-    aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
-    thePuzzle = adjacent(aPuzzle.solution, theParams)
+    aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = adjacent(aPuzzle.solution)
+
+    return thePuzzle
+
+  # ===================== buildFrom_Sketch =====================
+  #
+  # @brief      Given an image with regions clearly separated by some
+  #             color or threshold, parse it to recover the puzzle
+  #             calibration/solution. Can source alternative detector.
+  #
+  # Instantiates a puzzle parser that gets applied to the submitted data
+  # to create a puzzle board instance. That instance is the
+  # calibration/solution.
+  #
+  # @param[in]  theImage        The puzzle image data.
+  # @param[in]  theMask         The puzzle mask data.
+  # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
+  #
+  # @param[out] thePuzzle   The arrangement puzzle board instance.
+  #
+  @staticmethod
+  def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
+
+    aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
+    if hasattr(theParams, 'tauAdj'):
+      thePuzzle = adjacent(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = adjacent(aPuzzle.solution)
 
     return thePuzzle
 

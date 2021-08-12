@@ -26,7 +26,7 @@ from dataclasses import dataclass
 import improcessor.basic as improcessor
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
-from puzzle.builder.gridded import gridded
+from puzzle.builder.gridded import gridded, paramGrid
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -66,7 +66,7 @@ cv2.imwrite(cpath+'/data/balloon_15_mask.png', theMaskSol)
 
 #==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer(paramPuzzle(5000))
+theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
 
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
@@ -113,7 +113,7 @@ axarr[0, 1].title.set_text('Solution board from Grid 1')
 #==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_15p.obj')
+theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_15p.obj', theParams=paramGrid(areaThreshold=5000))
 
 bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
@@ -124,7 +124,7 @@ axarr[0, 2].title.set_text('Solution board from Grid 2')
 
 theGrid_3 = gridded.buildFromFiles_ImageAndMask(
 cpath + '/data/balloon_15_img.png',
-cpath + '/data/balloon_15_mask.png'
+cpath + '/data/balloon_15_mask.png', theParams=paramGrid(areaThreshold=5000)
 )
 
 bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
@@ -135,7 +135,7 @@ axarr[1, 0].title.set_text('Solution board from Grid 3')
 #==[2.4] Test buildFrom_ImageAndMask
 #
 
-theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
 
 bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
@@ -144,7 +144,7 @@ axarr[1, 1].title.set_text('Solution board from Grid 4')
 #==[2.5] Test buildFrom_Sketch
 #
 
-theGrid_5 = gridded.buildFrom_Sketch(theImageSol, theMaskSol_src, theDetector=theDet)
+theGrid_5 = gridded.buildFrom_Sketch(theImageSol, theMaskSol_src, theDetector=theDet, theParams=paramGrid(areaThreshold=5000))
 
 bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)

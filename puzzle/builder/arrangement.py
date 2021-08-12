@@ -34,7 +34,7 @@ from dataclasses import dataclass
 import pickle
 
 from puzzle.board import board
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 import puzzle.parser.simple as perceiver
 
 import improcessor.basic as improcessor
@@ -44,7 +44,7 @@ import detector.inImage as detector
 #
 
 @dataclass
-class paramArrange:
+class paramArrange(paramPuzzle):
   tauDist: int = 20 # @< The threshold of whether two puzzle pieces are correctly matched.
 
 #
@@ -284,7 +284,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, tauDist = None):
+  def buildFromFile_Puzzle(fileName, theParams = None):
 
     theBoard = None
     with open(fileName,'rb') as fp:
@@ -292,12 +292,12 @@ class arrangement(board):
 
       if hasattr(data, 'board'):
         theBoard = data.board
-      if tauDist is None and hasattr(data, 'tauDist'):
-        tauDist = data.tauDist
+      if hasattr(data, 'tauDist'):
+        theParams = paramArrange(tauDist = data.tauDist)
 
     if isinstance(theBoard, board):
-      if tauDist is not None:
-        thePuzzle = arrangement(theBoard, paramArrange(tauDist))
+      if hasattr(theParams, 'tauDist'):
+        thePuzzle = arrangement(theBoard, theParams)
       else:
         thePuzzle = arrangement(theBoard)
     else:
@@ -321,7 +321,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, tauDist = None):
+  def buildFromFile_ImageAndMask(fileName, theParams = None):
 
     I = None
     M = None
@@ -333,14 +333,9 @@ class arrangement(board):
         I = data.I
       if hasattr(data, 'M'):
         M = data.M
-      if tauDist is None and hasattr(data, 'tauDist'):
-        tauDist = data.tauDist
 
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
-      if tauDist is not None:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramArrange(tauDist))
-      else:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
+      thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
     else:
       print('There is no Image or Mask saved in the file!')
       exit()
@@ -363,7 +358,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, tauDist = None):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams = None):
 
     I = cv2.imread(imFile)
     M = cv2.imread(maskFile, cv2.IMREAD_GRAYSCALE)
@@ -374,10 +369,7 @@ class arrangement(board):
 
 
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
-      if tauDist is not None:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, paramArrange(tauDist))
-      else:
-        thePuzzle = arrangement.buildFrom_ImageAndMask(I, M)
+      thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
     else:
       print('There is no Image or Mask saved in the file!')
       exit()
@@ -399,12 +391,16 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, tauDist = None):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams = None):
 
-    pParser = fromLayer()
+    if hasattr(theParams, 'areaThreshold'):
+      pParser = fromLayer(theParams)
+    else:
+      pParser = fromLayer()
+
     pParser.process(theImage, theMask)
-    if tauDist is not None:
-      thePuzzle = arrangement(pParser.getState(), paramArrange(tauDist))
+    if hasattr(theParams, 'tauDist'):
+      thePuzzle = arrangement(pParser.getState(), theParams)
     else:
       thePuzzle = arrangement(pParser.getState())
 
@@ -427,7 +423,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, tauDist = None):
+  def buildFrom_ImageProcessing(theImage, theProcessor = None, theDetector = None, theParams = None):
 
     if theDetector is None and theProcessor is None:
       if theImage.ndim == 3:
@@ -441,13 +437,17 @@ class arrangement(board):
     elif theDetector is None and theProcessor is not None:
       theDetector = detector.inImage(theProcessor)
 
-    theLayer = fromLayer()
+    if hasattr(theParams, 'areaThreshold'):
+      theLayer = fromLayer(theParams)
+    else:
+      theLayer = fromLayer()
+
     pParser = perceiver.simple(theDetector=theDetector , theTracker=theLayer, theParams=None)
 
     pParser.process(theImage)
 
-    if tauDist is not None:
-      thePuzzle = arrangement(pParser.board, paramArrange(tauDist))
+    if hasattr(theParams, 'tauDist'):
+      thePuzzle = arrangement(pParser.board, theParams)
     else:
       thePuzzle = arrangement(pParser.board)
 
@@ -471,7 +471,7 @@ class arrangement(board):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, tauDist=None):
+  def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
 
     if theDetector is None and theProcessor is None:
       if theImage.ndim == 3:
@@ -485,13 +485,17 @@ class arrangement(board):
     elif theDetector is None and theProcessor is not None:
       theDetector = detector.inImage(theProcessor)
 
-    theLayer = fromLayer()
+    if hasattr(theParams, 'areaThreshold'):
+      theLayer = fromLayer(theParams)
+    else:
+      theLayer = fromLayer()
+
     pParser = perceiver.simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
 
     pParser.process(theImage, theMask)
 
-    if tauDist is not None:
-      thePuzzle = arrangement(pParser.board, paramArrange(tauDist))
+    if hasattr(theParams, 'tauDist'):
+      thePuzzle = arrangement(pParser.board, theParams)
     else:
       thePuzzle = arrangement(pParser.board)
 

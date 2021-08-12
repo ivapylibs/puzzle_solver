@@ -221,7 +221,7 @@ class board:
   #
   # @param[out] theImage    The image to insert pieces into.
   #
-  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False, COLOR= (255, 255, 255)):
+  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False, COLOR= (255, 255, 255), COUNTOUR_DISPLAY = True):
 
     if theImage is not None:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
@@ -230,7 +230,7 @@ class board:
       if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
           if ID_DISPLAY == True:
-            piece.placeInImage(theImage, offset=-bbox[0])
+            piece.placeInImage(theImage, offset=-bbox[0], COUNTOUR_DISPLAY = COUNTOUR_DISPLAY)
             pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0] / 2),
                    int(piece.rLoc[1] - bbox[0][1] + piece.size()[1] / 2))
             if ID_SOLUTION == True:
@@ -251,7 +251,7 @@ class board:
       bbox = self.boundingBox().astype('int')
       theImage = np.zeros((lengths[1],lengths[0],3),dtype='uint8')
       for piece in self.pieces:
-        piece.placeInImage(theImage, offset=-bbox[0])
+        piece.placeInImage(theImage, offset=-bbox[0], COUNTOUR_DISPLAY = COUNTOUR_DISPLAY)
         if ID_DISPLAY == True:
           pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0]/2),
                  int(piece.rLoc[1] - bbox[0][1] + piece.size()[1]/2))
@@ -272,7 +272,7 @@ class board:
   #
   # @param[out] fh  The handle of the image.
   #
-  def display(self, fh = None, ID_DISPLAY = False):
+  def display(self, fh = None, ID_DISPLAY = False, COUNTOUR_DISPLAY = True):
 
     # @note
     #
@@ -291,7 +291,7 @@ class board:
     else:
       fh = plt.figure()
 
-    theImage = self.toImage(ID_DISPLAY=ID_DISPLAY )
+    theImage = self.toImage(ID_DISPLAY=ID_DISPLAY, COUNTOUR_DISPLAY = COUNTOUR_DISPLAY)
 
     # @note
     # Yunzhi: extent is used to change the axis tick, we should use figsize

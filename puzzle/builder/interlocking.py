@@ -123,21 +123,20 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_Puzzle(fileName, tauInter=None):
+  def buildFromFile_Puzzle(fileName, theParams=None):
 
     aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
 
     with open(fileName, 'rb') as fp:
       data = pickle.load(fp)
 
-    if tauInter is None and hasattr(data, 'tauInter'):
-      tauInter = data.tauInter
+    if hasattr(data, 'tauInter'):
+      theParams = paramInter(tauAdj = data.tauInter)
 
-    if tauInter is not None:
-      thePuzzle = interlocking(aPuzzle.solution, paramInter(tauInter))
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
     else:
-      thePuzzle = interlocking(aPuzzle.solution, paramInter())
-
+      thePuzzle = interlocking(aPuzzle.solution)
 
     return thePuzzle
 
@@ -156,10 +155,14 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFile_ImageAndMask(fileName, theParams=paramInter):
+  def buildFromFile_ImageAndMask(fileName, theParams=None):
 
     aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName)
-    thePuzzle = interlocking(aPuzzle.solution, theParams)
+
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = interlocking(aPuzzle.solution)
 
     return thePuzzle
 
@@ -179,10 +182,14 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=paramInter):
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
 
     aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
-    thePuzzle = interlocking(aPuzzle.solution, theParams)
+
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = interlocking(aPuzzle.solution)
 
     return thePuzzle
 
@@ -201,10 +208,14 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParams=paramInter):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
     aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
-    thePuzzle = interlocking(aPuzzle.solution, theParams)
+
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = interlocking(aPuzzle.solution)
 
     return thePuzzle
 
@@ -225,12 +236,45 @@ class interlocking(adjacent):
   # @param[out] thePuzzle   The arrangement puzzle board instance.
   #
   @staticmethod
-  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=paramInter):
+  def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
 
     aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
-    thePuzzle = interlocking(aPuzzle.solution, theParams)
+
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = interlocking(aPuzzle.solution)
 
     return thePuzzle
+
+  # ===================== buildFrom_Sketch =====================
+  #
+  # @brief      Given an image with regions clearly separated by some
+  #             color or threshold, parse it to recover the puzzle
+  #             calibration/solution. Can source alternative detector.
+  #
+  # Instantiates a puzzle parser that gets applied to the submitted data
+  # to create a puzzle board instance. That instance is the
+  # calibration/solution.
+  #
+  # @param[in]  theImage        The puzzle image data.
+  # @param[in]  theMask         The puzzle mask data.
+  # @param[in]  theProcessor    The processing scheme.
+  # @param[in]  theDetector     The detector scheme.
+  #
+  # @param[out] thePuzzle   The arrangement puzzle board instance.
+  #
+  @staticmethod
+  def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
+
+    aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
+    if hasattr(theParams, 'tauInter'):
+      thePuzzle = interlocking(aPuzzle.solution, theParams)
+    else:
+      thePuzzle = interlocking(aPuzzle.solution)
+
+    return thePuzzle
+
 
 #
 #====================== puzzle.builder.interlocking ======================
