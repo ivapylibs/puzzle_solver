@@ -11,8 +11,9 @@
 # @file     twoAgent.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO WHO
-# @date     2021/08/11  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/08/11 [created]
+#           2021/08/12 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -22,7 +23,7 @@
 
 #===== Dependencies / Packages
 #
-WHAT
+from puzzle.solver.simple import simple
 
 #===== Class Helper Elements
 #
@@ -32,7 +33,7 @@ WHAT
 #========================= puzzle.solver.twoAgent ========================
 #
 
-class twoAgent(puzzle.solver.base):
+class twoAgent(simple):
 
   #=============================== simple ==============================
   #
@@ -42,16 +43,16 @@ class twoAgent(puzzle.solver.base):
   #
   def __init__(self, theSol, thePuzzle, agent1 = None, agent2 = None):
 
-    __init__(super, blahblah)(theSolver, thePuzzle)
+    super(twoAgent, self).__init__(theSol, thePuzzle)
 
-   if not agent1:
-     agent1 = puzzle.solver.simple(theSol, thePuzzle)
+    if not agent1:
+      agent1 = simple(theSol, thePuzzle)
 
-   if not agent2:
-     agent2 = puzzle.solver.simple(theSol, thePuzzle)
+    if not agent2:
+      agent2 = simple(theSol, thePuzzle)
 
     self.agents = [agent1, agent2]      # Make a list/array.
-    self.iMove  = 0                     # Move index.
+    self.iMove = 0                     # Move index.
 
   #============================== takeTurn =============================
   #
@@ -60,7 +61,7 @@ class twoAgent(puzzle.solver.base):
   #
   def takeTurn(self, thePlan = None):
 
-    self.agent[self.iMove].takeTurn()
+    self.agents[self.iMove].takeTurn()
 
     if (self.iMove == 0):       # Toggle back and forth between agents.
       self.iMove = 1

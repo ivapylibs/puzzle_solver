@@ -8,8 +8,9 @@
 # @file     simple.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO WHO
-# @date     2021/08/06  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/08/06 [created]
+#           2021/08/12 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -19,7 +20,7 @@
 
 #===== Dependencies / Packages
 #
-WHAT
+from puzzle.solver.base import base
 
 #===== Class Helper Elements
 #
@@ -29,7 +30,7 @@ WHAT
 #========================== puzzle.solver.simple =========================
 #
 
-class simple:
+class simple(base):
 
   #=============================== simple ==============================
   #
@@ -39,9 +40,10 @@ class simple:
   #
   def __init__(self, theSol, thePuzzle):
 
-    self.desired = theSol               # @< Desired/solution puzzle state.
-    self.current = thePuzzle            # @< Actual puzzle state.
-    self.match   = 1:theSol.length()    # @< Mapping from current to desired.
+    super(simple, self).__init__(theSol, thePuzzle)
+
+    # @todo
+    # self.match   = 1:theSol.length()    # @< Mapping from current to desired.
 
     self.plan = None
 
@@ -54,6 +56,7 @@ class simple:
 
     if not self.plan:
       if not thePlan:
+        # @todo
         # Check current puzzle against desired for correct placement boolean
         # Find lowest false instance
         # Establish were it must be placed to be correct.

@@ -10,8 +10,9 @@
 # @file     base.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO WHO
-# @date     2021/08/06  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/08/06 [created]
+#           2021/08/12 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -21,8 +22,7 @@
 
 #===== Dependencies / Packages
 #
-WHAT
-
+import numpy as np
 #===== Class Helper Elements
 #
 
