@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic02_builder ===========================
 #
 # @brief    Test script for the most basic functionality of arrangement class.
@@ -55,7 +56,7 @@ theBoardSol = theLayer.getState()
 f, axarr = plt.subplots(2,3)
 bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
-axarr[0, 0].title.set_text('Source solution board')
+axarr[0, 0].title.set_text('Source Board')
 
 # ==[1.3] Save theBoardSol
 #
@@ -87,7 +88,7 @@ theArrangement_1 = arrangement.buildFromFile_Puzzle(cpath + '/data/board_6p.obj'
 
 bsolArrangement_1 = theArrangement_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolArrangement_1)
-axarr[0, 1].title.set_text('Solution board from arrangement 1')
+axarr[0, 1].title.set_text('Board 1')
 
 #==[2.2] Test buildFromFile_ImageAndMask
 #
@@ -96,7 +97,7 @@ theArrangement_2 = arrangement.buildFromFile_ImageAndMask(cpath + '/data/image_6
 
 bsolArrangement_2 = theArrangement_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolArrangement_2)
-axarr[0, 2].title.set_text('Solution board from arrangement 2')
+axarr[0, 2].title.set_text('Board 2')
 
 #==[2.3] Test buildFromFiles_ImageAndMask
 #
@@ -108,7 +109,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 
 bsolArrangement_3 = theArrangement_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolArrangement_3)
-axarr[1, 0].title.set_text('Solution board from arrangement 3')
+axarr[1, 0].title.set_text('Board 3')
 
 
 #==[2.4] Test buildFrom_ImageAndMask
@@ -118,7 +119,7 @@ theArrangement_4 = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolArrangement_4 = theArrangement_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolArrangement_4)
-axarr[1, 1].title.set_text('Solution board from arrangement 4')
+axarr[1, 1].title.set_text('Board 4')
 
 #==[2.5] Test buildFrom_ImageProcessing
 #
@@ -127,11 +128,12 @@ theArrangement_5 = arrangement.buildFrom_ImageProcessing(theImageSol)
 
 bsolArrangement_5 = theArrangement_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolArrangement_5)
-axarr[1, 2].title.set_text('Solution board from arrangement 5')
+axarr[1, 2].title.set_text('Board 5')
 
 # Should see 6 same boards
+print('Should see the same board 6 times.')
+print('All are loaded from different sources.')
 plt.show()
 
-print('Should see 6 same boards')
 #
 #============================ basic02_builder ===========================

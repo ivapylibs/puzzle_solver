@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic03_adjacent ===========================
 #
 # @brief    Test script for the most basic functionality of Adjacent class.
@@ -56,7 +57,7 @@ theBoardSol = theLayer.getState()
 f, axarr = plt.subplots(2,3)
 bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
-axarr[0, 0].title.set_text('Source solution board')
+axarr[0, 0].title.set_text('Source Board')
 
 # ==[1.3] Save theBoardSol
 #
@@ -88,7 +89,7 @@ theAdj_1 = adjacent.buildFromFile_Puzzle(cpath + '/data/board_6p_adj.obj')
 
 bsolAdjacent_1 = theAdj_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolAdjacent_1)
-axarr[0, 1].title.set_text('Solution board from Adjacent 1')
+axarr[0, 1].title.set_text('Board 1')
 
 #==[2.2] Test buildFromFile_ImageAndMask
 #
@@ -97,7 +98,7 @@ theAdj_2 = adjacent.buildFromFile_ImageAndMask(cpath + '/data/image_6p_adj.obj')
 
 bsolAdjacent_2 = theAdj_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolAdjacent_2)
-axarr[0, 2].title.set_text('Solution board from Adjacent 2')
+axarr[0, 2].title.set_text('Board 2')
 
 #==[2.3] Test buildFromFiles_ImageAndMask
 #
@@ -109,7 +110,7 @@ cpath + '/../../testing/data/shapes_color_six_image_adjacent.png'
 
 bsolAdjacent_3 = theAdj_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolAdjacent_3)
-axarr[1, 0].title.set_text('Solution board from Adjacent 3')
+axarr[1, 0].title.set_text('Board 3')
 
 
 #==[2.4] Test buildFrom_ImageAndMask
@@ -119,7 +120,7 @@ theAdj_4 = adjacent.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolAdjacent_4 = theAdj_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolAdjacent_4)
-axarr[1, 1].title.set_text('Solution board from Adjacent 4')
+axarr[1, 1].title.set_text('Board 4')
 
 #==[2.5] Test buildFrom_ImageProcessing
 #
@@ -128,16 +129,22 @@ theAdj_5 = adjacent.buildFrom_ImageProcessing(theImageSol)
 
 bsolAdjacent_5 = theAdj_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolAdjacent_5)
-axarr[1, 2].title.set_text('Solution board from Adjacent 5')
+axarr[1, 2].title.set_text('Board 5')
 
-# Should see 6 same boards
-plt.show()
-print('Should see 6 same boards.')
 
-#==[3] Display the adjacent matrix. Should see 20 Trues (2*7+6).
+#==[3] Print expected outcomes, the adjacency matrix, and plot the
+#      boards. Should see 20 Trues (2*7+6).
 #
-print('Adjacent matrix: \n', theAdj_1.adjMat)
+print('Should see the same board 6 times.')
+print('All are loaded from different sources.')
+
+print('Adjacency matrix: \n', theAdj_1.adjMat)
 print('The number of Trues:', np.sum(theAdj_1.adjMat))
-print('Should see 20 Trues (2*7+6).')
+print('Should see 20 Trues (3*6+2).')
+print('All 6 have at least 2 neighbors plus self-adjacent.')
+print('2 have a third neighbor.')
+
+plt.show()
+
 #
 #============================ basic03_adjacent ===========================

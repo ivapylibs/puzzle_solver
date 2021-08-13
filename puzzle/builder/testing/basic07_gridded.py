@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic06_gridded ===========================
 #
 # @brief    Test script for the most basic functionality of Grid class.
@@ -78,6 +79,7 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
 axarr[0, 0].title.set_text('Source solution board')
 
+
 #==[1.4] Save theBoardSol
 #
 if not os.path.exists(cpath + '/data/board_15p.obj'):
@@ -101,6 +103,8 @@ if not os.path.exists(cpath + '/data/image_15p.obj'):
 #==[2] Create an Grid instance
 #
 
+print('Running through test cases. Will take a bit.')
+
 #==[2.1] Test buildFromFile_Puzzle
 #
 
@@ -108,7 +112,7 @@ theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_15p.obj')
 
 bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolGrid_1)
-axarr[0, 1].title.set_text('Solution board from Grid 1')
+axarr[0, 1].title.set_text('Board 1')
 
 #==[2.2] Test buildFromFile_ImageAndMask
 #
@@ -117,7 +121,7 @@ theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_15p.obj', th
 
 bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
-axarr[0, 2].title.set_text('Solution board from Grid 2')
+axarr[0, 2].title.set_text('Board 2')
 
 #==[2.3] Test buildFromFiles_ImageAndMask
 #
@@ -129,7 +133,7 @@ cpath + '/data/balloon_15_mask.png', theParams=paramGrid(areaThreshold=5000)
 
 bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
-axarr[1, 0].title.set_text('Solution board from Grid 3')
+axarr[1, 0].title.set_text('Board 3')
 
 
 #==[2.4] Test buildFrom_ImageAndMask
@@ -139,7 +143,7 @@ theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=pa
 
 bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
-axarr[1, 1].title.set_text('Solution board from Grid 4')
+axarr[1, 1].title.set_text('Board 4')
 
 #==[2.5] Test buildFrom_Sketch
 #
@@ -148,15 +152,17 @@ theGrid_5 = gridded.buildFrom_Sketch(theImageSol, theMaskSol_src, theDetector=th
 
 bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
-axarr[1, 2].title.set_text('Solution board from Grid 5')
+axarr[1, 2].title.set_text('Board 5')
 
-# Should see 6 same boards
-plt.show()
 
 #==[3] Display the Interlocking matrix. Should see a matrix filled with some Trues.
 #
+print('Should see the same board 6 times.')
+
 print('Interlocking matrix: \n', theGrid_1.ilMat)
 print('Grid coordinates: \n', theGrid_1.gc)
+
+plt.show()
 
 #
 #============================ basic06_gridded ===========================

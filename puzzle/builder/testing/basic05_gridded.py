@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic05_gridded ===========================
 #
 # @brief    Test script for the most basic functionality of Grid class.
@@ -56,7 +57,7 @@ theBoardSol = theLayer.getState()
 f, axarr = plt.subplots(2,3)
 bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0, 0].imshow(bSource)
-axarr[0, 0].title.set_text('Source solution board')
+axarr[0, 0].title.set_text('Source Board')
 
 # ==[1.3] Save theBoardSol
 #
@@ -88,7 +89,7 @@ theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolGrid_1)
-axarr[0, 1].title.set_text('Solution board from Grid 1')
+axarr[0, 1].title.set_text('Board 1')
 
 #==[2.2] Test buildFromFile_ImageAndMask
 #
@@ -97,7 +98,7 @@ theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
-axarr[0, 2].title.set_text('Solution board from Grid 2')
+axarr[0, 2].title.set_text('Board 2')
 
 #==[2.3] Test buildFromFiles_ImageAndMask
 #
@@ -109,7 +110,7 @@ cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 
 bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
-axarr[1, 0].title.set_text('Solution board from Grid 3')
+axarr[1, 0].title.set_text('Board 3')
 
 
 #==[2.4] Test buildFrom_ImageAndMask
@@ -119,7 +120,7 @@ theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
-axarr[1, 1].title.set_text('Solution board from Grid 4')
+axarr[1, 1].title.set_text('Board 4')
 
 #==[2.5] Test buildFrom_ImageProcessing
 #
@@ -128,15 +129,17 @@ theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
 
 bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
-axarr[1, 2].title.set_text('Solution board from Grid 5')
-
-# Should see 6 same boards
-plt.show()
+axarr[1, 2].title.set_text('Board 5')
 
 #==[3] Display the Interlocking matrix. Should see an identity matrix.
 #
+print('Should see the same board 6 times.')
+
 print('Interlocking matrix: \n', theGrid_1.ilMat)
 print('Grid coordinates: \n', theGrid_1.gc)
+
+plt.show()
+
 
 #
 #============================ basic05_gridded ===========================
