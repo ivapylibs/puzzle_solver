@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic03_pca ===========================
 #
 # @brief    Test script for the most basic functionality of moments. Create

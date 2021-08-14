@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic02_moments ===========================
 #
 # @brief    Test script for the most basic functionality of moments. Create

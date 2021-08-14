@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic01_parser ===========================
 #
 # @brief    Test script for the most basic functionality of parser

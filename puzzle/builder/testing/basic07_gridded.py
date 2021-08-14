@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-#============================ basic06_gridded ===========================
+#============================ basic07_gridded ===========================
 #
 # @brief    Test script for the most basic functionality of Grid class.
 #           Build a gridded instance from different sources.
 #           (15 one with touching case)
 #
-#============================ basic06_gridded ===========================
+#============================ basic07_gridded ===========================
 
 #
-# @file     basic06_gridded.py
+# @file     basic07_gridded.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/10  [created]
 #
-#============================ basic06_gridded ===========================
+#============================ basic07_gridded ===========================
 
 
 #==[0] Prep environment
@@ -165,4 +165,4 @@ print('Grid coordinates: \n', theGrid_1.gc)
 plt.show()
 
 #
-#============================ basic06_gridded ===========================
+#============================ basic07_gridded ===========================

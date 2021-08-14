@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #============================ basic01_template ===========================
 #
 # @brief    Test script for the most basic functionality of template
