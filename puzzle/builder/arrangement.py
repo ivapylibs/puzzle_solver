@@ -126,9 +126,6 @@ class arrangement(board):
     pLocTrue = self.solution.pieceLocations()
     if len(pLocTrue) == len(pLoc):
       for id in pLoc:
-        # @todo
-        # Need double check if the id or id_sol will always be marched with the solution ?
-        # I prefer id as build has access to the solution from the very beginning
         theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
     else:
       # @todo
@@ -163,9 +160,6 @@ class arrangement(board):
     pLocTrue = self.solution.pieceLocations()
     if len(pLocTrue) == len(pLoc):
       for id in pLoc:
-        # @todo
-        # Need double check if the id or id_sol will always be marched with the solution ?
-        # I prefer id as build has access to the solution from the very beginning
         theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
     else:
       # @todo

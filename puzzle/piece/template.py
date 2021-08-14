@@ -54,7 +54,6 @@ class template:
     self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
 
     self.id = None  # @< The puzzle piece id in the measured board. Be set up by the board.
-    self.id_sol = None   # @< The assigned puzzle piece id in the solution board. Be set up by the board.
 
     # self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
     # @note     Opting not to use discrete grid puzzle piece description.

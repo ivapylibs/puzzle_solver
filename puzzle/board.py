@@ -98,9 +98,6 @@ class board:
   #
   def getAssigned(self, pAssignments):
 
-    for assignment in pAssignments:
-      # assignment[1] is for the solution board, where the instance shares the same id as the index
-      self.pieces[assignment[0]].id_sol = assignment[1]
     theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
 
     return theBoard
@@ -221,7 +218,7 @@ class board:
   #
   # @param[out] theImage    The image to insert pieces into.
   #
-  def toImage(self, theImage = None, ID_DISPLAY = False, ID_SOLUTION = False, COLOR= (255, 255, 255), CONTOUR_DISPLAY = True):
+  def toImage(self, theImage = None, ID_DISPLAY = False, COLOR= (255, 255, 255), CONTOUR_DISPLAY = True):
 
     if theImage is not None:
       # Check dimensions ok and act accordingly, should be equal or bigger, not less.
@@ -233,12 +230,9 @@ class board:
             piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY = CONTOUR_DISPLAY)
             pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0] / 2),
                    int(piece.rLoc[1] - bbox[0][1] + piece.size()[1] / 2))
-            if ID_SOLUTION == True:
-              cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                          min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
-            else:
-              cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                          min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
+
+            cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
       else:
         # @todo
         #  Figure out what to do if image too small. Expand it or abort?
@@ -255,12 +249,9 @@ class board:
         if ID_DISPLAY == True:
           pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0]/2),
                  int(piece.rLoc[1] - bbox[0][1] + piece.size()[1]/2))
-          if ID_SOLUTION == True:
-            cv2.putText(theImage, str(piece.id_sol), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
-          else:
-            cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
+
+          cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
+                      min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
 
     return theImage
 

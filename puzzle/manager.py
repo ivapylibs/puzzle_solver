@@ -139,7 +139,7 @@ class manager(fromLayer):
     #
     # self.bAssigned = self.bMeas.getSubset(iPieces)
 
-    # Generate a new board for association
+    # Generate a new board for association, filtered by the moments threshold
     pFilteredAssignments = []
     for assignment in self.pAssignments:
       theMoment = moments(self.bMeas.pieces[assignment[0]].y, 20)
@@ -147,7 +147,8 @@ class manager(fromLayer):
       if ret:
         pFilteredAssignments.append(assignment)
 
-    self.bAssigned = self.bMeas.getAssigned(pFilteredAssignments)
+    self.pAssignments = pFilteredAssignments
+    self.bAssigned = self.bMeas.getAssigned(self.pAssignments)
 
 
 
@@ -184,7 +185,7 @@ class manager(fromLayer):
   def greedyAssignment(self, scoreTable):
     matched_indices = []
     if scoreTable.shape[1] == 0:
-      return np.array(matched_indices, np.int32).reshape(-1, 2)
+      return np.array(matched_indices).reshape(-1, 2)
     for i in range(scoreTable.shape[0]):
       if self.scoreType == SCORE_DIFFERENCE:
         j = scoreTable[i].argmin()
@@ -201,7 +202,7 @@ class manager(fromLayer):
           scoreTable[:, j] = 100
           matched_indices.append([i, j])
 
-    matched_indices = np.array(matched_indices, np.int32).reshape(-1, 2)
+    matched_indices = np.array(matched_indices).reshape(-1, 2)
 
     return matched_indices
 

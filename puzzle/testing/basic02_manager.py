@@ -58,15 +58,16 @@ theManager.measure(theImageMea,theMaskMea)
 #
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
 bsolImage = theManager.solution.toImage(ID_DISPLAY = True)
-bAssignedImage = theManager.bAssigned.toImage(ID_DISPLAY = True, ID_SOLUTION = True)
 
-f, axarr = plt.subplots(1,3)
+f, axarr = plt.subplots(1,2)
 axarr[0].imshow(bMeasImage)
 axarr[0].title.set_text('Measurement')
 axarr[1].imshow(bsolImage)
 axarr[1].title.set_text('Solution')
-axarr[2].imshow(bAssignedImage)
-axarr[2].title.set_text('Assignment')
+
+# Show assignment
+print('The first index refers to the measured board while the second one refers to the solution board.')
+print(theManager.pAssignments)
 
 plt.show()
 #
