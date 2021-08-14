@@ -4,8 +4,6 @@ setup(name='puzzle',
   description   = 'Classes implementing detection based puzzle solving pipelines.', 
   url       = "https://github.com/ivapylibs/puzzle_solver",
   author    = 'IVALab',
-  #package_dir   = {"":"puzzle"},
-  #packages  = ['puzzle','puzzle.piece']
-  packages  = ['puzzle']
-  #packages=setuptools.find_packages(where="puzzle")
+  packages  = ['puzzle'],
+  install_requires=['numpy', 'scipy', 'matplotlib','opencv-python','scikit-image']
 )
