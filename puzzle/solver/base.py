@@ -40,8 +40,8 @@ class base:
   #
   def __init__(self, theSol, thePuzzle):
 
-    self.desired = theSol               # @< Desired/solution puzzle state.
-    self.current = thePuzzle            # @< Actual puzzle state.
+    self.desired = theSol               # @< Desired/solution puzzle board.
+    self.current = thePuzzle            # @< Actual puzzle board.
 
   #============================== takeTurn =============================
   #

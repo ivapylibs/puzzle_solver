@@ -80,13 +80,15 @@ class board:
   #
   # @brief  Return a new board consisting of a subset of pieces.
   #
-  # @param[in]  subset   A list of indexes for the subset.
+  # @param[in]  subset   A list of indexes for the subset of puzzle pieces.
+  #
+  # @param[out] theBoard   A new board following the input subset.
   #
   def getSubset(self, subset):
 
-    bSubset = board(np.array(self.pieces)[subset], len(subset))
+    theBoard = board(np.array(self.pieces)[subset], len(subset))
 
-    return bSubset
+    return theBoard
 
   # =============================== getAssigned ===============================
   #
@@ -94,7 +96,7 @@ class board:
   #
   # @param[in]  pAssignments   A list of assignments for the subset.
   #
-  # @param[out] theBoard   A new board with assignment.
+  # @param[out] theBoard   A new board following assignment.
   #
   def getAssigned(self, pAssignments):
 
