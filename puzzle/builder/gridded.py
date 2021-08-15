@@ -112,6 +112,53 @@ class gridded(interlocking):
   #
   # OTHER CODE / MEMBER FUNCTIONS
 
+  # =========================== explodedPuzzle ==========================
+  #
+  # @brief  Create an exploded version of the puzzle. It is an image
+  #         with no touching pieces.
+  #
+  # The value for an exploded puzzle image is that it can be used to
+  # generate a simulated puzzle scenario that can be passed to a puzzle
+  # solver. It can also be used to define a quasi-puzzle problem, where
+  # the objective is to place the pieces in grid ordering like the
+  # exploded view (without needing to interlock). Doing see keeps puzzle
+  # piece well separated for simple puzzle interpretation algorithms to
+  # rapidly parse.
+  #
+  # @param[in]  dx          The horizontal offset when exploding.
+  # @param[in]  dy          The vertical offset when exploding.
+  # @param[in]  bgColor     The background color to use.
+  #
+  # @param[out] epImage     Exploded puzzle image.
+  #
+  def explodedPuzzle(self, dx=100, dy=50, bgColor=(0,0,0)):
+
+    #--[1] First figure out how big the exploded image should be based
+    #      on the puzzle image dimensions, the number of puzzle pieces
+    #      across rows and columns, and the chosen spacing.
+    [nc, nr] = self.solution.extents()
+    bbox = self.solution.boundingBox()
+    r_origin = bbox[0]
+
+    # The max index of pieces for x,y
+    x_max = np.max(self.gc[0,:])
+    y_max = np.max(self.gc[1, :])
+
+    nr = int(nr + y_max * dy)
+    nc = int(nc + x_max * dx)
+
+    epImage = np.zeros((nr,nc,3),dtype='uint8')
+    epImage[:,:,:] = bgColor
+
+    #--[2] Place image data into the exploded puzzle image.
+    #
+    for idx, piece in enumerate(self.solution.pieces):
+      r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:,idx].flatten()
+      r_new = r_new.astype('int')
+      piece.placeInImageAt(epImage, rc=r_new)
+
+    return epImage
+
   # ======================== buildFromFile_Puzzle =======================
   #
   # @brief      Load a saved arrangement calibration/solution puzzle board.

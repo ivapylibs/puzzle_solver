@@ -162,7 +162,7 @@ class template:
     if CONTOUR_DISPLAY:
       rcoords = list(np.where(self.y.contour))
       rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
-      rcoords =  self.rLoc.reshape(-1,1) + rcoords
+      rcoords =  rc.reshape(-1,1) + rcoords
       theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
     # @todo

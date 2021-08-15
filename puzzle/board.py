@@ -146,12 +146,13 @@ class board:
   # @brief  Iterate through the puzzle pieces to figure out the tight
   #         bounding box extents of the board.
   #
-  # @param[out] lengths     The bounding box side lengths.
+  # @param[out] lengths     The bounding box side lengths. [x,y]
   #
   def extents(self):
 
     # [[min x, min y], [max x, max y]]
     bbox = self.boundingBox()
+
     lengths = bbox[1]-bbox[0]
 
     return lengths
@@ -161,7 +162,7 @@ class board:
   # @brief  Iterate through the puzzle pieces to figure out the tight
   #         bounding box of the board.
   #
-  # @param[out] bbox        The bounding box coordinates.
+  # @param[out] bbox        The bounding box coordinates. [[min x, min y], [max x, max y]]
   #
   def boundingBox(self):
 
