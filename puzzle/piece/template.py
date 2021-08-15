@@ -96,11 +96,17 @@ class template:
   # @param[in]  r           Location of its frame origin. 
   # @param[in]  isCenter    Boolean indicating r is center instead.
   #
-  def setPlacement(self, r, isCenter = False):
+  def setPlacement(self, r, offset = False, isCenter = False):
     if isCenter:
-      self.rLoc = r - np.ceil(self.y.size/2)
+      if offset:
+        self.rLoc = self.rLoc + r - np.ceil(self.y.size/2)
+      else:
+        self.rLoc = r - np.ceil(self.y.size/2)
     else:
-      self.rLoc = r
+      if offset:
+        self.rLoc = self.rLoc + r
+      else:
+        self.rLoc = r
 
   #============================ placeInImage ===========================
   #
