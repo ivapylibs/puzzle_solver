@@ -91,19 +91,23 @@ saveMe = True
 # saveMe = False
 
 # num of size() actions at most
-for i in range(theSolver.desired.size()):
+for i in range(1+theSolver.desired.size()):
 
-  print(f'Step {i}:')
-
-  theSolver.takeTurn()
-
-  theSolver.current.display(fh =fh, ID_DISPLAY=True)
+  theSolver.current.display(fh=fh, ID_DISPLAY=True)
   fh.suptitle(f'Step {i}', fontsize=20)
-
   plt.pause(1)
+
+  if i==0:
+    # Display the original one at the very beginning
+    print(f'The original measured board')
+  else:
+    print(f'Step {i}:')
 
   if saveMe:
     fh.savefig(cpath + f'/data/theBoardMea_step{i}.png')
+
+  if i > 0:
+    theSolver.takeTurn()
 
 plt.ioff()
 # plt.draw()
