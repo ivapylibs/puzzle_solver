@@ -93,14 +93,8 @@ class manager(fromLayer):
   # @param[in]  solution    A solution/calibrated board instance.
   # @param[in]  theParms    Any additional parameters in a structure.
   #
-  def __init__(self, solution, theParms = []):
+  def __init__(self, solution, theParms = managerParms):
     super(manager, self).__init__()
-
-    if not theParms:
-      theParms = managerParms
-
-    # @todo
-    # Yunzhi: we have to simulate a gt here. It is designed to be done in builder?
 
     self.solution = solution              # @< The solution puzzle board.
     self.scoreType = theParms.scoreType   # @< The type of comparator.
@@ -116,28 +110,24 @@ class manager(fromLayer):
   # @brief  Process the passed imagery to recover puzzle pieces and
   #         manage their track states.
   #
-  def measure(self, I, M):
+  # @param[in]  I   Source image.
+  # @param[in]  M   Layer mask (binary)
+  # @param[in]  board The measured board.
+  #
+  def measure(self, *argv):
 
-    # Call measure function from fromLayer to generate a measured board
-    # self.bMeas
-    super().measure(I,  M)
+    if len(argv)==1:
+      self.bMeas = argv[0]
+    else:
+      I = argv[0]
+      M = argv[1]
+      # Call measure function from fromLayer to generate a measured board
+      # self.bMeas
+      super().measure(I,  M)
+
 
     # Compare with ground truth/generate associates
     self.matchPieces()
-
-    # # Generate a new board for association
-    #
-    # iPieces = []
-    # for assignment in self.pAssignments:
-    #   theMoment = moments(self.bMeas.pieces[assignment[0]].y,5)
-    #   ret = theMoment.compare(self.solution.pieces[assignment[1]].y)
-    #   if ret:
-    #     iPieces.append(assignment[0])
-    #
-    # # @todo
-    # # Currently, assume all the measured puzzle pieces could find a match.
-    #
-    # self.bAssigned = self.bMeas.getSubset(iPieces)
 
     # Generate a new board for association, filtered by the moments threshold
     pFilteredAssignments = []
@@ -147,10 +137,9 @@ class manager(fromLayer):
       if ret:
         pFilteredAssignments.append(assignment)
 
+    # pAssignments refers to the index but not the id of the puzzle piece
     self.pAssignments = pFilteredAssignments
     self.bAssigned = self.bMeas.getAssigned(self.pAssignments)
-
-
 
   #=========================== matchPieces ==========================
   #
@@ -202,6 +191,7 @@ class manager(fromLayer):
           scoreTable[:, j] = 100
           matched_indices.append([i, j])
 
+    # matched_indices refers to the index but not the id of the puzzle piece
     matched_indices = np.array(matched_indices).reshape(-1, 2)
 
     return matched_indices
@@ -216,15 +206,16 @@ class manager(fromLayer):
 
   #=========================== process ==========================
   #
-  # @brief  Run the tracking pipeline for image measurement.
+  # @brief  Run the tracking pipeline for image measurement or directly work
+  #         on a measured board. Assume two modes: 1. I & M 2. the measured board.
   #
   # @param[in]  I   Source image.
   # @param[in]  M   Layer mask (binary)
+  # @param[in]  board The measured board.
   #
-  def process(self, I, M):
+  def process(self, *argv):
 
-    self.measure(I, M)
+    self.measure(*argv)
 
-    pass
 #
 #================================ manager ================================

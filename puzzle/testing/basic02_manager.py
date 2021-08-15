@@ -51,7 +51,7 @@ theMaskMea = cv2.imread(cpath + '/../testing/data/shapes_color_six_binary.png', 
 #
 theManager = manager(theBoardSol)
 
-theManager.measure(theImageMea,theMaskMea)
+theManager.process(theImageMea,theMaskMea)
 
 #==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.
