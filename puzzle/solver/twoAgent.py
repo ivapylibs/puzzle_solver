@@ -23,6 +23,9 @@
 
 #===== Dependencies / Packages
 #
+
+import numpy as np
+
 from puzzle.solver.simple import simple
 
 #===== Class Helper Elements
@@ -45,14 +48,26 @@ class twoAgent(simple):
 
     super(twoAgent, self).__init__(theSol, thePuzzle)
 
-    if not agent1:
+    if agent1 is None:
       agent1 = simple(theSol, thePuzzle)
 
-    if not agent2:
+    if agent2 is None:
       agent2 = simple(theSol, thePuzzle)
 
     self.agents = [agent1, agent2]      # Make a list/array.
     self.iMove = 0                     # Move index.
+
+  #============================== setMatch =============================
+  #
+  # @brief  Set up the match
+  #
+  # @param[in]  match   The match between the id in the measured board
+  #                     and the solution board.
+  #
+  def setMatch(self, match):
+
+    for agent in self.agents:
+      agent.match = np.array(match)
 
   #============================== takeTurn =============================
   #
@@ -60,6 +75,8 @@ class twoAgent(simple):
   #         to its correct location.
   #
   def takeTurn(self, thePlan = None):
+
+    print(f'It is agent {self.iMove}\'s turn:')
 
     self.agents[self.iMove].takeTurn()
 

@@ -1,18 +1,19 @@
 #!/usr/bin/python3
-#============================ basic02_simple ===========================
+#============================ basic03_twoAgent ===========================
 #
 # @brief    Test script for the most basic functionality of simple class.
-#           Display a visual sequence of the puzzle being solved.
+#           Display a visual sequence of the puzzle being solved. Played
+#           by two agents.
 #
-#============================ basic02_simple ===========================
+#============================ basic03_twoAgent ===========================
 
 #
-# @file     basic02_simple.py
+# @file     basic03_twoAgent.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/15  [created]
 #
-#============================ basic02_simple ===========================
+#============================ basic03_twoAgent ===========================
 
 
 #==[0] Prep environment
@@ -26,7 +27,7 @@ import imageio
 
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.manager import manager
-from puzzle.solver.simple import simple
+from puzzle.solver.twoAgent import twoAgent
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -74,12 +75,12 @@ theManager.process(theBoardMea)
 
 #==[5] Create simple instance and set up the match
 #
-theSolver = simple(theBoardSol, theBoardMea)
+thetwoAgent = twoAgent(theBoardSol, theBoardMea)
 
 theManager = manager(theBoardSol)
 theManager.process(theBoardMea)
 
-theSolver.setMatch(theManager.pAssignments)
+thetwoAgent.setMatch(theManager.pAssignments)
 
 #==[6] Start the solver to take turns, display the updated board.
 #
@@ -91,9 +92,9 @@ saveMe = True
 # saveMe = False
 
 # num of size() actions at most
-for i in range(1+theSolver.desired.size()):
+for i in range(1 + thetwoAgent.desired.size()):
 
-  theSolver.current.display(fh=fh, ID_DISPLAY=True)
+  thetwoAgent.current.display(fh=fh, ID_DISPLAY=True)
   fh.suptitle(f'Step {i}', fontsize=20)
   plt.pause(1)
 
@@ -104,9 +105,9 @@ for i in range(1+theSolver.desired.size()):
   if saveMe:
     fh.savefig(cpath + f'/data/theBoardMea_step{i}.png')
 
-  if i < theSolver.desired.size():
+  if i < thetwoAgent.desired.size():
     print(f'Step {i+1}:')
-    theSolver.takeTurn()
+    thetwoAgent.takeTurn()
 
 plt.ioff()
 # plt.draw()
@@ -120,4 +121,4 @@ with imageio.get_writer(cpath + f'/data/demo.gif', mode='I', fps=1) as writer:
         writer.append_data(image)
 
 #
-#============================ basic02_simple ===========================
+#============================ basic03_twoAgent ===========================

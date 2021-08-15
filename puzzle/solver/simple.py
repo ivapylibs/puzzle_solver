@@ -53,8 +53,8 @@ class simple(base):
   #
   # @brief  Set up the match
   #
-  # @param[in]  I   The match between the id in the measured board
-  #                 and the solution board.
+  # @param[in]  match   The match between the id in the measured board
+  #                     and the solution board.
   #
   def setMatch(self, match):
     self.match = np.array(match)
