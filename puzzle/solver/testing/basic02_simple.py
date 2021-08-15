@@ -100,13 +100,12 @@ for i in range(1+theSolver.desired.size()):
   if i==0:
     # Display the original one at the very beginning
     print(f'The original measured board')
-  else:
-    print(f'Step {i}:')
 
   if saveMe:
     fh.savefig(cpath + f'/data/theBoardMea_step{i}.png')
-
-  if i > 0:
+  
+  if i < theSolver.desired.size():
+    print(f'Step {i+1}:')
     theSolver.takeTurn()
 
 plt.ioff()
