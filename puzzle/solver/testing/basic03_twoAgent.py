@@ -95,7 +95,7 @@ saveMe = True
 for i in range(1 + thetwoAgent.desired.size()):
 
   thetwoAgent.current.display(fh=fh, ID_DISPLAY=True)
-  fh.suptitle(f'Step {i}', fontsize=20)
+  fh.suptitle(f'Step {i}, Agent {thetwoAgent.iMove}\'s turn', fontsize=20)
   plt.pause(1)
 
   if i==0:
@@ -103,7 +103,7 @@ for i in range(1 + thetwoAgent.desired.size()):
     print(f'The original measured board')
 
   if saveMe:
-    fh.savefig(cpath + f'/data/theBoardMea_step{i}.png')
+    fh.savefig(cpath + f'/data/theBoardMea_twoAgent_step{i}.png')
 
   if i < thetwoAgent.desired.size():
     print(f'Step {i+1}:')
@@ -113,8 +113,8 @@ plt.ioff()
 # plt.draw()
 
 # Build GIF
-with imageio.get_writer(cpath + f'/data/demo.gif', mode='I', fps=1) as writer:
-    filename_list = glob.glob(cpath + f'/data/theBoardMea_*.png')
+with imageio.get_writer(cpath + f'/data/demo_twoAgent.gif', mode='I', fps=1) as writer:
+    filename_list = glob.glob(cpath + f'/data/theBoardMea_twoAgent_*.png')
     filename_list.sort()
     for filename in filename_list:
         image = imageio.imread(filename)
