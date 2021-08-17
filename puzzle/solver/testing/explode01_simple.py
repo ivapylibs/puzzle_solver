@@ -59,7 +59,10 @@ axarr[0].title.set_text('Source Board')
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-_, epBoard = theGrid.explodedPuzzle()
+epImage, epBoard = theGrid.explodedPuzzle()
+
+axarr[1].imshow(epImage)
+axarr[1].title.set_text('Exploded view')
 
 #==[3] Create match by manager
 #
