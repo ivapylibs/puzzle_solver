@@ -21,14 +21,14 @@
 #
 #========================= puzzle.solver.twoAgent ========================
 
-#===== Dependencies / Packages
+#===== Environment / Dependencies
 #
 
 import numpy as np
 
 from puzzle.solver.simple import simple
 
-#===== Class Helper Elements
+#===== Helper Elements
 #
 
 

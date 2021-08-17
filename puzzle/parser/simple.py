@@ -21,14 +21,14 @@
 #
 #========================== puzzle.parser.simple =========================
 
-#============================== Dependencies =============================
+#===== Environment / Dependencies
 #
 import perceiver.simple as perceiverSimple
 from puzzle.board import board
+
 #
 #========================== puzzle.parser.simple =========================
 #
-
 class simple(perceiverSimple.simple):
 
   #=============================== simple ==============================

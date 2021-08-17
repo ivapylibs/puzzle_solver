@@ -1,8 +1,8 @@
-#================================ moments ================================
+#================================ puzzle.piece.pca ================================
 #
 # @brief    Uses pca to calculate rotation.
 #
-#================================ moments ================================
+#================================ puzzle.piece.pca ================================
 
 #
 # @file     pca.py
@@ -14,18 +14,22 @@
 #!  Indent is set to 2 spaces.
 #!  Tab is set to 4 spaces with conversion to spaces.
 #
-#================================ moments ================================
+#================================ puzzle.piece.pca ================================
 
+#===== Environment / Dependencies
+#
 import cv2
 import math
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
 
-
+#
+#================================ puzzle.piece.pca ================================
+#
 class pca(matchDifferent):
 
-  #=============================== moments ==============================
+  #=============================== puzzle.piece.pca ==============================
   #
   # @brief  Constructor for the puzzle piece matchDifferent class.
   #
@@ -100,4 +104,4 @@ class pca(matchDifferent):
     return dict
 
 #
-#================================ moments ================================
+#================================ puzzle.piece.pca ================================

@@ -18,7 +18,7 @@
 #
 #========================== puzzle.solver.simple =========================
 
-#===== Dependencies / Packages
+#===== Environment / Dependencies
 #
 import numpy as np
 import itertools
@@ -26,7 +26,8 @@ import itertools
 from puzzle.solver.base import base
 from puzzle.builder.arrangement import arrangement
 from puzzle.builder.gridded import gridded
-#===== Class Helper Elements
+
+#===== Helper Elements
 #
 
 

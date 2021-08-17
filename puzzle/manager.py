@@ -36,7 +36,7 @@
 #
 #================================ manager ================================
 
-#==== Imports
+#===== Environment / Dependencies
 #
 from dataclasses import dataclass
 import itertools
@@ -45,9 +45,9 @@ import numpy as np
 
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.piece.moments import moments
-#==== Helper 
-#
 
+#===== Helper Elements
+#
 # DEFINE ENUMERATED TYPE HERE FOR scoreType.
 SCORE_DIFFERENCE = 0
 SCORE_SIMILAR = 1

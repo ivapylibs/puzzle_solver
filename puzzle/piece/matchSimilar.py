@@ -23,9 +23,13 @@
 #
 #======================= puzzle.piece.matchSimilar =======================
 
+#===== Environment / Dependencies
+#
 from puzzle.piece.matcher import matcher
 
-
+#
+#================================ puzzle.piece.matchSimilar ================================
+#
 class matchSimilar(matcher):
 
   #============================ matchSimilar ===========================

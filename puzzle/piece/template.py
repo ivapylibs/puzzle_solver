@@ -21,16 +21,16 @@
 #
 #========================= puzzle.piece.template =========================
 
-#============================= Dependencies ==============================
-
+#===== Environment / Dependencies
+#
 import numpy as np
 from dataclasses import dataclass
 import cv2
 
 import matplotlib.pyplot as plt
 
-#=========================== Helper Components ===========================
-
+#===== Helper Elements
+#
 @dataclass
 class puzzleTemplate:
   size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
@@ -39,6 +39,7 @@ class puzzleTemplate:
   image:   np.ndarray = np.array([],dtype='uint8')  # @< Template image with BG default fill.
   mask:     np.ndarray = np.array([],dtype='uint8') # @< Template mask.
   contour:  np.ndarray = np.array([],dtype='uint8') # @< Template contour.
+
 #
 #========================= puzzle.piece.template =========================
 #

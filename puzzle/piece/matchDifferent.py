@@ -23,8 +23,13 @@
 #
 #====================== puzzle.piece.matchDifferent ======================
 
+#===== Environment / Dependencies
+#
 from puzzle.piece.matcher import matcher
 
+#
+#========================= puzzle.piece.matchDifferent =========================
+#
 class matchDifferent(matcher):
 
   #=========================== matchDifferent ==========================

@@ -2,7 +2,7 @@
 #
 # @brief    Uses shape moments to establish similarity.
 #
-#================================ moments ================================
+#================================ puzzle.piece.moments ================================
 
 #
 # @file     moments.py
@@ -16,18 +16,22 @@
 #!  Indent is set to 2 spaces.
 #!  Tab is set to 4 spaces with conversion to spaces.
 #
-#================================ moments ================================
+#================================ puzzle.piece.moments ================================
 
+#===== Environment / Dependencies
+#
 import cv2
 import math
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
 
-
+#
+#================================ puzzle.piece.moments ================================
+#
 class moments(matchDifferent):
 
-  #=============================== moments ==============================
+  #=============================== puzzle.piece.moments ==============================
   #
   # @brief  Constructor for the puzzle piece matchDifferent class.
   #
@@ -78,4 +82,4 @@ class moments(matchDifferent):
 
 
 #
-#================================ moments ================================
+#================================ puzzle.piece.moments ================================

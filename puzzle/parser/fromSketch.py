@@ -23,7 +23,7 @@
 #
 # ======================== puzzle.parser.fromSketch ========================
 
-# ==== Imports
+#===== Environment / Dependencies
 #
 
 import cv2
@@ -31,7 +31,7 @@ import numpy as np
 
 from detector.inImage import inImage
 
-# ==== Helper
+#===== Helper Elements
 #
 
 #

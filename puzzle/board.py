@@ -28,10 +28,9 @@
 
 #============================== Dependencies =============================
 
-# Imports go here. Aim for the bare minimum. 
+#===== Environment / Dependencies
+#
 
-# Make sure to include in dependencies for this package.
-# Delete this comment when done.
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt

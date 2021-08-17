@@ -17,13 +17,13 @@
 #====================== puzzle.utils.dataProcessing ======================
 
 
-#============================== Dependencies =============================
+#===== Environment / Dependencies
+#
+import numpy as np
+import types
 
 #====================== puzzle.utils.dataProcessing ======================
 #
-import numpy as np
-
-
 # ================================ updateLabel ==============================
 #
 # @brief  Update the label according to the ranking of all the elements'
@@ -49,6 +49,28 @@ def updateLabel(x_list, x_label):
 
   return x_label_updated
 
+# ================================ copyAttributes ==============================
+#
+# @brief  Copy attributes from a source class to a target class.
+#         See https://stackoverflow.com/a/12014625/5269146.
+#
+# @param[in]  source   The source class instance.
+# @param[in]  target   The target class instance.
+#
+# @param[out] target   The updated target class instance.
+#
+class copyAttributes(object):
+    def __init__(self, source):
+        self.source = source
+
+    def __call__(self, target):
+        for attr, value in self.source.__dict__.items():
+            if attr.startswith('__'):
+                continue
+            if isinstance(value, (property, types.FunctionType)):
+                continue
+            setattr(target, attr, value)
+        return target
 
 #
 #====================== puzzle.utils.dataProcessing ======================

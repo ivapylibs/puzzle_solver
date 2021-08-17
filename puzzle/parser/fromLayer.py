@@ -22,7 +22,7 @@
 #
 #======================== puzzle.parser.fromLayer ========================
 
-#==== Imports
+#===== Environment / Dependencies
 #
 
 import cv2
@@ -34,7 +34,7 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 from trackpointer.centroidMulti import centroidMulti
 from puzzle.piece.template import template
 from puzzle.board import board
-#==== Helper 
+#===== Helper Elements
 #
 
 @dataclass

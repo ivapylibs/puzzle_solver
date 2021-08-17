@@ -20,10 +20,11 @@
 #
 #=========================== puzzle.solver.base ==========================
 
-#===== Dependencies / Packages
+#===== Environment / Dependencies
 #
 import numpy as np
-#===== Class Helper Elements
+
+#===== Helper Elements
 #
 
 
