@@ -76,9 +76,6 @@ theManager.process(theBoardMea)
 #
 theSolver = simple(theBoardSol, theBoardMea)
 
-theManager = manager(theBoardSol)
-theManager.process(theBoardMea)
-
 theSolver.setMatch(theManager.pAssignments)
 
 #==[6] Start the solver to take turns, display the updated board.

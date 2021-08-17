@@ -77,9 +77,6 @@ theManager.process(theBoardMea)
 #
 thetwoAgent = twoAgent(theBoardSol, theBoardMea)
 
-theManager = manager(theBoardSol)
-theManager.process(theBoardMea)
-
 thetwoAgent.setMatch(theManager.pAssignments)
 
 #==[6] Start the solver to take turns, display the updated board.
