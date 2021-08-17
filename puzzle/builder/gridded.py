@@ -31,6 +31,7 @@
 import numpy as np
 from dataclasses import dataclass
 import pickle
+from copy import deepcopy
 
 import scipy.cluster.hierarchy as hcluster
 
@@ -102,6 +103,9 @@ class gridded(interlocking):
 
     for ii in range(self.solution.size()):
       # The order is in line with the one saving in self.solution.pieces
+
+      # @todo
+      # Yunzhi: Eventually, this has to be upgraded to a dict?
       self.gc[:,ii]= x_label[ii], y_label[ii]
 
   # OTHER CODE / MEMBER FUNCTIONS
@@ -130,6 +134,7 @@ class gridded(interlocking):
   # @param[in]  bgColor     The background color to use.
   #
   # @param[out] epImage     Exploded puzzle image.
+  # @param[out] epBoard     Exploded puzzle board.
   #
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0,0,0)):
 
@@ -152,12 +157,20 @@ class gridded(interlocking):
 
     #--[2] Place image data into the exploded puzzle image.
     #
-    for idx, piece in enumerate(self.solution.pieces):
+
+    # Work on the epBoard
+    epBoard = deepcopy(self.solution)
+    for idx, piece in enumerate(epBoard.pieces):
       r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:,idx].flatten()
       r_new = r_new.astype('int')
       piece.placeInImageAt(epImage, rc=r_new)
+      piece.setPlacement(r_new)
 
-    return epImage
+    # @todo
+    # Yunzhi: Currently, it is just explode but without changing the order.
+    # Otherwise, gc has to be updated too.
+
+    return epImage, epBoard
 
   # ======================== buildFromFile_Puzzle =======================
   #
