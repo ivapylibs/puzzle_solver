@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 #============================ explode01_simple ===========================
 #
-# @brief    Test script for explodedPuzzle function.
-#           (15 one with touching case)
+# @brief    Test script for solving a explodedPuzzle in a col-wise manner.
+#           (6 shapes img)
 #
 #============================ explode01_simple ===========================
 
