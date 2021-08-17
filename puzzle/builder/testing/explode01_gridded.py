@@ -28,16 +28,6 @@ from puzzle.builder.gridded import gridded
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-@dataclass
-class dataBoard:
-  board: any = None
-  tauDist: float = None
-
-@dataclass
-class dataImage:
-  I: np.ndarray = None
-  M: np.ndarray = None
-
 #==[1] Create image & mask for solution
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')
@@ -58,32 +48,12 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0].imshow(bSource)
 axarr[0].title.set_text('Source Board')
 
-# ==[1.3] Save theBoardSol
-#
-if not os.path.exists(cpath + '/data/board_6p.obj'):
-  theData_save = dataBoard(theBoardSol)
-
-  with open(cpath + '/data/board_6p.obj', 'wb') as fp:
-    pickle.dump(theData_save, fp)
-
-  del theData_save
-
-# ==[1.4] Save theImageSol & theMaskSol
-#
-if not os.path.exists(cpath + '/data/image_6p.obj'):
-  theData_save = dataImage(theImageSol, theMaskSol)
-
-  with open(cpath + '/data/image_6p.obj', 'wb') as fp:
-    pickle.dump(theData_save, fp)
-
-  del theData_save
-
 #==[2] Create an Grid instance and explode it
 #
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-epImage = theGrid.explodedPuzzle()
+epImage, _ = theGrid.explodedPuzzle()
 
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')

@@ -106,7 +106,7 @@ print('Running through test cases. Will take a bit.')
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
 
-epImage = theGrid.explodedPuzzle(dx=100,dy=100)
+epImage, _ = theGrid.explodedPuzzle(dx=100,dy=100)
 
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')
