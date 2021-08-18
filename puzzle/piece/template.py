@@ -36,9 +36,9 @@ class puzzleTemplate:
   size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
   rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
   appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
-  image:   np.ndarray = np.array([],dtype='uint8')  # @< Template image with BG default fill.
-  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template mask.
-  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template contour.
+  image:   np.ndarray = np.array([],dtype='uint8')  # @< Template RGB image with BG default fill.
+  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template binary mask.
+  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template binary contour.
 
 #
 #========================= puzzle.piece.template =========================
@@ -50,11 +50,11 @@ class template:
   #
   # @brief  Constructor for the puzzle.piece.base class.
   #
-  def __init__(self, y = None, r = (0, 0)):
+  def __init__(self, y = None, r = (0, 0), id = None):
     self.y = y          # @< The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate
     self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
 
-    self.id = None  # @< The puzzle piece id in the measured board. Be set up by the board.
+    self.id = id  # @< The puzzle piece id in the measured board. Be set up by the board.
 
     # self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
     # @note     Opting not to use discrete grid puzzle piece description.
