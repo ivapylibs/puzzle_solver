@@ -87,6 +87,9 @@ fh = plt.figure()
 saveMe = True
 # saveMe = False
 
+if saveMe:
+  f.savefig(cpath + f'/data/theBoard.png')
+
 # num of size() actions at most
 for i in range(1+theSolver.desired.size()):
 

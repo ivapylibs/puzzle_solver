@@ -20,14 +20,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import cv2
-import pickle
-from dataclasses import dataclass
+import imageio
+import glob
 
-import improcessor.basic as improcessor
 from puzzle.manager import manager
 from puzzle.solver.simple import simple
 
-from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.builder.gridded import gridded, paramGrid
 
@@ -62,7 +60,7 @@ theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 epImage, epBoard = theGrid.explodedPuzzle()
 
 axarr[1].imshow(epImage)
-axarr[1].title.set_text('Exploded view')
+axarr[1].title.set_text('Exploded View')
 
 #==[3] Create match by manager
 #
@@ -81,8 +79,11 @@ theSolver.setMatch(theManager.pAssignments)
 plt.ion()
 fh = plt.figure()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
+
+if saveMe:
+  f.savefig(cpath + f'/data/theBoardExplod.png')
 
 # num of size() actions at most
 for i in range(1+theSolver.desired.size()):
@@ -104,5 +105,14 @@ for i in range(1+theSolver.desired.size()):
 
 plt.ioff()
 # plt.draw()
+
+# Build GIF
+with imageio.get_writer(cpath + f'/data/demo_simple_exploded.gif', mode='I', fps=1) as writer:
+    filename_list = glob.glob(cpath + f'/data/explod01_simple_step*.png')
+    filename_list.sort()
+    for filename in filename_list:
+        image = imageio.imread(filename)
+        writer.append_data(image)
+
 #
 #============================ explode01_simple ===========================
