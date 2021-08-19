@@ -26,9 +26,7 @@ from enum import Enum
 
 from puzzle.piece.template import template
 
-# @todo
-# Temporary
-from puzzle.piece.side_extractor import process_piece
+from puzzle.utils.sideExtractor import sideExtractor
 
 #===== Helper Elements
 #
@@ -87,8 +85,6 @@ class regular(template):
 
     super(regular, self).__init__(y, r, id)
 
-
-
     # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
     self.edge = [TypeEdge.UNDEFINED] * 4
 
@@ -103,12 +99,20 @@ class regular(template):
 
     self.edge[direction] = type
 
-
+  # ============================== process ==============================
+  #
+  # @brief  Run the sideExtractor
+  #
+  #
   def process(self):
 
-    out_dict = process_piece(self.y.mask, scale_factor=0.4,
+    out_dict = sideExtractor(self.y, scale_factor=1,
                              harris_block_size=5, harris_ksize=5,
                              corner_score_threshold=0.2, corner_minmax_threshold=100)
+
+    # Set up the type of the chosen edge
+    for direction, type in enumerate(out_dict['inout']):
+      self.setTypeEdge(direction, type)
 
     return out_dict
 #

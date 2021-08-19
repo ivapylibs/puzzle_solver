@@ -24,7 +24,6 @@ import cv2
 import improcessor.basic as improcessor
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
-from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.piece.regular import regular
 
 fpath = os.path.realpath(__file__)
@@ -57,24 +56,37 @@ theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
 
+# theBoardSol.display(ID_DISPLAY=True)
+# plt.show()
+
 #==[1.3] Focus on a single puzzle piece
 #
-theTemplate = theBoardSol.pieces[6]
+
+theTemplate = theBoardSol.pieces[9]
 
 theRegular = regular(theTemplate)
-
 
 #==[2] Process the puzzle piece to obtain the segmented contours
 #
 
 output = theRegular.process()
 
-#==[3] Display the puzzle piece and the extracted info
+#==[3] Display the puzzle piece and the extracted info.
 #
-theMask = theRegular.y.mask
-cv2.imshow('demo', aa)
-cv2.waitKey()
+print('Should see [3,1,2,2], which corresponds to LEFT: FLAT, RIGHT: IN, TOP: OUT, BOTTOM: OUT')
+print('The type of the edge:', theRegular.edge)
 
+theImage = theRegular.toImage()
+
+f, axarr = plt.subplots(1,2)
+
+axarr[0].imshow(theImage)
+axarr[0].title.set_text('The segmented puzzle piece')
+
+axarr[1].imshow(output['class_image'])
+axarr[1].title.set_text('The segmented 4 edges')
+
+plt.show()
 
 #
 #============================ basic04_regular ===========================

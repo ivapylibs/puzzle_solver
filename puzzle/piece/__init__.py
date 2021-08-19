@@ -7,6 +7,3 @@ import puzzle.piece.pca
 import puzzle.piece.template
 import puzzle.piece.regular
 
-import puzzle.piece.side_extractor
-import puzzle.piece.utils
-

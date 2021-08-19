@@ -170,6 +170,19 @@ class template:
     # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
     # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.
 
+  # ============================== toImage ==============================
+  #
+  # @brief  Return the puzzle piece image (cropped)
+  #
+  # @param[out] theImage  The image.
+  #
+  def toImage(self):
+
+    theImage = np.zeros_like(self.y.image)
+    theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
+
+    return theImage
+
   #============================== display ==============================
   #
   # @brief  Display the puzzle piece contents in an image window.
@@ -187,10 +200,11 @@ class template:
 
     # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
     # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
-    theImage = np.zeros_like(self.y.image)
-    theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
+
+    theImage = self.toImage()
     plt.imshow(theImage)
-    plt.show()
+
+    # plt.show()
 
     return fh
 
