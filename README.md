@@ -20,7 +20,6 @@ modified).
 Requires the installation of the following python packages:
 
 - ```numpy```
-- ```functools```
 - ```matplotlib```
 - ```scipy```
 - ```scikit-learn```
