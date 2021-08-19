@@ -20,7 +20,9 @@ modified).
 Requires the installation of the following python packages:
 
 - ```numpy```
+- ```functools```
 - ```matplotlib```
 - ```scipy```
+- ```scikit-learn```
 - ```scikit-image```
 - ```opencv-python >= 4.0.0.21```
