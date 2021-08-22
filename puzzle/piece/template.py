@@ -100,14 +100,14 @@ class template:
   def setPlacement(self, r, offset = False, isCenter = False):
     if isCenter:
       if offset:
-        self.rLoc = self.rLoc + r - np.ceil(self.y.size/2)
+        self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size/2))
       else:
-        self.rLoc = r - np.ceil(self.y.size/2)
+        self.rLoc = np.array(r - np.ceil(self.y.size/2))
     else:
       if offset:
-        self.rLoc = self.rLoc + r
+        self.rLoc = np.array(self.rLoc + r)
       else:
-        self.rLoc = r
+        self.rLoc = np.array(r)
 
   #============================ placeInImage ===========================
   #

@@ -57,7 +57,7 @@ class basic:
     #
 
 
-  #============================ setPositions ===========================
+  #============================ setPieces ===========================
   #
   # @brief  Sets the positions of pieces.
   #
@@ -70,35 +70,50 @@ class basic:
   # Yunzhi: Since we use a dict to manage the pLocs input, it does not matter
   # if pLocs have less pieces or not. So we can combine several functions together.
   #
-  def setPositions(self, pLocs):
+  def setPieces(self, pLocs):
 
     for ii in range(self.puzzle.size()):
-      if self.puzzle.piece[ii].id in pLocs.keys():
-        self.puzzle.piece[ii].setPlacement(pLocs[self.puzzle.piece[ii].id])
+      if self.puzzle.pieces[ii].id in pLocs.keys():
+        self.puzzle.pieces[ii].setPlacement(pLocs[self.puzzle.pieces[ii].id])
 
-  #============================= dragPiece =============================
+  #============================= dragPieces =============================
   #
   # @brief  Moves pieces incrementally from where it is.
   #
   # @param[in]  pVecs    A dict of puzzle pieces ids and movement vector.
   # 
-  def dragPiece(self, pVecs):
+  def dragPieces(self, pVecs):
 
     for ii in range(self.puzzle.size()):
-      if self.puzzle.piece[ii].id in pVecs.keys():
+      if self.puzzle.pieces[ii].id in pVecs.keys():
+        self.puzzle.pieces[ii].setPlacement(pVecs[self.puzzle.pieces[ii].id], offset=True)
 
-        self.puzzle.piece[ii].offset(pVecs[self.puzzle.piece[ii].id])
+
+  #============================== toImage ==============================
+  #
+  # @brief  Uses puzzle piece locations to create an image for
+  #         visualizing them.  If given an image, then will place in it.
+  #
+  # @param[in]  theImage    The image to insert pieces into. (optional)
+  #
+  # @param[out] theImage    The image to insert pieces into.
+  #
+  def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True):
+
+    theImage = self.puzzle.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, COLOR=COLOR, CONTOUR_DISPLAY=CONTOUR_DISPLAY )
+
+    return theImage
 
   #============================== display ============================== 
   #
   # @brief  Displays the current puzzle board.
   #
-  def display(self):
+  def display(self, ID_DISPLAY = True):
 
     if not self.fig:
       self.fig = plt.figure()
 
-    self.puzzle.display(fh=self.fig)
+    self.puzzle.display(fh=self.fig, ID_DISPLAY= ID_DISPLAY)
 
 #
 #========================= puzzle.simulator.basic ========================
