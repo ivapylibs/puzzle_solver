@@ -54,7 +54,7 @@ axarr[0].title.set_text('Original \n Focus on piece 1')
 
 #==[3.2] Set the puzzle piece location & display
 #
-pLocs = {1: [20,20]}
+pLocs = {1: [50,50]}
 theSim.setPieces(pLocs)
 
 theSim_img = theSim.toImage(ID_DISPLAY=True)
