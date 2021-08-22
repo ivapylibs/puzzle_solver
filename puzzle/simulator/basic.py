@@ -11,8 +11,9 @@
 # @file     basic.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @author   WHO WHO
-# @date     2021/08/06  [started]
+#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/08/06 [created]
+#           2021/08/22 [modified]
 #
 #!NOTE:
 #!  Indent is set to 2 spaces.
@@ -22,7 +23,7 @@
 
 #===== Dependencies / Packages 
 #
-WHAT
+import matplotlib.pyplot as plt
 
 #===== Class Helper Elements
 #
@@ -40,10 +41,10 @@ class basic:
   # @param[in]  thePuzzle   The puzzle board info for simulation.
   # @param[in]  theFig      The figure handle to use (optional).
   #
-  def __init__(self, thePuzzle, theFig = None)
+  def __init__(self, thePuzzle, theFig = None):
 
     self.puzzle = thePuzzle
-    self.layers = 1:self.puzzle.length  # change to python
+    self.layers = list(range(self.puzzle.size()))  # change to python
 
     self.fig = theFig
 
@@ -58,80 +59,36 @@ class basic:
 
   #============================ setPositions ===========================
   #
-  # @brief  Sets the positions of all of the pieces.
+  # @brief  Sets the positions of pieces.
   #
-  # @param[in]  pLocs   Ordered array of puzzle pieces. 
+  # @param[in]  pLocs   A dict of puzzle pieces ids and their locations.
   #
   # If the array of locations is correct, then the puzzle board is updated
   # according to the specified locations.
   #
+  # @note
+  # Yunzhi: Since we use a dict to manage the pLocs input, it does not matter
+  # if pLocs have less pieces or not. So we can combine several functions together.
+  #
   def setPositions(self, pLocs):
 
-    pass # REMOVE WHEN WRITTEN
-    for ii = 1:self.puzzle.length
-      self.puzzle.piece(ii).setPlacement(pLocs(:, ii))
-
-  #============================= movePiece =============================
-  #
-  # @brief  Moves a single piece to the given location.
-  #
-  # @param[in]  pInd    The puzzle piece index.
-  # @param[in]  pLoc    The puzzle piece location.
-  # 
-  def setPositions(self, pInd, pLoc):
-
-    pass # REMOVE WHEN WRITTEN
-    if pInd is valid
-      self.puzzle.piece(pInd).setPlacement(pLoc)
-      
-
-  #============================= movePieces ============================
-  #
-  # @brief  Moves specified pieces to given locations.
-  #
-  # @param[in]  pInds   The puzzle pieces indices.
-  # @param[in]  pLocs   The puzzle pieces locations.
-  # 
-  def setPositions(self, pInds, pLocs):
-
-    pass # REMOVE WHEN WRITTEN
-    pInds = only valid indices.
-
-    for pInd in pInds
-      self.puzzle.piece(pInd).setPlacement(pLoc(:,pInd))
-      
+    for ii in range(self.puzzle.size()):
+      if self.puzzle.piece[ii].id in pLocs.keys():
+        self.puzzle.piece[ii].setPlacement(pLocs[self.puzzle.piece[ii].id])
 
   #============================= dragPiece =============================
   #
-  # @brief  Moves a piece incrementally from where it is.
+  # @brief  Moves pieces incrementally from where it is.
   #
-  # @param[in]  pInd    The puzzle piece index.
-  # @param[in]  pVec    The puzzle piece movement vector.
+  # @param[in]  pVecs    A dict of puzzle pieces ids and movement vector.
   # 
-  def dragPiece(self, pInd, pVec):
+  def dragPiece(self, pVecs):
 
-    pass # REMOVE WHEN WRITTEN
-    if pInd is valid:
-      self.puzzle.piece(pInd).offset(pVec)
-      NEED TO WRITE offset MEMBER FUNCTION
-      IN FUTURE WILL NOT COMMENT ON NEW MEMBER FUNCTIONS.
-      SHOULD BE INFERRED FROM ITS BEING MISSING
+    for ii in range(self.puzzle.size()):
+      if self.puzzle.piece[ii].id in pVecs.keys():
 
-  #============================= dragPiece =============================
-  #
-  # @brief  Moves a piece incrementally from where it is.
-  #
-  # @param[in]  pInds   The puzzle pieces indices.
-  # @param[in]  pVecs   The puzzle pieces movement vectors.
-  # 
-  def setPositions(self, pInds, pLocs):
+        self.puzzle.piece[ii].offset(pVecs[self.puzzle.piece[ii].id])
 
-    pass # REMOVE WHEN WRITTEN. NOT GONNA WRITE ANYMORE.
-    pInds = only valid indices.
-
-    for pInd in pInds
-      self.puzzle.piece(pInd).offset(pVecs(:,pInd))
-  
   #============================== display ============================== 
   #
   # @brief  Displays the current puzzle board.
@@ -139,9 +96,9 @@ class basic:
   def display(self):
 
     if not self.fig:
-      self.fig = create new figure.
+      self.fig = plt.figure()
 
-    self.puzzle.display(self.fig)
+    self.puzzle.display(fh=self.fig)
 
 #
 #========================= puzzle.simulator.basic ========================
