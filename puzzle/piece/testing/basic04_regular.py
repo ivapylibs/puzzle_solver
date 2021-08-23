@@ -83,7 +83,7 @@ f, axarr = plt.subplots(1,2)
 axarr[0].imshow(theImage)
 axarr[0].title.set_text('The segmented puzzle piece')
 
-axarr[1].imshow(output['class_image'])
+axarr[1].imshow(output['class_image'], cmap='rainbow')
 axarr[1].title.set_text('The segmented 4 edges')
 
 plt.show()

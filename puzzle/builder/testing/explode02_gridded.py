@@ -31,16 +31,6 @@ from puzzle.builder.gridded import gridded, paramGrid
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-@dataclass
-class dataBoard:
-  board: any = None
-  tauDist: float = None
-
-@dataclass
-class dataImage:
-  I: np.ndarray = None
-  M: np.ndarray = None
-
 #==[1] Read the source image and template.
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
@@ -61,9 +51,6 @@ theDet = fromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-cv2.imwrite(cpath+'/data/balloon_15_img.png', theImageSol)
-cv2.imwrite(cpath+'/data/balloon_15_mask.png', theMaskSol)
-
 #==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
@@ -77,27 +64,6 @@ f, axarr = plt.subplots(1,2)
 bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0].imshow(bSource)
 axarr[0].title.set_text('Source solution board')
-
-
-#==[1.4] Save theBoardSol
-#
-if not os.path.exists(cpath + '/data/board_15p.obj'):
-  theData_save = dataBoard(theBoardSol)
-
-  with open(cpath + '/data/board_15p.obj', 'wb') as fp:
-    pickle.dump(theData_save, fp)
-
-  del theData_save
-
-#==[1.5] Save theImageSol & theMaskSol
-#
-if not os.path.exists(cpath + '/data/image_15p.obj'):
-  theData_save = dataImage(theImageSol, theMaskSol)
-
-  with open(cpath + '/data/image_15p.obj', 'wb') as fp:
-    pickle.dump(theData_save, fp)
-
-  del theData_save
 
 #==[2] Create an Grid instance and explode it
 #
