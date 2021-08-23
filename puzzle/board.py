@@ -115,13 +115,21 @@ class board:
   #
   def testAdjacent(self, index_A, index_B, tauAdj):
 
-
     # Based on the nearest points on the contours
 
-    pts_A = np.array(np.flip(np.where(self.pieces[index_A].y.contour),axis=0)) + self.pieces[index_A].rLoc.reshape(-1,1)
-    pts_B = np.array(np.flip(np.where(self.pieces[index_B].y.contour),axis=0)) + self.pieces[index_B].rLoc.reshape(-1,1)
+    # Obtain the pts locations after subsampling
+    def obtain_sub_pts(piece, num_samples=500):
+      pts = np.array(np.flip(np.where(piece.y.contour), axis=0)) + piece.rLoc.reshape(
+        -1, 1)
+      pts = pts.T
+      idx = np.random.choice(np.arange(len(pts)), num_samples)
+      pts = pts[idx]
+      return pts
 
-    dists = cdist(pts_A.T, pts_B.T, 'euclidean')
+    pts_A = obtain_sub_pts(self.pieces[index_A])
+    pts_B = obtain_sub_pts(self.pieces[index_B])
+
+    dists = cdist(pts_A, pts_B, 'euclidean')
 
     theFlag = dists.min() < tauAdj
 
