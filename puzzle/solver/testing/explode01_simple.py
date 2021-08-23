@@ -107,7 +107,7 @@ plt.ioff()
 # plt.draw()
 
 # Build GIF
-with imageio.get_writer(cpath + f'/data/demo_simple_exploded.gif', mode='I', fps=1) as writer:
+with imageio.get_writer(cpath + f'/data/demo_simple_explod01.gif', mode='I', fps=1) as writer:
     filename_list = glob.glob(cpath + f'/data/explod01_simple_step*.png')
     filename_list.sort()
     for filename in filename_list:
