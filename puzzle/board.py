@@ -66,9 +66,26 @@ class board:
     self.id_count +=1
     self.pieces.append(piece)
 
+  # =========================== rmPiece ==========================
+  #
+  # @brief      Remove puzzle piece instance from the board
+  #
+  # @param[in]  id   The puzzle piece id
+  #
+  def rmPiece(self, id):
+
+    rm_index = None
+    for idx, piece in enumerate(self.pieces):
+      if piece.id == id:
+        rm_index = idx
+        break
+
+    if rm_index:
+      del self.pieces[rm_index]
+
   #=============================== clear ===============================
   #
-  # @brief  Clear the puzzle pieces from the board.
+  # @brief  Clear all the puzzle pieces from the board.
   #
   def clear(self):
 

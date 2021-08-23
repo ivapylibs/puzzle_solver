@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import cv2
+from copy import deepcopy
 
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.simulator.basic import basic
@@ -41,13 +42,14 @@ theBoardMea = theLayer.getState()
 #==[2] Create a simulatior
 #
 theSim = basic(theBoardMea)
+newPiece = deepcopy(theSim.puzzle.pieces[1])
 
 #==[3] Display
 #
 
 #==[3.1] Display the original board
 #
-f, axarr = plt.subplots(1,3)
+f, axarr = plt.subplots(1,5)
 theSim_img = theSim.toImage(ID_DISPLAY=True)
 axarr[0].imshow(theSim_img)
 axarr[0].title.set_text('Original \n Focus on piece 1')
@@ -69,6 +71,23 @@ theSim.dragPieces(pVec)
 theSim_img = theSim.toImage(ID_DISPLAY=True)
 axarr[2].imshow(theSim_img)
 axarr[2].title.set_text('After drag \n by (200,0) ')
+
+#==[3.3] Add a new puzzle piece & display
+#
+
+theSim.addPiece(newPiece)
+
+theSim_img = theSim.toImage(ID_DISPLAY=True)
+axarr[3].imshow(theSim_img)
+axarr[3].title.set_text('Add a new piece')
+
+#==[3.4] Remove a puzzle piece & display
+#
+theSim.rmPiece(3)
+
+theSim_img = theSim.toImage(ID_DISPLAY=True)
+axarr[4].imshow(theSim_img)
+axarr[4].title.set_text('Remove puzzle piece 3')
 
 plt.show()
 

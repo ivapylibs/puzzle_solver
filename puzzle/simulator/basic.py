@@ -56,6 +56,25 @@ class basic:
     #       rather part of the interpretation of the puzzle board.
     #
 
+  # =========================== addPiece ==========================
+  #
+  # @brief      Add puzzle piece instance to the board
+  #
+  # @param[in]  piece   A puzzle piece instance
+  #
+  def addPiece(self, piece):
+
+    self.puzzle.addPiece(piece)
+
+  # =========================== rmPiece ==========================
+  #
+  # @brief      Remove puzzle piece instance from the board
+  #
+  # @param[in]  id   The puzzle piece id
+  #
+  def rmPiece(self, id):
+
+    self.puzzle.rmPiece(id)
 
   #============================ setPieces ===========================
   #
