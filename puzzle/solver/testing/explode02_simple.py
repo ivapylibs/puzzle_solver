@@ -2,15 +2,15 @@
 #============================ explode02_simple ===========================
 #
 # @brief    Test script for solving a explodedPuzzle in a col-wise manner.
-#           (6 shapes img)
+#           (15p img)
 #
 #============================ explode02_simple ===========================
 
 #
-# @file     explode01_simple.py
+# @file     explode02_simple.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/16  [created]
+# @date     2021/08/23  [created]
 #
 #============================ explode02_simple ===========================
 
@@ -94,11 +94,11 @@ theSolver.setMatch(pAssignments)
 #==[5] Start the solver to take turns, display the updated board.
 #
 
-# plt.ion()
-# fh = plt.figure()
+plt.ion()
+fh = plt.figure()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
 
 if saveMe:
   f.savefig(cpath + f'/data/theBoardExplod.png')
@@ -106,16 +106,16 @@ if saveMe:
 # num of size() actions at most
 for i in range(1+theSolver.desired.size()):
 
-  # theSolver.current.display(fh=fh, ID_DISPLAY=True)
-  # fh.suptitle(f'Step {i}', fontsize=20)
-  # plt.pause(1)
+  theSolver.current.display(fh=fh, ID_DISPLAY=True)
+  fh.suptitle(f'Step {i}', fontsize=20)
+  plt.pause(1)
 
   if i==0:
     # Display the original one at the very beginning
     print(f'The original measured board')
 
-  # if saveMe:
-  #   fh.savefig(cpath + f'/data/explod01_simple_step{i}.png')
+  if saveMe:
+    fh.savefig(cpath + f'/data/explod02_simple_step{i}.png')
 
   if i < theSolver.desired.size():
     print(f'Step {i+1}:')
@@ -124,13 +124,13 @@ for i in range(1+theSolver.desired.size()):
 plt.ioff()
 # plt.draw()
 
-# # Build GIF
-# with imageio.get_writer(cpath + f'/data/demo_simple_exploded.gif', mode='I', fps=1) as writer:
-#     filename_list = glob.glob(cpath + f'/data/explod01_simple_step*.png')
-#     filename_list.sort()
-#     for filename in filename_list:
-#         image = imageio.imread(filename)
-#         writer.append_data(image)
+# Build GIF
+with imageio.get_writer(cpath + f'/data/demo_simple_exploded.gif', mode='I', fps=1) as writer:
+    filename_list = glob.glob(cpath + f'/data/explod02_simple_step*.png')
+    filename_list.sort()
+    for filename in filename_list:
+        image = imageio.imread(filename)
+        writer.append_data(image)
 
 #
 #============================ explode02_simple ===========================

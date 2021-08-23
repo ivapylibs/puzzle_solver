@@ -33,13 +33,13 @@ import matplotlib.pyplot as plt
 #
 @dataclass
 class puzzleTemplate:
-  size:    np.ndarray = np.array([])   # @< tight bbox size of puzzle piece image.
+  size:    np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
   rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
   appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
   image:   np.ndarray = np.array([],dtype='uint8')  # @< Template RGB image with BG default fill.
-  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template binary mask.
-  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template binary contour.
-
+  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template binary mask image.
+  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template binary contour image.
+  contour_pts: np.ndarray = np.array([]) # @< Template contour points.
 #
 #========================= puzzle.piece.template =========================
 #
@@ -233,8 +233,18 @@ class template:
     # Create a contour of the mask
     cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
                             cv2.CHAIN_APPROX_SIMPLE)
+
+    y.contour_pts = cnts[0][0]
     y.contour = np.zeros_like(y.mask).astype('uint8')
     cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+
+    # @note
+    # Yunzhi: For debug
+    # hull = cv2.convexHull(cnts[0][0])
+    # aa = np.zeros_like(y.mask).astype('uint8')
+    # cv2.drawContours(aa, hull, -1, (255, 255, 255), thickness=10)
+    # cv2.imshow('Test', aa)
+    # cv2.waitKey()
 
     y.rcoords = list(np.nonzero(theMask)) # 2 (row,col) x N
     # Updated to OpenCV style -> (x,y)
