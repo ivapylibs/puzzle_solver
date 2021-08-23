@@ -115,7 +115,7 @@ for i in range(1+theSolver.desired.size()):
     print(f'The original measured board')
 
   if saveMe:
-    fh.savefig(cpath + f'/data/explod02_simple_step{i}.png')
+    fh.savefig(cpath + f'/data/explod02_simple_step{str(i).zfill(2)}.png')
 
   if i < theSolver.desired.size():
     print(f'Step {i+1}:')
