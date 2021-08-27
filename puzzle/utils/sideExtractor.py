@@ -386,6 +386,20 @@ def compute_inout(class_image, line_params, pts, d_threshold=10):
 
   return inout
 
+
+def create_side_images_simple(class_image, inout, corners):
+
+  side_images = []
+
+  for cl in (1, 2, 3, 4):
+
+    side_image = np.zeros(class_image.shape, dtype='uint8')
+    side_image[class_image == cl] = cl
+    side_images.append(side_image)
+
+  return side_images
+
+
 def create_side_images(class_image, inout, corners):
 
   how_to_rotate = [(90, -90), (180, 0), (-90, 90), (0, 180)]
@@ -782,5 +796,8 @@ def sideExtractor(puzzleTemplate, **kwargs):
   # Yunzhi: Currently, we do not need this part
   # side_images = create_side_images(class_image, inout, corners)
   # out_dict['side_images'] = side_images
+
+  side_images = create_side_images_simple(class_image, inout, corners)
+  out_dict['side_images'] = side_images
 
   return out_dict

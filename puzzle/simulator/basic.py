@@ -44,7 +44,7 @@ class basic:
   def __init__(self, thePuzzle, theFig = None):
 
     self.puzzle = thePuzzle
-    self.layers = list(range(self.puzzle.size()))  # change to python
+    self.layers = list(range(self.puzzle.size()))
 
     self.fig = theFig
 

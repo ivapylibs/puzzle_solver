@@ -73,8 +73,8 @@ output = theRegular.process()
 
 #==[3] Display the puzzle piece and the extracted info.
 #
-print('Should see [3,1,2,2], which corresponds to LEFT: FLAT, RIGHT: IN, TOP: OUT, BOTTOM: OUT')
-print('The type of the edge:', theRegular.edge)
+print('Should see [3,1,2,2], which means LEFT: FLAT, RIGHT: IN, TOP: OUT, BOTTOM: OUT')
+theRegular.displayEdgeType()
 
 theImage = theRegular.toImage()
 

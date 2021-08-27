@@ -30,8 +30,8 @@ from puzzle.utils.sideExtractor import sideExtractor
 
 #===== Helper Elements
 #
-class TypeEdge(Enum):
-  """ TypeEdge used to keep track of the type of edges """
+class EdgeType(Enum):
+  """ EdgeType used to keep track of the type of edges """
 
   UNDEFINED = 0
   IN = 1
@@ -40,13 +40,18 @@ class TypeEdge(Enum):
 
 # @todo
 # Yunzhi: May need to upgrade to other forms when we have rotations
-class DirectionEdge(Enum):
-  """ DirectionEdge used to keep track of the direction of edges """
+class EdgeDirection(Enum):
+  """ EdgeDirection used to keep track of the direction of edges """
 
   LEFT = 0
   RIGHT = 1
   TOP = 2
   BOTTOM = 3
+
+class EdgeDes:
+  type: int= EdgeType.UNDEFINED
+  feature_shape: np.ndarray =np.array([])  # To save the shape feature
+  feature_color: np.ndarray =np.array([])  # To save the color feature
 
 #
 #================================ puzzle.piece.regular ================================
@@ -86,18 +91,63 @@ class regular(template):
     super(regular, self).__init__(y, r, id)
 
     # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
-    self.edge = [TypeEdge.UNDEFINED] * 4
+    self.edge = [EdgeDes() for i in range(4)]
 
-  # ============================== setTypeEdge ==============================
+
+  # ============================== setEdgeType ==============================
   #
   # @brief  Set up the type of the chosen edge
   #
   # @param[in]   direction      The edge to be set up.
   # @param[in]   type           The type.
   #
-  def setTypeEdge(self, direction, type):
+  def setEdgeType(self, direction, type):
+    self.edge[direction].type = type
 
-    self.edge[direction] = type
+  # ============================== displayEdgeType ==============================
+  #
+  # @brief  Display the edge type of the piece
+  #
+  def displayEdgeType(self):
+
+    for direction in EdgeDirection:
+      print(f'{direction.name}:',self.edge[direction.value].type)
+
+  # ============================== shapeFeaExtrct ==============================
+  #
+  # @brief  Extract the edge shape feature from an input image
+  #
+  # @param[in]   direction      The edge to be set up.
+  # @param[in]   img            The input image.
+  #
+  def shapeFeaExtract(self, direction, img):
+
+    y, x = np.nonzero(img)
+    shapeFea = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
+    self.edge[direction].feature_shape = shapeFea
+
+  # ============================== colorFeaExtrct ==============================
+  #
+  # @brief  Extract the edge color feature from an input image
+  #
+  # @param[in]   direction      The edge to be set up.
+  # @param[in]   img            The input image.
+  #
+  def colorFeaExtract(self, direction, img, feaLength=50):
+
+    y, x = np.nonzero(img)
+
+    # Extract the valid pts
+    pts = self.y.image[y,x]
+
+    # Expand dim for further processing
+    feaOri = np.expand_dims(pts, axis=0)
+
+    # Resize to a unit length
+    feaResize = cv2.resize(feaOri,(1,feaLength))
+
+    self.edge[direction].feature_color = feaResize
+
 
   # ============================== process ==============================
   #
@@ -111,9 +161,13 @@ class regular(template):
                              corner_score_threshold=0.2, corner_minmax_threshold=100)
 
     # Set up the type of the chosen edge
-    for direction, type in enumerate(out_dict['inout']):
-      self.setTypeEdge(direction, type)
+    for direction in EdgeDirection:
+      self.setEdgeType(direction.value, out_dict['inout'][direction.value])
+      self.shapeFeaExtract(direction.value, out_dict['side_images'][direction.value])
+      self.colorFeaExtract(direction.value, out_dict['side_images'][direction.value])
 
+    # @todo
+    # Yunzhi: will remove afterwards
     return out_dict
 #
 #================================ puzzle.piece.regular ================================

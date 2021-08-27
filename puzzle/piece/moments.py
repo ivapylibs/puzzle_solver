@@ -39,7 +39,7 @@ class moments(matchDifferent):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self, y =None, tau=float('inf')):
+  def __init__(self, y =None, tau=-float('inf')):
     super(moments, self).__init__(y, tau)
 
   #=========================== process ==========================
