@@ -40,7 +40,7 @@ from puzzle.board import board
 @dataclass
 class paramPuzzle:
   areaThreshold: float = 20
-
+  pieceConstructor: any = template
 #
 #======================== puzzle.parser.fromLayer ========================
 #
@@ -57,6 +57,8 @@ class fromLayer(centroidMulti):
     self.bMeas = board()             # @< The measured board.
 
     self.params = theParams
+
+    self.pieceConstructor = theParams.pieceConstructor # @< The basic constructor for pieces: template or regular
 
   #============================== getState =============================
   #
@@ -209,7 +211,7 @@ class fromLayer(centroidMulti):
       rLoc = region[2]
       # @todo
       # Have to update from MatLab coordinate system to OpenCV one later
-      thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc = rLoc)
+      thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc = rLoc)
 
       pieces.append(thePiece)
 
