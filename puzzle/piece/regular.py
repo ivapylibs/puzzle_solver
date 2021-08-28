@@ -93,6 +93,9 @@ class regular(template):
     # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
     self.edge = [EdgeDes() for i in range(4)]
 
+    self.class_image = None
+
+    self._process()
 
   # ============================== setEdgeType ==============================
   #
@@ -144,7 +147,7 @@ class regular(template):
     feaOri = np.expand_dims(pts, axis=0)
 
     # Resize to a unit length
-    feaResize = cv2.resize(feaOri,(1,feaLength))
+    feaResize = cv2.resize(feaOri,(feaLength,1))
 
     self.edge[direction].feature_color = feaResize
 
@@ -154,7 +157,7 @@ class regular(template):
   # @brief  Run the sideExtractor
   #
   #
-  def process(self):
+  def _process(self):
 
     out_dict = sideExtractor(self.y, scale_factor=1,
                              harris_block_size=5, harris_ksize=5,
@@ -166,8 +169,7 @@ class regular(template):
       self.shapeFeaExtract(direction.value, out_dict['side_images'][direction.value])
       self.colorFeaExtract(direction.value, out_dict['side_images'][direction.value])
 
-    # @todo
-    # Yunzhi: will remove afterwards
-    return out_dict
+    # Just for demo for now
+    self.class_image = out_dict['class_image']
 #
 #================================ puzzle.piece.regular ================================
