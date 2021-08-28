@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 #============================ basic04_regular ===========================
 #
-# @brief    Test script for the most basic functionality of template
-#           puzzle piece class.
+# @brief    Test script for the most basic functionality of regular
+#           puzzle piece class. (regular piece with 4 edges)
 #
 #============================ basic04_regular ===========================
 
@@ -10,7 +10,7 @@
 # @file     basic04_regular.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/17  [modified]
+# @date     2021/08/17  [created]
 #
 #============================ basic04_regular ===========================
 
@@ -66,12 +66,7 @@ theTemplate = theBoardSol.pieces[9]
 
 theRegular = regular(theTemplate)
 
-#==[2] Process the puzzle piece to obtain the segmented contours
-#
-
-output = theRegular.process()
-
-#==[3] Display the puzzle piece and the extracted info.
+#==[2] Display the puzzle piece and the extracted info.
 #
 print('Should see [3,1,2,2], which means LEFT: FLAT, RIGHT: IN, TOP: OUT, BOTTOM: OUT')
 theRegular.displayEdgeType()
@@ -83,7 +78,7 @@ f, axarr = plt.subplots(1,2)
 axarr[0].imshow(theImage)
 axarr[0].title.set_text('The segmented puzzle piece')
 
-axarr[1].imshow(output['class_image'], cmap='rainbow')
+axarr[1].imshow(theRegular.class_image, cmap='rainbow')
 axarr[1].title.set_text('The segmented 4 edges')
 
 plt.show()

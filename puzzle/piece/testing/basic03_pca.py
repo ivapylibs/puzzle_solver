@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 #============================ basic03_pca ===========================
 #
-# @brief    Test script for the most basic functionality of moments. Create
+# @brief    Test script for the most basic functionality of pca. Create
 #           two puzzles (rotate 1 for 90 degree) and compare them by moments
-#           feature.
+#           pca.
 #
 #============================ basic03_pca ===========================
 
@@ -45,11 +45,11 @@ thePiece_2.setPlacement(np.array([50,50]))
 thePiece_1.display()
 thePiece_2.display()
 
-#==[3] Create a moments instance and compare puzzle 1 and 2. Should see True.
+#==[3] Create a PCA instance and compare puzzle 1 and 2. Should see -90.
 #
-theMoment = pca(thePiece_1.y, 5)
+thePCA = pca(5)
 
-ret = theMoment.score(thePiece_2.y)
+ret = thePCA.score(thePiece_1, thePiece_2)
 print(ret)
 
 

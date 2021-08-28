@@ -40,21 +40,22 @@ class matchSimilar(matcher):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self, y=None, tau=float('inf')):
-    super(matchSimilar, self).__init__(y, tau)
+  def __init__(self, tau=float('inf')):
+    super(matchSimilar, self).__init__(tau)
 
   #============================== compare ==============================
   #
   # @brief  Compare a measured puzzle piece to this particular one. 
   #
-  # @param[in]  yM    A puzzleTemplate instance saving a passed puzzle piece's info
+  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
+  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
   #
   # @param[out]      Return comparison result
   #
-  def compare(self, yM):
+  def compare(self, yA, yB):
 
     # score is to calculate the similarity while it will call the feature extraction process inside
-    simScore = self.score(yM)
+    simScore = self.score(yA, yB)
 
     return simScore > self.tau
 

@@ -132,8 +132,8 @@ class manager(fromLayer):
     # Generate a new board for association, filtered by the moments threshold
     pFilteredAssignments = []
     for assignment in self.pAssignments:
-      theMoment = moments(self.bMeas.pieces[assignment[0]].y, 20)
-      ret = theMoment.compare(self.solution.pieces[assignment[1]].y)
+      theMoment = moments(20)
+      ret = theMoment.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
       if ret:
         pFilteredAssignments.append(assignment)
 
@@ -153,9 +153,8 @@ class manager(fromLayer):
       for idx_y, bSol in enumerate(self.solution.pieces):
 
         # Create a moments instance
-        theMoment = moments(bMea.y)
-        # ret = theMoment.compare(bSol.y)
-        ret = theMoment.score(bSol.y)
+        theMoment = moments()
+        ret = theMoment.score(bMea, bSol)
         scoreTable[idx_x][idx_y] = ret
 
     # The measured piece will be assigned a solution piece

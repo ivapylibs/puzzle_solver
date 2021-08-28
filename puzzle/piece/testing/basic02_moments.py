@@ -47,9 +47,9 @@ thePiece_2.display()
 
 #==[3] Create a moments instance and compare puzzle 1 and 2. Should see True.
 #
-theMoment = moments(thePiece_1.y, 5)
+theMoment = moments(5)
 
-ret = theMoment.compare(thePiece_2.y)
+ret = theMoment.compare(thePiece_1, thePiece_2)
 print(ret)
 
 

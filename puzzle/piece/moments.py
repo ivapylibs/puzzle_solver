@@ -25,7 +25,7 @@ import math
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
-
+from puzzle.piece.template import template, puzzleTemplate
 #
 #================================ puzzle.piece.moments ================================
 #
@@ -39,19 +39,26 @@ class moments(matchDifferent):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self, y =None, tau=-float('inf')):
-    super(moments, self).__init__(y, tau)
+  def __init__(self, tau=-float('inf')):
+    super(moments, self).__init__(tau)
 
   #=========================== process ==========================
   #
   # @brief  Compute moments from the raw puzzle data.
   #         See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
   #
-  # @param[in]  y    A puzzleTemplate instance saving a piece's info
+  # @param[in]  y    A template instance or puzzleTemplate instance saving a piece's info.
   #
   # @param[out]  huMoments    A list of huMoments value
   #
   def process(self, y):
+
+    if isinstance(y, template):
+      y = y.y
+    elif isinstance(y, puzzleTemplate):
+      pass
+    else:
+      raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
     moments = cv2.moments(y.contour)
     huMoments = cv2.HuMoments(moments)
@@ -65,15 +72,15 @@ class moments(matchDifferent):
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
-  # @param[in]  yM    A puzzleTemplate instance saving a passed puzzle piece's info
+  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
+  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
   #
-  # @param[out]  distance    The distance between passed puzzle piece data and
-  #                          stored puzzle piece.
+  # @param[out]  distance    The distance between the two passed puzzle piece data.
   #
-  def score(self, yM):
+  def score(self, yA, yB):
 
-    huMoments_A= self.process(self.y)
-    huMoments_B= self.process(yM)
+    huMoments_A= self.process(yA)
+    huMoments_B= self.process(yB)
 
     distance = np.sum(np.abs(huMoments_B-huMoments_A))
 

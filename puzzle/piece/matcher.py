@@ -25,20 +25,20 @@
 
 #===== Environment / Dependencies
 #
-from puzzle.piece.template import template
+# from puzzle.piece.template import template
 
 #
 #========================= puzzle.piece.matcher =========================
 #
-class matcher(template):
+class matcher:
 
   #============================== matcher ==============================
   #
   # @brief  Constructor for the puzzle.piece.matcher class.
   #
-  def __init__(self, y = None, tau = float("NaN")):
+  def __init__(self, tau = float("NaN")):
 
-    super(matcher, self).__init__(y)
+    # super(matcher, self).__init__(y)
 
     self.tau = tau  # @< Threshold to use when comparing, if given.
 
@@ -50,7 +50,7 @@ class matcher(template):
   #
   # This member function should be overloaded.
   #
-  def process(self, yM):
+  def process(self, y):
     pass
 
   #=============================== score ===============================
@@ -58,10 +58,13 @@ class matcher(template):
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
+  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
+  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
+  #
   # This member function should be overloaded. Currently returns NaN to
   # indicate that a score cannot be computed.
   #
-  def score(self, yM):
+  def score(self, yA, yB):
     # @note
     # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError
@@ -73,7 +76,7 @@ class matcher(template):
   # This member function should be overloaded. Currently returns false
   # so that all comparisons fail.
   #
-  def compare(self, yM):
+  def compare(self, yA, yB):
     # @note
     # Yunzhi: since this function should be overloaded. It is better to raise an error here.
     raise NotImplementedError

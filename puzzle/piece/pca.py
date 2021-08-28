@@ -37,19 +37,27 @@ class pca(matchDifferent):
   # Decide later if initialization/calibration data can be passed
   # at instantiation.
   #
-  def __init__(self, y =None, tau=float('inf')):
-    super(pca, self).__init__(y, tau)
+  def __init__(self, tau=-float('inf')):
+    super(pca, self).__init__(tau)
 
   #=========================== process ==========================
   #
   # @brief  Compute moments from the raw puzzle data.
   #         See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
   #
-  # @param[in]  y    A puzzleTemplate instance saving a piece's info
+  # @param[in]  y    A puzzleTemplate instance saving a passed puzzle piece's info
   #
   # @param[out]  theta    The rotation of the main vector.
   #
   def process(self, y):
+
+    if isinstance(y, template):
+      y = y.y
+    elif isinstance(y, puzzleTemplate):
+      pass
+    else:
+      raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
+
     yfeature = pca.getEig(y.contour)
     theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
 
@@ -60,15 +68,16 @@ class pca(matchDifferent):
   # @brief  Compute the score between passed puzzle piece data and
   #         stored puzzle piece.
   #
-  # @param[in]  yM    A puzzleTemplate instance saving a passed puzzle piece's info
+  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
+  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
   #
   # @param[out]  distance    The degree distance between passed puzzle piece data and
   #                          stored puzzle piece. (counter-clockwise)
   #
-  def score(self, yM):
+  def score(self, yA, yB):
 
-    theta_A= self.process(self.y)
-    theta_B= self.process(yM)
+    theta_A= self.process(yA)
+    theta_B= self.process(yB)
 
     distance = np.rad2deg(theta_B - theta_A)
 
