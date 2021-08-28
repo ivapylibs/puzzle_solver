@@ -35,10 +35,6 @@ class moments(matchDifferent):
   #
   # @brief  Constructor for the puzzle piece matchDifferent class.
   #
-  # @todo
-  # Decide later if initialization/calibration data can be passed
-  # at instantiation.
-  #
   def __init__(self, tau=-float('inf')):
     super(moments, self).__init__(tau)
 

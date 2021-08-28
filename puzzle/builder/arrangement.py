@@ -69,12 +69,12 @@ class arrangement(board):
     # self.pieces = solBoard.pieces
     # self.id_count = solBoard.id_count
 
-    # @todo
-    # Yunzhi: I think for each arrangement instance, there should be
-    # two boards input: One for the solution and one for the current estimation.
-    # By default, the current estimation could be the same as the solution.
-    # But we need another member function to edit it later.
-
+    '''
+    @todo Yunzhi: I think for each arrangement instance, there should be 
+    two boards input: One for the solution and one for the current estimation. 
+    By default, the current estimation could be the same as the solution.
+    But we need another member function to edit it later.
+    '''
 
 
     # @note
@@ -128,9 +128,7 @@ class arrangement(board):
       for id in pLoc:
         theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
     else:
-      # @todo
-      # Not decided what to do else if the size does not match yet
-      print('Error of unmatched puzzle piece number!')
+      raise RuntimeError('Error of unmatched puzzle piece number!')
 
     return theVects
 
@@ -150,21 +148,13 @@ class arrangement(board):
   #
   def distances(self, pLoc):
 
-    # @todo
-    # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
-    # COMPARE TO pLoc ARRAY to plocTrue, GET DISTANCE.
-    #
-    # RETURN the distances.
-
     theDists = {}
     pLocTrue = self.solution.pieceLocations()
     if len(pLocTrue) == len(pLoc):
       for id in pLoc:
         theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
     else:
-      # @todo
-      # Not decided what to do else if the size does not match yet
-      print('Error of unmatched puzzle piece number!')
+      raise RuntimeError('Error of unmatched puzzle piece number!')
 
     return theDists
 
@@ -231,10 +221,6 @@ class arrangement(board):
   #                         whether the piece is correctly in place or not.
   #
   def piecesInPlace(self, pLoc):
-
-    # @todo
-    # Threshold on the scoreByLocation.
-    # return boolean array
 
     errDists = self.distances(pLoc)
 

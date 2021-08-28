@@ -131,11 +131,11 @@ class template:
       rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + rcoords
       theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
-    # @todo
-    # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
-    # OPTION.  IT WILL BE A LITTLE MORE INVOLVED. WOULD REQUIRE HAVING A
-    # ROTATED IMAGE TEMPLATE AS A MEMBER VARIABLE.
-
+    '''
+    @todo FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
+    OPTION.  IT WILL BE A LITTLE MORE INVOLVED. WOULD REQUIRE HAVING A
+    ROTATED IMAGE TEMPLATE AS A MEMBER VARIABLE.
+    '''
   #============================ placeInImageAt ===========================
   #
   # @brief  Insert the puzzle piece into the image at the given location.
@@ -166,9 +166,11 @@ class template:
       rcoords =  rc.reshape(-1,1) + rcoords
       theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
-    # @todo
-    # FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. LATER, INCLUDE THAT
-    # OPTION.  IT WILL BE A LITTLE MORE INVOLVED.
+    '''
+    @todo FOR NOW JUST PROGRAM WITHOUT ORIENTATION CHANGE. 
+    LATER, INCLUDE THAT OPTION.  
+    IT WILL BE A LITTLE MORE INVOLVED.
+    '''
 
   # ============================== toImage ==============================
   #

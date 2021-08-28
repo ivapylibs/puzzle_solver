@@ -94,20 +94,15 @@ class fromLayer(centroidMulti):
     #
     self.bMeas.clear()
 
-    # @todo
-    # Should be updated to add the pieces one by one. So the label can be managed.
-    # self.bMeas.pieces = pieces
 
+    # Add the pieces one by one. So the label can be managed.
     for piece in pieces:
       self.bMeas.addPiece(piece)
 
     if len(self.bMeas.pieces) == 0:
       self.haveMeas = False
     else:
-      # @todo
-      # Yunzhi: Eventually, tpt should be updated with a dict or class instance
-
-      # self.tpt = self.bMeas.pieceLocations()
+      # @todo Yunzhi: Eventually, tpt should be updated with a dict or class instance
       self.tpt = []
       for id, loc in self.bMeas.pieceLocations().items():
         self.tpt.append(loc)
@@ -159,10 +154,9 @@ class fromLayer(centroidMulti):
       # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
       area = cv2.contourArea(c)
 
-      # @todo
-      # Yunzhi: this basic processing may be put somewhere else
-      # Filtered by the area threshold
+      # @todo Yunzhi: this basic processing may be put somewhere else.
 
+      # Filtered by the area threshold
       if area > self.params.areaThreshold:
         desired_cnts.append(c)
 
@@ -209,8 +203,6 @@ class fromLayer(centroidMulti):
       theMask = region[0]
       theImage = region[1]
       rLoc = region[2]
-      # @todo
-      # Have to update from MatLab coordinate system to OpenCV one later
       thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc = rLoc)
 
       pieces.append(thePiece)

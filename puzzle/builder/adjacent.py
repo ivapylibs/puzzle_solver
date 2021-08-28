@@ -86,13 +86,6 @@ class adjacent(arrangement):
 
 
   # OTHER CODE / MEMBER FUNCTIONS
-  #
-  # @todo
-  # Definitely need to overload the scoring and distance function
-  # to consider adjacency. Not clear how to do so now, so
-  # ignoring and pushing down the road.
-  #
-  # OTHER CODE / MEMBER FUNCTIONS
 
   #======================== buildFromFile_Puzzle =======================
   #

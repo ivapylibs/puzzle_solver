@@ -68,8 +68,6 @@ class detector_puzzle(inImage):
     # For OpenCV 4+
     cnts = cnts[0]
 
-    # @todo
-    # areaThreshold for contours
     areaThreshold = 100
 
     desired_cnts = []
@@ -124,7 +122,7 @@ class detector_puzzle(inImage):
     seg_img_pair_list = []
     for pair in itertools.combinations(seg_img_list, 2):
       d2 = cv2.matchShapes(pair[0], pair[1], cv2.CONTOURS_MATCH_I2, 0)
-      # @todo
+
       if d2 < 0.05:
         seg_img_pair_list.append([pair[0], pair[1], d2])
 
@@ -151,8 +149,6 @@ class detector_puzzle(inImage):
       dict_template = detector_puzzle.eig_getter(pair[0])
       dict_puzzle = detector_puzzle.eig_getter(pair[1])
 
-
-      # @todo
       scale = 10
       # Plot the Main axis of the puzzle piece
       plt.plot(dict_puzzle['v1'][0] * np.array([-scale, scale] * 4),

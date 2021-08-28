@@ -161,8 +161,10 @@ class manager(fromLayer):
         theMatcher = self.matcher()
         ret = theMatcher.score(bMea, bSol)
 
-        # @todo
-        # Yunzhi: Will update this part. We may need two scoreTable, currently, just will with the shape feature
+        '''
+        @todo Yunzhi: Will update this part. We may need two scoreTable. 
+        Currently, just will with the shape feature
+        '''
         if type(ret) is tuple and len(ret)>0:
           scoreTable[idx_x][idx_y] = np.sum(ret[0])
         else:
@@ -188,15 +190,13 @@ class manager(fromLayer):
     for i in range(scoreTable.shape[0]):
       if self.scoreType == SCORE_DIFFERENCE:
         j = scoreTable[i].argmin()
-        # @todo
-        # The threshold needs to be decided by the feature method
+        # @todo Yunzhi: The threshold needs to be decided by the feature method
         if scoreTable[i][j] < 1e16:
           scoreTable[:, j] = 1e18
           matched_indices.append([i, j])
       else:
         j = scoreTable[i].argmax()
-        # @todo
-        # The threshold needs to be decided by the feature method
+        # @todo Yunzhi: The threshold needs to be decided by the feature method
         if scoreTable[i][j] > 10:
           scoreTable[:, j] = 100
           matched_indices.append([i, j])

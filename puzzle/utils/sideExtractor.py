@@ -758,8 +758,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
   if intersections is None:
     raise RuntimeError('No rectangle found')
 
-  # @todo
-  # Rotate to get a horizontal puzzle piece
+  # @todo Rotate to get a horizontal puzzle piece
   # if intersections[1, 0] == intersections[0, 0]:
   #     rotation_angle = 90
   # else:
@@ -769,11 +768,11 @@ def sideExtractor(puzzleTemplate, **kwargs):
   edges = contour_enlarged
 
   # Rotate all images
-  # # @todo
+  # # @todo Rotate
   # edges, M = rotate(edges, rotation_angle)
   out_dict['edges'] = edges[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
 
-  # # @todo
+  # # @todo Rotate
   # # Rotate intersection points
   # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(np.int)
 
@@ -792,8 +791,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
   inout = compute_inout(class_image, line_params, (xb, yb), params['inout_distance_threshold'])
   out_dict['inout'] = inout
 
-  # @todo
-  # Yunzhi: Currently, we do not need this part
+  # @todo Yunzhi: Currently, we do not need this part
   # side_images = create_side_images(class_image, inout, corners)
   # out_dict['side_images'] = side_images
 

@@ -36,9 +36,6 @@ class edge(matchDifferent):
   #
   # @brief  Constructor for the puzzle piece matchDifferent class.
   #
-  # @todo
-  # Decide later if initialization/calibration data can be passed
-  # at instantiation.
   #
   def __init__(self, tau=-float('inf')):
     super(edge, self).__init__(tau)
@@ -52,8 +49,7 @@ class edge(matchDifferent):
   #
   def process(self, y):
 
-    # @todo
-    # Yunzhi: No additional processing for now
+    # @todo Yunzhi: No additional processing for now
 
     feature_color = cv2.cvtColor(y.feature_color,cv2.COLOR_RGB2Lab)
 

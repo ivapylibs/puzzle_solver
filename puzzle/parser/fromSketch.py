@@ -5,8 +5,7 @@
 # @brief    A derived detector class that can processe an image & mask image to create
 #           a binary mask.
 #
-#           @ todo
-#           Not fully developed yet.
+#           @todo Not fully developed yet.
 #
 #
 # ======================== puzzle.parser.fromSketch ========================

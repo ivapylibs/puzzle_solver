@@ -191,8 +191,6 @@ class board:
   def boundingBox(self):
 
     if self.size() == 0:
-      # @todo
-      # Yunzhi: Not sure what to do here
       print('No pieces exist')
       exit()
     else:
@@ -261,11 +259,7 @@ class board:
             cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
                         min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
       else:
-        # @todo
-        #  Figure out what to do if image too small. Expand it or abort?
-        #  Yunzhi: Currently abort.
-        print('The image is too small. Please try again.')
-        exit()
+        raise RuntimeError('The image is too small. Please try again.')
     else:
       # Create image with proper dimensions.
       lengths = self.extents().astype('int')

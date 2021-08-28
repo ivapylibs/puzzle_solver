@@ -104,16 +104,9 @@ class gridded(interlocking):
     for ii in range(self.solution.size()):
       # The order is in line with the one saving in self.solution.pieces
 
-      # @todo
-      # Yunzhi: Eventually, this has to be upgraded to a dict?
+      # @todo Yunzhi: Eventually, this has to be upgraded to a dict?
       self.gc[:,ii]= x_label[ii], y_label[ii]
 
-  # OTHER CODE / MEMBER FUNCTIONS
-  #
-  # @todo Definitely need to overload the scoring and distance function
-  #         to consider adjacency. Not clear how to do so now, so
-  #         ignoring and pushing down the road.
-  #
   # OTHER CODE / MEMBER FUNCTIONS
 
   # =========================== explodedPuzzle ==========================
@@ -166,9 +159,10 @@ class gridded(interlocking):
       piece.placeInImageAt(epImage, rc=r_new)
       piece.setPlacement(r_new)
 
-    # @todo
-    # Yunzhi: Currently, it is just explode but without changing the order.
-    # Otherwise, gc has to be updated too.
+    '''
+    @todo Yunzhi: Currently, it is just explode but without changing the order.
+    Otherwise, gc has to be updated too.
+    '''
 
     return epImage, epBoard
 

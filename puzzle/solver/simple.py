@@ -78,14 +78,16 @@ class simple(base):
           print('No default plan has been correctly initlized.')
 
       else:
-        # @todo
-        # Get and apply move from thePlan
-        # Plans not figured out yet, so ignore for now.
+        '''
+        @todo Get and apply move from thePlan
+        Plans not figured out yet, so ignore for now.
+        '''
         pass
     else:
-      # @todo
-      # Get and apply move from self.plan
-      # Plans not figured out yet, so ignore for now.
+      '''
+      @todo Get and apply move from self.plan
+      Plans not figured out yet, so ignore for now.
+      '''
       pass
 
 
