@@ -108,27 +108,27 @@ def segment_piece(image, bin_threshold=128):
   """
   return cv2.threshold(image, bin_threshold, 255, cv2.THRESH_BINARY)[1]
 
-def extract_piece(thresh):
-
-  # Here we build a square image centered on the blob (piece of the puzzle).
-  # The image is constructed large enough to allow for piece rotations.
-
-  minmax_y, minmax_x = compute_minmax_xy(thresh)
-
-  ly, lx = minmax_y[1] - minmax_y[0], minmax_x[1] - minmax_x[0]
-  size = int(max(ly, lx) * np.sqrt(2))
-
-  x_extract = thresh[minmax_y[0]:minmax_y[1] + 1, minmax_x[0]:minmax_x[1] + 1]
-  ly, lx = x_extract.shape
-
-  xeh, xew = x_extract.shape
-  x_copy = np.full((size, size), 255, dtype='uint8')
-  sy, sx = size // 2 - ly // 2, size // 2 - lx // 2
-
-  x_copy[sy: sy + ly, sx: sx + lx] = x_extract
-  thresh = x_copy
-  thresh = 255 - thresh
-  return thresh
+# def extract_piece(thresh):
+#
+#   # Here we build a square image centered on the blob (piece of the puzzle).
+#   # The image is constructed large enough to allow for piece rotations.
+#
+#   minmax_y, minmax_x = compute_minmax_xy(thresh)
+#
+#   ly, lx = minmax_y[1] - minmax_y[0], minmax_x[1] - minmax_x[0]
+#   size = int(max(ly, lx) * np.sqrt(2))
+#
+#   x_extract = thresh[minmax_y[0]:minmax_y[1] + 1, minmax_x[0]:minmax_x[1] + 1]
+#   ly, lx = x_extract.shape
+#
+#   xeh, xew = x_extract.shape
+#   x_copy = np.full((size, size), 255, dtype='uint8')
+#   sy, sx = size // 2 - ly // 2, size // 2 - lx // 2
+#
+#   x_copy[sy: sy + ly, sx: sx + lx] = x_extract
+#   thresh = x_copy
+#   thresh = 255 - thresh
+#   return thresh
 
 def prune_lines_by_voting(lines, angle_threshold=5):
 
@@ -797,7 +797,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
   # side_images = create_side_images(class_image, inout, corners)
   # out_dict['side_images'] = side_images
 
-  side_images = create_side_images_simple(class_image, inout, corners)
+  side_images = create_side_images_simple(out_dict['class_image'], inout, corners)
   out_dict['side_images'] = side_images
 
   return out_dict
