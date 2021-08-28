@@ -46,7 +46,7 @@ class detector_puzzle(inImage):
     if self.processor:
       self.Ip = self.processor.apply(I)
     else:
-      raise Exception('Processor has not been initialized yet')
+      raise RuntimeError('Processor has not been initialized yet')
 
     seg_img_list = self.get_segmented_mask(self.Ip)
     seg_img_pair_list = self.get_matched_pairs(seg_img_list)
