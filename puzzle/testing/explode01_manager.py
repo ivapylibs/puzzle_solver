@@ -9,10 +9,10 @@
 #============================= explode01_manager =============================
 
 #
-# @file     basic03_manager.py
+# @file     explode01_manager.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/02 [created]
+# @date     2021/08/28 [created]
 #
 #============================= explode01_manager =============================
 
