@@ -57,11 +57,13 @@ theBoard = theLayer.bMeas
 
 #==[4] Display the original image. Should see two circle pieces.
 #
+print('Should see two circle pieces.')
 plt.imshow(theImage)
 plt.show()
 
-#==[5] Display the resulting image. Should have two circle pieces in a cropped region.
+#==[5] Display the resulting image. Should see two circle pieces in a cropped region.
 #
+print('Should see two circle pieces in a cropped region.')
 fh = theBoard.display()
 plt.show()
 

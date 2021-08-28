@@ -41,11 +41,13 @@ theBoard = theLayer.bMeas
 
 #==[4] Display the original image. Should see some puzzle pieces.
 #
+print('Should see some puzzle pieces.')
 plt.imshow(theImage)
 plt.show()
 
-#==[5] Display the resulting image. Should have some puzzle pieces in a cropped region.
+#==[5] Display the resulting image. Should see some puzzle pieces in a cropped region.
 #
+print('Should see some puzzle pieces in a cropped region.')
 fh = theBoard.display()
 plt.show()
 
