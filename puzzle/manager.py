@@ -44,7 +44,9 @@ import itertools
 import numpy as np
 
 from puzzle.parser.fromLayer import fromLayer
+
 from puzzle.piece.moments import moments
+from puzzle.piece.edge import edge
 
 #===== Helper Elements
 #
@@ -55,7 +57,7 @@ SCORE_SIMILAR = 1
 @dataclass
 class managerParms:
   scoreType: int = SCORE_DIFFERENCE
-
+  matcher: any = moments
 #
 #================================ manager ================================
 #
@@ -101,6 +103,8 @@ class manager(fromLayer):
     self.pAssignments = []                # @< Assignments: meas to sol.
     self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
+    self.matcher = theParms.matcher
+
   #============================== predict ==============================
   #
   # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
@@ -112,6 +116,7 @@ class manager(fromLayer):
   #
   # @param[in]  I   Source image.
   # @param[in]  M   Layer mask (binary)
+  # OR
   # @param[in]  board The measured board.
   #
   def measure(self, *argv):
@@ -129,11 +134,11 @@ class manager(fromLayer):
     # Compare with ground truth/generate associates
     self.matchPieces()
 
-    # Generate a new board for association, filtered by the moments threshold
+    # Generate a new board for association, filtered by the matcher threshold
     pFilteredAssignments = []
     for assignment in self.pAssignments:
-      theMoment = moments(20)
-      ret = theMoment.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
+      theMatcher = self.matcher(20)
+      ret = theMatcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
       if ret:
         pFilteredAssignments.append(assignment)
 
@@ -152,10 +157,16 @@ class manager(fromLayer):
     for idx_x, bMea in enumerate(self.bMeas.pieces):
       for idx_y, bSol in enumerate(self.solution.pieces):
 
-        # Create a moments instance
-        theMoment = moments()
-        ret = theMoment.score(bMea, bSol)
-        scoreTable[idx_x][idx_y] = ret
+        # Create a matcher instance
+        theMatcher = self.matcher()
+        ret = theMatcher.score(bMea, bSol)
+
+        # @todo
+        # Yunzhi: Will update this part. We may need two scoreTable, currently, just will with the shape feature
+        if type(ret) is tuple and len(ret)>0:
+          scoreTable[idx_x][idx_y] = np.sum(ret[0])
+        else:
+          scoreTable[idx_x][idx_y] = ret
 
     # The measured piece will be assigned a solution piece
     # However, for some measured piece, they may not have a match according to the threshold.
