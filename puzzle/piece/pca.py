@@ -23,6 +23,7 @@ import math
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
+from puzzle.piece.template import template, puzzleTemplate
 
 #
 #================================ puzzle.piece.pca ================================

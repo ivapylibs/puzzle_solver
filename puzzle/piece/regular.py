@@ -171,5 +171,24 @@ class regular(template):
 
     # Just for demo for now
     self.class_image = out_dict['class_image']
+
+  #======================= buildFromMaskAndImage =======================
+  #
+  # @brief  Given a mask (individual) and an image of same base dimensions, use to
+  #         instantiate a puzzle piece template.
+  #
+  # @param[in]  theMask    The individual mask.
+  # @param[in]  theImage   The source image.
+  # @param[in]  rLoc       The puzzle piece location in the whole image.
+  #
+  # @param[out] thePiece   The puzzle piece instance.
+  #
+  @staticmethod
+  def buildFromMaskAndImage(theMask, theImage, rLoc=None):
+
+    thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc)
+    theRegular = regular(thePiece)
+
+    return theRegular
 #
 #================================ puzzle.piece.regular ================================
