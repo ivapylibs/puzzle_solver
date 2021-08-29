@@ -1,6 +1,6 @@
 #========================= puzzle.simulator.agent ========================
 #
-# @class    puzzle.simulator.lineArrange
+# @class    puzzle.simulator.agent
 #
 # @brief    The agent simulates the puzzle solving progress of a subject,
 #           including the perceiving, planning, executing, etc
