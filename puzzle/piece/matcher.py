@@ -55,8 +55,7 @@ class matcher:
 
   #=============================== score ===============================
   #
-  # @brief  Compute the score between passed puzzle piece data and
-  #         stored puzzle piece.
+  # @brief  Compute the score between two passed puzzle piece data.
   #
   # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
   # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
@@ -71,7 +70,7 @@ class matcher:
 
   #============================== compare ==============================
   #
-  # @brief  Compare a measured puzzle piece to this particular one. 
+  # @brief  Compare between two passed puzzle piece data.
   #
   # This member function should be overloaded. Currently returns false
   # so that all comparisons fail.

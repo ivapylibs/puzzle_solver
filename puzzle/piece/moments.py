@@ -1,4 +1,4 @@
-#================================ moments ================================
+#================================ puzzle.piece.moments ================================
 #
 # @brief    Uses shape moments to establish similarity.
 #
@@ -33,7 +33,7 @@ class moments(matchDifferent):
 
   #=============================== puzzle.piece.moments ==============================
   #
-  # @brief  Constructor for the puzzle piece matchDifferent class.
+  # @brief  Constructor for the puzzle piece moments class.
   #
   def __init__(self, tau=-float('inf')):
     super(moments, self).__init__(tau)
@@ -65,8 +65,7 @@ class moments(matchDifferent):
 
   #=============================== score ===============================
   #
-  # @brief  Compute the score between passed puzzle piece data and
-  #         stored puzzle piece.
+  # @brief  Compute the score between two passed puzzle piece data.
   #
   # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
   # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.

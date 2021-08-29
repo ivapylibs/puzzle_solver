@@ -34,7 +34,7 @@ class edge(matchDifferent):
 
   #=============================== puzzle.piece.edge ==============================
   #
-  # @brief  Constructor for the puzzle piece matchDifferent class.
+  # @brief  Constructor for the puzzle piece edge class.
   #
   #
   def __init__(self, tau=-float('inf')):
@@ -57,8 +57,7 @@ class edge(matchDifferent):
 
   #=============================== score ===============================
   #
-  # @brief  Compute the score between passed puzzle piece data and
-  #         stored puzzle piece.
+  # @brief  Compute the score between two passed puzzle piece data.
   #
   # @param[in]  yA    A regular instance or an EdgeDes instance.
   # @param[in]  yB    A regular instance or an EdgeDes instance.
@@ -116,7 +115,7 @@ class edge(matchDifferent):
 
   #============================== compare ==============================
   #
-  # @brief  Compare a measured puzzle piece to this particular one.
+  # @brief  Compare between two passed puzzle piece data.
   #
   # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
   # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.

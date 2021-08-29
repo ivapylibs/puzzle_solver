@@ -41,7 +41,7 @@ class matchDifferent(matcher):
 
   #============================== compare ==============================
   #
-  # @brief  Compare a measured puzzle piece to this particular one. 
+  # @brief  Compare between two passed puzzle piece data.
   #
   # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
   # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
