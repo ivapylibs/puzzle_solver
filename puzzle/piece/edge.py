@@ -40,6 +40,46 @@ class edge(matchDifferent):
   def __init__(self, tau=-float('inf')):
     super(edge, self).__init__(tau)
 
+  # ============================== shapeFeaExtrct ==============================
+  #
+  # @brief  Extract the edge shape feature from an input image of the edge.
+  #
+  # @param[in]   edge            An EdgeDes instance.
+  #
+  @staticmethod
+  def shapeFeaExtract(edge):
+
+    y, x = np.nonzero(edge.mask)
+    shapeFea = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
+    # self.edge[direction].feature_shape = shapeFea
+
+    return shapeFea
+  # ============================== colorFeaExtrct ==============================
+  #
+  # @brief  Extract the edge color feature from an input image of the edge.
+  #
+  # @param[in]   edge           An EdgeDes instance.
+  #
+  @staticmethod
+  def colorFeaExtract(edge, feaLength=50):
+    y, x = np.nonzero(edge.mask)
+
+    # Extract the valid pts
+    pts = edge.image[y, x]
+
+    # Expand dim for further processing
+    feaOri = np.expand_dims(pts, axis=0)
+
+    # Resize to a unit length
+    feaResize = cv2.resize(feaOri, (feaLength, 1))
+
+    # self.edge[direction].feature_color = feaResize
+
+    # @todo Yunzhi: May need to double check the color space
+    feaResize = cv2.cvtColor(feaResize, cv2.COLOR_BGR2Lab)
+
+    return feaResize
+
   #=========================== process ==========================
   #
   # @brief  Compute features from the data.
@@ -49,11 +89,10 @@ class edge(matchDifferent):
   #
   def process(self, y):
 
-    # @todo Yunzhi: No additional processing for now
+    feature_shape = edge.shapeFeaExtract(y)
+    feature_color = edge.colorFeaExtract(y)
 
-    feature_color = cv2.cvtColor(y.feature_color,cv2.COLOR_RGB2Lab)
-
-    return [y.feature_shape, feature_color]
+    return [feature_shape, feature_color]
 
   #=============================== score ===============================
   #

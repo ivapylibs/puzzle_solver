@@ -48,9 +48,11 @@ class EdgeDirection(Enum):
   BOTTOM = 3
 
 class EdgeDes:
-  type: int= EdgeType.UNDEFINED
-  feature_shape: np.ndarray =np.array([])  # To save the shape feature
-  feature_color: np.ndarray =np.array([])  # To save the color feature
+  type: int= EdgeType.UNDEFINED       # To save the type: in/out/flat.
+  image: np.ndarray =np.array([])  # To save the image of the edge.
+  mask: np.ndarray = np.array([])  # To save the mask of the edge.
+
+
 
 #
 #================================ puzzle.piece.regular ================================
@@ -96,6 +98,19 @@ class regular(template):
 
     self._process()
 
+  # ============================== setEdgeImg ==============================
+  #
+  # @brief  Set up the img of the chosen edge.
+  #
+  # @param[in]   direction      The edge to be set up.
+  # @param[in]   type           The type.
+  #
+  def setEdgeImg(self, direction, mask):
+
+    image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
+    self.edge[direction].image = image_masked
+    self.edge[direction].mask = mask
+
   # ============================== setEdgeType ==============================
   #
   # @brief  Set up the type of the chosen edge
@@ -115,42 +130,6 @@ class regular(template):
     for direction in EdgeDirection:
       print(f'{direction.name}:',self.edge[direction.value].type)
 
-  # ============================== shapeFeaExtrct ==============================
-  #
-  # @brief  Extract the edge shape feature from an input image
-  #
-  # @param[in]   direction      The edge to be set up.
-  # @param[in]   img            The input image.
-  #
-  def shapeFeaExtract(self, direction, img):
-
-    y, x = np.nonzero(img)
-    shapeFea = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
-    self.edge[direction].feature_shape = shapeFea
-
-  # ============================== colorFeaExtrct ==============================
-  #
-  # @brief  Extract the edge color feature from an input image
-  #
-  # @param[in]   direction      The edge to be set up.
-  # @param[in]   img            The input image.
-  #
-  def colorFeaExtract(self, direction, img, feaLength=50):
-
-    y, x = np.nonzero(img)
-
-    # Extract the valid pts
-    pts = self.y.image[y,x]
-
-    # Expand dim for further processing
-    feaOri = np.expand_dims(pts, axis=0)
-
-    # Resize to a unit length
-    feaResize = cv2.resize(feaOri,(feaLength,1))
-
-    self.edge[direction].feature_color = feaResize
-
-
   # ============================== process ==============================
   #
   # @brief  Run the sideExtractor
@@ -162,13 +141,12 @@ class regular(template):
                              harris_block_size=5, harris_ksize=5,
                              corner_score_threshold=0.2, corner_minmax_threshold=100)
 
-    # Set up the type of the chosen edge
+    # Set up the type/img of the chosen edge
     for direction in EdgeDirection:
       self.setEdgeType(direction.value, out_dict['inout'][direction.value])
-      self.shapeFeaExtract(direction.value, out_dict['side_images'][direction.value])
-      self.colorFeaExtract(direction.value, out_dict['side_images'][direction.value])
+      self.setEdgeImg(direction.value, out_dict['side_images'][direction.value])
 
-    # Just for demo for now
+    # @note Just for display for now
     self.class_image = out_dict['class_image']
 
   #======================= buildFromMaskAndImage =======================
