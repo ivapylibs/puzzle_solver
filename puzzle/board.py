@@ -49,11 +49,31 @@ class board:
   #         instantiation time or delay until later.
   #
   # @param[in]  thePieces   The puzzle pieces. (optional)
+  # @param[in]  id_count    The id count for the puzzle pieces. (optional)
   #
-  def __init__(self, thePieces = [], id_count = 0):
+  def __init__(self, *argv):
 
-    self.pieces = thePieces     # @< The puzzle pieces.
-    self.id_count = id_count
+    self.pieces = []  # @< The puzzle pieces.
+    self.id_count = 0
+
+    if len(argv)==1:
+      if isinstance(argv[0], board):
+        self.pieces = argv[0].pieces
+        self.id_count = argv[0].id_count
+      elif isinstance(argv[0],np.ndarray):
+        self.pieces = argv[0]
+        self.id_count = len(self.pieces)
+      else:
+        raise TypeError('Unknown input.')
+    elif len(argv)==2:
+      if isinstance(argv[0], np.ndarray) and isinstance(argv[1], int):
+        self.pieces = argv[0]
+        self.id_count = argv[1]
+      else:
+        raise TypeError('Unknown input.')
+    elif len(argv)>2:
+      raise TypeError('Too many inputs.')
+
   #=========================== addPiece ==========================
   #
   # @brief      Add puzzle piece instance to the board
