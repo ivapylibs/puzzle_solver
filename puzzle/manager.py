@@ -162,8 +162,8 @@ class manager(fromLayer):
         ret = theMatcher.score(bMea, bSol)
 
         '''
-        @todo Yunzhi: Will update this part. We may need two scoreTable. 
-        Currently, just will with the shape feature
+        @todo Yunzhi: Will update this part. We may need two scoreTables. 
+        Currently, only use the shape feature and add up the distances.
         '''
         if type(ret) is tuple and len(ret)>0:
           scoreTable[idx_x][idx_y] = np.sum(ret[0])
