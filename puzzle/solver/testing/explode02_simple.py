@@ -81,15 +81,16 @@ epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')
 
+#==[3] Create match by manager
+#
+theManager = manager(theBoardSol)
+theManager.process(epBoard)
+
 #==[4] Create simple sovler and set up the match
 #
 theSolver = simple(theBoardSol, epBoard)
 
-# Manually set up the match
-pAssignments = []
-for i in range(15):
-  pAssignments.append([i,i])
-theSolver.setMatch(pAssignments)
+theSolver.setMatch(theManager.pAssignments)
 
 #==[5] Start the solver to take turns, display the updated board.
 #
@@ -97,8 +98,8 @@ theSolver.setMatch(pAssignments)
 plt.ion()
 fh = plt.figure()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 if saveMe:
   f.savefig(cpath + f'/data/theBoardExplod.png')
@@ -124,13 +125,14 @@ for i in range(1+theSolver.desired.size()):
 plt.ioff()
 # plt.draw()
 
-# Build GIF
-with imageio.get_writer(cpath + f'/data/demo_simple_explod02.gif', mode='I', fps=1) as writer:
-    filename_list = glob.glob(cpath + f'/data/explod02_simple_step*.png')
-    filename_list.sort()
-    for filename in filename_list:
-        image = imageio.imread(filename)
-        writer.append_data(image)
+if saveMe:
+  # Build GIF
+  with imageio.get_writer(cpath + f'/data/demo_simple_explod02.gif', mode='I', fps=1) as writer:
+      filename_list = glob.glob(cpath + f'/data/explod02_simple_step*.png')
+      filename_list.sort()
+      for filename in filename_list:
+          image = imageio.imread(filename)
+          writer.append_data(image)
 
 #
 #============================ explode02_simple ===========================

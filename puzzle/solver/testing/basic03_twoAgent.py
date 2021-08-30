@@ -112,13 +112,14 @@ for i in range(1 + thetwoAgent.desired.size()):
 plt.ioff()
 # plt.draw()
 
-# Build GIF
-with imageio.get_writer(cpath + f'/data/demo_twoAgent.gif', mode='I', fps=1) as writer:
-    filename_list = glob.glob(cpath + f'/data/theBoardMea_twoAgent_*.png')
-    filename_list.sort()
-    for filename in filename_list:
-        image = imageio.imread(filename)
-        writer.append_data(image)
+if saveMe:
+  # Build GIF
+  with imageio.get_writer(cpath + f'/data/demo_twoAgent.gif', mode='I', fps=1) as writer:
+      filename_list = glob.glob(cpath + f'/data/theBoardMea_twoAgent_*.png')
+      filename_list.sort()
+      for filename in filename_list:
+          image = imageio.imread(filename)
+          writer.append_data(image)
 
 #
 #============================ basic03_twoAgent ===========================
