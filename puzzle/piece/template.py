@@ -264,5 +264,90 @@ class template:
 
     return thePiece
 
+  #======================= buildSquare =======================
+  #
+  # @brief  Build a square piece.
+  #
+  # @param[in]  size       The side length of the square
+  # @param[in]  color      (3,). The RGB color.
+  # @param[in]  rLoc       (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+  #
+  # @param[out] thePiece   The puzzle piece instance.
+  #
+  @staticmethod
+  def buildSquare(size, color, rLoc = None):
+    
+    y = puzzleTemplate()
+
+    # the tight bbox is just the square itself, so size is just size 
+    y.size = np.array([size, size])
+    y.mask = np.ones((size, size), dtype=np.uint8)*255
+
+    # Create a contour of the mask
+    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                            cv2.CHAIN_APPROX_SIMPLE)
+
+    y.contour_pts = cnts[0][0]
+    y.contour = np.zeros_like(y.mask).astype('uint8')
+    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+
+    y.rcoords = list(np.nonzero(y.mask)) # 2 (row,col) x N
+    # Updated to OpenCV style -> (x,y)
+    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+
+    y.image = np.zeros((size, size, 3), dtype=np.uint8)
+    y.image = cv2.rectangle(y.image, (0,0), (size-1, size-1), color=color, thickness=-1)
+    y.appear = y.image[y.rcoords[1],y.rcoords[0], :]
+
+    if not rLoc:
+      thePiece = template(y)
+    else:
+      thePiece = template(y, rLoc)
+
+    return thePiece
+
+  #======================= buildSphere =======================
+  #
+  # @brief  Build a sphere piece
+  #
+  # @param[in]  radius     The radius of the sphere
+  # @param[in]  color      (3,). The RGB color.
+  # @param[in]  rLoc       (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+  #
+  # @param[out] thePiece   The puzzle piece instance.
+  #
+  @staticmethod
+  def buildSphere(radius, color, rLoc = None):
+
+    y = puzzleTemplate()
+
+    # the tight bbox is just the square itself, so size is just size 
+    y.size = np.array([radius, radius]) * 2
+    y.mask = np.zeros((2*radius, 2*radius), dtype=np.uint8)
+    y.mask = cv2.circle(y.mask, center=(radius-1, radius-1), radius=radius, color=(255,255,255), thickness=-1)
+
+    # Create a contour of the mask
+    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                            cv2.CHAIN_APPROX_SIMPLE)
+
+    y.contour_pts = cnts[0][0]
+    y.contour = np.zeros_like(y.mask).astype('uint8')
+    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+
+    y.rcoords = list(np.nonzero(y.mask)) # 2 (row,col) x N
+    # Updated to OpenCV style -> (x,y)
+    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+
+
+    y.image = np.ones((2*radius, 2*radius, 3), dtype=np.uint8)
+    y.image = cv2.circle(y.image, radius=radius, center=(radius-1, radius-1), color=color, thickness=-1)
+    y.appear = y.image[y.rcoords[1],y.rcoords[0], :]
+
+    if not rLoc:
+      thePiece = template(y)
+    else:
+      thePiece = template(y, rLoc)
+
+    return thePiece
 #
 #========================= puzzle.piece.template =========================

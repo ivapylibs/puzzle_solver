@@ -11,6 +11,7 @@
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
+#           Yiye Chen,              yychen2019@gatech.edu
 # @date     2021/07/28  [created]
 #           2021/07/31  [modified]
 #
@@ -50,6 +51,17 @@ thePiece.placeInImageAt(bigImage, np.array([70,30]))
 # Display the resulting image. Should have three puzzle pieces in it.
 plt.figure()
 plt.imshow(bigImage)
+
+#==[4] Test the builder of the basic puzzle piece
+squarePiece = template.buildSquare(20, color=(255,0,0), rLoc=(80, 40))
+spherePiece = template.buildSphere(10, color=(0,255,0), rLoc=(80, 140))
+bigImage = np.zeros((200, 200, 3))
+squarePiece.placeInImage(bigImage)
+spherePiece.placeInImage(bigImage)
+plt.figure()
+plt.title("Test the builder of basic-shape puzzle pieces. Should see a red square and a green sphere")
+plt.imshow(bigImage)
+
 plt.show()
 
 #
