@@ -22,6 +22,7 @@
 #
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
+import copy
 
 from puzzle.board import board
 from puzzle.simulator.basic import basic
@@ -53,6 +54,9 @@ class lineArrange(basic):
     def __init__(self, initBoard:board, solBoard:board, initHuman:Agent,
                  theFig=None, params:paramLineArrange=paramLineArrange()):
         super().__init__(initBoard, theFig=theFig)
+
+        self.initBoard = initBoard
+        self.solBoard = solBoard
 
         # the arrangement instance for comparing the current status with the solutions
         self.progress_checker = arrangement(solBoard=solBoard, theParams=params)
@@ -95,5 +99,5 @@ class lineArrange(basic):
         @param[in]  targetX          The target X coordinate
         """
 
-        solBoard = None     # TODO: should be built according to the targetX and the initBoard
-        pass
+        solBoard = copy.deepcopy(initBoard)     # TODO: should be built according to the targetX and the initBoard
+        return lineArrange(initBoard, solBoard, initHuman)
