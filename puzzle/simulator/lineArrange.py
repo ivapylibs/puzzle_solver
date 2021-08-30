@@ -99,5 +99,8 @@ class lineArrange(basic):
         @param[in]  targetX          The target X coordinate
         """
 
-        solBoard = copy.deepcopy(initBoard)     # TODO: should be built according to the targetX and the initBoard
+        solBoard = copy.deepcopy(initBoard)    
+        for i in range(len(solBoard.pieces)):
+            rLoc = solBoard.pieces[i].rLoc
+            solBoard.pieces[i].setPlacement((targetX, rLoc[1]))
         return lineArrange(initBoard, solBoard, initHuman)
