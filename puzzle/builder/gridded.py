@@ -66,8 +66,7 @@ class gridded(interlocking):
       # @< Will store the calibrated grid location of the puzzle piece.
       self.gc = np.zeros((2, solBoard.size()))
     else:
-      print('Not initialized properly')
-      exit()
+      raise TypeError('Not initialized properly')
 
     self.__processGrid()
 

@@ -211,8 +211,7 @@ class board:
   def boundingBox(self):
 
     if self.size() == 0:
-      print('No pieces exist')
-      exit()
+      raise RuntimeError('No pieces exist')
     else:
       # process to get min x, min y, max x, and max y
       bbox = np.array([[float('inf'), float('inf')], [0, 0]])

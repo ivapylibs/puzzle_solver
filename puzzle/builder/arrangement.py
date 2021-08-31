@@ -281,8 +281,7 @@ class arrangement(board):
       else:
         thePuzzle = arrangement(theBoard)
     else:
-      print('There is no board instance saved in the file!')
-      exit()
+      raise TypeError('There is no board instance saved in the file!')
 
     return thePuzzle
 
@@ -317,8 +316,8 @@ class arrangement(board):
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
       thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
     else:
-      print('There is no Image or Mask saved in the file!')
-      exit()
+      raise TypeError('There is no Image or Mask saved in the file!')
+
 
     return thePuzzle
 
@@ -351,8 +350,7 @@ class arrangement(board):
     if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
       thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
     else:
-      print('There is no Image or Mask saved in the file!')
-      exit()
+      raise TypeError('There is no Image or Mask saved in the file!')
 
     return thePuzzle
 

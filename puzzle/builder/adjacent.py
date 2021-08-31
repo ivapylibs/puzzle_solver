@@ -61,8 +61,8 @@ class adjacent(arrangement):
     if isinstance(solBoard, board):
       self.adjMat = np.eye(solBoard.size()).astype('bool')
     else:
-      print('Not initialized properly')
-      exit()
+      raise TypeError('Not initialized properly')
+
     self.__processAdjacency()
 
 

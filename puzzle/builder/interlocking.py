@@ -60,8 +60,7 @@ class interlocking(adjacent):
     if isinstance(solBoard, board):
       self.ilMat = np.eye(solBoard.size()).astype('bool')
     else:
-      print('Not initialized properly')
-      exit()
+      raise TypeError('Not initialized properly')
 
     self.__processInterlocking()
 
