@@ -86,8 +86,7 @@ class regular(template):
       id = argv[2]
       super(regular, self).__init__(y, r, id)
     elif len(argv) == 4:
-      print('Too many parameters!')
-      exit()
+      raise TypeError('Too many parameters!')
 
     super(regular, self).__init__(y, r, id)
 

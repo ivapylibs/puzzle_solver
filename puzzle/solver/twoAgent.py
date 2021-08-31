@@ -74,11 +74,11 @@ class twoAgent(simple):
   # @brief  Perform a single puzzle solving action, which move a piece
   #         to its correct location.
   #
-  def takeTurn(self, thePlan = None):
+  def takeTurn(self, thePlan = None, defaultPlan='score'):
 
     print(f'It is agent {self.iMove}\'s turn:')
 
-    self.agents[self.iMove].takeTurn()
+    self.agents[self.iMove].takeTurn(defaultPlan=defaultPlan)
 
     if (self.iMove == 0):       # Toggle back and forth between agents.
       self.iMove = 1

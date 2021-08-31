@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 #============================ basic01_usage ===========================
 #
-# @brief    Test script for the most basic functionality of basic class.
-#
+# @brief    Test script for the most basic functionality of the
+#           basic class.
 #
 #============================ basic01_usage ===========================
 
@@ -39,7 +39,7 @@ theLayer = fromLayer()
 theLayer.process(theImageMea,theMaskMea)
 theBoardMea = theLayer.getState()
 
-#==[2] Create a simulatior
+#==[2] Create a simulator
 #
 theSim = basic(theBoardMea)
 newPiece = deepcopy(theSim.puzzle.pieces[1])
