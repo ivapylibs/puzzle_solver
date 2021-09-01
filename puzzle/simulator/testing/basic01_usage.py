@@ -2,7 +2,7 @@
 #============================ basic01_usage ===========================
 #
 # @brief    Test script for the most basic functionality of the
-#           basic class.
+#           basic class. (6 shapes img)
 #
 #============================ basic01_usage ===========================
 

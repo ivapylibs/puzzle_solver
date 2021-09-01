@@ -37,7 +37,7 @@ class edge(matchDifferent):
   # @brief  Constructor for the puzzle piece edge class.
   #
   #
-  def __init__(self, tau=-float('inf')):
+  def __init__(self, tau=20):
     super(edge, self).__init__(tau)
 
   # ============================== shapeFeaExtrct ==============================

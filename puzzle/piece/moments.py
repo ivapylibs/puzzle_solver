@@ -35,7 +35,7 @@ class moments(matchDifferent):
   #
   # @brief  Constructor for the puzzle piece moments class.
   #
-  def __init__(self, tau=-float('inf')):
+  def __init__(self, tau=5):
     super(moments, self).__init__(tau)
 
   #=========================== process ==========================
