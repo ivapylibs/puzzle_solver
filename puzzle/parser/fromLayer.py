@@ -126,6 +126,9 @@ class fromLayer(centroidMulti):
     # Convert mask to an image
     mask = M.astype('uint8')
 
+    # cv2.imshow('demo',mask)
+    # cv2.waitKey()
+
     # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
     # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
     # For OpenCV 4+
@@ -148,7 +151,7 @@ class fromLayer(centroidMulti):
 
     desired_cnts = []
 
-    # Filter out some contours according to length threshold
+    # Filter out some contours according to area threshold
     for c in cnts:
       # Draw the contours
       # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
@@ -171,19 +174,15 @@ class fromLayer(centroidMulti):
       # Get ROI, OpenCV style
       x, y, w, h = cv2.boundingRect(c)
 
-      # @note
-      # Seems not useful
-      # # Double check if ROI has a large IoU with the previous ones
-      # skipflag = False
-      # for region in regions:
-      #   aa = bb_intersection_over_union(region[3], [x,y,x+w,y+h])
-      #   if bb_intersection_over_union(region[3], [x,y,x+w,y+h])>0.5:
-      #     skipflag = True
-      #     break
-      # if not skipflag:
-      #   regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y],[x,y,x+w,y+h]))
 
-      regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
+      # Double check if ROI has a large IoU with the previous ones
+      skipflag = False
+      for region in regions:
+        if bb_intersection_over_union(region[3], [x,y,x+w,y+h])>0.5:
+          skipflag = True
+          break
+      if not skipflag:
+        regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y],[x,y,x+w,y+h]))
 
     return regions
 
