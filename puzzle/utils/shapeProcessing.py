@@ -21,7 +21,6 @@
 
 #====================== puzzle.utils.shapeProcessing ======================
 
-# See https://gist.github.com/meyerjo/dd3533edc97c81258898f60d8978eddc
 
 # ================================ bb_intersection_over_union ==============================
 #
