@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #============================ basic02_withSolver ===========================
 #
-# @brief    Test script with command from the solver.
+# @brief    Test script with command from the solver. (15p img)
 #
 #============================ basic02_withSolver ===========================
 
@@ -82,20 +82,36 @@ epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')
 
+#==[2.1] Create a new Grid instance from the images
+#
+
+# @note
+# Not a fair game to directly use the epBoard
+# Instead, should restart from images
+
+theMaskSol_new = cv2.cvtColor(epImage,cv2.COLOR_BGR2GRAY)
+_ , theMaskSol_new = cv2.threshold(theMaskSol_new,5,255,cv2.THRESH_BINARY)
+
+theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000))
+
+axarr[1].imshow(epImage)
+axarr[1].title.set_text('Exploded view')
+
 #==[3] Create match by manager
 #
 theManager = manager(theBoardSol)
-theManager.process(epBoard)
+# theManager.process(epBoard)
+theManager.process(theGrid_new.solution)
 
 #==[4] Create simple sovler and set up the match
 #
-theSolver = simple(theBoardSol, epBoard)
+theSolver = simple(theBoardSol, theGrid_new.solution)
 
 theSolver.setMatch(theManager.pAssignments)
 
 #==[5] Create a simulator for display
 #
-theSim = basic(epBoard)
+theSim = basic(theGrid_new.solution)
 
 #==[6] Start the solver to take turns, display the updated board.
 #

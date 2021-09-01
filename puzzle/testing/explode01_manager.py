@@ -72,14 +72,26 @@ print('Running through test cases. Will take a bit.')
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
 
 
-_, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
+epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 
+#==[2.1] Create a new Grid instance from the images
+#
+
+# @note
+# Not a fair game to directly use the epBoard
+# Instead, should restart from images
+
+theMaskSol_new = cv2.cvtColor(epImage,cv2.COLOR_BGR2GRAY)
+_ , theMaskSol_new = cv2.threshold(theMaskSol_new,5,255,cv2.THRESH_BINARY)
+
+theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular))
 
 #==[3] Create a manager
 #
-theManager = manager(theBoardSol, managerParms(matcher=edge(20)))
+theManager = manager(theBoardSol, managerParms(matcher=edge(1000)))
+# theManager = manager(theBoardSol, managerParms(matcher=moments()))
 
-theManager.process(epBoard)
+theManager.process(theGrid_new.solution)
 
 #==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.
