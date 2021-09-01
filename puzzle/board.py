@@ -136,7 +136,11 @@ class board:
   #
   def getAssigned(self, pAssignments):
 
-    theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
+    if len(pAssignments)>0:
+      theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
+    else:
+      print('No assignments is found. Return an empty board.')
+      theBoard = board()
 
     return theBoard
 
