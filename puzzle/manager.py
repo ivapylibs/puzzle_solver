@@ -57,7 +57,7 @@ SCORE_SIMILAR = 1
 @dataclass
 class managerParms:
   scoreType: int = SCORE_DIFFERENCE
-  matcher: any = moments
+  matcher: any = moments(20)
 #
 #================================ manager ================================
 #
@@ -137,8 +137,7 @@ class manager(fromLayer):
     # Generate a new board for association, filtered by the matcher threshold
     pFilteredAssignments = []
     for assignment in self.pAssignments:
-      theMatcher = self.matcher(20)
-      ret = theMatcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
+      ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
       if ret:
         pFilteredAssignments.append(assignment)
 
@@ -156,11 +155,7 @@ class manager(fromLayer):
     scoreTable = np.zeros((self.bMeas.size(),self.solution.size()))
     for idx_x, bMea in enumerate(self.bMeas.pieces):
       for idx_y, bSol in enumerate(self.solution.pieces):
-
-        # Create a matcher instance
-        theMatcher = self.matcher()
-        ret = theMatcher.score(bMea, bSol)
-
+        ret = self.matcher.score(bMea, bSol)
         '''
         @todo Yunzhi: Will update this part. We may need two scoreTables. 
         Currently, only use the shape feature and add up the distances.

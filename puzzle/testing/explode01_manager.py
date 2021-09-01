@@ -3,7 +3,7 @@
 #
 # @brief    Tests the core functionality of the puzzle.manager class. The manager
 #           will have access to measurement and solution images & masks to generate
-#           associations between them. (15 p img)
+#           associations between them. (15p img)
 #
 #
 #============================= explode01_manager =============================
@@ -31,6 +31,7 @@ from puzzle.builder.gridded import gridded, paramGrid
 
 from puzzle.piece.regular import regular
 from puzzle.piece.edge import edge
+from puzzle.piece.moments import moments
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -76,7 +77,7 @@ _, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 
 #==[3] Create a manager
 #
-theManager = manager(theBoardSol, managerParms(matcher=edge))
+theManager = manager(theBoardSol, managerParms(matcher=edge(20)))
 
 theManager.process(epBoard)
 
