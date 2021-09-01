@@ -124,11 +124,16 @@ class arrangement(board):
 
     theVects = {}
     pLocTrue = self.solution.pieceLocations()
-    if len(pLocTrue) == len(pLoc):
-      for id in pLoc:
-        theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
-    else:
-      raise RuntimeError('Error of unmatched puzzle piece number!')
+
+    for id in pLoc:
+      theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
+
+    # @todo Yunzhi: We may not need this check?
+    # if len(pLocTrue) == len(pLoc):
+    #   for id in pLoc:
+    #     theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
+    # else:
+    #   raise RuntimeError('Error of unmatched puzzle piece number!')
 
     return theVects
 
@@ -150,11 +155,16 @@ class arrangement(board):
 
     theDists = {}
     pLocTrue = self.solution.pieceLocations()
-    if len(pLocTrue) == len(pLoc):
-      for id in pLoc:
-        theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
-    else:
-      raise RuntimeError('Error of unmatched puzzle piece number!')
+
+    for id in pLoc:
+      theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
+
+    # @todo Yunzhi: We may not need this check?
+    # if len(pLocTrue) == len(pLoc):
+    #   for id in pLoc:
+    #     theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
+    # else:
+    #   raise RuntimeError('Error of unmatched puzzle piece number!')
 
     return theDists
 
