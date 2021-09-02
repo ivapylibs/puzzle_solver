@@ -132,15 +132,19 @@ class simple(base):
       # Obtain the correction plan for all the matched pieces
       theCorrect = theArrange.corrections(pLoc_sol)
 
-      # Obtain the corresponding index in the measured board
-      best_index_mea = self.match[:, 0][np.where(self.match[:, 1] == best_index_sol)[0]][0]
+      index = np.where(self.match[:, 1] == best_index_sol)[0]
 
-      # Display the plan
-      print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
+      if index.size>0:
+        # Obtain the corresponding index in the measured board
+        best_index_mea = self.match[:, 0][index][0]
 
-      # Execute the plan and update the current board
-      self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+        # Display the plan
+        print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
 
+        # Execute the plan and update the current board
+        self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+      else:
+        print('No assignment found')
     else:
       print('All the puzzle pices have been in position. No move.')
 
@@ -173,13 +177,20 @@ class simple(base):
 
     for i,j in itertools.product(range(int(x_max+1)), range(int(y_max+1))):
 
+      # best_index_sol is just the next target, no matter if the assignment is ready or not
       best_index_sol = np.argwhere((theGrid.gc.T == [i,j]).all(axis=1)).flatten()[0]
 
-      # Check if theScore is False
-      if theScores[best_index_sol] == False:
+      # Check if can find the match for best_index_sol and if theScore is False
+      if best_index_sol not in theScores:
+        print(f'No assignment found')
+        continue
+      elif theScores[best_index_sol] == True:
+        continue
+      else:
+        index = np.where(self.match[:, 1] == best_index_sol)[0]
 
         # Obtain the corresponding index in the measured board
-        best_index_mea = self.match[:, 0][np.where(self.match[:, 1] == best_index_sol)[0]][0]
+        best_index_mea = self.match[:, 0][index][0]
 
         # Display the plan
         print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
@@ -187,8 +198,7 @@ class simple(base):
         # Execute the plan and update the current board
         self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
         break
-      else:
-        continue
+
 
 
   #=========================== planGreedyTSP ===========================
