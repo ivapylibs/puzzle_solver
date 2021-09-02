@@ -18,33 +18,28 @@
 #
 #========================= puzzle.simulator.agent ========================
 
+from puzzle.piece.template import template
+from puzzle.simulator.action import Actions
 
-
-class Base():
+class Apperance(template):
     """
-    The base defines all the atomic actions that an agent can execute.
-    """
-    def __init__(self):
-        pass
-
-    def move(self, targetLoc):
-        pass
-
-    def pick(self, piece):
-        pass
+    @brief  The Appearance agent class contains the basic appearance information about the agent
+            It inherit the puzzle.piece.template class so that it can be treated as a special piece
     
-    def place(self, piece):
-        pass
-
-    def pause(self):
-        pass
-
-class Agent(Base):
+    TODO: so far haven't thought of features need to be added to the template. Add if needed
     """
-    In addition to the atomic actions, the 
+    def __init__(self, y= None, r = (0, 0), id = None):
+        super().__init__(y=y, r=r, id=id)
+
+
+class Agent(Actions):
     """
-    def __init__(self):
-        super().__init__()
+    The Agent class equip the Base with the actions and the planning ability
+    """
+
+    def __init__(self, app:Apperance):
+        self.app = app
+        super().__init__(loc=self.app.rLoc)
 
         # the short-term memory of the actions to be executed to accomplish a plan
         self.memory = None
@@ -62,3 +57,16 @@ class Agent(Base):
         """
         action = None
         return action
+
+    def placeInImage(self, img, offset, CONTOUR_DISPLAY):
+        self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+    
+    @staticmethod
+    def buildSphereAgent(radius, color, rLoc=None):
+        app_sphere = template.buildSphere(radius, color, rLoc)
+        return Agent(app_sphere)
+
+    @staticmethod
+    def buildSquareAgent(size, color, rLoc=None):
+        app_Square = template.buildSquare(size, color, rLoc)
+        return Agent(app_Square)
