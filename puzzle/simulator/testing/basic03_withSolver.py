@@ -41,8 +41,8 @@ cpath = fpath.rsplit('/', 1)[0]
 
 #==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
-# theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
@@ -65,11 +65,11 @@ theMaskSol = theDet.getState().x
 
 #==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-# theLayer = fromLayer(paramPuzzle(areaThreshold=5000,pieceConstructor=regular))
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
+theLayer = fromLayer(paramPuzzle(areaThreshold=5000,pieceConstructor=regular))
 
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
+
 
 #==[1.3] Display the solution board
 #
@@ -83,9 +83,12 @@ axarr[0].title.set_text('Source solution board')
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=1000))
+theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000,pieceConstructor=regular))
 
-epImage, epBoard = theGrid.explodedPuzzle(dx=200,dy=200)
+epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
+
+axarr[1].imshow(epImage)
+axarr[1].title.set_text('Exploded view')
 
 #==[2.1] Create a new Grid instance from the images
 #
@@ -109,7 +112,6 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')
 
-plt.show()
 #==[3] Create match by manager
 #
 theManager = manager(theBoardSol, managerParms(matcher=edge()))

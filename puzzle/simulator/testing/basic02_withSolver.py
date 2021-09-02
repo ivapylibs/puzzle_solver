@@ -25,6 +25,9 @@ import glob
 from puzzle.manager import manager
 from puzzle.solver.simple import simple
 
+from puzzle.utils.imageProcessing import cropImage
+
+
 import improcessor.basic as improcessor
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
@@ -38,9 +41,13 @@ cpath = fpath.rsplit('/', 1)[0]
 #==[1] Read the source image and template.
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 
 #==[1.1] Create an improcesser to obtain the mask.
@@ -89,10 +96,17 @@ axarr[1].title.set_text('Exploded view')
 # Not a fair game to directly use the epBoard
 # Instead, should restart from images
 
-theMaskSol_new = cv2.cvtColor(epImage,cv2.COLOR_BGR2GRAY)
-_ , theMaskSol_new = cv2.threshold(theMaskSol_new,5,255,cv2.THRESH_BINARY)
+improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+                  improcessor.basic.thresh, ((5,255,cv2.THRESH_BINARY),),
+                  cv2.GaussianBlur, ((3, 3), 0,),
+                  cv2.Canny, (30, 200,),
+                  improcessor.basic.thresh, ((10,255,cv2.THRESH_BINARY),))
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000))
+theDet = fromSketch(improc)
+theDet.process(epImage.copy())
+theMaskSol_new = theDet.getState().x
+
+theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=5000))
 
 axarr[1].imshow(epImage)
 axarr[1].title.set_text('Exploded view')
