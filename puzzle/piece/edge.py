@@ -37,8 +37,11 @@ class edge(matchDifferent):
   # @brief  Constructor for the puzzle piece edge class.
   #
   #
-  def __init__(self, tau=20):
-    super(edge, self).__init__(tau)
+  def __init__(self, tau_shape=100, tau_color=100):
+    super(edge, self).__init__()
+
+    self.tau_shape = tau_shape
+    self.tau_color = tau_color
 
   # ============================== shapeFeaExtrct ==============================
   #
@@ -61,11 +64,16 @@ class edge(matchDifferent):
   # @param[in]   edge           An EdgeDes instance.
   #
   @staticmethod
-  def colorFeaExtract(edge, feaLength=50):
+  def colorFeaExtract(edge, feaLength=200):
     y, x = np.nonzero(edge.mask)
 
     # Extract the valid pts
     pts = edge.image[y, x]
+    # pts = dst[y, x]
+
+    # import matplotlib.pyplot as plt
+    # plt.imshow(edge.mask)
+    # plt.show()
 
     # Expand dim for further processing
     feaOri = np.expand_dims(pts, axis=0)
@@ -75,10 +83,10 @@ class edge(matchDifferent):
 
     # self.edge[direction].feature_color = feaResize
 
-    # @todo Yunzhi: May need to double check the color space
-    feaResize = cv2.cvtColor(feaResize, cv2.COLOR_BGR2Lab)
+    # # @todo Yunzhi: May need to double check the color space
+    feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
 
-    return feaResize
+    return feaResize.astype('float32')
 
   #=========================== process ==========================
   #
@@ -126,7 +134,7 @@ class edge(matchDifferent):
 
     def dis_color(feature_color_A, feature_color_B):
 
-      distance = np.linalg.norm(feature_color_A-feature_color_B)
+      distance = np.mean(np.sum((feature_color_A[0]-feature_color_B[0]) ** 2, axis=1) ** (1. / 2))
 
       return distance
 
@@ -168,9 +176,10 @@ class edge(matchDifferent):
   def compare(self, yA, yB, method= similaritymeasures.pcm):
 
     # score is to calculate the similarity while it will call the feature extraction process inside
+
     distance_shape, distance_color = self.score(yA, yB, method = method)
 
-    if (np.array(distance_shape) < self.tau).all() and (np.array(distance_color) < self.tau).all():
+    if (np.array(distance_shape) < self.tau_shape).all() and (np.array(distance_color) < self.tau_color).all():
       return True
     else:
       return False

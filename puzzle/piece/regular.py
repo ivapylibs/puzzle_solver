@@ -106,8 +106,13 @@ class regular(template):
   #
   def setEdgeImg(self, direction, mask):
 
-    image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
-    self.edge[direction].image = image_masked
+    # image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
+
+    # Apply an average filter
+    kernel = np.ones((5, 5), np.float32)
+    dst = cv2.filter2D(self.y.image, -1, kernel)
+
+    self.edge[direction].image = dst
     self.edge[direction].mask = mask
 
   # ============================== setEdgeType ==============================
