@@ -152,7 +152,9 @@ class manager(fromLayer):
   #
   def matchPieces(self):
 
-    scoreTable = np.zeros((self.bMeas.size(),self.solution.size()))
+    scoreTable_shape = np.zeros((self.bMeas.size(),self.solution.size()))
+    scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
+
     for idx_x, bMea in enumerate(self.bMeas.pieces):
       for idx_y, bSol in enumerate(self.solution.pieces):
         ret = self.matcher.score(bMea, bSol)
@@ -161,13 +163,14 @@ class manager(fromLayer):
         Currently, only use the shape feature and add up the distances.
         '''
         if type(ret) is tuple and len(ret)>0:
-          scoreTable[idx_x][idx_y] = np.sum(ret[0])
+          scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
+          scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
         else:
-          scoreTable[idx_x][idx_y] = ret
+          scoreTable_shape[idx_x][idx_y] = ret
 
     # The measured piece will be assigned a solution piece
     # However, for some measured piece, they may not have a match according to the threshold.
-    self.pAssignments = self.greedyAssignment(scoreTable)
+    self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color)
 
 
   #=========================== greedyAssignment ==========================
@@ -178,26 +181,83 @@ class manager(fromLayer):
   #
   # @param[out]  matched_indices   The matched pairs. N x 2
   #
-  def greedyAssignment(self, scoreTable):
-    matched_indices = []
-    if scoreTable.shape[1] == 0:
-      return np.array(matched_indices).reshape(-1, 2)
-    for i in range(scoreTable.shape[0]):
-      if self.scoreType == SCORE_DIFFERENCE:
-        j = scoreTable[i].argmin()
-        # @todo Yunzhi: The threshold needs to be decided by the feature method
-        if scoreTable[i][j] < 1e16:
-          scoreTable[:, j] = 1e18
-          matched_indices.append([i, j])
-      else:
-        j = scoreTable[i].argmax()
-        # @todo Yunzhi: The threshold needs to be decided by the feature method
-        if scoreTable[i][j] > 10:
-          scoreTable[:, j] = 100
+  def greedyAssignment(self, scoreTable_shape, scoreTable_color):
+
+    if np.count_nonzero(scoreTable_color)==0:
+      # @note Yunzhi: Only focus on the difference in the scoreTable_shape
+      matched_indices = []
+      if scoreTable_shape.shape[1] == 0:
+        return np.array(matched_indices).reshape(-1, 2)
+      for i in range(scoreTable_shape.shape[0]):
+        if self.scoreType == SCORE_DIFFERENCE:
+          j = scoreTable_shape[i].argmin()
+          # @todo Yunzhi: The threshold needs to be decided by the feature method
+          if scoreTable_shape[i][j] < 1e16:
+            scoreTable_shape[:, j] = 1e18
+            matched_indices.append([i, j])
+        else:
+          j = scoreTable_shape[i].argmax()
+          # @todo Yunzhi: The threshold needs to be decided by the feature method
+          if scoreTable_shape[i][j] > 10:
+            scoreTable_shape[:, j] = 100
+            matched_indices.append([i, j])
+
+      # matched_indices refers to the index but not the id of the puzzle piece
+      matched_indices = np.array(matched_indices).reshape(-1, 2)
+
+    else:
+      def getKeepList(score_list, diff_thresh=150):
+
+        # Create new lists by removing the first element or the last element
+        # score_list_cmp_1 = np.delete(score_list, -1) # incremental change
+
+        score_list_cmp_1 = np.ones_like(score_list) *score_list[0] # absolute change with the first element
+        score_list_cmp_1 = np.delete(score_list_cmp_1, -1)
+
+        score_list_cmp_2 = np.delete(score_list, 0)
+
+        score_diff_list = score_list_cmp_2-score_list_cmp_1
+
+        keep = [0]
+        for idx, score_diff in enumerate(score_diff_list):
+          if not np.isnan(score_diff) and score_diff< diff_thresh :
+            keep.append(idx+1)
+          else:
+            break
+
+        return keep
+
+
+      matched_indices = []
+      if scoreTable_shape.shape[1] == 0:
+        return np.array(matched_indices).reshape(-1, 2)
+      for i in range(scoreTable_shape.shape[0]):
+        # j = scoreTable_shape[i].argmin()
+        ind = np.argsort(scoreTable_shape[i], axis=0)
+        new_order = np.sort(scoreTable_shape[i], axis=0)
+
+        # Update ind and new_order in a small range since
+        # distance between shape features may have similar, we want to keep all of them
+        keep_list = getKeepList(new_order)
+        ind = ind[keep_list]
+        new_order = new_order[keep_list]
+
+        if ind.size==1:
+          # @todo Yunzhi: The threshold needs to be decided by the feature method
+          j = ind[0]
+        else:
+          # Check scoreTable_color, find the lowest for now
+          # The index of the lowest score in the scoreTable_color[i][ind]
+          j = scoreTable_color[i][ind].argmin()
+          # The final index based on scoreTable_shape and scoreTable_color
+          j = ind[j]
+
+        if scoreTable_shape[i][j] < 1e16:
+          scoreTable_shape[:, j] = 1e18
           matched_indices.append([i, j])
 
-    # matched_indices refers to the index but not the id of the puzzle piece
-    matched_indices = np.array(matched_indices).reshape(-1, 2)
+      # matched_indices refers to the index but not the id of the puzzle piece
+      matched_indices = np.array(matched_indices).reshape(-1, 2)
 
     return matched_indices
 
