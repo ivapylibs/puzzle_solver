@@ -104,20 +104,24 @@ class edge(matchDifferent):
   # @param[out]  distance_shape    The shape distance between the two passed data.
   # @param[out]  distance_color    The color distance between the two passed data.
   #
-  def score(self, yA, yB, method = 'pcm'):
+  def score(self, yA, yB, method = similaritymeasures.pcm):
 
     def dis_shape(feature_shape_A, feature_shape_B, method=method):
-      if method == 'pcm':
-        distance = similaritymeasures.pcm(feature_shape_A, feature_shape_B)
-      elif method == 'frechet':
-        distance = similaritymeasures.frechet_dist(feature_shape_A, feature_shape_B)
-      elif method == 'area':
-        distance = similaritymeasures.area_between_two_curves(feature_shape_A, feature_shape_B)
-      elif method == 'length':
-        distance = similaritymeasures.curve_length_measure(feature_shape_A, feature_shape_B)
-      elif method == 'dtw':
-        distance, _ = similaritymeasures.dtw(feature_shape_A, feature_shape_B)
+      # if method == 'pcm':
+      #   distance = method(feature_shape_A, feature_shape_B)
+      # elif method == 'frechet':
+      #   distance = similaritymeasures.frechet_dist(feature_shape_A, feature_shape_B)
+      # elif method == 'area':
+      #   distance = similaritymeasures.area_between_two_curves(feature_shape_A, feature_shape_B)
+      # elif method == 'length':
+      #   distance = similaritymeasures.curve_length_measure(feature_shape_A, feature_shape_B)
+      # elif method == 'dtw':
+      #   distance, _ = similaritymeasures.dtw(feature_shape_A, feature_shape_B)
 
+      distance = method(feature_shape_A, feature_shape_B)
+      # For dtw
+      if isinstance(distance,tuple):
+        distance = distance[0]
       return distance
 
     def dis_color(feature_color_A, feature_color_B):
@@ -161,10 +165,10 @@ class edge(matchDifferent):
   #
   # @param[out]       Return comparison result
   #
-  def compare(self, yA, yB):
+  def compare(self, yA, yB, method= similaritymeasures.pcm):
 
     # score is to calculate the similarity while it will call the feature extraction process inside
-    distance_shape, distance_color = self.score(yA, yB)
+    distance_shape, distance_color = self.score(yA, yB, method = method)
 
     if (np.array(distance_shape) < self.tau).all() and (np.array(distance_color) < self.tau).all():
       return True

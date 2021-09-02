@@ -23,6 +23,8 @@ import cv2
 from copy import deepcopy
 
 import improcessor.basic as improcessor
+import similaritymeasures
+
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.piece.regular import regular
@@ -82,7 +84,7 @@ theMatcher = edge(10)
 #==[4] Display the new board and the comparison result.
 #
 
-print(theMatcher.compare(theRegular_A, theRegular_B))
+print(theMatcher.compare(theRegular_A, theRegular_B,method=similaritymeasures.pcm))
 
 theBoard.display()
 
