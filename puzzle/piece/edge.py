@@ -37,7 +37,7 @@ class edge(matchDifferent):
   # @brief  Constructor for the puzzle piece edge class.
   #
   #
-  def __init__(self, tau_shape=100, tau_color=100):
+  def __init__(self, tau_shape=100, tau_color=150):
     super(edge, self).__init__()
 
     self.tau_shape = tau_shape
@@ -50,11 +50,13 @@ class edge(matchDifferent):
   # @param[in]   edge            An EdgeDes instance.
   #
   @staticmethod
-  def shapeFeaExtract(edge):
+  def shapeFeaExtract(edge, method = None):
 
-    y, x = np.nonzero(edge.mask)
-    shapeFea = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
-    # self.edge[direction].feature_shape = shapeFea
+    if method == 'type':
+      shapeFea = edge.type
+    else:
+      y, x = np.nonzero(edge.mask)
+      shapeFea = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
     return shapeFea
   # ============================== colorFeaExtrct ==============================
@@ -95,9 +97,9 @@ class edge(matchDifferent):
   # @param[in]  y    An EdgeDes instance.
   #
   #
-  def process(self, y):
+  def process(self, y, method=None):
 
-    feature_shape = edge.shapeFeaExtract(y)
+    feature_shape = edge.shapeFeaExtract(y, method=method)
     feature_color = edge.colorFeaExtract(y)
 
     return [feature_shape, feature_color]
@@ -112,21 +114,23 @@ class edge(matchDifferent):
   # @param[out]  distance_shape    The shape distance between the two passed data.
   # @param[out]  distance_color    The color distance between the two passed data.
   #
-  def score(self, yA, yB, method = similaritymeasures.pcm):
+  def score(self, yA, yB, method = 'type'):
 
     def dis_shape(feature_shape_A, feature_shape_B, method=method):
-      # if method == 'pcm':
-      #   distance = method(feature_shape_A, feature_shape_B)
-      # elif method == 'frechet':
-      #   distance = similaritymeasures.frechet_dist(feature_shape_A, feature_shape_B)
-      # elif method == 'area':
-      #   distance = similaritymeasures.area_between_two_curves(feature_shape_A, feature_shape_B)
-      # elif method == 'length':
-      #   distance = similaritymeasures.curve_length_measure(feature_shape_A, feature_shape_B)
-      # elif method == 'dtw':
-      #   distance, _ = similaritymeasures.dtw(feature_shape_A, feature_shape_B)
 
-      distance = method(feature_shape_A, feature_shape_B)
+      # similaritymeasures.pcm
+      # similaritymeasures.frechet_dist
+      # similaritymeasures.area_between_two_curves
+      # similaritymeasures.curve_length_measure
+      # similaritymeasures.dtw
+
+      if method=='type':
+        if feature_shape_A==feature_shape_B:
+          distance = 0
+        else:
+          distance = float('inf')
+      else:
+        distance = method(feature_shape_A, feature_shape_B)
       # For dtw
       if isinstance(distance,tuple):
         distance = distance[0]
@@ -147,16 +151,16 @@ class edge(matchDifferent):
       if isinstance(yA, regular):
 
         for i in range(4):
-          feature_shape_A, feature_color_A = self.process(yA.edge[i])
-          feature_shape_B, feature_color_B = self.process(yB.edge[i])
+          feature_shape_A, feature_color_A = self.process(yA.edge[i],method=method)
+          feature_shape_B, feature_color_B = self.process(yB.edge[i],method=method)
 
-          distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method))
+          distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
           distance_color.append(dis_color(feature_color_A, feature_color_B))
 
       elif isinstance(yA, EdgeDes):
-        feature_shape_A, feature_color_A = self.process(yA)
-        feature_shape_B, feature_color_B = self.process(yB)
-        distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method))
+        feature_shape_A, feature_color_A = self.process(yA,method=method)
+        feature_shape_B, feature_color_B = self.process(yB,method=method)
+        distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
         distance_color.append(dis_color(feature_color_A, feature_color_B))
 
       else:
@@ -173,7 +177,7 @@ class edge(matchDifferent):
   #
   # @param[out]       Return comparison result
   #
-  def compare(self, yA, yB, method= similaritymeasures.pcm):
+  def compare(self, yA, yB, method= 'type'):
 
     # score is to calculate the similarity while it will call the feature extraction process inside
 

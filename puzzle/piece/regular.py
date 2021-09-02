@@ -20,6 +20,8 @@
 #
 import cv2
 import math
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 from enum import Enum
@@ -109,7 +111,7 @@ class regular(template):
     # image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
 
     # Apply an average filter
-    kernel = np.ones((5, 5), np.float32)
+    kernel = np.ones((5, 5), np.float32)/25
     dst = cv2.filter2D(self.y.image, -1, kernel)
 
     self.edge[direction].image = dst
