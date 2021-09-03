@@ -20,6 +20,7 @@
 
 from puzzle.piece.template import template
 from puzzle.simulator.action import Actions
+from puzzle.simulator.planner import Base as planner_base
 
 class Apperance(template):
     """
@@ -37,26 +38,26 @@ class Agent(Actions):
     The Agent class equip the Base with the actions and the planning ability
     """
 
-    def __init__(self, app:Apperance):
+    def __init__(self, app:Apperance, planner:planner_base):
         self.app = app
         super().__init__(loc=self.app.rLoc)
 
         # the short-term memory of the actions to be executed to accomplish a plan
-        self.memory = None
+        self.cache_actions = None
     
-    def plan(self, board):
+    def setSolBoard(self):
         """
-        Plan according to the perceived board and the solution board.
-        It outputs a sequence of action labels
+        Set the solution board for the Agent to refer to during the puzzle solving process
         """
         pass
     
-    def process(self, board):
+    def process(self, meaBoard):
         """
         Process the current perceived board to produce the next action
         """
-        action = None
-        return action
+        actions = None
+        self.cache_actions = actions
+        pass
 
     def placeInImage(self, img, offset, CONTOUR_DISPLAY):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)

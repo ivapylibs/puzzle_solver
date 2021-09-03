@@ -25,6 +25,12 @@ class Actions():
     def __init__(self, loc):
         self.loc = loc
         self.cache_piece = None
+        self.ACTION_LABELS = {
+            "move": self.move,
+            "pick": self.pick,
+            "place": self.place,
+            "pause": self.pause
+        }
 
     def move(self, targetLoc):
         self.loc = targetLoc
@@ -42,3 +48,11 @@ class Actions():
 
     def pause(self):
         return
+
+    def execute(self, action_label, action_param):
+        """
+        Exectute an action given the action label and parameter
+
+        TODO: currently assume all actions only take one parameter. What if some action in the future requires more? How to update the API?
+        """
+        self.ACTION_LABELS[action_label](action_param)
