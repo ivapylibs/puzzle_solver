@@ -23,25 +23,42 @@ import os
 import cv2
 from copy import deepcopy
 
+from numpy.lib.shape_base import apply_along_axis
+
 from puzzle.piece.template import template
 from puzzle.simulator.basic import basic
 from puzzle.simulator.agent import Agent
 
 #[0.2 utility function]
-def vis_scene(piece, agent, canvas, title=None, ax=None):
+def vis_scene(piece, agent, canvas, agent_color=None, title=None, ax=None):
+    """
+    @param[in]  agent_color         allow overwrite the agent's color, which is temporary and will not be saved after visualization
+    """
     if ax is None:
         ax = plt.gca()
     canvas_vis = deepcopy(canvas)
+    # change color?
+    if agent_color is not None:
+        appear_cache = deepcopy(agent.app.y.appear) 
+        new_appear = np.repeat(pick_color[np.newaxis,:], repeats=agent.app.y.appear.shape[0], axis=0)
+        agent.app.y.appear = new_appear
+    # visualize
     piece.placeInImage(canvas_vis)
     agent.placeInImage(canvas_vis, CONTOUR_DISPLAY=False)
     ax.imshow(canvas_vis)
     ax.set_title(title)
+    # restore the color
+    if agent_color is not None:
+        agent.app.y.appear = appear_cache
 
 
-#==[1] Prepare the piece, agent, and the canvas
+#==[1] Prepare
+
+# Prepare the piece, agent, and the canvas
 init_piece_loc = [140, 100]
 init_agent_loc = [100, 50]
 target_piece_loc = [40, 100]
+pick_color = np.array((0, 255, 0), dtype=np.uint8)
 
 canvas = np.ones((200, 200, 3), dtype=np.uint8)*255
 piece = template.buildSquare(20, (255,0,0), rLoc=init_piece_loc)
@@ -49,6 +66,7 @@ agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
 
 # visualize
 plt.figure()
+plt.pause(7)    # give me time to record the gif
 ax = plt.gca()
 vis_scene(piece, agent, canvas, title="Initial scene", ax=ax)
 plt.pause(1)
@@ -61,13 +79,13 @@ plt.pause(1)
 #==[3] pick the piece
 agent.execute("pick", piece)
 agent.pick(piece)
-vis_scene(piece, agent, canvas, title="Pick the piece up", ax=ax)
+vis_scene(piece, agent, canvas, agent_color=pick_color, title="Pick the piece up", ax=ax)
 plt.pause(1)
 
 
 #==[4] move to another location
 agent.execute("move", target_piece_loc)
-vis_scene(piece, agent, canvas, title="Move to the target location", ax=ax)
+vis_scene(piece, agent, canvas, agent_color=pick_color, title="Move to the target location", ax=ax)
 plt.pause(1)
 
 #==[5] place the piece
