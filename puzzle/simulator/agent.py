@@ -38,9 +38,10 @@ class Agent(Actions):
     The Agent class equip the Base with the actions and the planning ability
     """
 
-    def __init__(self, app:Apperance, planner:planner_base):
+    def __init__(self, app:Apperance, planner:planner_base=None):
         self.app = app
         super().__init__(loc=self.app.rLoc)
+        self.app.rLoc = self.loc
 
         # the short-term memory of the actions to be executed to accomplish a plan
         self.cache_actions = None
@@ -59,15 +60,28 @@ class Agent(Actions):
         self.cache_actions = actions
         pass
 
-    def placeInImage(self, img, offset, CONTOUR_DISPLAY):
+    def execute(self, action_label, action_param=None):
+        """
+        Exectute an action given the action label and parameter
+
+        Overwrite the execute function since we need to keep the self.app.rLoc updated
+        NOTE:This is necessary only when we are using the puzzle.template as the appearance model
+        """
+        if action_param is None:
+            self.ACTION_LABELS[action_label]()
+        else:
+            self.ACTION_LABELS[action_label](action_param)
+        self.app.rLoc = self.loc
+
+    def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=True):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
     
     @staticmethod
-    def buildSphereAgent(radius, color, rLoc=None):
+    def buildSphereAgent(radius, color, rLoc=None, planner:planner_base=None):
         app_sphere = template.buildSphere(radius, color, rLoc)
-        return Agent(app_sphere)
+        return Agent(app_sphere, planner)
 
     @staticmethod
-    def buildSquareAgent(size, color, rLoc=None):
+    def buildSquareAgent(size, color, rLoc=None, planner:planner_base=None):
         app_Square = template.buildSquare(size, color, rLoc)
-        return Agent(app_Square)
+        return Agent(app_Square, planner)

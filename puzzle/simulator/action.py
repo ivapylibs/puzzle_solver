@@ -16,6 +16,7 @@
 #
 #========================= puzzle.simulator.action ========================
 
+import numpy as np
 from puzzle.piece.template import template
 
 class Actions():
@@ -33,8 +34,8 @@ class Actions():
         }
 
     def move(self, targetLoc):
-        self.loc = targetLoc
-        if self.cache_piece is None:
+        self.loc = np.array(targetLoc)
+        if self.cache_piece is not None:
             self.cache_piece.setPlacement(targetLoc)
 
     def pick(self, piece:template):
@@ -49,10 +50,13 @@ class Actions():
     def pause(self):
         return
 
-    def execute(self, action_label, action_param):
+    def execute(self, action_label, action_param=None):
         """
         Exectute an action given the action label and parameter
 
         TODO: currently assume all actions only take one parameter. What if some action in the future requires more? How to update the API?
         """
-        self.ACTION_LABELS[action_label](action_param)
+        if action_param is None:
+            self.ACTION_LABELS[action_label]()
+        else:
+            self.ACTION_LABELS[action_label](action_param)
