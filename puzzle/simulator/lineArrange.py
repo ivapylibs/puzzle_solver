@@ -25,6 +25,7 @@
 from dataclasses import dataclass
 from puzzle import solver
 import matplotlib.pyplot as plt
+import numpy as np
 import copy
 
 from puzzle.board import board
@@ -32,7 +33,7 @@ from puzzle.simulator.basic import basic
 from puzzle.simulator.agent import Agent
 from puzzle.builder.arrangement import arrangement, paramArrange
 from puzzle.solver.base import base as solver_base
-from puzzle.manager import manager
+from puzzle.manager import manager, managerParms
 
 #===== Class Helper Elements
 #
@@ -119,14 +120,58 @@ class manager_LA(manager):
     1. Establish the correspondence either by hard code or by order, instead of using the visual clue
        The reason is all puzzle pieces in this simulator have the same outlook 
     """
-    def __init__(self, solution, theParms):
+    def __init__(self, solution:board, theParms:managerParms=managerParms()):
         super().__init__(solution, theParms=theParms)
 
-    def setCorr_idx(self):
-        pass
+        # self.solution             The solution board
+        # self.pAssignment          meas-to-sol association
 
-    def setCorr_order(self):
-        pass
+    def set_pAssignments(self, pAssign):
+        """
+        set the pAssignments via the user input. 
+        The pAssignment is the data storing the meaBoard/solBoard association
+
+        @param[in]  pAssign         a list of (2, ). mea-to-sol index
+        """
+        # sanity check. The solution piece idx can not exceed the 
+        # the size of the stored solution board
+        sol_idxs = np.array([pair[1] for pair in pAssign])
+        assert np.amax(sol_idxs) <= self.solution.size() - 1,\
+            "The assignment exceed the stored solution board size. \
+                Please check the assignment"
+        
+        # store the assignment
+        self.pAssignments = pAssign
+
+    def set_pAssignments_board(self, meaBoard:board):
+        """
+        This function create an assignment from a measured board,
+        which assumes that the measured and the solution are one-to-one corresponded.
+        i.e. the first piece of the meaBoard corresponds to the first piece of the solBoard,
+            the second to second, etc.
+
+        @param[in]  meaBoard        The measured board, whose size must be the same as the self.solution(board)
+        """
+        # sanity check - size should match
+        assert meaBoard.size() == self.solution.size(),\
+            "The input board size does not match the solution's"
+
+        # process the board to get a pAssign
+        pAssign = []
+        for i in range(meaBoard.size()):
+            pAssign.append(np.array([i, i]))
+        
+        # set the assignment
+        self.set_pAssignments(pAssign)
+    
+    def measure(self, *argv):
+        """
+        Overwrite the measure. Now this simulator does not it to really measure the board,
+        because all pieces have the same visual clue.
+
+        Assginement will be directly set
+        """
+        return 
 
 class solver_LA(solver_base):
     """
@@ -142,10 +187,13 @@ class solver_LA(solver_base):
     def __init__(self, theSol, thePuzzle):
         super().__init__(theSol, thePuzzle)
     
-    def takeTurn(self, thePlan):
-        raise NotImplementedError
+    def setMatch(self, match):
+        pass
+    
+    def takeTurn(self, thePlan=None):
+        pass
         return super().takeTurn(thePlan=thePlan)
 
-    def planByScore(self):
-        raise NotImplementedError
+    def planByOrder(self):
+        pass
         return None

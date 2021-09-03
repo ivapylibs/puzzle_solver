@@ -23,6 +23,7 @@
 
 ##==[0] Prepare
 #[0.1] environment
+from puzzle.simulator.planner import Planner_step
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -34,6 +35,7 @@ from puzzle.piece.template import template
 from puzzle.simulator.basic import basic
 from puzzle.board import board
 from puzzle.simulator.agent import Agent
+from puzzle.simulator.lineArrange import solver_LA, manager_LA
 
 #[0.2 utility function]
 def vis_scene(board, canvas, agent=None, agent_color=None, title=None, ax=None):
@@ -84,6 +86,11 @@ sol_board.addPiece(sol_piece)
 
 # prepare the human agent 
 agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
+solver = solver_LA(sol_board, init_board)
+manager = manager_LA(sol_board)
+manager.set_pAssignments_board(init_board)
+planner = Planner_step(solver, manager)
+agent.setPlanner(planner)
 
 # visualize
 fh, axes = plt.subplots(1, 2, figsize=(10, 5))
@@ -96,7 +103,10 @@ plt.pause(1)
 
 #==[2] Agent observe and plan
 agent.process(init_board)
-# NEED to verify the planner output here
+# verify the manager function
+assigns = manager.pAssignments
+assert all([np.all(assign==np.array((idx, idx))) for idx, assign in enumerate(assigns)])
+print("The mea-to-sol assignment: {}, which is correct!".format(assigns))
 
 #==[3] Agent execute the action until finishing the puzzle
 while(False):

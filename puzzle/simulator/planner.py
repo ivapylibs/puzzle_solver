@@ -52,6 +52,7 @@ class Planner_Base():
 
         # solver use the association to plan which puzzle to move to where
         # TODO: still need to determine what should be the output of the solver
+        self.solver.setMatch(self.manager.pAssignments)
         solver_out = self.solver.takeTurn()
 
         # plan a sequence of actions to achieve whatever is the solver_out
