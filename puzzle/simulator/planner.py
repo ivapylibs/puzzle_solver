@@ -19,11 +19,12 @@
 from puzzle.solver.base import base as solver_base 
 from puzzle.manager import manager
 
-class Base():
+class Planner_Base():
     """
     Define the general planner planning process. 
 
-    @param[in]  manager         The manager instance responsible for determining the association between the measured board and the solution board
+    @param[in]  manager         The manager instance responsible for determining the \
+                                association between the measured board and the solution board
     @param[in]  solver          The solver instance responsible for plan the execution order
     """
     def __init__(self, solver:solver_base, manager:manager) -> None:
@@ -50,15 +51,17 @@ class Base():
 
 
     def plan(self, solver_out):
-        raise NotImplementedError("The base class assume no method for action planning. Needs to be overwritten by children classes")
+        raise NotImplementedError("The base class assume no method for action planning.\
+             Needs to be overwritten by children classes")
 
-class Planner_step(Base):
+class Planner_step(Planner_Base):
     def __init__(self, solver: solver_base, manager: manager) -> None:
         super().__init__(solver, manager) 
     
     def plan(self, solver_out):
         """
-        For this class, the idea is to use a fixed sequence of action to 
+        For this class, the idea is to use a predefined sequence of actions 
+        to accomplish what is planned by the solver
         """
         pass
     
