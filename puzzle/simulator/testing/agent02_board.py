@@ -1,6 +1,13 @@
 #========================= agent02_board ========================
 #
 # @brief    The test script for the agent functions on the board
+#       
+#           On top of the agent01_piece that verifies the funcionality 
+#           of the atomic actions, this script test the planner.
+#           The planner will use a customized manager and solver 
+#           to plan the action according to the solution board,
+#           so those will also be tested
+#           
 #
 #========================= agent02_board ========================
 
@@ -14,3 +21,83 @@
 #
 #========================= agent02_board ========================
 
+##==[0] Prepare
+#[0.1] environment
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import cv2
+from copy import deepcopy
+
+
+from puzzle.piece.template import template
+from puzzle.simulator.basic import basic
+from puzzle.board import board
+from puzzle.simulator.agent import Agent
+
+#[0.2 utility function]
+def vis_scene(board, canvas, agent=None, agent_color=None, title=None, ax=None):
+    """
+    @param[in]  agent_color         allow overwrite the agent's color, which is temporary and will not be saved after visualization
+    """
+    if ax is None:
+        ax = plt.gca()
+    canvas_vis = deepcopy(canvas)
+    # add the board
+    for piece in board.pieces:
+        piece.placeInImage(canvas_vis)
+
+    # add the agent
+    if agent is not None:
+        # change color?
+        if agent_color is not None:
+            appear_cache = deepcopy(agent.app.y.appear) 
+            new_appear = np.repeat(pick_color[np.newaxis,:], repeats=agent.app.y.appear.shape[0], axis=0)
+            agent.app.y.appear = new_appear
+        # visualize
+        agent.placeInImage(canvas_vis, CONTOUR_DISPLAY=False)
+    
+    # show
+    ax.imshow(canvas_vis)
+    ax.set_title(title)
+
+    # restore the color
+    if (agent is not None) and (agent_color is not None):
+        agent.app.y.appear = appear_cache
+
+
+#==[1] Prepare
+
+# Prepare the boards and the canvas(visualization)
+init_piece_loc = [140, 100]
+init_agent_loc = [100, 50]
+target_piece_loc = [40, 100]
+pick_color = np.array((0, 255, 0), dtype=np.uint8)
+
+canvas = np.ones((200, 200, 3), dtype=np.uint8)*255
+init_board = board()
+init_piece = template.buildSquare(20, (255,0,0), rLoc=init_piece_loc)
+init_board.addPiece(init_piece)
+sol_board = board()
+sol_piece = template.buildSquare(20, (255,0,0), rLoc=target_piece_loc)
+sol_board.addPiece(sol_piece)
+
+# prepare the human agent 
+agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
+
+# visualize
+fh, axes = plt.subplots(1, 2, figsize=(10, 5))
+fh.suptitle("The puzzle to solve")
+#plt.pause(7)    # give me time to record the gif
+canvs_vis = canvas
+vis_scene(init_board, canvas, title="Initial board", ax=axes[0])
+vis_scene(sol_board, canvas, title="Solution board", ax=axes[1])
+plt.pause(1)
+
+#==[2] Agent observe and plan
+agent.process(init_board)
+# NEED to verify the planner output here
+
+#==[3] Agent execute the action until finishing the puzzle
+while(False):
+    pass

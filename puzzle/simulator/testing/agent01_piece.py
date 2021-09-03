@@ -66,7 +66,7 @@ agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
 
 # visualize
 plt.figure()
-plt.pause(7)    # give me time to record the gif
+#plt.pause(7)    # give me time to record the gif
 ax = plt.gca()
 vis_scene(piece, agent, canvas, title="Initial scene", ax=ax)
 plt.pause(1)

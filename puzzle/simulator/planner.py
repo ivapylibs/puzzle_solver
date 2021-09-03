@@ -38,6 +38,14 @@ class Planner_Base():
     def process(self, meaBoard):
         """
         The process procedure when observed an measured board
+
+        Part of the process follow the one in the 
+            puzzle.simulator.testing.basic02/basic03_withSolver.py
+        It:
+        1. uses the manager to process the measured board and get the correspondence
+            between it and the solution board
+        2. use the solver to process the correspondence to establish the next action goal
+        3. The planner needs to plan to achieve the goal
         """
         # manager process the measured board to establish the association
         self.manager.process(meaBoard)

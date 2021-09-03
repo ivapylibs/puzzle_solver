@@ -20,7 +20,7 @@
 
 from puzzle.piece.template import template
 from puzzle.simulator.action import Actions
-from puzzle.simulator.planner import Base as planner_base
+from puzzle.simulator.planner import Planner_Base
 
 class Apperance(template):
     """
@@ -38,27 +38,39 @@ class Agent(Actions):
     The Agent class equip the Base with the actions and the planning ability
     """
 
-    def __init__(self, app:Apperance, planner:planner_base=None):
+    def __init__(self, app:Apperance, planner:Planner_Base=None):
         self.app = app
         super().__init__(loc=self.app.rLoc)
         self.app.rLoc = self.loc
 
+        # planner
+        self.planner = planner
+
         # the short-term memory of the actions to be executed to accomplish a plan
         self.cache_actions = None
     
-    def setSolBoard(self):
+    def setSolBoard(self, solBoard):
         """
         Set the solution board for the Agent to refer to during the puzzle solving process
         """
-        pass
+        self.planner.setSolBoard(solBoard)
+
+    def setPlanner(self, planner:Planner_Base):
+        self.planner = planner
     
     def process(self, meaBoard):
         """
         Process the current perceived board to produce the next action
         """
+        assert self.planner is not None,\
+            "The planner can not be None, or the agent has no brain! \
+                Please use the setPlanner function to get a planner"
         actions = None
-        self.cache_actions = actions
-        pass
+        if self.cache_actions is not None:
+            return
+        else:
+            actions = self.planner.process(meaBoard=meaBoard)
+            self.cache_actions = actions
 
     def execute(self, action_label, action_param=None):
         """
@@ -77,11 +89,11 @@ class Agent(Actions):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
     
     @staticmethod
-    def buildSphereAgent(radius, color, rLoc=None, planner:planner_base=None):
+    def buildSphereAgent(radius, color, rLoc=None, planner:Planner_Base=None):
         app_sphere = template.buildSphere(radius, color, rLoc)
         return Agent(app_sphere, planner)
 
     @staticmethod
-    def buildSquareAgent(size, color, rLoc=None, planner:planner_base=None):
+    def buildSquareAgent(size, color, rLoc=None, planner:Planner_Base=None):
         app_Square = template.buildSquare(size, color, rLoc)
         return Agent(app_Square, planner)
