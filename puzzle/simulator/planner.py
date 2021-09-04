@@ -16,6 +16,7 @@
 #
 #========================= puzzle.simulator.planner ========================
 
+import numpy as np
 from puzzle.solver.base import base as solver_base 
 from puzzle.manager import manager
 
@@ -58,7 +59,7 @@ class Planner_Base():
         # manager process the measured board to establish the association
         self.manager.process(meaBoard)
 
-        # solver use the association to plan which puzzle to move to where
+        # solver use the association to plan which next puzzle to move to where
         self.solver.current = meaBoard
         self.solver.setMatch(self.manager.pAssignments)
         flag, puzzle_idx, target_loc = self.solver.takeTurn()
@@ -66,23 +67,42 @@ class Planner_Base():
         # if no plan found, probably means the puzzle is solved
         if not flag:
             return flag, None, None
-        else:
         # plan a sequence of actions to achieve whatever is the solver_out
-            return flag, self.plan(puzzle_idx, target_loc)
+        else:
+            actions, action_args = self.plan(puzzle_idx, target_loc)
+            return flag, actions, action_args
 
 
-    def plan(self, solver_out):
+    def plan(self, puzzle_idx, target_loc):
         raise NotImplementedError("The base class assume no method for action planning.\
              Needs to be overwritten by children classes")
 
 class Planner_step(Planner_Base):
-    def __init__(self, solver: solver_base, manager: manager) -> None:
+    def __init__(self, solver: solver_base, manager: manager, init_loc=None) -> None:
         super().__init__(solver, manager) 
+        self.init_loc = init_loc
     
-    def plan(self, solver_out):
+    def plan(self, puzzle_idx, target_loc):
         """
         For this class, the idea is to use a predefined sequence of actions 
         to accomplish what is planned by the solver
+
+        @param[in]  puzzle_idx          The index of the next puzzle piece to assemble
+        @param[in]  target_loc          The target location of the selected puzzle piece
+
+        @param[out] actions             The list of action labels to assemble the selected piece
+        @param[out] action_args         The list of arguments for the action. If an action needs no argument, 
+                                        then store None
         """
+        assert self.init_loc is not None,"Please set the init location first"
         pass
+    
+    def setInitLoc(self, init_loc:np.ndarray):
+        """
+        Set the init location
+
+        @param[in]  init_loc        The initial location
+        """
+        self.init_loc = init_loc
+
     

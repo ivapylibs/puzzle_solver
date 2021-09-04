@@ -47,7 +47,8 @@ class Agent(Actions):
         self.planner = planner
 
         # the short-term memory of the actions to be executed to accomplish a plan
-        self.cache_actions = None
+        self.cache_actions = []
+        self.cache_action_args = []
     
     def setSolBoard(self, solBoard):
         """
@@ -61,20 +62,43 @@ class Agent(Actions):
     def process(self, meaBoard):
         """
         Process the current perceived board to produce the next action
+
+        @param[out] succ_flag           Whether future actions are planned and executed
         """
         assert self.planner is not None,\
             "The planner can not be None, or the agent has no brain! \
                 Please use the setPlanner function to get a planner"
-        actions = None
+        succ_flag = False
 
         # if there are no cached actions, plan new actions
-        if self.cache_actions is None:
-            actions = self.planner.process(meaBoard=meaBoard)
-            self.cache_actions = actions
+        if len(self.cache_actions) == 0:
+            flag, actions, action_args = self.planner.process(meaBoard=meaBoard)
+            if not flag:
+                return succ_flag
+            else:
+                succ_flag = True
+                self.cache_actions = actions
+                self.cache_action_args = action_args
 
         # execute the next action
-        actions = self.planner.process(meaBoard=meaBoard)
-        self.cache_actions = actions
+        self.execute_next(meaBoard)
+
+    def execute_next(self, meaBoard):
+        """
+        This function execture the next cached action
+        """
+        next_action = self.cache_actions.pop(0)
+        next_arg = self.cache_action_args.pop(0)
+
+        # if the next action is "pick", the next argument is the index of the target piece in the board
+        if next_action == "pick":
+            # sanity check. Make sure the arg is int (index)
+            assert isinstance(next_arg, int)
+            next_arg = meaBoard.pieces[next_arg]
+
+        # execute the action 
+        self.execute(next_action, next_arg)
+
 
     def execute(self, action_label, action_param=None):
         """
@@ -88,6 +112,7 @@ class Agent(Actions):
         else:
             self.ACTION_LABELS[action_label](action_param)
         self.app.rLoc = self.loc
+    
 
     def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=True):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)

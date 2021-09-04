@@ -188,6 +188,11 @@ class solver_LA(solver_base):
     def __init__(self, theSol, thePuzzle):
         super().__init__(theSol, thePuzzle)
         self.match = None
+
+        # save results
+        self.flag_found = False
+        self.puzzle_idx = None
+        self.target_loc = None
     
     def setMatch(self, match):
         """
@@ -209,6 +214,14 @@ class solver_LA(solver_base):
         """
         self.current = meaBoard
     
+    def clear_results(self):
+        """
+        Clear the cached results
+        """
+        self.flag_found = False
+        self.puzzle_idx = None
+        self.target_loc = None 
+    
     def takeTurn(self):
         """
         Produce the goal of next plan.
@@ -217,7 +230,11 @@ class solver_LA(solver_base):
         @param[out] puzzle_idx          The next puzzle to be assembled
         @param[out] target_loc          The target location for the selected puzzle
         """
+        # prepare
         flag_found = False
+        self.clear_results()
+
+        # get started
         for idx in range(self.current.size()):
             # fetch the match
             sol_match_idx = None
@@ -229,15 +246,18 @@ class solver_LA(solver_base):
                     Solution and current might not match".format(idx)
 
             # check whether has already been assembled
-            if np.all(self.current[idx].rLoc == self.desired[sol_match_idx].rLoc):
+            if np.all(self.current.pieces[idx].rLoc == self.desired.pieces[sol_match_idx].rLoc):
                 continue
 
             # if not, then return the next puzzle and its target location
-            puzzle_idx = idx
-            target_loc = self.desired[sol_match_idx].rLoc
-            flag_found = True
-            return flag_found, puzzle_idx, target_loc
+            self.puzzle_idx = idx
+            self.target_loc = self.desired.pieces[sol_match_idx].rLoc
+            self.flag_found = True
+            return self.flag_found, self.puzzle_idx, self.target_loc
 
         # if no target found, return None:
         if not flag_found:
-            return flag_found, None, None
+            self.puzzle_idx = None
+            self.target_loc = None
+            self.flag_found = False 
+            return self.flag_found, self.puzzle_idx, self.target_loc
