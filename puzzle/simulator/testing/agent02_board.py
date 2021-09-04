@@ -5,6 +5,7 @@
 #           On top of the agent01_piece that verifies the funcionality 
 #           of the atomic actions, this script test the planner.
 #           The planner will use a customized manager and solver 
+#           (namely the manager&solver for the lineArrangement)
 #           to plan the action according to the solution board,
 #           so those will also be tested
 #           
