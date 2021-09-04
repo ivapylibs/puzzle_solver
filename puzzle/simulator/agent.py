@@ -66,11 +66,15 @@ class Agent(Actions):
             "The planner can not be None, or the agent has no brain! \
                 Please use the setPlanner function to get a planner"
         actions = None
-        if self.cache_actions is not None:
-            return
-        else:
+
+        # if there are no cached actions, plan new actions
+        if self.cache_actions is None:
             actions = self.planner.process(meaBoard=meaBoard)
             self.cache_actions = actions
+
+        # execute the next action
+        actions = self.planner.process(meaBoard=meaBoard)
+        self.cache_actions = actions
 
     def execute(self, action_label, action_param=None):
         """

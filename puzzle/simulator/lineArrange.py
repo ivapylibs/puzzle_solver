@@ -27,6 +27,7 @@ from puzzle import solver
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+import puzzle
 
 from puzzle.board import board
 from puzzle.simulator.basic import basic
@@ -186,14 +187,57 @@ class solver_LA(solver_base):
 
     def __init__(self, theSol, thePuzzle):
         super().__init__(theSol, thePuzzle)
+        self.match = None
     
     def setMatch(self, match):
-        pass
-    
-    def takeTurn(self, thePlan=None):
-        pass
-        return super().takeTurn(thePlan=thePlan)
+        """
+        Set up the match
 
-    def planByOrder(self):
-        pass
-        return None
+        @param[in]  match       measure-to-solution match. a list of (2,) array
+        """
+        self.match = match
+    
+    def setMeaBoard(self, meaBoard:board):
+        """
+        store the newly measured board.
+
+        NOTE: in principle when perceiving a new board, the match needs to be updated.
+        But in this simple simulation case the match is assumed to remain unchange.
+        So the point of updating the measured board is just update their locations
+
+        @param[in] meaBoard         The new measured board
+        """
+        self.current = meaBoard
+    
+    def takeTurn(self):
+        """
+        Produce the goal of next plan.
+
+        @param[out] flag_found          The flag of whether the next move is found
+        @param[out] puzzle_idx          The next puzzle to be assembled
+        @param[out] target_loc          The target location for the selected puzzle
+        """
+        flag_found = False
+        for idx in range(self.current.size()):
+            # fetch the match
+            sol_match_idx = None
+            for j in range(len(self.match)):
+                if self.match[j][0] == idx:
+                    sol_match_idx = self.match[j][1]
+            assert sol_match_idx is not None,\
+                "There is no match in the solution board for the puzzle piece:{}. \
+                    Solution and current might not match".format(idx)
+
+            # check whether has already been assembled
+            if np.all(self.current[idx].rLoc == self.desired[sol_match_idx].rLoc):
+                continue
+
+            # if not, then return the next puzzle and its target location
+            puzzle_idx = idx
+            target_loc = self.desired[sol_match_idx].rLoc
+            flag_found = True
+            return flag_found, puzzle_idx, target_loc
+
+        # if no target found, return None:
+        if not flag_found:
+            return flag_found, None, None

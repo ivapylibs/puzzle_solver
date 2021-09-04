@@ -46,17 +46,29 @@ class Planner_Base():
             between it and the solution board
         2. use the solver to process the correspondence to establish the next action goal
         3. The planner needs to plan to achieve the goal
+
+        @param[in]  meaBoard            The measured board
+
+        @param[out] flag                Whether the new actions is successfully planned
+        @param[out] actions             a list of actions
+        @param[out] action_args         the argument of the action.
+                                        If the argument is about a piece, then return the piece idx
+                                        If the argument is a location, then it is direcly an 2-d array
         """
         # manager process the measured board to establish the association
         self.manager.process(meaBoard)
 
         # solver use the association to plan which puzzle to move to where
-        # TODO: still need to determine what should be the output of the solver
+        self.solver.current = meaBoard
         self.solver.setMatch(self.manager.pAssignments)
-        solver_out = self.solver.takeTurn()
+        flag, puzzle_idx, target_loc = self.solver.takeTurn()
 
+        # if no plan found, probably means the puzzle is solved
+        if not flag:
+            return flag, None, None
+        else:
         # plan a sequence of actions to achieve whatever is the solver_out
-        return self.plan(solver_out)
+            return flag, self.plan(puzzle_idx, target_loc)
 
 
     def plan(self, solver_out):
