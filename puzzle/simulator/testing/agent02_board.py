@@ -23,7 +23,7 @@
 
 ##==[0] Prepare
 #[0.1] environment
-from puzzle.simulator.planner import Planner_step
+from puzzle.simulator.planner import Planner_Fix
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -89,7 +89,8 @@ agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
 solver = solver_LA(sol_board, init_board)
 manager = manager_LA(sol_board)
 manager.set_pAssignments_board(init_board)
-planner = Planner_step(solver, manager)
+planner = Planner_Fix(solver, manager)
+planner.setInitLoc(init_agent_loc)
 agent.setPlanner(planner)
 
 # visualize
@@ -101,13 +102,43 @@ vis_scene(init_board, canvas, title="Initial board", ax=axes[0])
 vis_scene(sol_board, canvas, title="Solution board", ax=axes[1])
 plt.pause(1)
 
+
 #==[2] Agent observe and plan
-agent.process(init_board)
+
+plt.figure()
+
+succ, _, _ = agent.process(init_board, execute=False)
 # verify the manager function
 assigns = manager.pAssignments
 assert all([np.all(assign==np.array((idx, idx))) for idx, assign in enumerate(assigns)])
 print("The mea-to-sol assignment: {}, which is correct!".format(assigns))
 
+# visualize
+ax = plt.gca()
+vis_scene(init_board, canvas, agent=agent, title="Initial Scene", ax=ax)
+plt.pause(1)
+
+#plt.pause(7)    #<- give me time to setup for the gif recording.
+
+
 #==[3] Agent execute the action until finishing the puzzle
-while(False):
-    pass
+
+succ = True
+while succ:
+    # plan and execute
+    succ, action, action_arg = agent.process(init_board, execute=True)
+    if not succ:
+        # if not success, will lead to termination
+        continue
+
+    # visualize
+    if action == 'pick':
+        title = "Actions: {}. Argument: the piece of index {}".format(action, action_arg)
+    else:
+        title = "Action: {}. Argument: {}".format(action, action_arg)
+    ax = plt.gca()
+    if agent.cache_piece is not None:
+        vis_scene(init_board, canvas, agent=agent, agent_color=pick_color, title=title, ax=ax)
+    else:
+        vis_scene(init_board, canvas, agent=agent, title=title, ax=ax)
+    plt.pause(1)

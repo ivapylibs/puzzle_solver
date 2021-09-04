@@ -69,7 +69,7 @@ class Planner_Base():
             return flag, None, None
         # plan a sequence of actions to achieve whatever is the solver_out
         else:
-            actions, action_args = self.plan(puzzle_idx, target_loc)
+            actions, action_args = self.plan(meaBoard, puzzle_idx, target_loc)
             return flag, actions, action_args
 
 
@@ -77,17 +77,31 @@ class Planner_Base():
         raise NotImplementedError("The base class assume no method for action planning.\
              Needs to be overwritten by children classes")
 
-class Planner_step(Planner_Base):
+class Planner_Fix(Planner_Base):
+    """
+    This class assumes a fixed sequence of actions to accomplish the puzzle piece assembly plan
+    produced by the solver. The fixed sequence is:
+    1. Move from initial location to the puzzle piece location
+    2. pick the piece
+    3. Move to the target piece location (with the piece in hand)
+    4. Place the piece
+    5. Move back to the initial location
+
+    @param[in]  solver              The solver 
+    @param[in]  manager             The manager
+    @param[in]  init_location       The agent's initial location. Can be None when creating the instance,
+                                    But needs to be set before planning. Default is None 
+    """
     def __init__(self, solver: solver_base, manager: manager, init_loc=None) -> None:
         super().__init__(solver, manager) 
         self.init_loc = init_loc
     
-    def plan(self, puzzle_idx, target_loc):
+    def plan(self, meaBoard, puzzle_idx, target_loc):
         """
-        For this class, the idea is to use a predefined sequence of actions 
-        to accomplish what is planned by the solver
+        Hard code the sequence of action to move a piece in the board to the target location
 
-        @param[in]  puzzle_idx          The index of the next puzzle piece to assemble
+        @param[in]  meaboard            The measured board
+        @param[in]  puzzle_idx          The index of the next puzzle piece to assemble in the meaBoard
         @param[in]  target_loc          The target location of the selected puzzle piece
 
         @param[out] actions             The list of action labels to assemble the selected piece
@@ -95,7 +109,27 @@ class Planner_step(Planner_Base):
                                         then store None
         """
         assert self.init_loc is not None,"Please set the init location first"
-        pass
+
+        actions = []
+        action_args = []
+
+        # move to the piece location
+        actions.append('move')
+        action_args.append(meaBoard.pieces[puzzle_idx].rLoc)
+        # pick
+        actions.append('pick')
+        action_args.append(puzzle_idx)
+        # move to the target location
+        actions.append('move')
+        action_args.append(target_loc)
+        # place
+        actions.append('place')
+        action_args.append(None)
+        # move back tot the initial location
+        actions.append('move')
+        action_args.append(self.init_loc)
+
+        return actions, action_args
     
     def setInitLoc(self, init_loc:np.ndarray):
         """

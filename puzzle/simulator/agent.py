@@ -18,6 +18,7 @@
 #
 #========================= puzzle.simulator.agent ========================
 
+from puzzle.board import board
 from puzzle.piece.template import template
 from puzzle.simulator.action import Actions
 from puzzle.simulator.planner import Planner_Base
@@ -59,11 +60,16 @@ class Agent(Actions):
     def setPlanner(self, planner:Planner_Base):
         self.planner = planner
     
-    def process(self, meaBoard):
+    def process(self, meaBoard:board, execute=True):
         """
         Process the current perceived board to produce the next action
 
+        @param[in]  meaBoard            The measured board
+        @param[in]  execute             bool. Execute an action or not.If not, will only attempt to plan
+
         @param[out] succ_flag           Whether future actions are planned and executed
+        @param[out] action              The action label
+        @param[out] action_arg          The action arguments. If it is piece, then this will be its index in the board
         """
         assert self.planner is not None,\
             "The planner can not be None, or the agent has no brain! \
@@ -74,21 +80,35 @@ class Agent(Actions):
         if len(self.cache_actions) == 0:
             flag, actions, action_args = self.planner.process(meaBoard=meaBoard)
             if not flag:
-                return succ_flag
+                # if the planning is not successful, return False, None, None
+                return succ_flag, None, None
             else:
+                # if the planning is successful, update cached actions
                 succ_flag = True
                 self.cache_actions = actions
                 self.cache_action_args = action_args
+        # if there are already planned actions, then planning is successful
+        else:
+            succ_flag = True
+
 
         # execute the next action
-        self.execute_next(meaBoard)
+        if execute:
+            next_action, next_arg = self.execute_next(meaBoard)
+            return succ_flag, next_action, next_arg
+        else:
+            return succ_flag, None, None
 
     def execute_next(self, meaBoard):
         """
         This function execture the next cached action
+
+        @param[in]  next_action         The next action label
+        @param[in]  next_arg            The next action's argument
         """
         next_action = self.cache_actions.pop(0)
         next_arg = self.cache_action_args.pop(0)
+        next_arg_return = next_arg      # since next arg might be changed
 
         # if the next action is "pick", the next argument is the index of the target piece in the board
         if next_action == "pick":
@@ -98,6 +118,8 @@ class Agent(Actions):
 
         # execute the action 
         self.execute(next_action, next_arg)
+
+        return next_action, next_arg_return
 
 
     def execute(self, action_label, action_param=None):
