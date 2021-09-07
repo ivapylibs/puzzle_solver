@@ -41,7 +41,7 @@ class Planner_Base():
         The process procedure when observed an measured board
 
         Part of the process follow the one in the 
-            puzzle.simulator.testing.basic02/basic03_withSolver.py
+            puzzle.simulator.testing.basic02/basic03_60pSolver.py
         It:
         1. uses the manager to process the measured board and get the correspondence
             between it and the solution board
