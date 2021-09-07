@@ -39,7 +39,7 @@ class edge(matchDifferent):
   #
 
   # 150 for lab space/400 for RGB space
-  def __init__(self, tau_shape=100, tau_color=150):
+  def __init__(self, tau_shape=100, tau_color=400):
     super(edge, self).__init__()
 
     self.tau_shape = tau_shape
@@ -73,11 +73,6 @@ class edge(matchDifferent):
 
     # Extract the valid pts
     pts = edge.image[y, x]
-    # pts = dst[y, x]
-
-    # import matplotlib.pyplot as plt
-    # plt.imshow(edge.mask)
-    # plt.show()
 
     # Expand dim for further processing
     feaOri = np.expand_dims(pts, axis=0)
@@ -85,10 +80,8 @@ class edge(matchDifferent):
     # Resize to a unit length
     feaResize = cv2.resize(feaOri, (feaLength, 1))
 
-    # self.edge[direction].feature_color = feaResize
-
-    # # @todo Yunzhi: May need to double check the color space
-    feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
+    # # # @todo Yunzhi: May need to double check the color space
+    # feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
 
     return feaResize.astype('float32')
 
