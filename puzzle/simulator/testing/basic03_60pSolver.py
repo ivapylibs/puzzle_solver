@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-#============================ basic03_withSolver ===========================
+#============================ basic03_60pSolver ===========================
 #
 # @brief    Test script with command from the solver. (60p img)
 #
 #============================ basic03_withSolver ===========================
 
 #
-# @file     basic03_withSolver.py
+# @file     basic03_60pSolver.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/30  [created]
 #
-#============================ basic03_withSolver ===========================
+#============================ basic03_60pSolver ===========================
 
 
 #==[0] Prep environment
@@ -46,8 +46,8 @@ theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-# theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
-theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
+# theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 
@@ -70,25 +70,19 @@ theLayer = fromLayer(paramPuzzle(areaThreshold=5000,pieceConstructor=regular))
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
 
-
-#==[1.3] Display the solution board
+#==[1.3] Create a Grid instance to reorder the puzzle board
 #
-f, axarr = plt.subplots(1,2)
-bSource = theBoardSol.toImage(ID_DISPLAY=True)
-axarr[0].imshow(bSource)
-axarr[0].title.set_text('Source solution board')
 
-#==[2] Create an Grid instance and explode it
+theGrid_src = gridded(theBoardSol,paramGrid(reorder=True))
+
+#==[2] Create a Grid instance and explode it into a new board
 #
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000,pieceConstructor=regular))
+theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
-
-axarr[1].imshow(epImage)
-axarr[1].title.set_text('Exploded view')
 
 #==[2.1] Create a new Grid instance from the images
 #
@@ -107,15 +101,12 @@ theDet = fromSketch(improc)
 theDet.process(epImage.copy())
 theMaskSol_new = theDet.getState().x
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=5000,pieceConstructor=regular))
+theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular, reorder=True))
 
-axarr[1].imshow(epImage)
-axarr[1].title.set_text('Exploded view')
-
-#==[3] Create match by manager
+#==[3] Create a manager
 #
-theManager = manager(theBoardSol, managerParms(matcher=edge()))
-# theManager.process(epBoard)
+
+theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
 theManager.process(theGrid_new.solution)
 
 #==[4] Create simple sovler and set up the match
@@ -147,7 +138,7 @@ for i in range(1+theSolver.desired.size()):
   theSim.display(ID_DISPLAY=True)
 
   theSim.fig.suptitle(f'Step {i}', fontsize=20)
-  plt.pause(1)
+  plt.pause(0.1)
 
   if i==0:
     # Display the original one at the very beginning
@@ -173,4 +164,4 @@ if saveMe:
           writer.append_data(image)
 
 #
-#============================ basic03_withSolver ===========================
+#============================ basic03_60pSolver ===========================

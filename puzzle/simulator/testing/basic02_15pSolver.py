@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-#============================ basic02_withSolver ===========================
+#============================ basic02_15pSolver ===========================
 #
 # @brief    Test script with command from the solver. (15p img)
 #
 #============================ basic02_withSolver ===========================
 
 #
-# @file     basic02_withSolver.py
+# @file     basic02_15pSolver.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/30  [created]
 #
-#============================ basic02_withSolver ===========================
+#============================ basic02_15pSolver ===========================
 
 
 #==[0] Prep environment
@@ -65,29 +65,22 @@ theMaskSol = theDet.getState().x
 #==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
-
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
 
-
-#==[1.3] Display the solution board
+#==[1.3] Create a Grid instance to reorder the puzzle board
 #
-f, axarr = plt.subplots(1,2)
-bSource = theBoardSol.toImage(ID_DISPLAY=True)
-axarr[0].imshow(bSource)
-axarr[0].title.set_text('Source solution board')
 
-#==[2] Create an Grid instance and explode it
+theGrid_src = gridded(theBoardSol,paramGrid(reorder=True))
+
+#==[2] Create a Grid instance and explode it into a new board
 #
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
+theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
-
-axarr[1].imshow(epImage)
-axarr[1].title.set_text('Exploded view')
 
 #==[2.1] Create a new Grid instance from the images
 #
@@ -106,15 +99,12 @@ theDet = fromSketch(improc)
 theDet.process(epImage.copy())
 theMaskSol_new = theDet.getState().x
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=5000))
+theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000, reorder=True))
 
-axarr[1].imshow(epImage)
-axarr[1].title.set_text('Exploded view')
-
-#==[3] Create match by manager
+#==[3] Create a manager
 #
-theManager = manager(theBoardSol)
-# theManager.process(epBoard)
+
+theManager = manager(theGrid_src.solution)
 theManager.process(theGrid_new.solution)
 
 #==[4] Create simple sovler and set up the match
@@ -172,4 +162,4 @@ if saveMe:
           writer.append_data(image)
 
 #
-#============================ basic02_withSolver ===========================
+#============================ basic02_15pSolver ===========================
