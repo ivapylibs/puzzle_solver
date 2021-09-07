@@ -48,6 +48,9 @@ from puzzle.parser.fromLayer import fromLayer
 from puzzle.piece.moments import moments
 from puzzle.piece.edge import edge
 
+from puzzle.piece.matchDifferent import matchDifferent
+from puzzle.piece.matchSimilar import matchSimilar
+
 #===== Helper Elements
 #
 # DEFINE ENUMERATED TYPE HERE FOR scoreType.
@@ -56,7 +59,7 @@ SCORE_SIMILAR = 1
 
 @dataclass
 class managerParms:
-  scoreType: int = SCORE_DIFFERENCE
+  # scoreType: int = SCORE_DIFFERENCE
   matcher: any = moments(20)
 #
 #================================ manager ================================
@@ -99,11 +102,17 @@ class manager(fromLayer):
     super(manager, self).__init__()
 
     self.solution = solution              # @< The solution puzzle board.
-    self.scoreType = theParms.scoreType   # @< The type of comparator.
     self.pAssignments = []                # @< Assignments: meas to sol.
     self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
-    self.matcher = theParms.matcher
+    self.matcher = theParms.matcher       # @< Matcher instance
+
+    if isinstance(self.matcher,matchDifferent):
+      self.scoreType = SCORE_DIFFERENCE   # @< The type of comparator.
+    elif isinstance(self.matcher,matchSimilar):
+      self.scoreType = SCORE_SIMILAR   # @< The type of comparator.
+    else:
+      raise TypeError('The matcher is of wrong input.')
 
   #============================== predict ==============================
   #
@@ -162,8 +171,8 @@ class manager(fromLayer):
         @todo Yunzhi: Will update this part. We may need two scoreTables. 
         Currently, only use the shape feature and add up the distances.
         '''
-        if idx_x==25 and (idx_y==24 or idx_y==47):
-          print('s')
+        # if idx_x==56 and (idx_y==58 or idx_y==56):
+        #   print('s')
         if type(ret) is tuple and len(ret)>0:
           scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
           scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
@@ -186,7 +195,7 @@ class manager(fromLayer):
   #
   def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
 
-    # Shape only
+    # Single feature
     if np.count_nonzero(scoreTable_color)==0:
       # @note Yunzhi: Only focus on the difference in the scoreTable_shape
       matched_indices = []
@@ -202,15 +211,16 @@ class manager(fromLayer):
         else:
           j = scoreTable_shape[i].argmax()
           # @todo Yunzhi: The threshold needs to be decided by the feature method
-          if scoreTable_shape[i][j] > 10:
-            scoreTable_shape[:, j] = 100
+          if scoreTable_shape[i][j] > 2:
+            scoreTable_shape[:, j] = -100
             matched_indices.append([i, j])
 
       # matched_indices refers to the index but not the id of the puzzle piece
       matched_indices = np.array(matched_indices).reshape(-1, 2)
 
     else:
-      # Shape + Color
+      # @todo Yunzhi: Currently, it is hard-coded for edge feature
+      # Shape + Color feature
 
       def getKeepList(score_list, diff_thresh=150):
 
