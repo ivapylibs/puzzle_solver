@@ -34,6 +34,7 @@ from puzzle.builder.gridded import gridded, paramGrid
 
 from puzzle.simulator.basic import basic
 from puzzle.piece.edge import edge
+from puzzle.piece.sift import sift
 from puzzle.piece.regular import regular
 
 fpath = os.path.realpath(__file__)
@@ -42,7 +43,8 @@ cpath = fpath.rsplit('/', 1)[0]
 #==[1] Read the source image and template.
 #
 # theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
@@ -106,7 +108,7 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=
 #==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
+theManager = manager(theGrid_src.solution, managerParms(matcher=sift()))
 theManager.process(theGrid_new.solution)
 
 #==[4] Create simple sovler and set up the match
@@ -123,9 +125,10 @@ theSim = basic(theGrid_new.solution)
 #
 
 plt.ion()
+f = plt.figure()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
 
 if saveMe:
   f.savefig(cpath + f'/data/theBoardExplode.png')
@@ -145,7 +148,7 @@ for i in range(1+theSolver.desired.size()):
     print(f'The original measured board')
 
   if saveMe:
-    theSim.fig.savefig(cpath + f'/data/explode02_simple_step{str(i).zfill(2)}.png')
+    theSim.fig.savefig(cpath + f'/data/explode03_simple_step{str(i).zfill(2)}.png')
 
   if i < theSolver.desired.size():
     print(f'Step {i+1}:')
@@ -156,8 +159,8 @@ plt.ioff()
 
 if saveMe:
   # Build GIF
-  with imageio.get_writer(cpath + f'/data/demo_simple_explode02.gif', mode='I', fps=1) as writer:
-      filename_list = glob.glob(cpath + f'/data/explode02_simple_step*.png')
+  with imageio.get_writer(cpath + f'/data/demo_simple_explode03.gif', mode='I', fps=1) as writer:
+      filename_list = glob.glob(cpath + f'/data/explode03_simple_step*.png')
       filename_list.sort()
       for filename in filename_list:
           image = imageio.imread(filename)

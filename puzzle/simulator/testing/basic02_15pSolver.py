@@ -78,7 +78,7 @@ theGrid_src = gridded(theBoardSol,paramGrid(reorder=True))
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
+theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 
@@ -121,6 +121,7 @@ theSim = basic(theGrid_new.solution)
 #
 
 plt.ion()
+f = plt.figure()
 
 # saveMe = True
 saveMe = False
