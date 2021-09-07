@@ -154,7 +154,7 @@ class manager(fromLayer):
 
     scoreTable_shape = np.zeros((self.bMeas.size(),self.solution.size()))
     scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
-
+    scoreTable_edge_color = np.zeros((self.bMeas.size(), self.solution.size(),4))
     for idx_x, bMea in enumerate(self.bMeas.pieces):
       for idx_y, bSol in enumerate(self.solution.pieces):
         ret = self.matcher.score(bMea, bSol)
@@ -162,15 +162,18 @@ class manager(fromLayer):
         @todo Yunzhi: Will update this part. We may need two scoreTables. 
         Currently, only use the shape feature and add up the distances.
         '''
+        if idx_x==25 and (idx_y==24 or idx_y==47):
+          print('s')
         if type(ret) is tuple and len(ret)>0:
           scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
           scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
+          scoreTable_edge_color[idx_x][idx_y] = ret[1]
         else:
           scoreTable_shape[idx_x][idx_y] = ret
 
     # The measured piece will be assigned a solution piece
     # However, for some measured piece, they may not have a match according to the threshold.
-    self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color)
+    self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
 
 
   #=========================== greedyAssignment ==========================
@@ -181,8 +184,9 @@ class manager(fromLayer):
   #
   # @param[out]  matched_indices   The matched pairs. N x 2
   #
-  def greedyAssignment(self, scoreTable_shape, scoreTable_color):
+  def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
 
+    # Shape only
     if np.count_nonzero(scoreTable_color)==0:
       # @note Yunzhi: Only focus on the difference in the scoreTable_shape
       matched_indices = []
@@ -206,6 +210,8 @@ class manager(fromLayer):
       matched_indices = np.array(matched_indices).reshape(-1, 2)
 
     else:
+      # Shape + Color
+
       def getKeepList(score_list, diff_thresh=150):
 
         # Create new lists by removing the first element or the last element
@@ -233,24 +239,51 @@ class manager(fromLayer):
         return np.array(matched_indices).reshape(-1, 2)
       for i in range(scoreTable_shape.shape[0]):
         # j = scoreTable_shape[i].argmin()
-        ind = np.argsort(scoreTable_shape[i], axis=0)
-        new_order = np.sort(scoreTable_shape[i], axis=0)
 
-        # Update ind and new_order in a small range since
-        # distance between shape features may have similar, we want to keep all of them
-        keep_list = getKeepList(new_order)
-        ind = ind[keep_list]
-        new_order = new_order[keep_list]
+        shape_list = scoreTable_shape[i]
+        ind_shape_sort = np.argsort(shape_list, axis=0)
+        shape_sort_list = np.sort(shape_list, axis=0)
 
-        if ind.size==1:
+        # Update ind_shape_sort and shape_sort_list in a small range since
+        # distance between shape features may be similar, we want to keep all of them
+        keep_list = getKeepList(shape_sort_list)
+        ind_shape_sort = ind_shape_sort[keep_list] # ind in shape_list (complete)
+
+        # Not used for now
+        shape_sort_list = shape_sort_list[keep_list]
+
+        if ind_shape_sort.size==1:
           # @todo Yunzhi: The threshold needs to be decided by the feature method
-          j = ind[0]
+          j = ind_shape_sort[0]
         else:
-          # Check scoreTable_color, find the lowest for now
-          # The index of the lowest score in the scoreTable_color[i][ind]
-          j = scoreTable_color[i][ind].argmin()
-          # The final index based on scoreTable_shape and scoreTable_color
-          j = ind[j]
+
+          color_list = scoreTable_color[i][ind_shape_sort]
+          ind_color_sort = np.argsort(color_list, axis=0) # ind in color_list (not complete)
+          color_sort_list = np.sort(color_list, axis=0)
+
+          # Update ind_shape_sort and shape_sort_list in a small range since
+          # distance between shape features may be similar, we want to keep all of them
+
+          keep_list = getKeepList(color_sort_list,10)
+          ind_color_sort = ind_color_sort[keep_list]  # ind in color_list (not complete)
+
+          color_sort_list = color_sort_list[keep_list]
+
+          if ind_color_sort.size == 1:
+            # @todo Yunzhi: The threshold needs to be decided by the feature method
+            j = ind_shape_sort[ind_color_sort[0]]
+          else:
+            # Check color_sort_list, find the one with lowest edge score for now
+            edge_color_list = scoreTable_edge_color[i][ind_shape_sort[ind_color_sort]]
+            ind_edge_color = np.where(edge_color_list == np.amin(edge_color_list))
+
+            j = ind_shape_sort[ind_color_sort[ind_edge_color[0]]][0]
+
+          # # Check scoreTable_color, find the lowest for now
+          # # The index of the lowest score in the scoreTable_color[i][ind_shape_sort]
+          # j = scoreTable_color[i][ind_shape_sort].argmin()
+          # # The final index based on scoreTable_shape and scoreTable_color
+          # j = ind_shape_sort[j]
 
         if scoreTable_shape[i][j] < 1e16:
           scoreTable_shape[:, j] = 1e18

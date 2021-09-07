@@ -95,7 +95,11 @@ class regular(template):
     # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
     self.edge = [EdgeDes() for i in range(4)]
 
+    # For debug
     self.class_image = None
+    self.rectangle_pts = None
+    self.filtered_harris_pts =None
+    self.simple_harris_pts=None
 
     self._process()
 
@@ -145,7 +149,8 @@ class regular(template):
 
     out_dict = sideExtractor(self.y, scale_factor=1,
                              harris_block_size=5, harris_ksize=5,
-                             corner_score_threshold=0.2, corner_minmax_threshold=100)
+                             corner_score_threshold=0.15, corner_minmax_threshold=100,
+                             shape_classification_nhs=3)
 
     # Set up the type/img of the chosen edge
     for direction in EdgeDirection:
@@ -154,7 +159,9 @@ class regular(template):
 
     # @note Just for display for now
     self.class_image = out_dict['class_image']
-
+    self.rectangle_pts = out_dict['rectangle_pts']
+    self.filtered_harris_pts = out_dict['filtered_harris_pts']
+    self.simple_harris_pts = out_dict['simple_harris_pts']
   #======================= buildFromMaskAndImage =======================
   #
   # @brief  Given a mask (individual) and an image of same base dimensions, use to

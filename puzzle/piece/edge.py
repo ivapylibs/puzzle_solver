@@ -37,6 +37,8 @@ class edge(matchDifferent):
   # @brief  Constructor for the puzzle piece edge class.
   #
   #
+
+  # 150 for lab space/400 for RGB space
   def __init__(self, tau_shape=100, tau_color=150):
     super(edge, self).__init__()
 
@@ -66,7 +68,7 @@ class edge(matchDifferent):
   # @param[in]   edge           An EdgeDes instance.
   #
   @staticmethod
-  def colorFeaExtract(edge, feaLength=200):
+  def colorFeaExtract(edge, feaLength=300):
     y, x = np.nonzero(edge.mask)
 
     # Extract the valid pts
