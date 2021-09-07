@@ -35,6 +35,7 @@ from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.piece.regular import regular
 from puzzle.piece.edge import edge
 from puzzle.piece.moments import moments
+from puzzle.piece.sift import sift
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -104,8 +105,9 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=
 
 #==[3] Create a manager
 #
+# theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
+theManager = manager(theGrid_src.solution, managerParms(matcher=sift()))
 theManager.process(theGrid_new.solution)
 
 #==[4] Display. Should see some ids on the puzzle pieces
@@ -129,6 +131,8 @@ for pair in theManager.pAssignments:
   if pair[0]!=pair[1]:
     num_failure=num_failure+1
 
+# Add the unmatched pairs
+num_failure=num_failure+theManager.bMeas.size()- len(theManager.pAssignments)
 print('Failure cases:',num_failure)
 
 plt.show()

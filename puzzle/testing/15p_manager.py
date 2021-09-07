@@ -117,6 +117,15 @@ axarr[1].title.set_text('Solution')
 print('The first index refers to the measured board while the second one refers to the solution board.')
 print(theManager.pAssignments)
 
+num_failure =0
+for pair in theManager.pAssignments:
+  if pair[0]!=pair[1]:
+    num_failure=num_failure+1
+
+# Add the unmatched pairs
+num_failure=num_failure+theManager.bMeas.size()- len(theManager.pAssignments)
+print('Failure cases:',num_failure)
+
 plt.show()
 #
 #============================= 15p_manager =============================
