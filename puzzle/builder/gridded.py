@@ -45,7 +45,8 @@ from puzzle.builder.interlocking import interlocking, paramInter
 
 @dataclass
 class paramGrid(paramInter):
-  tauGrid: float = 30
+  tauGrid: float = 30 # Not used yet
+  reorder: bool = False
 
 #
 #====================== puzzle.builder.interlocking ======================
@@ -68,7 +69,7 @@ class gridded(interlocking):
     else:
       raise TypeError('Not initialized properly')
 
-    self.__processGrid()
+    self.__processGrid(theParams.reorder)
 
   #============================ processGrid ============================
   #
@@ -81,7 +82,7 @@ class gridded(interlocking):
   # are weird puzzles that can be thought of with a mix of adjacent and
   # interlocking.
   #
-  def __processGrid(self):
+  def __processGrid(self, reorder=False):
 
     pLoc = self.solution.pieceLocations()
 
@@ -100,11 +101,39 @@ class gridded(interlocking):
     y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
     y_label = updateLabel(y_list, y_label)
 
-    for ii in range(self.solution.size()):
-      # The order is in line with the one saving in self.solution.pieces
+    if reorder:
+      pieces_src = deepcopy(self.solution.pieces)
+      num = 0
 
-      # @todo Yunzhi: Eventually, this has to be upgraded to a dict?
-      self.gc[:,ii]= x_label[ii], y_label[ii]
+      # Save the changes, {new:old}
+      dict_conversion = {}
+
+      for jj in range(max(y_label) + 1):
+        for ii in range(max(x_label) + 1):
+          for idx, pts in enumerate(zip(x_label, y_label)):
+            if pts[0] == ii and pts[1] == jj:
+              self.solution.pieces[num] = pieces_src[idx]
+              dict_conversion[num] = idx
+              self.solution.pieces[num].id = num
+              self.gc[:, num] = ii, jj
+              num = num + 1
+              break
+
+      # Have to re-compute adjMat/ilMat
+      adjMat_src = deepcopy(self.adjMat)
+      for ii in range(self.solution.size()):
+        for jj in range(ii + 1, self.solution.size()):
+          self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
+          self.adjMat[jj, ii] = self.adjMat[ii, jj]
+
+      self.ilMat = self.adjMat
+
+    else:
+      for ii in range(self.solution.size()):
+        # The order is in line with the one saving in self.solution.pieces
+
+        # @todo Yunzhi: Eventually, this has to be upgraded to a dict?
+        self.gc[:,ii]= x_label[ii], y_label[ii]
 
   # OTHER CODE / MEMBER FUNCTIONS
 
