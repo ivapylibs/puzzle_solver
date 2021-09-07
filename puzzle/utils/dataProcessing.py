@@ -21,7 +21,7 @@
 #
 import numpy as np
 import types
-
+import cv2
 #====================== puzzle.utils.dataProcessing ======================
 #
 # ================================ updateLabel ==============================
@@ -60,17 +60,57 @@ def updateLabel(x_list, x_label):
 # @param[out] target   The updated target class instance.
 #
 class copyAttributes(object):
-    def __init__(self, source):
-        self.source = source
+  def __init__(self, source):
+    self.source = source
 
-    def __call__(self, target):
-        for attr, value in self.source.__dict__.items():
-            if attr.startswith('__'):
-                continue
-            if isinstance(value, (property, types.FunctionType)):
-                continue
-            setattr(target, attr, value)
-        return target
+  def __call__(self, target):
+    for attr, value in self.source.__dict__.items():
+      if attr.startswith('__'):
+        continue
+      if isinstance(value, (property, types.FunctionType)):
+        continue
+      setattr(target, attr, value)
+    return target
+
+
+# ================================ calculateMatches ==============================
+#
+# @brief  Calculate the matches based on KNN
+#         See https://github.com/adumrewal/SIFTImageSimilarity/blob/master/SIFTSimilarityInteractive.ipynb
+#
+# @param[in]  des1   The descriptor.
+# @param[in]  des2   The descriptor.
+#
+# @param[out] topResults   The matches.
+#
+
+def calculateMatches(des1, des2):
+  bf = cv2.BFMatcher()
+  matches = bf.knnMatch(des1, des2, k=2)
+  topResults1 = []
+  for m, n in matches:
+    if m.distance < 0.7 * n.distance:
+      topResults1.append([m])
+
+  matches = bf.knnMatch(des2, des1, k=2)
+  topResults2 = []
+  for m, n in matches:
+    if m.distance < 0.7 * n.distance:
+      topResults2.append([m])
+
+  topResults = []
+  for match1 in topResults1:
+    match1QueryIndex = match1[0].queryIdx
+    match1TrainIndex = match1[0].trainIdx
+
+    for match2 in topResults2:
+      match2QueryIndex = match2[0].queryIdx
+      match2TrainIndex = match2[0].trainIdx
+
+      if (match1QueryIndex == match2TrainIndex) and (match1TrainIndex == match2QueryIndex):
+        topResults.append(match1)
+  return topResults
+
 
 #
 #====================== puzzle.utils.dataProcessing ======================
