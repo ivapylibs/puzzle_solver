@@ -23,10 +23,10 @@
 from dataclasses import dataclass
 from puzzle.board import board
 from puzzle.simulator.agent import Agent
-from puzzle.simulator.simTimeless import SimTimeLess
+from puzzle.simulator.simTimeless import SimTimeLess, ParamST
 
 @dataclass
-class ParamST:
+class ParamSTL(ParamST):
     pass
 
 class SimTime(SimTimeLess):
@@ -43,7 +43,7 @@ class SimTime(SimTimeLess):
                                     related to the time effect
     """
     def __init__(self, init_board:board, sol_board:board, agent:Agent, 
-                param: ParamST=ParamST()):
+                param: ParamSTL=ParamSTL()):
         super().__init__(init_board, sol_board, agent)
         # store the parameters
         self.param = param
@@ -53,3 +53,4 @@ class SimTime(SimTimeLess):
         Overwrite the simulation step function
         """
         pass
+

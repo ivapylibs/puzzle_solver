@@ -18,8 +18,18 @@
 #
 #========================= puzzle.simulator.simTimeless ========================
 
+from copy import deepcopy
+from dataclasses import dataclass
+import matplotlib.pyplot as plt
+import numpy as np
+
 from puzzle.board import board
 from puzzle.simulator.agent import Agent
+
+@dataclass
+class ParamST():
+    canvas_H: int = 200         #<- The height of the scene
+    canvas_W: int = 200         #<- The width of the scene
 
 class SimTimeLess():
     """
@@ -37,17 +47,78 @@ class SimTimeLess():
     @param[in]  init_board          The initial board
     @param[in]  sol_board           The solution board
     @param[in]  agent               The puzzle solving agent
+    @param[in]  param               The parameters
     """
-    def __init__(self, init_board:board, sol_board:board, agent:Agent):
-        self.meaBoard = init_board  # the initial measured board is the init_board
-        self.sol_board = sol_board
-        self.agent = agent
+    def __init__(self, init_board:board, sol_board:board, agent:Agent, param:ParamST=ParamST()):
+        self.init_board = init_board        # Initial board
+        self.sol_board = sol_board          # Solution board
+        self.cur_board = init_board          # The current board. At first it will be only the inital board
+        self.agent = agent                  # The agent
+        self.param = param
 
         # let the agent be aware of the solution board
         self.agent.setSolBoard(sol_board)
-    
-    def simulate(self):
-        pass
 
-    def visualize(self):
-        pass
+    def simulate(self):
+        """
+        Simulate until done
+        """
+        Succ = True
+        while(Succ):
+            Succ = self.simulate_step()
+    
+    def simulate_step(self):
+        """
+        The simulation step.
+        For the timeless simulator, the simulation step will fully execute the agent's next action
+        """
+        succ, action, action_arg = self.agent.process(self.cur_board, execute=True)
+        return succ
+
+    def visualize(self, mode="scene", pickColorA=None, title=None, ax=None):
+        """
+        Visualization. It offers the following functionality
+        1. Visualize the initial board
+        2. Visualize the solution board
+        3. Visualize the current scene, including the agent and the current board
+
+        @param[in]  mode            "initBoard", "solBoard", "scene"(default)
+        @param[in]  pickColorA      The option to display a different color of the agent when 
+                                    the agent has a puzzle piece in hand.
+                                    It is only for visualization, the real color of the agent won't be changed
+                                    If None(default), then will use the original agent color for visualization
+        @param[in]  title           The title
+        @param[in]  ax              The axis for drawing
+        """
+        # determine the axis
+        if ax is None:
+            plt.figure()
+            ax = plt.gca()
+
+        # visualization 
+        canvas = np.ones(
+            (self.param.canvas_H, self.param.canvas_W),
+            dtype=np.uint8
+        ) * 255
+
+        if mode == "initBoard":
+            for piece in self.init_board.pieces:
+                piece.placeInImage(canvas)
+        elif mode == "solBoard":
+            for piece in self.sol_board.pieces:
+                piece.placeInImage(canvas)
+        elif mode == "scene":
+            # the current board
+            for piece in self.cur_board.pieces:
+                piece.placeInImage(canvas)
+            # change color?
+            if pickColorA is not None:
+                appear_cache = deepcopy(self.agent.app.y.appear) 
+                new_appear = np.repeat(pickColorA[np.newaxis,:], repeats=self.agent.app.y.appear.shape[0], axis=0)
+                self.agent.app.y.appear = new_appear
+            self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
+            if pickColorA is not None:
+                self.agent.app.y.appear = appear_cache
+    
+        ax.imshow(canvas)        
+        ax.set_title(title)
