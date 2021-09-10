@@ -102,6 +102,17 @@ class Agent(Actions):
             return succ_flag, next_action, next_arg
         else:
             return succ_flag, None, None
+        
+    def pop_action(self):
+        """
+        Pop out the next action and action argument WITHOUT executing them
+
+        @param[out]  next_action         The next action label
+        @param[out]  next_arg            The next action's argument
+        """
+        next_action = self.cache_actions.pop(0)
+        next_arg = self.cache_action_args.pop(0)
+        return next_action, next_arg
 
     def execute_next(self, meaBoard):
         """
@@ -110,29 +121,29 @@ class Agent(Actions):
         @param[in]  next_action         The next action label
         @param[in]  next_arg            The next action's argument
         """
-        next_action = self.cache_actions.pop(0)
-        next_arg = self.cache_action_args.pop(0)
+        next_action, next_arg = self.pop_action()
         next_arg_return = next_arg      # since next arg might be changed
 
-        # if the next action is "pick", the next argument is the index of the target piece in the board
-        if next_action == "pick":
-            # sanity check. Make sure the arg is int (index)
-            assert isinstance(next_arg, int)
-            next_arg = meaBoard.pieces[next_arg]
-
         # execute the action 
-        self.execute(next_action, next_arg)
+        self.execute(next_action, next_arg, board=meaBoard)
 
         return next_action, next_arg_return
 
 
-    def execute(self, action_label, action_param=None):
+    def execute(self, action_label, action_param=None, board=None):
         """
         Exectute an action given the action label and parameter
 
         Overwrite the execute function since we need to keep the self.app.rLoc updated
         NOTE:This is necessary only when we are using the puzzle.template as the appearance model
         """
+
+        # if it is pick action, then get the puzzle piece as the real parameter
+        if action_label == "pick":
+            # sanity check. Make sure the arg is int (index)
+            assert isinstance(action_param, int) and (board is not None)
+            action_param = board.pieces[action_param]
+
         if action_param is None:
             self.ACTION_LABELS[action_label]()
         else:

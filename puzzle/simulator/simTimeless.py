@@ -28,6 +28,10 @@ from puzzle.simulator.agent import Agent
 
 @dataclass
 class ParamST():
+    """
+    @param canvas_H             The height of the whole scene
+    @param canvas_W             The width of the whole scene
+    """
     canvas_H: int = 200         #<- The height of the scene
     canvas_W: int = 200         #<- The width of the scene
 
@@ -72,7 +76,7 @@ class SimTimeLess():
             Succ = self.simulate_step()
             if vis:
                 self.visualize(mode="scene", **kwargs)
-                plt.pause(vis_pause_time)
+                plt.pause(0.01)
     
     def simulate_step(self):
         """
