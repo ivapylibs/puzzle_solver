@@ -59,13 +59,20 @@ class SimTimeLess():
         # let the agent be aware of the solution board
         self.agent.setSolBoard(sol_board)
 
-    def simulate(self):
+    def simulate(self, vis=False, vis_pause_time=1, **kwargs):
         """
         Simulate until done
+
+        @param[in]  vis             If True, will visualize the scene after each simulation step
+        @param[in]  vis_pause_time  Pause time for visualization
+        @param[in]  **kwargs        The parameter for visualize function. See its API for detail
         """
         Succ = True
         while(Succ):
             Succ = self.simulate_step()
+            if vis:
+                self.visualize(mode="scene", **kwargs)
+                plt.pause(vis_pause_time)
     
     def simulate_step(self):
         """
@@ -97,7 +104,7 @@ class SimTimeLess():
 
         # visualization 
         canvas = np.ones(
-            (self.param.canvas_H, self.param.canvas_W),
+            (self.param.canvas_H, self.param.canvas_W, 3),
             dtype=np.uint8
         ) * 255
 
@@ -111,14 +118,15 @@ class SimTimeLess():
             # the current board
             for piece in self.cur_board.pieces:
                 piece.placeInImage(canvas)
-            # change color?
-            if pickColorA is not None:
+            # the agent
+            if (pickColorA is not None) and (self.agent.cache_piece is not None):
                 appear_cache = deepcopy(self.agent.app.y.appear) 
                 new_appear = np.repeat(pickColorA[np.newaxis,:], repeats=self.agent.app.y.appear.shape[0], axis=0)
                 self.agent.app.y.appear = new_appear
-            self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
-            if pickColorA is not None:
+                self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
                 self.agent.app.y.appear = appear_cache
+            else:
+                self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
     
         ax.imshow(canvas)        
         ax.set_title(title)
