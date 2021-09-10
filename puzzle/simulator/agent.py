@@ -54,6 +54,10 @@ class Agent(Actions):
     def setSolBoard(self, solBoard):
         """
         Set the solution board for the Agent to refer to during the puzzle solving process
+        It will update the solution board to the planner it used, 
+        which includes both manager and solver
+
+        @param[in]  solBoard        The solution board
         """
         self.planner.setSolBoard(solBoard)
 
