@@ -38,6 +38,7 @@ canvas_size = 200
 num_pieces = 4
 init_x = 140
 target_x = 40
+init_agent_loc = [100, 50]
 
 canvas = np.ones((canvas_size, canvas_size, 3), dtype=np.uint8)*255
 
@@ -51,9 +52,10 @@ for i in range(num_pieces):
 
 #==[2] Create a simulatior
 #
-lineArrange_simulator = lineArrange.buildSameX(target_x, init_board, initHuman=Agent())
+agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
+lineArrange_simulator = lineArrange.buildSameX(target_x, init_board, initHuman=agent)
 
-#==[3] Display
+#==[3] Verify the target locations
 #
 
 #==[3.1] Display the original board
