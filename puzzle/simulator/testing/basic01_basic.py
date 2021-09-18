@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-#============================ basic01_usage ===========================
+#============================ basic01_basic ===========================
 #
 # @brief    Test script for the most basic functionality of the
 #           basic class. (6 shapes img)
 #
-#============================ basic01_usage ===========================
+#============================ basic01_basic ===========================
 
 #
-# @file     basic01_simple.py
+# @file     basic01_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/22  [created]
 #
-#============================ basic01_usage ===========================
+#============================ basic01_basic ===========================
 
 
 #==[0] Prep environment
@@ -92,4 +92,4 @@ axarr[4].title.set_text('Remove puzzle piece 3')
 plt.show()
 
 #
-#============================ basic01_usage ===========================
+#============================ basic01_basic ===========================

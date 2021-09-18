@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-#============================ explode01_simple ===========================
+#============================ 6pExplode_simple ===========================
 #
 # @brief    Test script for solving a explodedPuzzle in a col-wise manner.
 #           (6 shapes img)
 #
-#============================ explode01_simple ===========================
+#============================ 6pExplode_simple ===========================
 
 #
-# @file     explode01_simple.py
+# @file     6pExplode_simple.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/16  [created]
 #
-#============================ explode01_simple ===========================
+#============================ 6pExplode_simple ===========================
 
 
 #==[0] Prep environment
@@ -116,4 +116,4 @@ if saveMe:
           writer.append_data(image)
 
 #
-#============================ explode01_simple ===========================
+#============================ 6pExplode_simple ===========================

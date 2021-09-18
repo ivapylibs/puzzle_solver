@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-#============================ explode01_gridded ===========================
+#============================ 6pExplode_gridded ===========================
 #
 # @brief    Test script for explodedPuzzle function. (6 shapes img)
 #
 #
-#============================ explode01_gridded ===========================
+#============================ 6pExplode_gridded ===========================
 
 #
-# @file     explode01_gridded.py
+# @file     6pExplode_gridded.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/15  [created]
 #
-#============================ explode01_gridded ===========================
+#============================ 6pExplode_gridded ===========================
 
 
 #==[0] Prep environment
@@ -62,4 +62,4 @@ plt.show()
 
 
 #
-#============================ explode01_gridded ===========================
+#============================ 6pExplode_gridded ===========================

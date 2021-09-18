@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-#============================ explode02_gridded ===========================
+#============================ 15pExplode_gridded ===========================
 #
 # @brief    Test script for explodedPuzzle function.
-#           (15 one with touching case)
+#           (15p with touching case)
 #
-#============================ explode02_gridded ===========================
+#============================ 15pExplode_gridded ===========================
 
 #
-# @file     explode02_gridded.py
+# @file     15pExplode_gridded.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/15  [created]
 #
-#============================ explode02_gridded ===========================
+#============================ 15pExplode_gridded ===========================
 
 
 #==[0] Prep environment
@@ -79,4 +79,4 @@ axarr[1].title.set_text('Exploded view')
 
 plt.show()
 #
-#============================ explode02_gridded ===========================
+#============================ 15pExplode_gridded ===========================
