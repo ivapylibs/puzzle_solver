@@ -121,13 +121,9 @@ theSim = basic(theGrid_new.solution)
 #
 
 plt.ion()
-f = plt.figure()
 
 # saveMe = True
 saveMe = False
-
-if saveMe:
-  f.savefig(cpath + f'/data/theBoardExplode.png')
 
 # num of size() actions at most
 for i in range(1+theSolver.desired.size()):

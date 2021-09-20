@@ -41,8 +41,7 @@ class pca(matchDifferent):
 
   #=========================== process ==========================
   #
-  # @brief  Compute moments from the raw puzzle data.
-  #         See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
+  # @brief  Compute PCA feature from the raw puzzle data.
   #
   # @param[in]  y    A puzzleTemplate instance saving a passed puzzle piece's info
   #

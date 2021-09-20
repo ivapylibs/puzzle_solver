@@ -164,6 +164,7 @@ class regular(template):
     self.rectangle_pts = out_dict['rectangle_pts']
     self.filtered_harris_pts = out_dict['filtered_harris_pts']
     self.simple_harris_pts = out_dict['simple_harris_pts']
+
   #======================= buildFromMaskAndImage =======================
   #
   # @brief  Given a mask (individual) and an image of same base dimensions, use to
