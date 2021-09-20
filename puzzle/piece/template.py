@@ -110,14 +110,18 @@ class template:
     See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
 
     :param  img:           A contour image.
+    :return: The aligned angle (rad).
     '''
 
-    # @todo Need double check the center
+    # @note
+    # Currently, we use the image center
 
     y, x = np.nonzero(img)
-    x = x - np.mean(x)
-    y = y - np.mean(y)
-
+    # x = x - np.mean(x)
+    # y = y - np.mean(y)
+    #
+    x = x - np.mean(img.shape[1]/2)
+    y = y - np.mean(img.shape[0]/2)
 
     coords = np.vstack([x, y])
     cov = np.cov(coords)
@@ -134,6 +138,18 @@ class template:
     }
 
     theta = np.arctan2(dict['v1'][1], dict['v1'][0])
+
+    # # Debug only
+    #
+    # scale = 20
+    # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
+    #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
+    # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
+    #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
+    # plt.plot(x, y, 'k.')
+    # plt.axis('equal')
+    # plt.gca().invert_yaxis()  # Match the image system with origin at top left
+    # plt.show()
 
     return theta
 

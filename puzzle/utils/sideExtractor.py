@@ -759,17 +759,18 @@ def sideExtractor(puzzleTemplate, **kwargs):
     raise RuntimeError('No rectangle found')
 
   # @todo Rotate to get a horizontal puzzle piece
-  # if intersections[1, 0] == intersections[0, 0]:
-  #     rotation_angle = 90
-  # else:
-  #     rotation_angle = np.arctan2(intersections[1, 1] - intersections[0, 1],
-  #                                 intersections[1, 0] - intersections[0, 0]) * 180 / np.pi
+  if intersections[1, 0] == intersections[0, 0]:
+      rotation_angle = 90
+  else:
+      rotation_angle = np.arctan2(intersections[1, 1] - intersections[0, 1],
+                                  intersections[1, 0] - intersections[0, 0]) * 180 / np.pi
 
   edges = contour_enlarged
 
   # Rotate all images
-  # # @todo Rotate
-  # edges, M = rotate(edges, rotation_angle)
+  # @todo Rotate
+  edges, M = rotate(edges, rotation_angle)
+
   out_dict['edges'] = edges[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
 
   # # @todo Rotate

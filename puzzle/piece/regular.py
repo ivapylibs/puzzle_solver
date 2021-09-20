@@ -90,7 +90,7 @@ class regular(template):
     elif len(argv) == 4:
       raise TypeError('Too many parameters!')
 
-    super(regular, self).__init__(y, r, id)
+    super(regular, self).__init__(y=y, r=r, id=id)
 
     # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
     self.edge = [EdgeDes() for i in range(4)]

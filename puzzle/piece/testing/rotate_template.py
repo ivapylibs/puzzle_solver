@@ -68,18 +68,18 @@ theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
 theLayer.process(theImageSol,theMaskSol)
 theBoardSol = theLayer.getState()
 
-#==[1.3] Focus on a single puzzle piece and duplicate it with a new location.
+#==[1.3] Focus on a single puzzle piece.
 #
 
-theRegular_A = regular(theBoardSol.pieces[36])
+thePiece_A = theBoardSol.pieces[36]
 
 #==[1.4] Rotate the puzzle piece.
 #
 
-theNew = theRegular_A.rotatePiece(20)
+theRotate = thePiece_A.rotatePiece(20)
 
 bigImage = np.zeros((1000, 1000, 3), dtype='uint8')
-theNew.placeInImage(bigImage)
+theRotate.placeInImage(bigImage)
 
 #==[2] Display.
 #
