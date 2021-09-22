@@ -64,7 +64,7 @@ class gridded(interlocking):
     super(gridded, self).__init__(solBoard, theParams)
 
     if isinstance(solBoard, board):
-      # @< Will store the calibrated grid location of the puzzle piece.
+      # Store the calibrated grid location of the puzzle piece.
       self.gc = np.zeros((2, solBoard.size()))
     else:
       raise TypeError('Not initialized properly')
@@ -101,6 +101,7 @@ class gridded(interlocking):
     y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
     y_label = updateLabel(y_list, y_label)
 
+    # Reorder the pieces, so the id will correspond to the grid location
     if reorder:
       pieces_src = deepcopy(self.solution.pieces)
       num = 0
@@ -137,27 +138,44 @@ class gridded(interlocking):
 
   # OTHER CODE / MEMBER FUNCTIONS
 
-  # =========================== explodedPuzzle ==========================
-  #
-  # @brief  Create an exploded version of the puzzle. It is an image
-  #         with no touching pieces.
-  #
-  # The value for an exploded puzzle image is that it can be used to
-  # generate a simulated puzzle scenario that can be passed to a puzzle
-  # solver. It can also be used to define a quasi-puzzle problem, where
-  # the objective is to place the pieces in grid ordering like the
-  # exploded view (without needing to interlock). Doing see keeps puzzle
-  # piece well separated for simple puzzle interpretation algorithms to
-  # rapidly parse.
-  #
-  # @param[in]  dx          The horizontal offset when exploding.
-  # @param[in]  dy          The vertical offset when exploding.
-  # @param[in]  bgColor     The background color to use.
-  #
-  # @param[out] epImage     Exploded puzzle image.
-  # @param[out] epBoard     Exploded puzzle board.
-  #
+  def swapPuzzle(self, num=100):
+    '''
+    @brief  Randomly swap rLoc of two puzzle pieces for num times.
+
+    :return: Generated puzzle image & Generated puzzle board.
+    '''
+
+    # @note We do not care about id in this function.
+    epBoard = deepcopy(self.solution)
+    for i in range(num):
+      target_list = np.random.randint(0,epBoard.size(),2)
+
+      temp = epBoard.pieces[target_list[0]].rLoc
+      epBoard.pieces[target_list[0]].rLoc = epBoard.pieces[target_list[1]].rLoc
+      epBoard.pieces[target_list[1]].rLoc = temp
+
+    epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
+
+    return epImage, epBoard
+
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0,0,0)):
+    '''
+    @brief  Create an exploded version of the puzzle. It is an image
+    with no touching pieces.
+
+    The value for an exploded puzzle image is that it can be used to
+    generate a simulated puzzle scenario that can be passed to a puzzle
+    solver. It can also be used to define a quasi-puzzle problem, where
+    the objective is to place the pieces in grid ordering like the
+    exploded view (without needing to interlock). Doing see keeps puzzle
+    piece well separated for simple puzzle interpretation algorithms to
+    rapidly parse.
+
+    :param dx: The horizontal offset when exploding.
+    :param dy: The vertical offset when exploding.
+    :param bgColor: The background color to use.
+    :return: Exploded puzzle image & Exploded puzzle board.
+    '''
 
     #--[1] First figure out how big the exploded image should be based
     #      on the puzzle image dimensions, the number of puzzle pieces
@@ -185,7 +203,9 @@ class gridded(interlocking):
       r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:,idx].flatten()
       r_new = r_new.astype('int')
       piece.placeInImageAt(epImage, rc=r_new)
+      # epBoard.pieces[idx].setPlacement(r_new)
       piece.setPlacement(r_new)
+    # epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
     '''
     @todo Yunzhi: Currently, it is just explode but without changing the order.
