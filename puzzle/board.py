@@ -74,14 +74,12 @@ class board:
     elif len(argv)>2:
       raise TypeError('Too many inputs.')
 
-  #=========================== addPiece ==========================
-  #
-  # @brief      Add puzzle piece instance to the board
-  #
-  # @param[in]  piece   A puzzle piece instance
-  #
   def addPiece(self, piece):
+    '''
+    @brief      Add puzzle piece instance to the board.
 
+    :param piece: A puzzle piece instance.
+    '''
     piece.id = self.id_count
     self.id_count +=1
     self.pieces.append(piece)
@@ -274,13 +272,22 @@ class board:
       bbox = self.boundingBox().astype('int')
       if (theImage.shape[:2]-lengths>0).all():
         for piece in self.pieces:
+          piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
           if ID_DISPLAY == True:
-            piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY = CONTOUR_DISPLAY)
-            pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0] / 2),
-                   int(piece.rLoc[1] - bbox[0][1] + piece.size()[1] / 2))
 
-            cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                        min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
+            txt = str(piece.id)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            char_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
+
+            y,x = np.nonzero(piece.y.mask)
+
+            pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x))-char_size[0],
+                   int(piece.rLoc[1] - bbox[0][1] + np.mean(y))-char_size[1])
+
+
+            font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
+            cv2.putText(theImage, str(piece.id), pos, font,
+                        font_scale, COLOR, 2, cv2.LINE_AA)
       else:
         raise RuntimeError('The image is too small. Please try again.')
     else:
@@ -288,14 +295,24 @@ class board:
       lengths = self.extents().astype('int')
       bbox = self.boundingBox().astype('int')
       theImage = np.zeros((lengths[1],lengths[0],3),dtype='uint8')
+
+
+
       for piece in self.pieces:
         piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY = CONTOUR_DISPLAY)
         if ID_DISPLAY == True:
-          pos = (int(piece.rLoc[0] - bbox[0][0] + piece.size()[0]/2),
-                 int(piece.rLoc[1] - bbox[0][1] + piece.size()[1]/2))
+          txt = str(piece.id)
+          font = cv2.FONT_HERSHEY_SIMPLEX
+          char_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
 
-          cv2.putText(theImage, str(piece.id), pos, cv2.FONT_HERSHEY_SIMPLEX,
-                      min(theImage.shape)/(25/5), COLOR, 2, cv2.LINE_AA)
+          y, x = np.nonzero(piece.y.mask)
+
+          pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
+                 int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
+
+          font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
+          cv2.putText(theImage, str(piece.id), pos, font,
+                      font_scale, COLOR, 2, cv2.LINE_AA)
 
     return theImage
 
