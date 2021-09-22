@@ -59,6 +59,7 @@ class sift(matchSimilar):
 
 
     sift_builder = cv2.SIFT_create()
+    # @todo Maybe it is wrong to put y.image here
     kp, des = sift_builder.detectAndCompute(y.image, None)
 
     return kp, des

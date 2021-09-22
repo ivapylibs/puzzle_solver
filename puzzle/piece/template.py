@@ -60,6 +60,8 @@ class template:
     '''
 
     self.y = y          # @< The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate
+
+    # The default location is the top left corner
     self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
 
     self.id = id  # @< The puzzle piece id in the measured board. Be set up by the board.
@@ -330,11 +332,11 @@ class template:
     :return: A new puzzle template instance.
     '''
 
-    # Create a new instance. Without rLoc or ID.
-    thePiece = template(y=deepcopy(self.y))
+    # Create a new instance. Without rLoc.
+    thePiece = template(y=deepcopy(self.y),id=deepcopy(self.id))
 
     # By default the rotation is around its center (img center)
-    thePiece.y.mask,_,_,_ = rotate_im(thePiece.y.mask, theta)
+    thePiece.y.mask,M,x_pad,y_pad = rotate_im(thePiece.y.mask, theta)
 
     # Have to apply a thresh to deal with holes caused by interpolation
     _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 10, 255, cv2.THRESH_BINARY)
@@ -351,6 +353,8 @@ class template:
 
     thePiece.y.appear = thePiece.y.image[thePiece.y.rcoords[1], thePiece.y.rcoords[0], :]
 
+    # @note If we simply transform the original info, the result may be inaccurate?
+
     # Create a contour of the mask
     cnts = cv2.findContours(thePiece.y.mask, cv2.RETR_TREE,
                             cv2.CHAIN_APPROX_SIMPLE)
@@ -358,6 +362,9 @@ class template:
     thePiece.y.contour_pts = cnts[0][0]
     thePiece.y.contour = np.zeros_like(thePiece.y.mask).astype('uint8')
     cv2.drawContours(thePiece.y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+
+    # Might be negative
+    thePiece.rLoc = self.rLoc-np.array([x_pad,y_pad])
 
     return thePiece
 
