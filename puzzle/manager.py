@@ -103,7 +103,7 @@ class manager(fromLayer):
 
     self.solution = solution              # @< The solution puzzle board.
     self.pAssignments = []                # @< Assignments: meas to sol.
-    self.bAssigned = []                   # @< Puzzle board of assigned pieces.
+    # self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
     self.matcher = theParms.matcher       # @< Matcher instance
 
@@ -152,7 +152,8 @@ class manager(fromLayer):
 
     # pAssignments refers to the index but not the id of the puzzle piece
     self.pAssignments = pFilteredAssignments
-    self.bAssigned = self.bMeas.getAssigned(self.pAssignments)
+
+    # self.bAssigned = self.bMeas.getAssigned(self.pAssignments)
 
   #=========================== matchPieces ==========================
   #
