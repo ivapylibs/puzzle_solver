@@ -103,6 +103,7 @@ class manager(fromLayer):
 
     self.solution = solution              # @< The solution puzzle board.
     self.pAssignments = []                # @< Assignments: meas to sol.
+    self.pAssignments_rotation = []       # @< Assignments: meas to sol. The rotation angles (degree).
     # self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
     self.matcher = theParms.matcher       # @< Matcher instance
@@ -148,6 +149,13 @@ class manager(fromLayer):
     for assignment in self.pAssignments:
       ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
       if ret:
+
+        # Some matchers calculate the rotation as well
+        if isinstance(ret, tuple):
+          self.pAssignments_rotation.append(np.rad2deg(ret[1]))
+        else:
+          self.pAssignments_rotation.append(np.rad2deg(self.solution.pieces[assignment[1]].theta-self.bMeas.pieces[assignment[0]].theta))
+
         pFilteredAssignments.append(assignment)
 
     # pAssignments refers to the index but not the id of the puzzle piece

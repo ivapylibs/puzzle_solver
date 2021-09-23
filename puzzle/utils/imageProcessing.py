@@ -53,7 +53,7 @@ def cropImage(image, template):
 
   return dst
 
-def rotate_im(image, angle):
+def rotate_im(image, angle, mask=None):
   '''
   @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
 
@@ -64,6 +64,7 @@ def rotate_im(image, angle):
 
   image_height = image.shape[0]
   image_width = image.shape[1]
+
   diagonal_square = (image_width * image_width) + (
           image_height * image_height
   )
@@ -95,7 +96,30 @@ def rotate_im(image, angle):
                                  (diagonal, diagonal),
                                  flags=cv2.INTER_NEAREST)
 
-  return rotated_image, transform_matrix, padding_left, padding_top
+
+  # boundingRect is meant to work on a black and white image
+  if mask is not None:
+    x, y, w, h = cv2.boundingRect(mask)
+  else:
+    x, y, w, h = cv2.boundingRect(rotated_image)
+
+  # print(x, y, w, h)
+  # cv2.imshow('rotate', rotated_image)
+  # cv2.imshow('src', image)
+
+  final_image = rotated_image[y:y+h, x:x+w]
+
+  final_image = cv2.copyMakeBorder(final_image,
+                                    top=2,
+                                    bottom=2,
+                                    left=2,
+                                    right=2,
+                                    borderType=cv2.BORDER_CONSTANT,
+                                    value=0
+                                    )
+  # cv2.imshow('dst', final_image)
+  # cv2.waitKey()
+  return final_image, rotated_image, transform_matrix, padding_left-x+2, padding_top-y+2
 
 #
 #====================== puzzle.utils.imageProcessing ======================

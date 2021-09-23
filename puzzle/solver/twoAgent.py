@@ -78,12 +78,14 @@ class twoAgent(simple):
 
     print(f'It is agent {self.iMove}\'s turn:')
 
-    self.agents[self.iMove].takeTurn(defaultPlan=defaultPlan)
+    FINISHED = self.agents[self.iMove].takeTurn(defaultPlan=defaultPlan)
 
     if (self.iMove == 0):       # Toggle back and forth between agents.
       self.iMove = 1
     else:
       self.iMove = 0
+
+    return FINISHED
 
 #
 #========================= puzzle.solver.twoAgent ========================

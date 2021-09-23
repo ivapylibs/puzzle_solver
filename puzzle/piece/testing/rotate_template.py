@@ -76,15 +76,18 @@ thePiece_A = theBoardSol.pieces[36]
 #==[1.4] Rotate the puzzle piece.
 #
 
-theRotate = thePiece_A.rotatePiece(20)
+theRotate = thePiece_A.rotatePiece(90)
 
 bigImage = np.zeros((1000, 1000, 3), dtype='uint8')
-theRotate.placeInImage(bigImage)
+thePiece_A.placeInImage(bigImage)
+
+theRotate_B = theRotate.rotatePiece(270)
+theRotate_B.placeInImage(bigImage)
 
 #==[2] Display.
 #
 plt.figure()
-plt.title("Test the rotation function of the puzzle piece. Should see a rotated puzzle piece.")
+plt.title("Test the rotation function of the puzzle piece. Should see two matched puzzle pieces.")
 plt.imshow(bigImage)
 
 plt.show()

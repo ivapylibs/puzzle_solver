@@ -126,7 +126,11 @@ class fromLayer(centroidMulti):
     # Convert mask to an image
     mask = M.astype('uint8')
 
-    # cv2.imshow('demo',mask)
+    mask_enlarged = np.zeros((mask.shape[0] + 20, mask.shape[1] + 20), dtype='uint8')
+    mask_enlarged[10:mask.shape[0] + 10, 10:mask.shape[1] + 10] = mask
+
+    # # Debug only
+    # cv2.imshow('debug',mask)
     # cv2.waitKey()
 
     # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
@@ -134,6 +138,9 @@ class fromLayer(centroidMulti):
     # For OpenCV 4+
     cnts, hierarchy = cv2.findContours(mask, cv2.RETR_TREE,
                             cv2.CHAIN_APPROX_SIMPLE)
+
+    # cnts, hierarchy = cv2.findContours(mask_enlarged, cv2.RETR_TREE,
+    #                                    cv2.CHAIN_APPROX_SIMPLE)
 
     hierarchy = hierarchy[0]
 
@@ -148,6 +155,14 @@ class fromLayer(centroidMulti):
 
     cnts= np.array(cnts)
     cnts = cnts[keep]
+
+    # # Debug only
+    # debug_mask = np.zeros_like(mask_enlarged).astype('uint8')
+    # for c in cnts:
+    #   cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
+    #
+    # cv2.imshow('after hierarchy thresh',debug_mask)
+    # cv2.waitKey()
 
     desired_cnts = []
 
@@ -165,11 +180,23 @@ class fromLayer(centroidMulti):
 
     # print('size of desired_cnts is', len(desired_cnts))
 
+    # # Debug only
+    # debug_mask = np.zeros_like(mask_enlarged).astype('uint8')
+    # for c in desired_cnts:
+    #   cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
+    #
+    #   cv2.imshow('after area thresh',debug_mask)
+    #   cv2.waitKey()
+
     regions = []
     # Get the individual part
     for c in desired_cnts:
       seg_img = np.zeros(mask.shape[:2], dtype="uint8")  # reset a blank image every time
       cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
+
+      # # Debug only
+      # cv2.imshow('debug',seg_img)
+      # cv2.waitKey()
 
       # Get ROI, OpenCV style
       x, y, w, h = cv2.boundingRect(c)
@@ -183,6 +210,7 @@ class fromLayer(centroidMulti):
           break
       if not skipflag:
         regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y],[x,y,x+w,y+h]))
+        # regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x-20, y-20],[x,y,x+w,y+h]))
 
     return regions
 

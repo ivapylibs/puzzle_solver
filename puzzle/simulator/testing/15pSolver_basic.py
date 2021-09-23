@@ -22,7 +22,7 @@ import cv2
 import imageio
 import glob
 
-from puzzle.manager import manager
+from puzzle.manager import manager, managerParms
 from puzzle.solver.simple import simple
 
 from puzzle.utils.imageProcessing import cropImage
@@ -34,6 +34,7 @@ from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.builder.gridded import gridded, paramGrid
 
 from puzzle.simulator.basic import basic
+from puzzle.piece.sift import sift
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -104,12 +105,12 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=
 #==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution)
+theManager = manager(theGrid_src.solution,managerParms(matcher=sift()))
 theManager.process(theGrid_new.solution)
 
 #==[4] Create simple sovler and set up the match
 #
-theSolver = simple(theBoardSol, theGrid_new.solution)
+theSolver = simple(theGrid_src.solution, theGrid_new.solution)
 
 theSolver.setMatch(theManager.pAssignments)
 

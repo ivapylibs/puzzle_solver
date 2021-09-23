@@ -85,20 +85,24 @@ _, epBoard = theGrid.explodedPuzzle(dx=400,dy=400)
 
 #==[2.2] Randomly swap the puzzle pieces.
 #
-theGrid_src = gridded(epBoard,paramGrid(reorder=True))
+theGrid_new = gridded(epBoard,paramGrid(reorder=True))
 
-_, epBoard  = theGrid_src.swapPuzzle()
+_, epBoard  = theGrid_new.swapPuzzle()
 
-#==[2.2] Randomly rotate the puzzle pieces.
+#==[2.3] Randomly rotate the puzzle pieces.
 #
+
+gt_rotation = []
 for i in range(epBoard.size()):
-    epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(np.random.randint(0,360))
+    # gt_rotation.append(60)
+    gt_rotation.append(np.random.randint(0, 70))
+    epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
 
 epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 # plt.imshow(epImage)
 # plt.show()
 
-#==[2.3] Create a new Grid instance from the images
+#==[2.4] Create a new Grid instance from the images
 #
 
 # @note
@@ -135,11 +139,18 @@ axarr[0].title.set_text('Measurement')
 axarr[1].imshow(bsolImage)
 axarr[1].title.set_text('Solution')
 
+plt.show()
+
 # Show assignment
 print('The first index refers to the measured board while the second one refers to the solution board. Note that '
       'the index in different boards may refer to different puzzle pieces.')
 print(theManager.pAssignments)
 
-plt.show()
+print('The computed rotation angles(degree):')
+print('Note that the order of angles do not correspond to the pieces')
+print(np.sort(np.array(theManager.pAssignments_rotation).astype('int')))
+print('The gt rotation angles(degree):')
+print(np.sort(np.array(gt_rotation).astype('int')))
+
 #
 #============================= 15pRotate_manager =============================

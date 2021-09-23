@@ -59,19 +59,10 @@ class template:
     :param id: The puzzle piece id in the measured board. Be set up by the board.
     '''
 
-    self.y = y          # @< The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate
-
-    # The default location is the top left corner
-    self.rLoc = np.array(r)       # @< The puzzle piece location in the whole image.
-
-    self.id = id  # @< The puzzle piece id in the measured board. Be set up by the board.
-
-    # self.pLoc = p       # @< The puzzle piece discrete grid piece coordinates.
-    # @note     Opting not to use discrete grid puzzle piece description.
-    # @note     Excluding orientation for now. Can add later. Or sub-class it.
-
-    # Should be set up later by the align function
-    self.theta = theta  # @< The puzzle piece aligned angle
+    self.y = y
+    self.rLoc = np.array(r) # The default location is the top left corner
+    self.id = id
+    self.theta = theta  # Should be set up later by the align function
 
   def size(self):
     '''
@@ -110,6 +101,7 @@ class template:
     '''
     @brief  To find the major and minor axes of a blob and then return the aligned rotation.
     See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+    PCA is our default method which does not perform very well.
 
     :param  img:           A contour image.
     :return: The aligned angle (rad).
@@ -320,7 +312,7 @@ class template:
       thePiece = template(y, rLoc)
 
     # Set up the rotation
-    thePiece.theta = template.getEig(thePiece.y.contour)
+    thePiece.theta = template.getEig(thePiece.y.mask)
 
     return thePiece
 
@@ -336,12 +328,12 @@ class template:
     thePiece = template(y=deepcopy(self.y),id=deepcopy(self.id))
 
     # By default the rotation is around its center (img center)
-    thePiece.y.mask,M,x_pad,y_pad = rotate_im(thePiece.y.mask, theta)
+    thePiece.y.mask,mask_temp, M,x_pad,y_pad = rotate_im(thePiece.y.mask, theta)
 
     # Have to apply a thresh to deal with holes caused by interpolation
-    _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 10, 255, cv2.THRESH_BINARY)
+    _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 5, 255, cv2.THRESH_BINARY)
 
-    thePiece.y.image,_,_,_ = rotate_im(thePiece.y.image, theta)
+    thePiece.y.image,_,_,_,_ = rotate_im(thePiece.y.image, theta, mask=mask_temp)
 
     thePiece.y.size = [thePiece.y.mask.shape[1], thePiece.y.mask.shape[0]]
 
@@ -365,6 +357,9 @@ class template:
 
     # Might be negative
     thePiece.rLoc = self.rLoc-np.array([x_pad,y_pad])
+
+    # Set up the new rotation
+    thePiece.theta = self.theta + np.deg2rad(theta)
 
     return thePiece
 
