@@ -86,7 +86,7 @@ theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=para
 #==[2.1] Create a new Grid instance from the images
 #
 
-_, epBoard = theGrid.explodedPuzzle(dx=400,dy=400)
+_, epBoard = theGrid.explodedPuzzle(dx=100,dy=100)
 
 #==[2.2] Randomly swap the puzzle pieces.
 #
@@ -122,6 +122,9 @@ theDet = fromSketch(improc)
 theDet.process(epImage.copy())
 theMaskSol_new = theDet.getState().x
 
+# temp_demo = cv2.resize(theMaskSol_new, (int(theMaskSol_new.shape[1] / 2), int(theMaskSol_new.shape[0] / 2)), interpolation=cv2.INTER_AREA)
+# cv2.imshow('debug',temp_demo)
+# cv2.waitKey()
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new, theParams=paramGrid(areaThreshold=1000, reorder=True))
 
 #==[3] Create a manager
@@ -147,8 +150,6 @@ theManager.process(theGrid_new.solution)
 #
 # plt.show()
 
-
-
 #==[4] Create simple sovler and set up the match
 #
 theSolver = simple(theGrid_src.solution, theGrid_new.solution)
@@ -164,8 +165,8 @@ theSim = basic(theGrid_new.solution)
 
 plt.ion()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
 
 FINISHED = False
 i=0
@@ -186,7 +187,7 @@ while 1:
     print(f'The original measured board')
 
   if saveMe:
-    theSim.fig.savefig(cpath + f'/data/60pRotateSolver_step{str(i).zfill(2)}.png')
+    theSim.fig.savefig(cpath + f'/data/60pRotateSolver_step{str(i).zfill(3)}.png')
 
 
   print(f'Step {i+1}:')

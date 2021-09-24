@@ -24,6 +24,7 @@
 
 #===== Environment / Dependencies
 #
+import copy
 
 import cv2
 import numpy as np
@@ -111,6 +112,71 @@ class fromLayer(centroidMulti):
       self.haveMeas = True
 
 
+  def findCorrectedContours(self, mask):
+    '''
+    @brief Find the right contours given a binary mask image.
+
+    :param mask: The input binary mask image.
+    :return: Contour list.
+    '''
+
+    # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
+    # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
+    # For OpenCV 4+
+    cnts, hierarchy = cv2.findContours(mask, cv2.RETR_TREE,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+
+    if len(cnts)==0:
+      return
+
+    hierarchy = hierarchy[0]
+
+    # Filter out the outermost contour
+    # See https://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html
+    keep = []
+    for i in range(hierarchy.shape[0]):
+      if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:, 3] == i) >= 2:
+        pass
+      else:
+        keep.append(i)
+
+    cnts = np.array(cnts)
+    cnts = cnts[keep]
+
+    desired_cnts = []
+
+    # Filter out some contours according to area threshold
+    for c in cnts:
+      # Draw the contours
+      # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
+      area = cv2.contourArea(c)
+
+      # @todo Yunzhi: this basic processing may be put somewhere else.
+
+      # Filtered by the area threshold
+      if area > self.params.areaThreshold:
+        desired_cnts.append(c)
+      else:
+
+        # findContours may return a discontinuous contour which cannot compute contourArea correctly
+        if cv2.arcLength(c, True) > 1000:
+
+          temp_mask = np.zeros_like(mask).astype('uint8')
+          cv2.drawContours(temp_mask, [c], -1, (255, 255, 255), 2)
+          _, temp_mask = cv2.threshold(temp_mask, 10, 255, cv2.THRESH_BINARY)
+          #
+          # debug_mask = copy.deepcopy(temp_mask)
+          # debug_mask = cv2.resize(debug_mask, (int(debug_mask.shape[1] / 2), int(debug_mask.shape[0] / 2)),
+          #                         interpolation=cv2.INTER_AREA)
+          # cv2.imshow('debug', debug_mask)
+          # cv2.waitKey()
+          desired_cnts_new = self.findCorrectedContours(temp_mask)
+          for c in desired_cnts_new:
+            desired_cnts.append(c)
+
+    return desired_cnts
+
+
   #=========================== mask2regions ============================
   #
   # @brief      Convert the selection mask into a bunch of regions.
@@ -126,57 +192,11 @@ class fromLayer(centroidMulti):
     # Convert mask to an image
     mask = M.astype('uint8')
 
-    mask_enlarged = np.zeros((mask.shape[0] + 20, mask.shape[1] + 20), dtype='uint8')
-    mask_enlarged[10:mask.shape[0] + 10, 10:mask.shape[1] + 10] = mask
-
     # # Debug only
     # cv2.imshow('debug',mask)
     # cv2.waitKey()
 
-    # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
-    # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
-    # For OpenCV 4+
-    cnts, hierarchy = cv2.findContours(mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
-
-    # cnts, hierarchy = cv2.findContours(mask_enlarged, cv2.RETR_TREE,
-    #                                    cv2.CHAIN_APPROX_SIMPLE)
-
-    hierarchy = hierarchy[0]
-
-    # Filter out the outermost contour
-    # See https://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html
-    keep = []
-    for i in range(hierarchy.shape[0]):
-      if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:,3] == i) >= 2:
-          pass
-      else:
-        keep.append(i)
-
-    cnts= np.array(cnts)
-    cnts = cnts[keep]
-
-    # # Debug only
-    # debug_mask = np.zeros_like(mask_enlarged).astype('uint8')
-    # for c in cnts:
-    #   cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
-    #
-    # cv2.imshow('after hierarchy thresh',debug_mask)
-    # cv2.waitKey()
-
-    desired_cnts = []
-
-    # Filter out some contours according to area threshold
-    for c in cnts:
-      # Draw the contours
-      # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
-      area = cv2.contourArea(c)
-
-      # @todo Yunzhi: this basic processing may be put somewhere else.
-
-      # Filtered by the area threshold
-      if area > self.params.areaThreshold:
-        desired_cnts.append(c)
+    desired_cnts = self.findCorrectedContours(mask)
 
     # print('size of desired_cnts is', len(desired_cnts))
 
@@ -185,8 +205,9 @@ class fromLayer(centroidMulti):
     # for c in desired_cnts:
     #   cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
     #
-    #   cv2.imshow('after area thresh',debug_mask)
-    #   cv2.waitKey()
+    # debug_mask = cv2.resize(debug_mask, (int(debug_mask.shape[1] / 2), int(debug_mask.shape[0] / 2)), interpolation=cv2.INTER_AREA)
+    # cv2.imshow('after area thresh',debug_mask)
+    # cv2.waitKey()
 
     regions = []
     # Get the individual part
@@ -201,7 +222,6 @@ class fromLayer(centroidMulti):
       # Get ROI, OpenCV style
       x, y, w, h = cv2.boundingRect(c)
 
-
       # Double check if ROI has a large IoU with the previous ones
       skipflag = False
       for region in regions:
@@ -210,7 +230,6 @@ class fromLayer(centroidMulti):
           break
       if not skipflag:
         regions.append((seg_img[y:y+h, x:x+w],I[y:y+h, x:x+w,:],[x,y],[x,y,x+w,y+h]))
-        # regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x-20, y-20],[x,y,x+w,y+h]))
 
     return regions
 
