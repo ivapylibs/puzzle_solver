@@ -75,11 +75,12 @@ class board:
       raise TypeError('Too many inputs.')
 
   def addPiece(self, piece):
-    '''
+    """
     @brief      Add puzzle piece instance to the board.
 
-    :param piece: A puzzle piece instance.
-    '''
+    Args:
+      piece: A puzzle piece instance.
+    """
     piece.id = self.id_count
     self.id_count +=1
     self.pieces.append(piece)

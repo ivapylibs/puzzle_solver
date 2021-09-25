@@ -33,7 +33,9 @@ from puzzle.utils.sideExtractor import sideExtractor
 #===== Helper Elements
 #
 class EdgeType(Enum):
-  """ EdgeType used to keep track of the type of edges """
+  """
+  @brief EdgeType used to keep track of the type of edges
+  """
 
   UNDEFINED = 0
   IN = 1
@@ -42,7 +44,9 @@ class EdgeType(Enum):
 
 # @todo Yunzhi: May need to upgrade to other forms when we have rotations
 class EdgeDirection(Enum):
-  """ EdgeDirection used to keep track of the direction of edges """
+  """
+  @brief EdgeDirection used to keep track of the direction of edges
+  """
 
   LEFT = 0
   RIGHT = 1
@@ -60,11 +64,13 @@ class EdgeDes:
 class regular(template):
 
   def __init__(self, *argv):
-    '''
+    """
     @brief  Constructor for the regular puzzle piece.
 
-    :param argv: Input params.
-    '''
+    Args:
+      *argv: Input params.
+    """
+
     y = None
     r = (0,0)
     id = None
@@ -102,12 +108,14 @@ class regular(template):
     self._process()
 
   def setEdgeImg(self, direction, mask):
-    '''
+    """
     @brief  Set up the img of the chosen edge.
 
-    :param direction: The edge to be set up.
-    :param mask: The edge mask image.
-    '''
+    Args:
+      direction: The edge to be set up.
+      mask: The edge mask image.
+
+    """
 
     # image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
 
@@ -121,27 +129,30 @@ class regular(template):
     self.edge[direction].mask = mask
 
   def setEdgeType(self, direction, type):
-    '''
+    """
     @brief  Set up the type of the chosen edge.
 
-    :param direction: The edge to be set up.
-    :param type: The type.
-    '''
+    Args:
+      direction: The edge to be set up.
+      type: The type.
+
+    """
+
     self.edge[direction].type = type
 
   def displayEdgeType(self):
-    '''
+    """
     @brief  Display the edge type of the piece.
+    """
 
-    '''
     for direction in EdgeDirection:
       print(f'{direction.name}:',self.edge[direction.value].type)
 
   def _process(self):
-    '''
+    """
     @brief  Run the sideExtractor.
+    """
 
-    '''
     out_dict = sideExtractor(self.y, scale_factor=1,
                              harris_block_size=5, harris_ksize=5,
                              corner_score_threshold=0.15, corner_minmax_threshold=100,
@@ -159,11 +170,16 @@ class regular(template):
     self.simple_harris_pts = out_dict['simple_harris_pts']
 
   def rotatePiece(self, theta):
-    '''
+    """
     @brief  Rotate the regualar puzzle piece
-    :param theta: The rotation angle.
-    :return: The rotated regular piece.
-    '''
+
+    Args:
+      theta: The rotation angle.
+
+    Returns:
+      The rotated regular piece.
+
+    """
 
     # @todo May need to change from redo everything to focus on transformation.
     thePiece = super().rotatePiece(theta)
@@ -174,15 +190,19 @@ class regular(template):
 
   @staticmethod
   def buildFromMaskAndImage(theMask, theImage, rLoc=None):
-    '''
+    """
     @brief  Given a mask (individual) and an image of same base dimensions, use to
     instantiate a puzzle piece template.
 
-    :param theMask: The individual mask.
-    :param theImage: The source image.
-    :param rLoc: The puzzle piece location in the whole image.
-    :return: The puzzle piece instance.
-    '''
+    Args:
+      theMask: The individual mask.
+      theImage: The source image.
+      rLoc: The puzzle piece location in the whole image.
+
+    Returns:
+      The puzzle piece instance.
+    """
+
     thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc)
     theRegular = regular(thePiece)
 

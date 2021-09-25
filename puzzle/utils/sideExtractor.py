@@ -347,7 +347,7 @@ def shape_classification(edges, line_params, d_threshold=500, n_hs=10):
   return class_image
 
 def compute_inout(class_image, line_params, pts, d_threshold=10):
-  '''
+  """
   Given the full class image, the line parameters and the coordinates of the barycenter,
   compute for each side if the curve of the piece goes inside (in) or outside (out).
   This is done by computing the mean coordinates for each class and see if the signed distance
@@ -355,7 +355,7 @@ def compute_inout(class_image, line_params, pts, d_threshold=10):
   true, the two points lie on the same side and we have a in; otherwise we have a out.
   To let the points of the curve to contribute more to the mean point calculation, only the
   signed distances that are greater than a threshold are used.
-  '''
+  """
 
   xb, yb = pts
 

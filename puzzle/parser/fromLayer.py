@@ -113,12 +113,15 @@ class fromLayer(centroidMulti):
 
 
   def findCorrectedContours(self, mask):
-    '''
+    """
     @brief Find the right contours given a binary mask image.
 
-    :param mask: The input binary mask image.
-    :return: Contour list.
-    '''
+    Args:
+      mask: The input binary mask image.
+
+    Returns:
+      Contour list.
+    """
 
     # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
     # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff

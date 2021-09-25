@@ -33,19 +33,27 @@ from puzzle.piece.template import template, puzzleTemplate
 class sift(matchSimilar):
 
   def __init__(self, tau=5):
-    '''
+    """
     @brief  Constructor for the puzzle piece moments class.
-    '''
+
+    Args:
+      tau: The threshold param to determine similarity.
+    """
+
     super(sift, self).__init__(tau)
 
   def process(self, y):
-    '''
+    """
     @brief  Compute sift features from the raw puzzle data.
-    See https://github.com/adumrewal/SIFTImageSimilarity/blob/master/SIFTSimilarityInteractive.ipynb
 
-    :param y: A template instance or puzzleTemplate instance saving a piece's info.
-    :return: The sift keypoints & the sift descriptor.
-    '''
+    Args:
+      y: A template instance or puzzleTemplate instance saving a piece's info.
+
+    Returns:
+      The sift keypoints & the sift descriptor.
+
+    """
+
     if isinstance(y, template):
       y = y.y
     elif isinstance(y, puzzleTemplate):
@@ -66,13 +74,17 @@ class sift(matchSimilar):
     return kp, des
 
   def score(self, yA, yB):
-    '''
+    """
     @brief  Compute the score between two passed puzzle piece data.
 
-    :param yA: A template instance or puzzleTemplate instance saving a piece's info.
-    :param yB: A template instance or puzzleTemplate instance saving a piece's info.
-    :return: The distance between the two passed puzzle piece data.
-    '''
+    Args:
+        yA: A template instance or puzzleTemplate instance saving a piece's info.
+        yB: A template instance or puzzleTemplate instance saving a piece's info.
+
+    Returns: 
+        The distance between the two passed puzzle piece data.
+    """
+
     kp_A, des_A= self.process(yA)
     kp_B, des_B= self.process(yB)
 
@@ -82,15 +94,18 @@ class sift(matchSimilar):
     return distance
 
   def compare(self, yA, yB):
-    '''
+    """
     @brief Compare between two passed puzzle piece data.
     See https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html
     and https://scikit-image.org/docs/dev/auto_examples/transform/plot_matching.html
 
-    :param yA: A template instance or puzzleTemplate instance saving a piece's info.
-    :param yB: A template instance or puzzleTemplate instance saving a piece's info.
-    :return: Comparison result & rotation angle(degree).
-    '''
+    Args:
+      yA: A template instance or puzzleTemplate instance saving a piece's info.
+      yB: A template instance or puzzleTemplate instance saving a piece's info.
+
+    Returns:
+      Comparison result & rotation angle(degree).
+    """
 
     # score is to calculate the similarity while it will call the feature extraction process inside
     kp_A, des_A = self.process(yA)

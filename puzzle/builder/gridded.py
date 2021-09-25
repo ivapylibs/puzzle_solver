@@ -139,11 +139,12 @@ class gridded(interlocking):
   # OTHER CODE / MEMBER FUNCTIONS
 
   def swapPuzzle(self, num=100):
-    '''
+    """
     @brief  Randomly swap rLoc of two puzzle pieces for num times.
 
-    :return: Generated puzzle image & Generated puzzle board.
-    '''
+    Returns:
+      Generated puzzle image & Generated puzzle board.
+    """
 
     # @note We do not care about id in this function.
     epBoard = deepcopy(self.solution)
@@ -159,7 +160,7 @@ class gridded(interlocking):
     return epImage, epBoard
 
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0,0,0)):
-    '''
+    """
     @brief  Create an exploded version of the puzzle. It is an image
     with no touching pieces.
 
@@ -171,11 +172,12 @@ class gridded(interlocking):
     piece well separated for simple puzzle interpretation algorithms to
     rapidly parse.
 
-    :param dx: The horizontal offset when exploding.
-    :param dy: The vertical offset when exploding.
-    :param bgColor: The background color to use.
-    :return: Exploded puzzle image & Exploded puzzle board.
-    '''
+    Args:
+      dx: The horizontal offset when exploding.
+      dy: The vertical offset when exploding.
+      bgColor: The background color to use.
+      Exploded puzzle image & Exploded puzzle board.
+    """
 
     #--[1] First figure out how big the exploded image should be based
     #      on the puzzle image dimensions, the number of puzzle pieces
@@ -207,10 +209,10 @@ class gridded(interlocking):
       piece.setPlacement(r_new)
     # epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
-    '''
+    """
     @todo Yunzhi: Currently, it is just explode but without changing the order.
     Otherwise, gc has to be updated too.
-    '''
+    """
 
     return epImage, epBoard
 

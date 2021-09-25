@@ -69,14 +69,6 @@ class arrangement(board):
     # self.pieces = solBoard.pieces
     # self.id_count = solBoard.id_count
 
-    '''
-    @todo Yunzhi: I think for each arrangement instance, there should be 
-    two boards input: One for the solution and one for the current estimation. 
-    By default, the current estimation could be the same as the solution.
-    But we need another member function to edit it later.
-    '''
-
-
     # @note
     # WHAT DO WE NEED? ADDING TWO ARGUMENTS FOR NOW.
     # AT MINIMUM, WE NEED A SOLUTION TO THE PUZZLE.

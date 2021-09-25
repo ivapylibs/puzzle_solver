@@ -38,13 +38,16 @@ from copy import deepcopy
 
 class simple(base):
 
-  #=============================== simple ==============================
-  #
-  # @brief  Constructor for the simple puzzle solver.  Assumes existence
-  #         of solution state and current puzzle state, the match is built up by
-  #         the manager.
-  #
   def __init__(self, theSol, thePuzzle):
+    """
+    @brief  Constructor for the simple puzzle solver. Assume existence
+    of solution state and current puzzle state, the match is built up by
+    the manager.
+
+    Args:
+      theSol: The solution board.
+      thePuzzle: The estimated board.
+    """
 
     super(simple, self).__init__(theSol, thePuzzle)
 
@@ -54,12 +57,13 @@ class simple(base):
     self.plan = None
 
   def setMatch(self, match, rotation_match = None):
-    '''
+    """
     @brief  Set up the match.
 
-    :param match: The match between the index in the measured board and the solution board.
-    :param rotation_match: The rotation for each piece in the measured board to the one in the solution board.
-    '''
+    Args:
+      match: The match between the index in the measured board and the solution board.
+      rotation_match: The rotation for each piece in the measured board to the one in the solution board.
+    """
     self.match = np.array(match)
     if rotation_match is not None:
       # The command should be minus rotation_match
@@ -83,16 +87,16 @@ class simple(base):
           print('No default plan has been correctly initlized.')
 
       else:
-        '''
+        """
         @todo Get and apply move from thePlan
         Plans not figured out yet, so ignore for now.
-        '''
+        """
         pass
     else:
-      '''
+      """
       @todo Get and apply move from self.plan
       Plans not figured out yet, so ignore for now.
-      '''
+      """
       pass
 
     return FINISHED
@@ -105,6 +109,11 @@ class simple(base):
   #             Will display the plan and update the puzzle piece.
   #
   def planByScore(self):
+    """
+    @brief      Plan is to solve in the order of lowest score
+    Will display the plan and update the puzzle piece.
+
+    """
 
     # @note
     # Check current puzzle against desired for correct placement boolean
@@ -158,14 +167,10 @@ class simple(base):
 
     return False
 
-  #============================ planOrdered ============================
-  #
-  # @brief      Plan is to just solve in order (col-wise).
-  #
   def planOrdered(self):
-    '''
+    """
     @brief  Plan is to just solve in order (col-wise).
-    '''
+    """
 
     # Upgrade the solution board to a grid instance to have more functions
     theGrid = gridded(self.desired)
@@ -184,7 +189,7 @@ class simple(base):
       # the pLoc of current ones
       pLoc_cur = self.current.pieceLocations()
 
-    # Obtain the id in the solution board according to match
+    # Rearrage the piece according to match in the solution board
     pLoc_sol = {}
     for i in self.match:
       pLoc_sol[i[1]] = pLoc_cur[i[0]]
@@ -237,20 +242,18 @@ class simple(base):
 
     return False
 
-
-  #=========================== planGreedyTSP ===========================
-  #
-  # @brief      Generate a greedy plan based on TS-like problem.
-  #
-  # The travelling salesman problem is to visit a set of cities in a
-  # path optimal manner.  This version applies the same idea in a greed
-  # manner. That involves finding the piece closest to the true
-  # solution, then placing it.  After that it seearches for a piece that
-  # minimizes to distance to pick and to place (e.g., distance to the
-  # next piece + distance to its true location).  That piece is added to
-  # the plan, and the process repeats until all pieces are planned.
-  #
   def planGreedyTSP(self):
+    """
+    @brief      Generate a greedy plan based on TS-like problem.
+    The travelling salesman problem is to visit a set of cities in a
+    path optimal manner.  This version applies the same idea in a greed
+    manner. That involves finding the piece closest to the true
+    solution, then placing it.  After that it seearches for a piece that
+    minimizes to distance to pick and to place (e.g., distance to the
+    next piece + distance to its true location).  That piece is added to
+    the plan, and the process repeats until all pieces are planned.
+
+    """
 
     self.plan = None    # EVENTUALLY NEED TO CODE. IGNORE FOR NOW.
 

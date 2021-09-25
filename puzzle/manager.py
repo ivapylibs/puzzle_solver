@@ -176,10 +176,10 @@ class manager(fromLayer):
     for idx_x, bMea in enumerate(self.bMeas.pieces):
       for idx_y, bSol in enumerate(self.solution.pieces):
         ret = self.matcher.score(bMea, bSol)
-        '''
+        """
         @todo Yunzhi: Will update this part. We may need two scoreTables. 
         Currently, only use the shape feature and add up the distances.
-        '''
+        """
         # if idx_x==56 and (idx_y==58 or idx_y==56):
         #   print('s')
         if type(ret) is tuple and len(ret)>0:

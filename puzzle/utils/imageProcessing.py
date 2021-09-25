@@ -24,13 +24,16 @@ import math
 #====================== puzzle.utils.imageProcessing ======================
 
 def cropImage(image, template):
-  '''
+  """
   @brief  Crop and resize a cover image, which has the same shape with the mask.
 
-  :param image: The source image.
-  :param template: The mask image.
-  :return: The resized image.
-  '''
+  Args:
+    image: The source image.
+    template: The mask image.
+
+  Returns:
+    The resized image.
+  """
 
   template_x, template_y = template.shape[1], template.shape[0]
   image_x, image_y = image.shape[1], image.shape[0]
@@ -54,13 +57,16 @@ def cropImage(image, template):
   return dst
 
 def rotate_im(image, angle, mask=None):
-  '''
+  """
   @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
 
-  :param image: The input image.
-  :param angle: The rotated angle.
-  :return: The rotated image & the rotation matrix & padding_left & padding_top.
-  '''
+  Args:
+    image: The input image.
+    angle: The rotated angle.
+
+  Returns:
+    The rotated image & the rotation matrix & padding_left & padding_top.
+  """
 
   image_height = image.shape[0]
   image_width = image.shape[1]

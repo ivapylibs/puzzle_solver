@@ -50,14 +50,15 @@ class puzzleTemplate:
 class template:
 
   def __init__(self, y = None, r = (0, 0), theta=0, id = None):
-    '''
+    """
     @brief  Constructor for the puzzle.piece.base class.
 
-    :param y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
-    :param r: The puzzle piece location in the whole image.
-    :param theta: The puzzle piece aligned angle.
-    :param id: The puzzle piece id in the measured board. Be set up by the board.
-    '''
+    Args:
+      y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
+      r: The puzzle piece location in the whole image.
+      theta: The puzzle piece aligned angle.
+      id: The puzzle piece id in the measured board. Be set up by the board.
+    """
 
     self.y = y
     self.rLoc = np.array(r) # The default location is the top left corner
@@ -65,31 +66,36 @@ class template:
     self.theta = theta  # Should be set up later by the align function
 
   def size(self):
-    '''
+    """
     @brief  Return the dimensions of the puzzle piece image.
 
-    :return: Dimensions of the puzzle piece image
-    '''
+    Returns:
+      Dimensions of the puzzle piece image
+    """
 
     return self.y.size
 
   def setMeasurement(self, thePiece):
-    '''
+    """
     @brief  Pass along to the instance a measurement of the puzzle piece.
 
-    :param thePiece: A measurement of the puzzle piece.
-    '''
+    Args:
+      thePiece: A measurement of the puzzle piece.
+    """
 
     self.y = thePiece.y
     self.rLoc = thePiece.rLoc
 
   def setSource(self, y, r = None):
-    '''
+    """
     @brief  Pass along the source data describing the puzzle piece.
 
-    :param y: Puzzle piece template.
-    :param r: The puzzle piece location in the whole image.
-    '''
+    Args:
+      y: Puzzle piece template.
+      r: The puzzle piece location in the whole image.
+
+    """
+
 
     self.y = y
 
@@ -98,17 +104,20 @@ class template:
 
   @staticmethod
   def getEig(img):
-    '''
+    """
     @brief  To find the major and minor axes of a blob and then return the aligned rotation.
     See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
     PCA is our default method which does not perform very well.
 
-    :param  img:           A contour image.
-    :return: The aligned angle (rad).
-    '''
+    Args:
+      img: A contour image.
 
-    # @note
-    # Currently, we use the image center
+    Returns:
+      The aligned angle (rad).
+
+    """
+
+    # @note Currently, we use the image center
 
     y, x = np.nonzero(img)
     # x = x - np.mean(x)
@@ -148,12 +157,18 @@ class template:
     return theta
 
   def setPlacement(self, r, offset = False, isCenter = False):
-    '''
+    """
     @brief  Provide pixel placement location information.
 
-    :param  r:           Location of its frame origin.
-    :param  isCenter:    Boolean indicating r is center instead.
-    '''
+    Args:
+      r: Location of its frame origin.
+      offset: Boolean indicating whether it sets the offset or not.
+      isCenter: Boolean indicating r is center or not.
+
+    Returns:
+
+    """
+
 
     if isCenter:
       if offset:
@@ -167,13 +182,15 @@ class template:
         self.rLoc = np.array(r)
 
   def placeInImage(self, theImage, offset=[0,0], CONTOUR_DISPLAY = True):
-    '''
+    """
     @brief  Insert the puzzle piece into the image at the given location.
 
-    :param theImage: The source image to put puzzle piece into.
-    :param offset: The offset list.
-    :param CONTOUR_DISPLAY: The flag indicating whether to display the contours.
-    '''
+    Args:
+      theImage: The source image to put puzzle piece into.
+      offset: The offset list.
+      CONTOUR_DISPLAY: The flag indicating whether to display the contours.
+
+    """
 
     # Remap coordinates from own image sprite coordinates to bigger
     # image coordinates.
@@ -190,15 +207,18 @@ class template:
       theImage[rcoords[1], rcoords[0], :] = [0,0,0]
 
   def placeInImageAt(self, theImage, rc, theta = None, isCenter = False, CONTOUR_DISPLAY = True):
-    '''
+    """
     @brief  Insert the puzzle piece into the image at the given location.
 
-    :param theImage: The source image to put puzzle piece into.
-    :param rc: The coordinate location.
-    :param theta: The orientation of the puzzle piece (default = 0).
-    :param isCenter: The flag indicating whether the given location is for the center.
-    :param CONTOUR_DISPLAY: The flag indicating whether to display the contours.
-    '''
+    Args:
+      theImage: The source image to put puzzle piece into.
+      rc: The coordinate location.
+      theta: The orientation of the puzzle piece (default = 0).
+      isCenter: The flag indicating whether the given location is for the center.
+      CONTOUR_DISPLAY: The flag indicating whether to display the contours.
+
+    """
+
 
     if theta is not None:
       thePiece= self.rotatePiece(theta)
@@ -224,11 +244,11 @@ class template:
 
 
   def toImage(self):
-    '''
+    """
     @brief  Return the puzzle piece image (cropped).
 
     :return: The puzzle piece image (cropped).
-    '''
+    """
 
     theImage = np.zeros_like(self.y.image)
     theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
@@ -236,12 +256,16 @@ class template:
     return theImage
 
   def display(self, fh = None):
-    '''
+    """
     @brief  Display the puzzle piece contents in an image window.
 
-    :param fh: The figure label/handle if available. (optional)
-    :return: The handle of the image.
-    '''
+    Args:
+      fh: The figure label/handle if available. (optional)
+
+    Returns:
+      The handle of the image.
+
+    """
 
     if fh:
       # See https://stackoverflow.com/a/7987462/5269146
@@ -261,15 +285,18 @@ class template:
 
   @staticmethod
   def buildFromMaskAndImage(theMask, theImage, rLoc = None):
-    '''
+    """
     @brief  Given a mask (individual) and an image of same base dimensions, use to
     instantiate a puzzle piece template.
 
-    :param theMask: The individual mask.
-    :param theImage: The source image.
-    :param rLoc: The puzzle piece location in the whole image.
-    :return: The puzzle piece instance.
-    '''
+    Args:
+      theMask: The individual mask.
+      theImage: The source image.
+      rLoc: The puzzle piece location in the whole image.
+
+    Returns:
+      The puzzle piece instance.
+    """
 
     y = puzzleTemplate()
 
@@ -317,12 +344,16 @@ class template:
     return thePiece
 
   def rotatePiece(self, theta):
-    '''
+    """
     @brief Rotate the puzzle template instance by the given angle.
 
-    :param theta: The rotated angle.
-    :return: A new puzzle template instance.
-    '''
+    Args:
+      theta: The rotated angle.
+
+    Returns:
+      A new puzzle template instance.
+
+    """
 
     # Create a new instance. Without rLoc.
     thePiece = template(y=deepcopy(self.y),id=deepcopy(self.id))
@@ -365,15 +396,18 @@ class template:
 
   @staticmethod
   def buildSquare(size, color, rLoc = None):
-    '''
+    """
     @brief  Build a square piece.
 
-    :param size: The side length of the square
-    :param color: (3,). The RGB color.
-    :param rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
-    :return: The puzzle piece instance.
-    '''
-    
+    Args:
+      size: The side length of the square
+      color: (3,). The RGB color.
+      rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+
+    Returns:
+      The puzzle piece instance.
+    """
+
     y = puzzleTemplate()
 
     # the tight bbox is just the square itself, so size is just size 
@@ -406,14 +440,15 @@ class template:
 
   @staticmethod
   def buildSphere(radius, color, rLoc = None):
-    '''
+    """
     @brief  Build a sphere piece
 
-    :param radius: The radius of the sphere.
-    :param color: (3,). The RGB color.
-    :param rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
-    :return: The puzzle piece instance.
-    '''
+    Args:
+      radius: The radius of the sphere.
+      color: (3,). The RGB color.
+      rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+      The puzzle piece instance.
+    """
 
     y = puzzleTemplate()
 

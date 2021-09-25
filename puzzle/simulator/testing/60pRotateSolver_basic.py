@@ -165,8 +165,8 @@ theSim = basic(theGrid_new.solution)
 
 plt.ion()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 FINISHED = False
 i=0
@@ -175,10 +175,10 @@ while 1:
 
   # Since we use the same instance in the simulator and the solver,
   # it will update automatically
-  theSim.display(ID_DISPLAY=True)
+  # theSim.display(ID_DISPLAY=True)
 
-  theSim.fig.suptitle(f'Step {i}', fontsize=20)
-  plt.pause(1)
+  # theSim.fig.suptitle(f'Step {i}', fontsize=20)
+  # plt.pause(0.1)
 
   if FINISHED:
       break
