@@ -1,4 +1,4 @@
-#========================== puzzle.parser.simple =========================
+# ========================== puzzle.parser.simple =========================
 #
 # @class    puzzle.parser.simple
 #
@@ -9,7 +9,7 @@
 #           For flexibility, this class is a perceiver. There will be
 #           many ways to instantiate a simple parser.
 #
-#========================== puzzle.parser.simple =========================
+# ========================== puzzle.parser.simple =========================
 
 #
 # @file     simple.py
@@ -19,112 +19,110 @@
 # @date     2021/07/28 [created]
 #           2021/08/01 [modified]
 #
-#========================== puzzle.parser.simple =========================
+# ========================== puzzle.parser.simple =========================
 
-#===== Environment / Dependencies
+# ===== Environment / Dependencies
 #
 import perceiver.simple as perceiverSimple
+
 from puzzle.board import board
 
+
 #
-#========================== puzzle.parser.simple =========================
+# ========================== puzzle.parser.simple =========================
 #
 class simple(perceiverSimple.simple):
 
-  #=============================== simple ==============================
-  #
-  # @brief  Constructor for the simple puzzler parser. Lacks a filter.
-  #
-  def __init__(self, theDetector, theTracker, theParams = []):
-
-    super(simple, self).__init__(theDetector, theTracker, [], theParams)
-    self.board = board()
-    self.Mask = []
-
-
-  #============================== measure ==============================
-  #
-  # @brief      Process data from mask layer and image
-  #
-  # @param[in]  I   The puzzle image source.
-  # @param[in]  LM  The puzzle template mask.
-  #
-  def measure(self, I, LM = None):
-
-    self.I = I
-    self.Mask = LM
-
-    #--[1] Parse image and mask to get distinct candidate puzzle objects
-    #      from it. Generates mask or revises existing mask.
+    # =============================== simple ==============================
     #
-    # @note Is process the right thing to call. Why not measure? Is it
-    #       because this is a perceiver? I think so. We are decoupling
-    #       the individual steps in this implementation.
-    if self.Mask is not None:
-      self.detector.process(I, self.Mask)
-    else:
-      self.detector.process(I)
-
-    detState = self.detector.getState()
-
-    #--[2] Parse detector output to reconstitute recognized puzzle
-    #      pieces into a board.
-
-    # Here detState.x is a mask
-    self.tracker.process(I, detState.x)
-
-    self.board = self.tracker.getState()
-
-    if self.board.size() > 0:
-      self.haveObs = True
-      self.haveState = True
-      self.haveRun = True
-      # @note   Is this right? Review meanings and correct/confirm.
-
-  def process(self, I, LM = None):
-
-    self.predict()
-    self.measure(I, LM)
-    self.correct()
-    self.adapt()
-
-  #========================= buildBasicPipeline ========================
-  #
-  # @brief      Creates a simple puzzle parser employing a very basic
-  #             (practically trivial) processing pipeline for 
-  @staticmethod
-  def buildBasicPipeline():
-
-    # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
-    # file is not yet created for fully known at this moment.
+    # @brief  Constructor for the simple puzzler parser. Lacks a filter.
     #
-    # @todo   Figure out where to place this static factory method so that
-    # test and puzzle solver code is easy to implement. It is really a
-    # wrapper for a data processing scheme that leads to a (I, LM)
-    # pairing.  We may not need it in the end since other processes will
-    # do the equivalent.
+    def __init__(self, theDetector, theTracker, theParams=[]):
 
+        super(simple, self).__init__(theDetector, theTracker, [], theParams)
+        self.board = board()
+        self.Mask = []
 
-    # @note The preference over the above, for the moment is to create a
-    # set of static methods here that perform simple image processing
-    # operations to extract the mask.  Options include:
+    # ============================== measure ==============================
     #
-    # imageToMask_Threshold
-    # imageToMask_GrowSelection
+    # @brief      Process data from mask layer and image
     #
-    # These should work for most of the basic images to be used for
-    # testing purposes.
+    # @param[in]  I   The puzzle image source.
+    # @param[in]  LM  The puzzle template mask.
     #
-    # If needed, some outer class can be made to automatically implement
-    # these, then pass on the image and mask.  Otherwise, just rely on the
-    # calling scope to properly implement.  Calling scope makes sense
-    # since immediate anticipated use is for test scripts more so than
-    # actual operation and final solution.
+    def measure(self, I, LM=None):
+
+        self.I = I
+        self.Mask = LM
+
+        # --[1] Parse image and mask to get distinct candidate puzzle objects
+        #      from it. Generates mask or revises existing mask.
+        #
+        # @note Is process the right thing to call. Why not measure? Is it
+        #       because this is a perceiver? I think so. We are decoupling
+        #       the individual steps in this implementation.
+        if self.Mask is not None:
+            self.detector.process(I, self.Mask)
+        else:
+            self.detector.process(I)
+
+        detState = self.detector.getState()
+
+        # --[2] Parse detector output to reconstitute recognized puzzle
+        #      pieces into a board.
+
+        # Here detState.x is a mask
+        self.tracker.process(I, detState.x)
+
+        self.board = self.tracker.getState()
+
+        if self.board.size() > 0:
+            self.haveObs = True
+            self.haveState = True
+            self.haveRun = True
+            # @note   Is this right? Review meanings and correct/confirm.
+
+    def process(self, I, LM=None):
+
+        self.predict()
+        self.measure(I, LM)
+        self.correct()
+        self.adapt()
+
+    # ========================= buildBasicPipeline ========================
     #
+    # @brief      Creates a simple puzzle parser employing a very basic
+    #             (practically trivial) processing pipeline for
+    @staticmethod
+    def buildBasicPipeline():
 
-    pass
+        # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
+        # file is not yet created for fully known at this moment.
+        #
+        # @todo   Figure out where to place this static factory method so that
+        # test and puzzle solver code is easy to implement. It is really a
+        # wrapper for a data processing scheme that leads to a (I, LM)
+        # pairing.  We may not need it in the end since other processes will
+        # do the equivalent.
 
+        # @note The preference over the above, for the moment is to create a
+        # set of static methods here that perform simple image processing
+        # operations to extract the mask.  Options include:
+        #
+        # imageToMask_Threshold
+        # imageToMask_GrowSelection
+        #
+        # These should work for most of the basic images to be used for
+        # testing purposes.
+        #
+        # If needed, some outer class can be made to automatically implement
+        # these, then pass on the image and mask.  Otherwise, just rely on the
+        # calling scope to properly implement.  Calling scope makes sense
+        # since immediate anticipated use is for test scripts more so than
+        # actual operation and final solution.
+        #
 
-    
+        pass
+
 #
-#========================== puzzle.parser.simple =========================
+# ========================== puzzle.parser.simple =========================

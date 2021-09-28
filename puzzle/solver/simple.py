@@ -1,4 +1,4 @@
-#========================== puzzle.solver.simple =========================
+# ========================== puzzle.solver.simple =========================
 #
 # @class    puzzle.solver.simple
 #
@@ -12,251 +12,246 @@
 # @date     2021/08/06 [created]
 #           2021/08/12 [modified]
 #
-#!NOTE:
-#!  Indent is set to 2 spaces.
-#!  Tab is set to 4 spaces with conversion to spaces.
 #
-#========================== puzzle.solver.simple =========================
+# ========================== puzzle.solver.simple =========================
 
-#===== Environment / Dependencies
+import itertools
+from copy import deepcopy
+
+# ===== Environment / Dependencies
 #
 import numpy as np
-import itertools
 
-from puzzle.solver.base import base
 from puzzle.builder.arrangement import arrangement
 from puzzle.builder.gridded import gridded
+from puzzle.solver.base import base
 
-from copy import deepcopy
-#===== Helper Elements
+
+# ===== Helper Elements
 #
 
 
 #
-#========================== puzzle.solver.simple =========================
+# ========================== puzzle.solver.simple =========================
 #
 
 class simple(base):
 
-  def __init__(self, theSol, thePuzzle):
-    """
-    @brief  Constructor for the simple puzzle solver. Assume existence
-    of solution state and current puzzle state, the match is built up by
-    the manager.
+    def __init__(self, theSol, thePuzzle):
+        """
+        @brief  Constructor for the simple puzzle solver. Assume existence
+        of solution state and current puzzle state, the match is built up by
+        the manager.
 
-    Args:
-      theSol: The solution board.
-      thePuzzle: The estimated board.
-    """
+        Args:
+          theSol: The solution board.
+          thePuzzle: The estimated board.
+        """
 
-    super(simple, self).__init__(theSol, thePuzzle)
+        super(simple, self).__init__(theSol, thePuzzle)
 
-    self.match = None    # @< Mapping from current to desired.
-    self.rotation_match = None  # @< Mapping from current to desired.
+        self.match = None  # @< Mapping from current to desired.
+        self.rotation_match = None  # @< Mapping from current to desired.
 
-    self.plan = None
+        self.plan = None
 
-  def setMatch(self, match, rotation_match = None):
-    """
-    @brief  Set up the match.
+    def setMatch(self, match, rotation_match=None):
+        """
+        @brief  Set up the match.
 
-    Args:
-      match: The match between the index in the measured board and the solution board.
-      rotation_match: The rotation for each piece in the measured board to the one in the solution board.
-    """
-    self.match = np.array(match)
-    if rotation_match is not None:
-      # The command should be minus rotation_match
-      self.rotation_match = -np.array(rotation_match)
+        Args:
+          match: The match between the index in the measured board and the solution board.
+          rotation_match: The rotation for each piece in the measured board to the one in the solution board.
+        """
+        self.match = np.array(match)
+        if rotation_match is not None:
+            # The command should be minus rotation_match
+            self.rotation_match = -np.array(rotation_match)
 
+    # ============================== takeTurn =============================
+    #
+    # @brief  Perform a single puzzle solving action, which move a piece
+    #         to its correct location.
+    #
+    def takeTurn(self, thePlan=None, defaultPlan='score'):
 
-  #============================== takeTurn =============================
-  #
-  # @brief  Perform a single puzzle solving action, which move a piece
-  #         to its correct location.
-  #
-  def takeTurn(self, thePlan = None, defaultPlan='score'):
+        if self.plan is None:
+            if thePlan is None:
+                if defaultPlan == 'score':
+                    FINISHED = self.planByScore()
+                elif defaultPlan == 'order':
+                    FINISHED = self.planOrdered()
+                else:
+                    print('No default plan has been correctly initlized.')
 
-    if self.plan is None:
-      if thePlan is None:
-        if defaultPlan=='score':
-          FINISHED = self.planByScore()
-        elif defaultPlan=='order':
-          FINISHED = self.planOrdered()
+            else:
+                """
+                @todo Get and apply move from thePlan
+                Plans not figured out yet, so ignore for now.
+                """
+                pass
         else:
-          print('No default plan has been correctly initlized.')
+            """
+            @todo Get and apply move from self.plan
+            Plans not figured out yet, so ignore for now.
+            """
+            pass
 
-      else:
+        return FINISHED
+
+    # ============================ planByScore ============================
+    #
+    # @brief      Plan is to solve in the order of lowest score.
+    #             Will display the plan and update the puzzle piece.
+    #
+    def planByScore(self):
         """
-        @todo Get and apply move from thePlan
-        Plans not figured out yet, so ignore for now.
+        @brief      Plan is to solve in the order of lowest score
+        Will display the plan and update the puzzle piece.
+
         """
-        pass
-    else:
-      """
-      @todo Get and apply move from self.plan
-      Plans not figured out yet, so ignore for now.
-      """
-      pass
 
-    return FINISHED
+        # @note
+        # Check current puzzle against desired for correct placement boolean
+        # Find lowest false instance
+        # Establish were it must be placed to be correct.
+        # Move to that location.
 
+        # Upgrade to a builder instance to have more functions
+        theArrange = arrangement(self.desired)
 
+        # the pLoc of current ones
+        pLoc_cur = self.current.pieceLocations()
 
-  #============================ planByScore ============================
-  #
-  # @brief      Plan is to solve in the order of lowest score.
-  #             Will display the plan and update the puzzle piece.
-  #
-  def planByScore(self):
-    """
-    @brief      Plan is to solve in the order of lowest score
-    Will display the plan and update the puzzle piece.
+        # Obtain the id in the solution board according to match
+        pLoc_sol = {}
+        for i in self.match:
+            pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
-    """
+        theScores = theArrange.piecesInPlace(pLoc_sol)
+        theDists = theArrange.distances(pLoc_sol)
 
-    # @note
-    # Check current puzzle against desired for correct placement boolean
-    # Find lowest false instance
-    # Establish were it must be placed to be correct.
-    # Move to that location.
+        # Filter the result by piecesInPlace, only take the False into consideration
+        theDists_filtered = {}
+        for key in theScores:
+            if theScores[key] == False:
+                theDists_filtered[key] = theDists[key]
 
-    # Upgrade to a builder instance to have more functions
-    theArrange = arrangement(self.desired)
+        if len(theDists_filtered) > 0:
+            # Note that the key refers to the index in the solution board.
+            best_index_sol = min(theDists_filtered, key=theDists_filtered.get)
 
-    # the pLoc of current ones
-    pLoc_cur = self.current.pieceLocations()
+            # Obtain the correction plan for all the matched pieces
+            theCorrect = theArrange.corrections(pLoc_sol)
 
-    # Obtain the id in the solution board according to match
-    pLoc_sol = {}
-    for i in self.match:
-      pLoc_sol[i[1]] = pLoc_cur[i[0]]
+            index = np.where(self.match[:, 1] == best_index_sol)[0]
 
-    theScores = theArrange.piecesInPlace(pLoc_sol)
-    theDists = theArrange.distances(pLoc_sol)
+            if index.size > 0:
+                # Obtain the corresponding index in the measured board
+                best_index_mea = self.match[:, 0][index][0]
 
-    # Filter the result by piecesInPlace, only take the False into consideration
-    theDists_filtered = {}
-    for key in theScores:
-      if theScores[key] == False:
-        theDists_filtered[key] = theDists[key]
+                # Display the plan
+                print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
 
-    if len(theDists_filtered) > 0:
-      # Note that the key refers to the index in the solution board.
-      best_index_sol = min(theDists_filtered, key=theDists_filtered.get)
+                # Execute the plan and update the current board
+                self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+            else:
+                print('No assignment found')
+        else:
+            print('All the puzzle pices have been in position. No move.')
+            return True
 
-      # Obtain the correction plan for all the matched pieces
-      theCorrect = theArrange.corrections(pLoc_sol)
+        return False
 
-      index = np.where(self.match[:, 1] == best_index_sol)[0]
+    def planOrdered(self):
+        """
+        @brief  Plan is to just solve in order (col-wise).
+        """
 
-      if index.size>0:
-        # Obtain the corresponding index in the measured board
-        best_index_mea = self.match[:, 0][index][0]
+        # Upgrade the solution board to a grid instance to have more functions
+        theGrid = gridded(self.desired)
 
-        # Display the plan
-        print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
+        if self.rotation_match is not None:
+            # Create a copy of the current board
+            current_corrected = deepcopy(self.current)
 
-        # Execute the plan and update the current board
-        self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
-      else:
-        print('No assignment found')
-    else:
-      print('All the puzzle pices have been in position. No move.')
-      return True
+            for idx, angle in enumerate(self.rotation_match):
+                if not np.isnan(angle):
+                    current_corrected.pieces[idx] = current_corrected.pieces[idx].rotatePiece(angle)
 
-    return False
+            pLoc_cur = current_corrected.pieceLocations()
+        else:
+            # the pLoc of current ones
+            pLoc_cur = self.current.pieceLocations()
 
-  def planOrdered(self):
-    """
-    @brief  Plan is to just solve in order (col-wise).
-    """
+        # Rearrage the piece according to match in the solution board
+        pLoc_sol = {}
+        for i in self.match:
+            pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
-    # Upgrade the solution board to a grid instance to have more functions
-    theGrid = gridded(self.desired)
+        # Obtain the correction plan for all the matched pieces
+        theCorrect = theGrid.corrections(pLoc_sol)
 
-    if self.rotation_match is not None:
-      # Create a copy of the current board
-      current_corrected= deepcopy(self.current)
+        theScores = theGrid.piecesInPlace(pLoc_sol)
 
-      for idx, angle in enumerate(self.rotation_match):
-        if not np.isnan(angle):
+        if all(value == True for value in theScores.values()):
+            print('All the puzzle pieces have been in position. No move.')
+            return True
 
-          current_corrected.pieces[idx] = current_corrected.pieces[idx].rotatePiece(angle)
+        x_max, y_max = np.max(theGrid.gc, axis=1)
 
-      pLoc_cur = current_corrected.pieceLocations()
-    else:
-      # the pLoc of current ones
-      pLoc_cur = self.current.pieceLocations()
+        for i, j in itertools.product(range(int(x_max + 1)), range(int(y_max + 1))):
 
-    # Rearrage the piece according to match in the solution board
-    pLoc_sol = {}
-    for i in self.match:
-      pLoc_sol[i[1]] = pLoc_cur[i[0]]
+            # best_index_sol is just the next target, no matter if the assignment is ready or not
+            best_index_sol = np.argwhere((theGrid.gc.T == [i, j]).all(axis=1)).flatten()[0]
 
-    # Obtain the correction plan for all the matched pieces
-    theCorrect = theGrid.corrections(pLoc_sol)
+            # Check if can find the match for best_index_sol
+            if best_index_sol not in theScores:
+                print(f'No assignment found')
+                continue
+            elif theScores[best_index_sol] == True:
+                # Skip if theScore is False
+                continue
+            else:
+                index = np.where(self.match[:, 1] == best_index_sol)[0]
 
-    theScores = theGrid.piecesInPlace(pLoc_sol)
+                # Obtain the corresponding index in the measured board
+                best_index_mea = self.match[:, 0][index][0]
 
-    if all(value == True for value in theScores.values()):
-      print('All the puzzle pieces have been in position. No move.')
-      return True
+                # Get the corresponding id
+                best_id_mea = self.current.pieces[best_index_mea].id
 
-    x_max, y_max = np.max(theGrid.gc, axis=1)
+                if self.rotation_match is not None and not np.isnan(self.rotation_match[best_index_mea]):
+                    # Display the plan
+                    print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[best_index_mea])} degree')
+                    self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
+                        self.rotation_match[best_index_mea])
+                    self.rotation_match[best_index_mea] = None
+                    break
 
-    for i,j in itertools.product(range(int(x_max+1)), range(int(y_max+1))):
+                # Display the plan
+                print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
 
-      # best_index_sol is just the next target, no matter if the assignment is ready or not
-      best_index_sol = np.argwhere((theGrid.gc.T == [i,j]).all(axis=1)).flatten()[0]
+                # Execute the plan and update the current board
+                self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+                break
 
-      # Check if can find the match for best_index_sol
-      if best_index_sol not in theScores:
-        print(f'No assignment found')
-        continue
-      elif theScores[best_index_sol] == True:
-        # Skip if theScore is False
-        continue
-      else:
-        index = np.where(self.match[:, 1] == best_index_sol)[0]
+        return False
 
-        # Obtain the corresponding index in the measured board
-        best_index_mea = self.match[:, 0][index][0]
+    def planGreedyTSP(self):
+        """
+        @brief      Generate a greedy plan based on TS-like problem.
+        The travelling salesman problem is to visit a set of cities in a
+        path optimal manner.  This version applies the same idea in a greed
+        manner. That involves finding the piece closest to the true
+        solution, then placing it.  After that it seearches for a piece that
+        minimizes to distance to pick and to place (e.g., distance to the
+        next piece + distance to its true location).  That piece is added to
+        the plan, and the process repeats until all pieces are planned.
 
-        # Get the corresponding id
-        best_id_mea = self.current.pieces[best_index_mea].id
+        """
 
-        if self.rotation_match is not None and not np.isnan(self.rotation_match[best_index_mea]):
-          # Display the plan
-          print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[best_index_mea])} degree')
-          self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(self.rotation_match[best_index_mea])
-          self.rotation_match[best_index_mea] = None
-          break
-
-        # Display the plan
-        print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
-
-        # Execute the plan and update the current board
-        self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
-        break
-
-    return False
-
-  def planGreedyTSP(self):
-    """
-    @brief      Generate a greedy plan based on TS-like problem.
-    The travelling salesman problem is to visit a set of cities in a
-    path optimal manner.  This version applies the same idea in a greed
-    manner. That involves finding the piece closest to the true
-    solution, then placing it.  After that it seearches for a piece that
-    minimizes to distance to pick and to place (e.g., distance to the
-    next piece + distance to its true location).  That piece is added to
-    the plan, and the process repeats until all pieces are planned.
-
-    """
-
-    self.plan = None    # EVENTUALLY NEED TO CODE. IGNORE FOR NOW.
-
+        self.plan = None  # EVENTUALLY NEED TO CODE. IGNORE FOR NOW.
 
 #
-#========================== puzzle.solver.simple =========================
+# ========================== puzzle.solver.simple =========================

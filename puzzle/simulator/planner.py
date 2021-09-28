@@ -1,11 +1,10 @@
-#========================= puzzle.simulator.planner ========================
+# ========================= puzzle.simulator.planner ========================
 #
 # @class    puzzle.simulator.planner
 #
 # @brief    The planner for producing the action sequence to solve the puzzle
 #
-#========================= puzzle.simulator.planner ========================
-
+# ========================= puzzle.simulator.planner ========================
 #
 # @file     planner.py
 #
@@ -14,11 +13,13 @@
 # @date     2021/09/02
 #
 #
-#========================= puzzle.simulator.planner ========================
+# ========================= puzzle.simulator.planner ========================
 
 import numpy as np
-from puzzle.solver.base import base as solver_base 
+
 from puzzle.manager import manager
+from puzzle.solver.base import base as solver_base
+
 
 class Planner_Base():
     """
@@ -28,14 +29,15 @@ class Planner_Base():
                                 association between the measured board and the solution board
     @param[in]  solver          The solver instance responsible for plan the execution order
     """
-    def __init__(self, solver:solver_base, manager:manager) -> None:
+
+    def __init__(self, solver: solver_base, manager: manager) -> None:
         self.solver = solver
         self.manager = manager
-    
+
     def setSolBoard(self, solBoard):
         self.solver.desired = solBoard
         self.manager.solution = solBoard
-    
+
     def process(self, meaBoard):
         """
         The process procedure when observed an measured board
@@ -72,10 +74,10 @@ class Planner_Base():
             actions, action_args = self.plan(meaBoard, puzzle_idx, target_loc)
             return flag, actions, action_args
 
-
     def plan(self, puzzle_idx, target_loc):
         raise NotImplementedError("The base class assume no method for action planning.\
              Needs to be overwritten by children classes")
+
 
 class Planner_Fix(Planner_Base):
     """
@@ -92,10 +94,11 @@ class Planner_Fix(Planner_Base):
     @param[in]  init_location       The agent's initial location. Can be None when creating the instance,
                                     But needs to be set before planning. Default is None 
     """
+
     def __init__(self, solver: solver_base, manager: manager, init_loc=None) -> None:
-        super().__init__(solver, manager) 
+        super().__init__(solver, manager)
         self.init_loc = init_loc
-    
+
     def plan(self, meaBoard, puzzle_idx, target_loc):
         """
         Hard code the sequence of action to move a piece in the board to the target location
@@ -108,7 +111,7 @@ class Planner_Fix(Planner_Base):
         @param[out] action_args         The list of arguments for the action. If an action needs no argument, 
                                         then store None
         """
-        assert self.init_loc is not None,"Please set the init location first"
+        assert self.init_loc is not None, "Please set the init location first"
 
         actions = []
         action_args = []
@@ -130,13 +133,11 @@ class Planner_Fix(Planner_Base):
         action_args.append(self.init_loc)
 
         return actions, action_args
-    
-    def setInitLoc(self, init_loc:np.ndarray):
+
+    def setInitLoc(self, init_loc: np.ndarray):
         """
         Set the init location
 
         @param[in]  init_loc        The initial location
         """
         self.init_loc = init_loc
-
-    

@@ -1,112 +1,108 @@
-#================================ puzzle.piece.pca ================================
+# ================================ puzzle.piece.pca ================================
 #
 # @brief    Uses pca to calculate rotation.
 #
-#================================ puzzle.piece.pca ================================
-
+# ================================ puzzle.piece.pca ================================
 #
 # @file     pca.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/03 [created]
 #
-#!NOTE:
-#!  Indent is set to 2 spaces.
-#!  Tab is set to 4 spaces with conversion to spaces.
 #
-#================================ puzzle.piece.pca ================================
+# ================================ puzzle.piece.pca ================================
 
-#===== Environment / Dependencies
+# ===== Environment / Dependencies
 #
-import cv2
-import math
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.template import template, puzzleTemplate
+from puzzle.piece.template import template
+
 
 #
-#================================ puzzle.piece.pca ================================
+# ================================ puzzle.piece.pca ================================
 #
 class pca(matchDifferent):
 
-  def __init__(self, tau=-float('inf')):
-    """
-    @brief  Constructor for the puzzle piece matchDifferent class.
-    Args:
-      tau: The threshold param to determine difference.
-    """
+    def __init__(self, tau=-float('inf')):
+        """
+        @brief  Constructor for the puzzle piece matchDifferent class.
 
-    super(pca, self).__init__(tau)
+        Args:
+          tau: The threshold param to determine difference.
+        """
 
-  def process(self, piece):
-    """
-    @brief  Compute PCA feature from the raw puzzle data.
+        super(pca, self).__init__(tau)
 
-    Args:
-      piece: A puzzleTemplate instance saving a passed puzzle piece's info
+    def process(self, piece):
+        """
+        @brief  Compute PCA feature from the raw puzzle data.
 
-    Returns:
-      The rotation of the main vector.
-    """
+        Args:
+          piece: A puzzleTemplate instance saving a passed puzzle piece's info
 
-    if isinstance(piece, template):
-      yfeature = pca.getEig(piece.y.contour)
-      theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
+        Returns:
+          The rotation of the main vector.
+        """
 
-      return theta
-    else:
-      raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
+        if isinstance(piece, template):
+            yfeature = pca.getEig(piece.y.contour)
+            theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
 
-  def score(self, piece_A, piece_B):
-    """
-    @brief  Compute the score between two passed puzzle piece data.
+            return theta
+        else:
+            raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
-    Args:
-      piece_A: A template instance saving a piece's info.
-      piece_B: A template instance saving a piece's info.
+    def score(self, piece_A, piece_B):
+        """
+        @brief  Compute the score between two passed puzzle piece data.
 
-    Returns:
-      The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
-    """
+        Args:
+          piece_A: A template instance saving a piece's info.
+          piece_B: A template instance saving a piece's info.
 
-    theta_A= self.process(piece_A)
-    theta_B= self.process(piece_B)
+        Returns:
+          The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
+        """
 
-    distance = np.rad2deg(theta_B - theta_A)
+        theta_A = self.process(piece_A)
+        theta_B = self.process(piece_B)
 
-    return distance
+        distance = np.rad2deg(theta_B - theta_A)
 
-  @staticmethod
-  def getEig(img):
-    """
-    @brief  To find the major and minor axes of a blob.
-    See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+        return distance
 
-    Args:
-      img: A mask image.
+    @staticmethod
+    def getEig(img):
+        """
+        @brief  To find the major and minor axes of a blob.
+        See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
 
-    Returns:
-      A dict saving centerized points, main vectors.
-    """
-    y, x = np.nonzero(img)
-    x = x - np.mean(x)
-    y = y - np.mean(y)
-    coords = np.vstack([x, y])
-    cov = np.cov(coords)
-    evals, evecs = np.linalg.eig(cov)
-    sort_indices = np.argsort(evals)[::-1]
-    v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-    v2 = evecs[:, sort_indices[1]]
+        Args:
+          img: A mask image.
 
-    dict = {
-      'x': x,
-      'y': y,
-      'v1': v1,
-      'v2': v2,
-    }
+        Returns:
+          A dict saving centerized points, main vectors.
+        """
+        y, x = np.nonzero(img)
+        x = x - np.mean(x)
+        y = y - np.mean(y)
+        coords = np.vstack([x, y])
+        cov = np.cov(coords)
+        evals, evecs = np.linalg.eig(cov)
+        sort_indices = np.argsort(evals)[::-1]
+        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
+        v2 = evecs[:, sort_indices[1]]
 
-    return dict
+        dict = {
+            'x': x,
+            'y': y,
+            'v1': v1,
+            'v2': v2,
+        }
+
+        return dict
 
 #
-#================================ puzzle.piece.pca ================================
+# ================================ puzzle.piece.pca ================================

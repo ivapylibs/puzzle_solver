@@ -1,4 +1,4 @@
-#========================= puzzle.simulator.lineArrange ========================
+# ========================= puzzle.simulator.lineArrange ========================
 #
 # @class    puzzle.simulator.lineArrange
 #
@@ -6,8 +6,7 @@
 #           which is to arrange a set of puzzle pieces into a line.
 #           The simulation will be used for test the activity analyzer's capacity
 #
-#========================= puzzle.simulator.lineArrange ========================
-
+# ========================= puzzle.simulator.lineArrange ========================
 #
 # @file     lineArrange.py
 #
@@ -18,33 +17,33 @@
 #
 # TODO: need to build a foo manager (and possibily also a solver) for the lineArrange puzzle in this file
 # 
-#========================= puzzle.simulator.lineArrange ========================
+# ========================= puzzle.simulator.lineArrange ========================
 
-#===== Dependencies / Packages 
+import copy
+# ===== Dependencies / Packages
 #
 from dataclasses import dataclass
-from puzzle import solver
-import matplotlib.pyplot as plt
+
 import numpy as np
-import copy
-import puzzle
 
 from puzzle.board import board
-from puzzle.simulator.basic import basic
-from puzzle.simulator.agent import Agent
 from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.solver.base import base as solver_base
 from puzzle.manager import manager, managerParms
+from puzzle.simulator.agent import Agent
+from puzzle.simulator.basic import basic
+from puzzle.solver.base import base as solver_base
 
-#===== Class Helper Elements
+
+# ===== Class Helper Elements
 #
 
 @dataclass
 class paramLineArrange(paramArrange):
     pass
 
+
 #
-#========================= puzzle.simulator.lineArrange ========================
+# ========================= puzzle.simulator.lineArrange ========================
 #
 
 class lineArrange(basic):
@@ -58,8 +57,9 @@ class lineArrange(basic):
     @param[in]  theFig              plt.Figure. The figure handle for display. Optional
     @param[in]  params              paramLineArrange. Other parameters
     """
-    def __init__(self, initBoard:board, solBoard:board, initHuman:Agent,
-                 theFig=None, params:paramLineArrange=paramLineArrange()):
+
+    def __init__(self, initBoard: board, solBoard: board, initHuman: Agent,
+                 theFig=None, params: paramLineArrange = paramLineArrange()):
         super().__init__(initBoard, theFig=theFig)
 
         self.initBoard = initBoard
@@ -70,7 +70,6 @@ class lineArrange(basic):
 
         # the hand
         self.hand = None
-    
 
     def display(self):
         pass
@@ -95,10 +94,9 @@ class lineArrange(basic):
     def _get_activity(self):
         pass
 
-    
     @staticmethod
-    def buildSameX(targetX, initBoard:board, initHuman:Agent, theFig=None, 
-                    params:paramLineArrange=paramLineArrange()):
+    def buildSameX(targetX, initBoard: board, initHuman: Agent, theFig=None,
+                   params: paramLineArrange = paramLineArrange()):
         """
         @brief: Build a lineArrange instance in which the goal is to simply horizontally move 
                 the puzzle pieces from the initial location to a target X coordinate.
@@ -106,7 +104,7 @@ class lineArrange(basic):
         @param[in]  targetX          The target X coordinate
         """
 
-        solBoard = copy.deepcopy(initBoard)    
+        solBoard = copy.deepcopy(initBoard)
         for i in range(len(solBoard.pieces)):
             rLoc = solBoard.pieces[i].rLoc
             solBoard.pieces[i].setPlacement((targetX, rLoc[1]))
@@ -121,7 +119,8 @@ class manager_LA(manager):
     1. Establish the correspondence either by hard code or by order, instead of using the visual clue
        The reason is all puzzle pieces in this simulator have the same outlook 
     """
-    def __init__(self, solution:board, theParms:managerParms=managerParms()):
+
+    def __init__(self, solution: board, theParms: managerParms = managerParms()):
         super().__init__(solution, theParms=theParms)
 
         # self.solution             The solution board
@@ -137,14 +136,14 @@ class manager_LA(manager):
         # sanity check. The solution piece idx can not exceed the 
         # the size of the stored solution board
         sol_idxs = np.array([pair[1] for pair in pAssign])
-        assert np.amax(sol_idxs) <= self.solution.size() - 1,\
+        assert np.amax(sol_idxs) <= self.solution.size() - 1, \
             "The assignment exceed the stored solution board size. \
                 Please check the assignment"
-        
+
         # store the assignment
         self.pAssignments = pAssign
 
-    def set_pAssignments_board(self, meaBoard:board):
+    def set_pAssignments_board(self, meaBoard: board):
         """
         This function create an assignment from a measured board,
         which assumes that the measured and the solution are one-to-one corresponded.
@@ -154,17 +153,17 @@ class manager_LA(manager):
         @param[in]  meaBoard        The measured board, whose size must be the same as the self.solution(board)
         """
         # sanity check - size should match
-        assert meaBoard.size() == self.solution.size(),\
+        assert meaBoard.size() == self.solution.size(), \
             "The input board size does not match the solution's"
 
         # process the board to get a pAssign
         pAssign = []
         for i in range(meaBoard.size()):
             pAssign.append(np.array([i, i]))
-        
+
         # set the assignment
         self.set_pAssignments(pAssign)
-    
+
     def measure(self, *argv):
         """
         Overwrite the measure. Now this simulator does not it to really measure the board,
@@ -172,7 +171,8 @@ class manager_LA(manager):
 
         Assginement will be directly set
         """
-        return 
+        return
+
 
 class solver_LA(solver_base):
     """
@@ -193,7 +193,7 @@ class solver_LA(solver_base):
         self.flag_found = False
         self.puzzle_idx = None
         self.target_loc = None
-    
+
     def setMatch(self, match):
         """
         Set up the match
@@ -201,8 +201,8 @@ class solver_LA(solver_base):
         @param[in]  match       measure-to-solution match. a list of (2,) array
         """
         self.match = match
-    
-    def setMeaBoard(self, meaBoard:board):
+
+    def setMeaBoard(self, meaBoard: board):
         """
         store the newly measured board.
 
@@ -213,15 +213,15 @@ class solver_LA(solver_base):
         @param[in] meaBoard         The new measured board
         """
         self.current = meaBoard
-    
+
     def clear_results(self):
         """
         Clear the cached results
         """
         self.flag_found = False
         self.puzzle_idx = None
-        self.target_loc = None 
-    
+        self.target_loc = None
+
     def takeTurn(self):
         """
         Produce the goal of next plan.
@@ -241,7 +241,7 @@ class solver_LA(solver_base):
             for j in range(len(self.match)):
                 if self.match[j][0] == idx:
                     sol_match_idx = self.match[j][1]
-            assert sol_match_idx is not None,\
+            assert sol_match_idx is not None, \
                 "There is no match in the solution board for the puzzle piece:{}. \
                     Solution and current might not match".format(idx)
 
@@ -259,5 +259,5 @@ class solver_LA(solver_base):
         if not flag_found:
             self.puzzle_idx = None
             self.target_loc = None
-            self.flag_found = False 
+            self.flag_found = False
             return self.flag_found, self.puzzle_idx, self.target_loc

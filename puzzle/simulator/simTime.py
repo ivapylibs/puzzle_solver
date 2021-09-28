@@ -1,4 +1,4 @@
-#========================= puzzle.simulator.simTime ========================
+# ========================= puzzle.simulator.simTime ========================
 #
 # @class    puzzle.simulator.SimTime
 #
@@ -7,8 +7,7 @@
 #           and the speed of the agent movement and the length
 #           of the agent's pause will be simulated.
 #
-#========================= puzzle.simulator.simTime ========================
-
+# ========================= puzzle.simulator.simTime ========================
 #
 # @file     simTime.py
 #
@@ -17,16 +16,18 @@
 # @date     2021/09/10
 #
 #
-#========================= puzzle.simulator.simTime ========================
+# ========================= puzzle.simulator.simTime ========================
 
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
+
 import numpy as np
 
 from puzzle.board import board
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.simTimeless import SimTimeLess, ParamST
+
 
 @dataclass
 class ParamSTL(ParamST):
@@ -38,9 +39,10 @@ class ParamSTL(ParamST):
     @param  speed               Unit: pixel/s. The speed of the agent movement
     @param  static_duration     Unit: s(econd). The duration of the static actions
     """
-    delta_t:float = 0.01
-    speed:float = 200
-    static_duration:float = 0.5
+    delta_t: float = 0.01
+    speed: float = 200
+    static_duration: float = 0.5
+
 
 class SimTime(SimTimeLess):
     """
@@ -59,24 +61,25 @@ class SimTime(SimTimeLess):
     @param[in]  param               ParamST instance. It stores the parameters
                                     related to the time effect
     """
-    def __init__(self, init_board:board, sol_board:board, agent:Agent, 
-                param: ParamSTL=ParamSTL()):
+
+    def __init__(self, init_board: board, sol_board: board, agent: Agent,
+                 param: ParamSTL = ParamSTL()):
         super().__init__(init_board, sol_board, agent, param=param)
         # store the parameters
         self.param = param
 
         # cached action, argument, and time
-        self.cache_action = None        # The next action to execute
-        self.cache_arg = None           # The next action argument
-        self.timer = -1                 # The timer
-    
+        self.cache_action = None  # The next action to execute
+        self.cache_arg = None  # The next action argument
+        self.timer = -1  # The timer
+
     def simulate_step(self):
         """
         Overwrite the simulate_step function
         """
-        
-        succ = True             #< Whether the simulation is still successfully running
-        flag_finish = False     #< Whether the current cached action has been finished
+
+        succ = True  # < Whether the simulation is still successfully running
+        flag_finish = False  # < Whether the current cached action has been finished
 
         if self.cache_action is None:
             # if no more stored action, meaning the last action has been executed.
@@ -98,7 +101,7 @@ class SimTime(SimTimeLess):
         else:
             # The static actions
             flag_finish = self._pause_step()
-        
+
         # if the cached action is finished, reset the cache and the timer
         if flag_finish:
             self.reset_cache()
@@ -118,7 +121,7 @@ class SimTime(SimTimeLess):
         # distance
         delta_x = target_loc[0] - self.agent.loc[0]
         delta_y = target_loc[1] - self.agent.loc[1]
-        distance = math.sqrt(delta_x**2 + delta_y**2)
+        distance = math.sqrt(delta_x ** 2 + delta_y ** 2)
 
         # determine where to end up
         step_loc = np.array([-1, -1])
@@ -132,20 +135,20 @@ class SimTime(SimTimeLess):
             step_loc[0] = target_loc[0]
             step_loc[1] = target_loc[1]
             flag_finish = True
-        
+
         # execute
         self.agent.execute("move", step_loc)
 
         return flag_finish
-    
+
     def _pause_step(self):
         assert self.cache_action != "move"
 
         # if have not been executed, then execute first before pause there
         if self.timer == self.param.static_duration:
-            self.agent.execute(self.cache_action, self.cache_arg, board=self.cur_board) 
+            self.agent.execute(self.cache_action, self.cache_arg, board=self.cur_board)
 
-        # continue to run the timer
+            # continue to run the timer
         self.timer -= self.param.delta_t
 
         # if timer is below zero, then it is up!

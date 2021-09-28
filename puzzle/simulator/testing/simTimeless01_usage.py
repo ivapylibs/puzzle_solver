@@ -1,8 +1,8 @@
-#========================= simTimeless01_usage ========================
+# ========================= simTimeless01_usage ========================
 #
 # @brief    The test script for the basic timeless simulator
 #
-#========================= simTimeless01_usage ========================
+# ========================= simTimeless01_usage ========================
 #
 # @file     agent02_board.py
 #
@@ -11,27 +11,21 @@
 # @date     2021/09/10
 #
 #
-#========================= simTimeless01_usage ========================
+# ========================= simTimeless01_usage ========================
 
-##==[0] Prepare
-#[0.1] environment
-from puzzle.simulator.planner import Planner_Fix
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import cv2
-from copy import deepcopy
 
-
-from puzzle.piece.template import template
-from puzzle.simulator.basic import basic
 from puzzle.board import board
+from puzzle.piece.template import template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
+##==[0] Prepare
+# [0.1] environment
+from puzzle.simulator.planner import Planner_Fix
 from puzzle.simulator.simTimeless import SimTimeLess, ParamST
 
-
-#==[1] Prepare
+# ==[1] Prepare
 
 # settings
 init_piece_loc = [140, 100]
@@ -41,10 +35,10 @@ pick_color = np.array((0, 255, 0), dtype=np.uint8)
 
 # Prepare the boards
 init_board = board()
-init_piece = template.buildSquare(20, (255,0,0), rLoc=init_piece_loc)
+init_piece = template.buildSquare(20, (255, 0, 0), rLoc=init_piece_loc)
 init_board.addPiece(init_piece)
 sol_board = board()
-sol_piece = template.buildSquare(20, (255,0,0), rLoc=target_piece_loc)
+sol_piece = template.buildSquare(20, (255, 0, 0), rLoc=target_piece_loc)
 sol_board.addPiece(sol_piece)
 
 # prepare the human agent 
@@ -66,17 +60,17 @@ simulator = SimTimeLess(init_board, sol_board, agent, param_sim)
 # visualize
 fh, axes = plt.subplots(1, 3, figsize=(15, 5))
 fh.suptitle("The timeless Simulator")
-#plt.pause(7)    # give me time to record the gif
+# plt.pause(7)    # give me time to record the gif
 simulator.visualize(mode="initBoard", title="The initial board", ax=axes[0])
 simulator.visualize(mode="solBoard", title="The solution board", ax=axes[1])
 simulator.visualize(mode="scene", title="The current scene", ax=axes[2])
 plt.pause(1)
 
-#==[2] Simulate
+# ==[2] Simulate
 simulator.simulate(
-    vis=True, 
+    vis=True,
     vis_pause_time=1,
-    title="The current scene", 
+    title="The current scene",
     ax=axes[2],
     pickColorA=pick_color
 )

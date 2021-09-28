@@ -5,6 +5,7 @@
 #           See details in https://towardsdatascience.com/solving-jigsaw-puzzles-with-python-and-opencv-d775ba730660?gi=7f5f85686413
 #
 # ================================ puzzle.utils.sideExtractor ================================
+
 #
 # @file     sideExtractor.py
 #
@@ -13,6 +14,7 @@
 # @date     2018/09/29 [created]
 # @date     2021/08/17 [created]
 #
+
 #
 # ================================ puzzle.utils.sideExtractor ================================
 

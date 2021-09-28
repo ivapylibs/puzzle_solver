@@ -1,4 +1,4 @@
-#====================== puzzle.piece.matchDifferent ======================
+# ====================== puzzle.piece.matchDifferent ======================
 #
 # @brief    Sub-classes of this derived class branch use similarity
 #           scores for determining wheter two puzzle pieces match.
@@ -7,8 +7,7 @@
 # match and bigger being less likely to be a match. There will usually
 # be lower and upper limits for the difference score.
 #
-#====================== puzzle.piece.matchDifferent ======================
-
+# ====================== puzzle.piece.matchDifferent ======================
 #
 # @file     matchDifferent.py
 #
@@ -17,47 +16,45 @@
 # @date     2021/07/24 [created]
 #           2021/07/30 [modified]
 #
-#!NOTE:
-#!  Indent is set to 2 spaces.
-#!  Tab is set to 4 spaces with conversion to spaces.
 #
-#====================== puzzle.piece.matchDifferent ======================
+# ====================== puzzle.piece.matchDifferent ======================
 
-#===== Environment / Dependencies
+# ===== Environment / Dependencies
 #
 from puzzle.piece.matcher import matcher
 
+
 #
-#========================= puzzle.piece.matchDifferent =========================
+# ========================= puzzle.piece.matchDifferent =========================
 #
 class matchDifferent(matcher):
 
-  def __init__(self, tau=-float('inf')):
-    """
-    @brief  Constructor for the puzzle piece matchDifferent class.
+    def __init__(self, tau=-float('inf')):
+        """
+        @brief  Constructor for the puzzle piece matchDifferent class.
 
-    Args:
-      tau: The threshold param to determine difference.
-    """
+        Args:
+          tau: The threshold param to determine difference.
+        """
 
-    super(matchDifferent, self).__init__(tau)
+        super(matchDifferent, self).__init__(tau)
 
-  def compare(self, piece_A, piece_B):
-    """
-    @brief  Compare between two passed puzzle piece data.
+    def compare(self, piece_A, piece_B):
+        """
+        @brief  Compare between two passed puzzle piece data.
 
-    Args:
-      piece_A: A template instance saving a piece's info.
-      piece_B: A template instance saving a piece's info.
+        Args:
+          piece_A: A template instance saving a piece's info.
+          piece_B: A template instance saving a piece's info.
 
-    Returns:
-      Comparison result
-    """
+        Returns:
+          Comparison result
+        """
 
-    # score is to calculate the similarity while it will call the feature extraction process inside
-    diffScore = self.score(piece_A, piece_B)
+        # score is to calculate the similarity while it will call the feature extraction process inside
+        diffScore = self.score(piece_A, piece_B)
 
-    return diffScore < self.tau
+        return diffScore < self.tau
 
 #
-#====================== puzzle.piece.matchDifferent ======================
+# ====================== puzzle.piece.matchDifferent ======================

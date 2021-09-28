@@ -1,12 +1,11 @@
-#========================= puzzle.piece.template =========================
+# ========================= puzzle.piece.template =========================
 #
 # @brief    The base class for puzzle piece specification or description
 #           encapsulation. This simply stores the template image and
 #           related data for a puzzle piece in its canonical
 #           orientation.
 #
-#========================= puzzle.piece.template =========================
-
+# ========================= puzzle.piece.template =========================
 #
 # @file     template.py
 #
@@ -15,470 +14,469 @@
 # @date     2021/07/24 [created]
 #           2021/07/28 [modified]
 #
-#!NOTE:
-#!  Indent is set to 2 spaces.
-#!  Tab is set to 4 spaces with conversion to spaces.
 #
-#========================= puzzle.piece.template =========================
+# ========================= puzzle.piece.template =========================
 
-#===== Environment / Dependencies
+from copy import deepcopy
+from dataclasses import dataclass
+
+import cv2
+import matplotlib.pyplot as plt
+# ===== Environment / Dependencies
 #
 import numpy as np
-from dataclasses import dataclass
-import cv2
-
-import matplotlib.pyplot as plt
 
 from puzzle.utils.imageProcessing import rotate_im
 
-from copy import deepcopy
-#===== Helper Elements
+
+# ===== Helper Elements
 #
 @dataclass
 class puzzleTemplate:
-  size:    np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
-  rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
-  appear:  np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
-  image:   np.ndarray = np.array([],dtype='uint8')  # @< Template RGB image with BG default fill.
-  mask:     np.ndarray = np.array([],dtype='uint8') # @< Template binary mask image.
-  contour:  np.ndarray = np.array([],dtype='uint8') # @< Template binary contour image.
-  contour_pts: np.ndarray = np.array([]) # @< Template contour points.
+    size: np.ndarray = np.array([])  # @< Tight bbox size of puzzle piece image.
+    rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
+    appear: np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
+    image: np.ndarray = np.array([], dtype='uint8')  # @< Template RGB image with BG default fill.
+    mask: np.ndarray = np.array([], dtype='uint8')  # @< Template binary mask image.
+    contour: np.ndarray = np.array([], dtype='uint8')  # @< Template binary contour image.
+    contour_pts: np.ndarray = np.array([])  # @< Template contour points.
+
+
 #
-#========================= puzzle.piece.template =========================
+# ========================= puzzle.piece.template =========================
 #
 
 class template:
 
-  def __init__(self, y = None, r = (0, 0), id = None, theta=0, feature=None):
-    """
-    @brief  Constructor for the puzzle.piece.base class.
-
-    Args:
-      y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
-      r: The puzzle piece location in the whole image.
-      theta: The puzzle piece aligned angle.
-      feature: The processed feature.
-      id: The puzzle piece id in the measured board. Be set up by the board.
-    """
-
-    self.y = y
-    self.rLoc = np.array(r) # The default location is the top left corner
-    self.id = id
-    self.theta = theta  # Should be set up later by the alignment function
-    self.feature = feature # Should be set up later by the matcher class
-
-  def size(self):
-    """
-    @brief  Return the dimensions of the puzzle piece image.
-
-    Returns:
-      Dimensions of the puzzle piece image
-    """
-
-    return self.y.size
-
-  def setMeasurement(self, thePiece):
-    """
-    @brief  Pass along to the instance a measurement of the puzzle piece.
-
-    Args:
-      thePiece: A measurement of the puzzle piece.
-    """
-
-    self.y = thePiece.y
-    self.rLoc = thePiece.rLoc
-
-  def setSource(self, y, r = None):
-    """
-    @brief  Pass along the source data describing the puzzle piece.
-
-    Args:
-      y: Puzzle piece template.
-      r: The puzzle piece location in the whole image.
-
-    """
-
-    self.y = y
-
-    if r:
-      self.r = r
-
-  @staticmethod
-  def getEig(img):
-    """
-    @brief  To find the major and minor axes of a blob and then return the aligned rotation.
-    See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
-    PCA is our default method which does not perform very well.
-
-    Args:
-      img: A contour image.
-
-    Returns:
-      The aligned angle (rad).
-
-    """
-
-    # @note Currently, we use the image center
-
-    y, x = np.nonzero(img)
-    # x = x - np.mean(x)
-    # y = y - np.mean(y)
-    #
-    x = x - np.mean(img.shape[1]/2)
-    y = y - np.mean(img.shape[0]/2)
-
-    coords = np.vstack([x, y])
-    cov = np.cov(coords)
-    evals, evecs = np.linalg.eig(cov)
-    sort_indices = np.argsort(evals)[::-1]
-    v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-    v2 = evecs[:, sort_indices[1]]
-
-    dict = {
-      'x': x,
-      'y': y,
-      'v1': v1,
-      'v2': v2,
-    }
-
-    theta = np.arctan2(dict['v1'][1], dict['v1'][0])
-
-    # # Debug only
-    #
-    # scale = 20
-    # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
-    #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
-    # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
-    #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
-    # plt.plot(x, y, 'k.')
-    # plt.axis('equal')
-    # plt.gca().invert_yaxis()  # Match the image system with origin at top left
-    # plt.show()
-
-    return theta
-
-  def setPlacement(self, r, offset = False, isCenter = False):
-    """
-    @brief  Provide pixel placement location information.
-
-    Args:
-      r: Location of its frame origin.
-      offset: Boolean indicating whether it sets the offset or not.
-      isCenter: Boolean indicating r is center or not.
+    def __init__(self, y=None, r=(0, 0), id=None, theta=0, feature=None):
+        """
+        @brief  Constructor for the puzzle.piece.base class.
+
+        Args:
+          y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
+          r: The puzzle piece location in the whole image.
+          theta: The puzzle piece aligned angle.
+          feature: The processed feature.
+          id: The puzzle piece id in the measured board. Be set up by the board.
+        """
+
+        self.y = y
+        self.rLoc = np.array(r)  # The default location is the top left corner
+        self.id = id
+        self.theta = theta  # Should be set up later by the alignment function
+        self.feature = feature  # Should be set up later by the matcher class
+
+    def size(self):
+        """
+        @brief  Return the dimensions of the puzzle piece image.
+
+        Returns:
+          Dimensions of the puzzle piece image
+        """
+
+        return self.y.size
+
+    def setMeasurement(self, thePiece):
+        """
+        @brief  Pass along to the instance a measurement of the puzzle piece.
+
+        Args:
+          thePiece: A measurement of the puzzle piece.
+        """
+
+        self.y = thePiece.y
+        self.rLoc = thePiece.rLoc
+
+    def setSource(self, y, r=None):
+        """
+        @brief  Pass along the source data describing the puzzle piece.
+
+        Args:
+          y: Puzzle piece template.
+          r: The puzzle piece location in the whole image.
+
+        """
+
+        self.y = y
+
+        if r:
+            self.r = r
+
+    @staticmethod
+    def getEig(img):
+        """
+        @brief  To find the major and minor axes of a blob and then return the aligned rotation.
+        See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+        PCA is our default method which does not perform very well.
+
+        Args:
+          img: A contour image.
+
+        Returns:
+          The aligned angle (rad).
+
+        """
+
+        # @note Currently, we use the image center
+
+        y, x = np.nonzero(img)
+        # x = x - np.mean(x)
+        # y = y - np.mean(y)
+        #
+        x = x - np.mean(img.shape[1] / 2)
+        y = y - np.mean(img.shape[0] / 2)
+
+        coords = np.vstack([x, y])
+        cov = np.cov(coords)
+        evals, evecs = np.linalg.eig(cov)
+        sort_indices = np.argsort(evals)[::-1]
+        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
+        v2 = evecs[:, sort_indices[1]]
+
+        dict = {
+            'x': x,
+            'y': y,
+            'v1': v1,
+            'v2': v2,
+        }
+
+        theta = np.arctan2(dict['v1'][1], dict['v1'][0])
+
+        # # Debug only
+        #
+        # scale = 20
+        # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
+        #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
+        # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
+        #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
+        # plt.plot(x, y, 'k.')
+        # plt.axis('equal')
+        # plt.gca().invert_yaxis()  # Match the image system with origin at top left
+        # plt.show()
+
+        return theta
+
+    def setPlacement(self, r, offset=False, isCenter=False):
+        """
+        @brief  Provide pixel placement location information.
+
+        Args:
+          r: Location of its frame origin.
+          offset: Boolean indicating whether it sets the offset or not.
+          isCenter: Boolean indicating r is center or not.
 
-    Returns:
+        Returns:
+
+        """
+
+        if isCenter:
+            if offset:
+                self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size / 2))
+            else:
+                self.rLoc = np.array(r - np.ceil(self.y.size / 2))
+        else:
+            if offset:
+                self.rLoc = np.array(self.rLoc + r)
+            else:
+                self.rLoc = np.array(r)
 
-    """
+    def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
+        """
+        @brief  Insert the puzzle piece into the image at the given location.
 
-    if isCenter:
-      if offset:
-        self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size/2))
-      else:
-        self.rLoc = np.array(r - np.ceil(self.y.size/2))
-    else:
-      if offset:
-        self.rLoc = np.array(self.rLoc + r)
-      else:
-        self.rLoc = np.array(r)
+        Args:
+          theImage: The source image to put puzzle piece into.
+          offset: The offset list.
+          CONTOUR_DISPLAY: The flag indicating whether to display the contours.
 
-  def placeInImage(self, theImage, offset=[0,0], CONTOUR_DISPLAY = True):
-    """
-    @brief  Insert the puzzle piece into the image at the given location.
+        """
+
+        # Remap coordinates from own image sprite coordinates to bigger
+        # image coordinates.
+        rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+
+        # Dump color/appearance information into the image (It will override the original image).
+        theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
-    Args:
-      theImage: The source image to put puzzle piece into.
-      offset: The offset list.
-      CONTOUR_DISPLAY: The flag indicating whether to display the contours.
+        # May have to re-draw the contour for better visualization
+        if CONTOUR_DISPLAY:
+            rcoords = list(np.where(self.y.contour))
+            rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+            rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + rcoords
+            theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
 
-    """
+    def placeInImageAt(self, theImage, rc, theta=None, isCenter=False, CONTOUR_DISPLAY=True):
+        """
+        @brief  Insert the puzzle piece into the image at the given location.
 
-    # Remap coordinates from own image sprite coordinates to bigger
-    # image coordinates.
-    rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + self.y.rcoords
+        Args:
+          theImage: The source image to put puzzle piece into.
+          rc: The coordinate location.
+          theta: The orientation of the puzzle piece (default = 0).
+          isCenter: The flag indicating whether the given location is for the center.
+          CONTOUR_DISPLAY: The flag indicating whether to display the contours.
 
-    # Dump color/appearance information into the image (It will override the original image).
-    theImage[rcoords[1], rcoords[0], :] = self.y.appear
+        """
+
+        if theta is not None:
+            thePiece = self.rotatePiece(theta)
+        else:
+            thePiece = self
+
+        # If specification is at center, then compute offset to top-left corner.
+        if isCenter:
+            rc = rc - np.ceil(thePiece.y.size / 2)
+
+        # Remap coordinates from own image sprite coordinates to bigger image coordinates.
+        rcoords = rc.reshape(-1, 1) + thePiece.y.rcoords
+
+        # Dump color/appearance information into the image.
+        theImage[rcoords[1], rcoords[0], :] = thePiece.y.appear
+
+        # May have to re-draw the contour for better visualization
+        if CONTOUR_DISPLAY:
+            rcoords = list(np.where(thePiece.y.contour))
+            rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+            rcoords = rc.reshape(-1, 1) + rcoords
+            theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
+
+    def toImage(self):
+        """
+        @brief  Return the puzzle piece image (cropped).
+
+        :return: The puzzle piece image (cropped).
+        """
+
+        theImage = np.zeros_like(self.y.image)
+        theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
+
+        return theImage
 
-    # May have to re-draw the contour for better visualization
-    if CONTOUR_DISPLAY:
-      rcoords = list(np.where(self.y.contour))
-      rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
-      rcoords = np.array(offset).reshape(-1,1) +  self.rLoc.reshape(-1,1) + rcoords
-      theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+    def display(self, fh=None):
+        """
+        @brief  Display the puzzle piece contents in an image window.
 
-  def placeInImageAt(self, theImage, rc, theta = None, isCenter = False, CONTOUR_DISPLAY = True):
-    """
-    @brief  Insert the puzzle piece into the image at the given location.
+        Args:
+          fh: The figure label/handle if available. (optional)
 
-    Args:
-      theImage: The source image to put puzzle piece into.
-      rc: The coordinate location.
-      theta: The orientation of the puzzle piece (default = 0).
-      isCenter: The flag indicating whether the given location is for the center.
-      CONTOUR_DISPLAY: The flag indicating whether to display the contours.
+        Returns:
+          The handle of the image.
 
-    """
+        """
 
-    if theta is not None:
-      thePiece= self.rotatePiece(theta)
-    else:
-      thePiece = self
+        if fh:
+            # See https://stackoverflow.com/a/7987462/5269146
+            fh = plt.figure(fh.number)
+        else:
+            fh = plt.figure()
 
-    # If specification is at center, then compute offset to top-left corner.
-    if isCenter:
-      rc = rc - np.ceil(thePiece.y.size / 2)
+        # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
+        # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
 
-    # Remap coordinates from own image sprite coordinates to bigger image coordinates.
-    rcoords = rc.reshape(-1,1) + thePiece.y.rcoords
-
-    # Dump color/appearance information into the image.
-    theImage[rcoords[1], rcoords[0], :] = thePiece.y.appear
+        theImage = self.toImage()
+        plt.imshow(theImage)
 
-    # May have to re-draw the contour for better visualization
-    if CONTOUR_DISPLAY:
-      rcoords = list(np.where(thePiece.y.contour))
-      rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
-      rcoords =  rc.reshape(-1,1) + rcoords
-      theImage[rcoords[1], rcoords[0], :] = [0,0,0]
+        # plt.show()
 
+        return fh
 
-  def toImage(self):
-    """
-    @brief  Return the puzzle piece image (cropped).
+    @staticmethod
+    def buildFromMaskAndImage(theMask, theImage, rLoc=None):
+        """
+        @brief  Given a mask (individual) and an image of same base dimensions, use to
+        instantiate a puzzle piece template.
 
-    :return: The puzzle piece image (cropped).
-    """
+        Args:
+          theMask: The individual mask.
+          theImage: The source image.
+          rLoc: The puzzle piece location in the whole image.
 
-    theImage = np.zeros_like(self.y.image)
-    theImage[self.y.rcoords[1], self.y.rcoords[0], :] = self.y.appear
+        Returns:
+          The puzzle piece instance.
+        """
 
-    return theImage
+        y = puzzleTemplate()
 
-  def display(self, fh = None):
-    """
-    @brief  Display the puzzle piece contents in an image window.
+        # Populate dimensions.
+        # Updated to OpenCV style
+        y.size = [theMask.shape[1], theMask.shape[0]]
 
-    Args:
-      fh: The figure label/handle if available. (optional)
+        y.mask = theMask.astype('uint8')
 
-    Returns:
-      The handle of the image.
+        # Create a contour of the mask
+        cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                                cv2.CHAIN_APPROX_SIMPLE)
 
-    """
+        y.contour_pts = cnts[0][0]
+        y.contour = np.zeros_like(y.mask).astype('uint8')
+        cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-    if fh:
-      # See https://stackoverflow.com/a/7987462/5269146
-      fh = plt.figure(fh.number)
-    else:
-      fh = plt.figure()
+        # @note
+        # Yunzhi: For debug
+        # hull = cv2.convexHull(cnts[0][0])
+        # aa = np.zeros_like(y.mask).astype('uint8')
+        # cv2.drawContours(aa, hull, -1, (255, 255, 255), thickness=10)
+        # cv2.imshow('Test', aa)
+        # cv2.waitKey()
 
-    # See https://stackoverflow.com/questions/13384653/imshow-extent-and-aspect
-    # plt.imshow(self.y.image, extent = [0, 1, 0, 1])
+        y.rcoords = list(np.nonzero(theMask))  # 2 (row,col) x N
+        # Updated to OpenCV style -> (x,y)
+        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]  # 2 (x;y) x N
+        y.rcoords = np.array(y.rcoords)
 
-    theImage = self.toImage()
-    plt.imshow(theImage)
+        y.appear = theImage[y.rcoords[1], y.rcoords[0], :]
+        # Store template image.
+        # @note
+        # For now, not concerned about bad image data outside of mask.
+        y.image = theImage
 
-    # plt.show()
+        if not rLoc:
+            thePiece = template(y)
+        else:
+            thePiece = template(y, rLoc)
 
-    return fh
+        # Set up the rotation
+        thePiece.theta = template.getEig(thePiece.y.mask)
 
-  @staticmethod
-  def buildFromMaskAndImage(theMask, theImage, rLoc = None):
-    """
-    @brief  Given a mask (individual) and an image of same base dimensions, use to
-    instantiate a puzzle piece template.
+        return thePiece
 
-    Args:
-      theMask: The individual mask.
-      theImage: The source image.
-      rLoc: The puzzle piece location in the whole image.
+    def rotatePiece(self, theta):
+        """
+        @brief Rotate the puzzle template instance by the given angle.
 
-    Returns:
-      The puzzle piece instance.
-    """
+        Args:
+          theta: The rotated angle.
 
-    y = puzzleTemplate()
+        Returns:
+          A new puzzle template instance.
 
-    # Populate dimensions.
-    # Updated to OpenCV style
-    y.size = [theMask.shape[1], theMask.shape[0]]
+        """
 
-    y.mask = theMask.astype('uint8')
+        # Create a new instance. Without rLoc.
+        thePiece = template(y=deepcopy(self.y), id=deepcopy(self.id))
 
-    # Create a contour of the mask
-    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
+        # By default the rotation is around its center (img center)
+        thePiece.y.mask, mask_temp, M, x_pad, y_pad = rotate_im(thePiece.y.mask, theta)
 
-    y.contour_pts = cnts[0][0]
-    y.contour = np.zeros_like(y.mask).astype('uint8')
-    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+        # Have to apply a thresh to deal with holes caused by interpolation
+        _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 5, 255, cv2.THRESH_BINARY)
 
-    # @note
-    # Yunzhi: For debug
-    # hull = cv2.convexHull(cnts[0][0])
-    # aa = np.zeros_like(y.mask).astype('uint8')
-    # cv2.drawContours(aa, hull, -1, (255, 255, 255), thickness=10)
-    # cv2.imshow('Test', aa)
-    # cv2.waitKey()
+        thePiece.y.image, _, _, _, _ = rotate_im(thePiece.y.image, theta, mask=mask_temp)
 
-    y.rcoords = list(np.nonzero(theMask)) # 2 (row,col) x N
-    # Updated to OpenCV style -> (x,y)
-    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0] # 2 (x;y) x N
-    y.rcoords = np.array(y.rcoords)
+        thePiece.y.size = [thePiece.y.mask.shape[1], thePiece.y.mask.shape[0]]
 
-    y.appear = theImage[y.rcoords[1],y.rcoords[0], :]
-    # Store template image.
-    # @note
-    # For now, not concerned about bad image data outside of mask.
-    y.image = theImage
+        thePiece.y.rcoords = list(np.nonzero(thePiece.y.mask))  # 2 (row;col) x N
 
-    if not rLoc:
-      thePiece = template(y)
-    else:
-      thePiece = template(y, rLoc)
+        # Updated to OpenCV style -> (x,y)
+        thePiece.y.rcoords[0], thePiece.y.rcoords[1] = thePiece.y.rcoords[1], thePiece.y.rcoords[0]  # 2 (x;y) x N
+        thePiece.y.rcoords = np.array(thePiece.y.rcoords)
 
-    # Set up the rotation
-    thePiece.theta = template.getEig(thePiece.y.mask)
+        thePiece.y.appear = thePiece.y.image[thePiece.y.rcoords[1], thePiece.y.rcoords[0], :]
 
-    return thePiece
+        # @note If we simply transform the original info, the result may be inaccurate?
 
-  def rotatePiece(self, theta):
-    """
-    @brief Rotate the puzzle template instance by the given angle.
+        # Create a contour of the mask
+        cnts = cv2.findContours(thePiece.y.mask, cv2.RETR_TREE,
+                                cv2.CHAIN_APPROX_SIMPLE)
 
-    Args:
-      theta: The rotated angle.
+        thePiece.y.contour_pts = cnts[0][0]
+        thePiece.y.contour = np.zeros_like(thePiece.y.mask).astype('uint8')
+        cv2.drawContours(thePiece.y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-    Returns:
-      A new puzzle template instance.
+        # Might be negative
+        thePiece.rLoc = self.rLoc - np.array([x_pad, y_pad])
 
-    """
+        # Set up the new rotation
+        thePiece.theta = self.theta + np.deg2rad(theta)
 
-    # Create a new instance. Without rLoc.
-    thePiece = template(y=deepcopy(self.y),id=deepcopy(self.id))
+        return thePiece
 
-    # By default the rotation is around its center (img center)
-    thePiece.y.mask,mask_temp, M,x_pad,y_pad = rotate_im(thePiece.y.mask, theta)
+    @staticmethod
+    def buildSquare(size, color, rLoc=None):
+        """
+        @brief  Build a square piece.
 
-    # Have to apply a thresh to deal with holes caused by interpolation
-    _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 5, 255, cv2.THRESH_BINARY)
+        Args:
+          size: The side length of the square
+          color: (3,). The RGB color.
+          rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
 
-    thePiece.y.image,_,_,_,_ = rotate_im(thePiece.y.image, theta, mask=mask_temp)
+        Returns:
+          The puzzle piece instance.
+        """
 
-    thePiece.y.size = [thePiece.y.mask.shape[1], thePiece.y.mask.shape[0]]
+        y = puzzleTemplate()
 
-    thePiece.y.rcoords = list(np.nonzero(thePiece.y.mask))  # 2 (row;col) x N
+        # the tight bbox is just the square itself, so size is just size
+        y.size = np.array([size, size])
+        y.mask = np.ones((size, size), dtype=np.uint8) * 255
 
-    # Updated to OpenCV style -> (x,y)
-    thePiece.y.rcoords[0], thePiece.y.rcoords[1] = thePiece.y.rcoords[1], thePiece.y.rcoords[0]  # 2 (x;y) x N
-    thePiece.y.rcoords = np.array(thePiece.y.rcoords)
+        # Create a contour of the mask
+        cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                                cv2.CHAIN_APPROX_SIMPLE)
 
-    thePiece.y.appear = thePiece.y.image[thePiece.y.rcoords[1], thePiece.y.rcoords[0], :]
+        y.contour_pts = cnts[0][0]
+        y.contour = np.zeros_like(y.mask).astype('uint8')
+        cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-    # @note If we simply transform the original info, the result may be inaccurate?
+        y.rcoords = list(np.nonzero(y.mask))  # 2 (row,col) x N
+        # Updated to OpenCV style -> (x,y)
+        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+        y.rcoords = np.array(y.rcoords)
 
-    # Create a contour of the mask
-    cnts = cv2.findContours(thePiece.y.mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
+        y.image = np.zeros((size, size, 3), dtype=np.uint8)
+        y.image = cv2.rectangle(y.image, (0, 0), (size - 1, size - 1), color=color, thickness=-1)
+        y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
-    thePiece.y.contour_pts = cnts[0][0]
-    thePiece.y.contour = np.zeros_like(thePiece.y.mask).astype('uint8')
-    cv2.drawContours(thePiece.y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+        if not rLoc:
+            thePiece = template(y)
+        else:
+            thePiece = template(y, rLoc)
 
-    # Might be negative
-    thePiece.rLoc = self.rLoc-np.array([x_pad,y_pad])
+        return thePiece
 
-    # Set up the new rotation
-    thePiece.theta = self.theta + np.deg2rad(theta)
+    @staticmethod
+    def buildSphere(radius, color, rLoc=None):
+        """
+        @brief  Build a sphere piece
 
-    return thePiece
+        Args:
+          radius: The radius of the sphere.
+          color: (3,). The RGB color.
+          rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+          The puzzle piece instance.
+        """
 
-  @staticmethod
-  def buildSquare(size, color, rLoc = None):
-    """
-    @brief  Build a square piece.
+        y = puzzleTemplate()
 
-    Args:
-      size: The side length of the square
-      color: (3,). The RGB color.
-      rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
+        # the tight bbox is just the square itself, so size is just size
+        y.size = np.array([radius, radius]) * 2
+        y.mask = np.zeros((2 * radius, 2 * radius), dtype=np.uint8)
+        y.mask = cv2.circle(y.mask, center=(radius - 1, radius - 1), radius=radius, color=(255, 255, 255), thickness=-1)
 
-    Returns:
-      The puzzle piece instance.
-    """
+        # Create a contour of the mask
+        cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+                                cv2.CHAIN_APPROX_SIMPLE)
 
-    y = puzzleTemplate()
+        y.contour_pts = cnts[0][0]
+        y.contour = np.zeros_like(y.mask).astype('uint8')
+        cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-    # the tight bbox is just the square itself, so size is just size 
-    y.size = np.array([size, size])
-    y.mask = np.ones((size, size), dtype=np.uint8)*255
+        y.rcoords = list(np.nonzero(y.mask))  # 2 (row,col) x N
+        # Updated to OpenCV style -> (x,y)
+        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+        y.rcoords = np.array(y.rcoords)
 
-    # Create a contour of the mask
-    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
+        y.image = np.ones((2 * radius, 2 * radius, 3), dtype=np.uint8)
+        y.image = cv2.circle(y.image, radius=radius, center=(radius - 1, radius - 1), color=color, thickness=-1)
+        y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
-    y.contour_pts = cnts[0][0]
-    y.contour = np.zeros_like(y.mask).astype('uint8')
-    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+        if not rLoc:
+            thePiece = template(y)
+        else:
+            thePiece = template(y, rLoc)
 
-    y.rcoords = list(np.nonzero(y.mask)) # 2 (row,col) x N
-    # Updated to OpenCV style -> (x,y)
-    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
-    y.rcoords = np.array(y.rcoords)
-
-    y.image = np.zeros((size, size, 3), dtype=np.uint8)
-    y.image = cv2.rectangle(y.image, (0,0), (size-1, size-1), color=color, thickness=-1)
-    y.appear = y.image[y.rcoords[1],y.rcoords[0], :]
-
-    if not rLoc:
-      thePiece = template(y)
-    else:
-      thePiece = template(y, rLoc)
-
-    return thePiece
-
-  @staticmethod
-  def buildSphere(radius, color, rLoc = None):
-    """
-    @brief  Build a sphere piece
-
-    Args:
-      radius: The radius of the sphere.
-      color: (3,). The RGB color.
-      rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
-      The puzzle piece instance.
-    """
-
-    y = puzzleTemplate()
-
-    # the tight bbox is just the square itself, so size is just size 
-    y.size = np.array([radius, radius]) * 2
-    y.mask = np.zeros((2*radius, 2*radius), dtype=np.uint8)
-    y.mask = cv2.circle(y.mask, center=(radius-1, radius-1), radius=radius, color=(255,255,255), thickness=-1)
-
-    # Create a contour of the mask
-    cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
-                            cv2.CHAIN_APPROX_SIMPLE)
-
-    y.contour_pts = cnts[0][0]
-    y.contour = np.zeros_like(y.mask).astype('uint8')
-    cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
-
-    y.rcoords = list(np.nonzero(y.mask)) # 2 (row,col) x N
-    # Updated to OpenCV style -> (x,y)
-    y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
-    y.rcoords = np.array(y.rcoords)
-
-    y.image = np.ones((2*radius, 2*radius, 3), dtype=np.uint8)
-    y.image = cv2.circle(y.image, radius=radius, center=(radius-1, radius-1), color=color, thickness=-1)
-    y.appear = y.image[y.rcoords[1],y.rcoords[0], :]
-
-    if not rLoc:
-      thePiece = template(y)
-    else:
-      thePiece = template(y, rLoc)
-
-    return thePiece
+        return thePiece
 
 #
-#========================= puzzle.piece.template =========================
+# ========================= puzzle.piece.template =========================

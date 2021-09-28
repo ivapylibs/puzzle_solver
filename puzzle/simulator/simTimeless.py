@@ -1,4 +1,4 @@
-#========================= puzzle.simulator.simTimeless ========================
+# ========================= puzzle.simulator.simTimeless ========================
 #
 # @class    puzzle.simulator.SimTimeless
 #
@@ -6,8 +6,7 @@
 #           without any time effect.
 #           The agent will observe the board and attempt to solve it until finished
 #
-#========================= puzzle.simulator.simTimeless ========================
-
+# ========================= puzzle.simulator.simTimeless ========================
 #
 # @file     simTimeless.py
 #
@@ -16,15 +15,17 @@
 # @date     2021/09/10
 #
 #
-#========================= puzzle.simulator.simTimeless ========================
+# ========================= puzzle.simulator.simTimeless ========================
 
 from copy import deepcopy
 from dataclasses import dataclass
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from puzzle.board import board
 from puzzle.simulator.agent import Agent
+
 
 @dataclass
 class ParamST():
@@ -32,8 +33,9 @@ class ParamST():
     @param canvas_H             The height of the whole scene
     @param canvas_W             The width of the whole scene
     """
-    canvas_H: int = 200         #<- The height of the scene
-    canvas_W: int = 200         #<- The width of the scene
+    canvas_H: int = 200  # <- The height of the scene
+    canvas_W: int = 200  # <- The width of the scene
+
 
 class SimTimeLess():
     """
@@ -53,11 +55,12 @@ class SimTimeLess():
     @param[in]  agent               The puzzle solving agent
     @param[in]  param               The parameters
     """
-    def __init__(self, init_board:board, sol_board:board, agent:Agent, param:ParamST=ParamST()):
-        self.init_board = init_board        # Initial board
-        self.sol_board = sol_board          # Solution board
-        self.cur_board = init_board          # The current board. At first it will be only the inital board
-        self.agent = agent                  # The agent
+
+    def __init__(self, init_board: board, sol_board: board, agent: Agent, param: ParamST = ParamST()):
+        self.init_board = init_board  # Initial board
+        self.sol_board = sol_board  # Solution board
+        self.cur_board = init_board  # The current board. At first it will be only the inital board
+        self.agent = agent  # The agent
         self.param = param
 
         # let the agent be aware of the solution board
@@ -72,12 +75,12 @@ class SimTimeLess():
         @param[in]  **kwargs        The parameter for visualize function. See its API for detail
         """
         Succ = True
-        while(Succ):
+        while (Succ):
             Succ = self.simulate_step()
             if vis:
                 self.visualize(mode="scene", **kwargs)
                 plt.pause(0.01)
-    
+
     def simulate_step(self):
         """
         The simulation step.
@@ -124,13 +127,13 @@ class SimTimeLess():
                 piece.placeInImage(canvas)
             # the agent
             if (pickColorA is not None) and (self.agent.cache_piece is not None):
-                appear_cache = deepcopy(self.agent.app.y.appear) 
-                new_appear = np.repeat(pickColorA[np.newaxis,:], repeats=self.agent.app.y.appear.shape[0], axis=0)
+                appear_cache = deepcopy(self.agent.app.y.appear)
+                new_appear = np.repeat(pickColorA[np.newaxis, :], repeats=self.agent.app.y.appear.shape[0], axis=0)
                 self.agent.app.y.appear = new_appear
                 self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
                 self.agent.app.y.appear = appear_cache
             else:
                 self.agent.placeInImage(canvas, CONTOUR_DISPLAY=False)
-    
-        ax.imshow(canvas)        
+
+        ax.imshow(canvas)
         ax.set_title(title)
