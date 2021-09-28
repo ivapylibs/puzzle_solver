@@ -3,14 +3,12 @@
 # @brief    Some image processing functions.
 #
 # ====================== puzzle.utils.imageProcessing ======================
-
 #
 # @file     imageProcessing.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/09/01 [created]
 #
-
 #
 # ====================== puzzle.utils.shapeProcessing ======================
 

@@ -3,14 +3,12 @@
 # @brief    Some shape processing functions.
 #
 # ====================== puzzle.utils.dataProcessing ======================
-
 #
 # @file     shapeProcessing.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/10 [created]
 #
-
 #
 # ====================== puzzle.utils.shapeProcessing ======================
 

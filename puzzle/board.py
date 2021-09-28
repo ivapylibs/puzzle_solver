@@ -39,16 +39,15 @@ from scipy.spatial.distance import cdist
 
 class board:
 
-    # ================================ board ==============================
-    #
-    # @brief  Constructor for puzzle board. Can pass contents at
-    #         instantiation time or delay until later.
-    #
-    # @param[in]  thePieces   The puzzle pieces. (optional)
-    # @param[in]  id_count    The id count for the puzzle pieces. (optional)
-    #
     def __init__(self, *argv):
+        """
+        @brief  Constructor for puzzle board. Can pass contents at
+                instantiation time or delay until later.
 
+        Args:
+            *argv: The input params
+
+        """
         self.pieces = []  # @< The puzzle pieces.
         self.id_count = 0
 
@@ -76,19 +75,21 @@ class board:
 
         Args:
           piece: A puzzle piece instance.
+
         """
+
         piece.id = self.id_count
         self.id_count += 1
         self.pieces.append(piece)
 
-    # =========================== rmPiece ==========================
-    #
-    # @brief      Remove puzzle piece instance from the board
-    #
-    # @param[in]  id   The puzzle piece id
-    #
     def rmPiece(self, id):
+        """
+        @brief      Remove puzzle piece instance from the board
 
+        Args:
+            id: The puzzle piece id
+
+        """
         rm_index = None
         for idx, piece in enumerate(self.pieces):
             if piece.id == id:
@@ -98,38 +99,39 @@ class board:
         if rm_index:
             del self.pieces[rm_index]
 
-    # =============================== clear ===============================
-    #
-    # @brief  Clear all the puzzle pieces from the board.
-    #
     def clear(self):
+        """
+        @brief  Clear all the puzzle pieces from the board.
 
+        """
         self.pieces = []
         self.id_count = 0
 
-    # =============================== getSubset ===============================
-    #
-    # @brief  Return a new board consisting of a subset of pieces.
-    #
-    # @param[in]  subset   A list of indexes for the subset of puzzle pieces.
-    #
-    # @param[out] theBoard   A new board following the input subset.
-    #
     def getSubset(self, subset):
+        """
+        @brief  Return a new board consisting of a subset of pieces.
+
+        Args:
+            subset: A list of indexes for the subset of puzzle pieces.
+
+        Returns:
+            A new board following the input subset.
+        """
 
         theBoard = board(np.array(self.pieces)[subset], len(subset))
 
         return theBoard
 
-    # =============================== getAssigned ===============================
-    #
-    # @brief  Return a new board consisting of a subset of pieces.
-    #
-    # @param[in]  pAssignments   A list of assignments for the subset.
-    #
-    # @param[out] theBoard   A new board following assignment.
-    #
     def getAssigned(self, pAssignments):
+        """
+        @brief  Return a new board consisting of a subset of pieces.
+
+        Args:
+            pAssignments: A list of assignments for the subset.
+
+        Returns:
+            A new board following assignment.
+        """
 
         if len(pAssignments) > 0:
             theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
@@ -139,17 +141,18 @@ class board:
 
         return theBoard
 
-    # =============================== testAdjacent ===============================
-    #
-    # @brief  Check if two puzzle pieces are adjacent or not
-    #
-    # @param[in]  index_A   The index of the puzzle piece A.
-    # @param[in]  index_B   The index of the puzzle piece B.
-    # @param[in]  tauAdj    The threshold of the distance.
-    #
-    # @param[out] theFlag   The flag signalling whether two puzzle pieces are adjacent or not.
-    #
     def testAdjacent(self, index_A, index_B, tauAdj):
+        """
+        @brief  Check if two puzzle pieces are adjacent or not
+
+        Args:
+            index_A: The index of the puzzle piece A.
+            index_B: The index of the puzzle piece B.
+            tauAdj: The threshold of the distance.
+
+        Returns:
+            The flag indicating whether two puzzle pieces are adjacent or not.
+        """
 
         # Based on the nearest points on the contours
 
@@ -171,26 +174,26 @@ class board:
 
         return theFlag
 
-    # ================================ size ===============================
-    #
-    # @brief  Return the number of pieces on the board.
-    #
-    # @param[out] nPieces     The number of pieces on the board.
-    #
     def size(self):
+        """
+        @brief  Return the number of pieces on the board.
+
+        Returns:
+            The number of pieces on the board.
+        """
 
         nPieces = len(self.pieces)
 
         return nPieces
 
-    # ============================== extents ==============================
-    #
-    # @brief  Iterate through the puzzle pieces to figure out the tight
-    #         bounding box extents of the board.
-    #
-    # @param[out] lengths     The bounding box side lengths. [x,y]
-    #
     def extents(self):
+        """
+        @brief  Iterate through the puzzle pieces to figure out the tight
+                bounding box extents of the board.
+
+        Returns:
+            The bounding box side lengths. [x,y]
+        """
 
         # [[min x, min y], [max x, max y]]
         bbox = self.boundingBox()
@@ -199,14 +202,14 @@ class board:
 
         return lengths
 
-    # ============================ boundingBox ============================
-    #
-    # @brief  Iterate through the puzzle pieces to figure out the tight
-    #         bounding box of the board.
-    #
-    # @param[out] bbox        The bounding box coordinates. [[min x, min y], [max x, max y]]
-    #
     def boundingBox(self):
+        """
+        @brief  Iterate through the puzzle pieces to figure out the tight
+                bounding box of the board.
+
+        Returns:
+            The bounding box coordinates. [[min x, min y], [max x, max y]]
+        """
 
         if self.size() == 0:
             raise RuntimeError('No pieces exist')
@@ -226,13 +229,13 @@ class board:
 
             return bbox
 
-    # =========================== pieceLocations ==========================
-    #
-    # @brief      Returns list/array of puzzle piece locations.
-    #
-    # @param[out] pLocs   A dict of puzzle piece id & location.
-    #
     def pieceLocations(self):
+        """
+        @brief      Returns list/array of puzzle piece locations.
+
+        Returns:
+            A dict of puzzle piece id & location.
+        """
 
         # @note
         # Previously, return a list/array of puzzle piece locations.
@@ -249,16 +252,20 @@ class board:
 
         return pLocs
 
-    # ============================== toImage ==============================
-    #
-    # @brief  Uses puzzle piece locations to create an image for
-    #         visualizing them.  If given an image, then will place in it.
-    #
-    # @param[in]  theImage    The image to insert pieces into. (optional)
-    #
-    # @param[out] theImage    The image to insert pieces into.
-    #
     def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True):
+        """
+        @brief  Uses puzzle piece locations to create an image for
+                visualizing them.  If given an image, then will place in it.
+
+        Args:
+            theImage: The image to insert pieces into.
+            ID_DISPLAY: The flag indicating displaying ID or not.
+            COLOR: The background color.
+            CONTOUR_DISPLAY: The flag indicating drawing contour or not.
+
+        Returns:
+            The rendered image.
+        """
 
         if theImage is not None:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
@@ -306,25 +313,18 @@ class board:
 
         return theImage
 
-    # ============================== display ==============================
-    #
-    # @brief  Display the puzzle board as an image.
-    #
-    # @param[in]  fh  The figure label/handle if available (optional).
-    #
-    # @param[out] fh  The handle of the image.
-    #
     def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True):
+        """
+        @brief  Display the puzzle board as an image.
 
-        # @note
-        #
-        # Generating new image each time is time inefficient.
-        #
-        # MOST LIKELY WANT TO STORE FIGURE AND IMAGE IF GENERATED, THEN TEST
-        # IF AVAILABLE. THIS INTRODUCTES PROBLEMS THOUGH SINCE KEEP TRACK OF
-        # DIRTY STATUS REQUIRES KNOWLEDGE ABOUT PUZZLE PIECES AND SOME FORM
-        # OF COMMUNICATION OR COORDINATION. NOT WORTH THE EFFORT RIGHT NOW.
-        #
+        Args:
+            fh: The figure handle if available.
+            ID_DISPLAY:  The flag indicating displaying ID or not.
+            CONTOUR_DISPLAY: The flag indicating drawing contour or not.
+
+        Returns:
+            The figure handle.
+        """
 
         if fh:
             # See https://stackoverflow.com/a/7987462/5269146
@@ -334,12 +334,7 @@ class board:
 
         theImage = self.toImage(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-        # @note
-        # Yunzhi: extent is used to change the axis tick, we should use figsize
-        # See https://stackoverflow.com/a/66315574/5269146
-        # plt.imshow(theImage, extent=[0, 1, 0, 1])
         plt.imshow(theImage)
-        # plt.show()
 
         return fh
 
