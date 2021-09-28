@@ -87,7 +87,7 @@ theRotate_B.placeInImage(bigImage)
 #==[2] Display.
 #
 plt.figure()
-plt.title("Test the rotation function of the puzzle piece. Should see two matched puzzle pieces.")
+plt.title("Test the rotation function of the puzzle piece. \n Should see two matched puzzle pieces.")
 plt.imshow(bigImage)
 
 plt.show()

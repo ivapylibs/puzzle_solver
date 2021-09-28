@@ -50,6 +50,8 @@ thePiece_2.display()
 theMoment = moments(5)
 
 ret = theMoment.compare(thePiece_1, thePiece_2)
+
+print('Create a moments instance and compare puzzle 1 and 2. Should see True.')
 print(ret)
 
 

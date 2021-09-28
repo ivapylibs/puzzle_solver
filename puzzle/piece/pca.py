@@ -30,66 +30,65 @@ from puzzle.piece.template import template, puzzleTemplate
 #
 class pca(matchDifferent):
 
-  #=============================== puzzle.piece.pca ==============================
-  #
-  # @brief  Constructor for the puzzle piece matchDifferent class.
-  #
-  # @todo Decide later if initialization/calibration data can be passed at instantiation.
-  #
   def __init__(self, tau=-float('inf')):
+    """
+    @brief  Constructor for the puzzle piece matchDifferent class.
+    Args:
+      tau: The threshold param to determine difference.
+    """
+
     super(pca, self).__init__(tau)
 
-  #=========================== process ==========================
-  #
-  # @brief  Compute PCA feature from the raw puzzle data.
-  #
-  # @param[in]  y    A puzzleTemplate instance saving a passed puzzle piece's info
-  #
-  # @param[out]  theta    The rotation of the main vector.
-  #
-  def process(self, y):
+  def process(self, piece):
+    """
+    @brief  Compute PCA feature from the raw puzzle data.
 
-    if isinstance(y, template):
-      y = y.y
-    elif isinstance(y, puzzleTemplate):
-      pass
+    Args:
+      piece: A puzzleTemplate instance saving a passed puzzle piece's info
+
+    Returns:
+      The rotation of the main vector.
+    """
+
+    if isinstance(piece, template):
+      yfeature = pca.getEig(piece.y.contour)
+      theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
+
+      return theta
     else:
       raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
-    yfeature = pca.getEig(y.contour)
-    theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
+  def score(self, piece_A, piece_B):
+    """
+    @brief  Compute the score between two passed puzzle piece data.
 
-    return theta
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
 
-  #=============================== score ===============================
-  #
-  # @brief  Compute the score between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
-  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
-  #
-  # @param[out]  distance    The degree distance between passed puzzle piece data and
-  #                          stored puzzle piece. (counter-clockwise)
-  #
-  def score(self, yA, yB):
+    Returns:
+      The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
+    """
 
-    theta_A= self.process(yA)
-    theta_B= self.process(yB)
+    theta_A= self.process(piece_A)
+    theta_B= self.process(piece_B)
 
     distance = np.rad2deg(theta_B - theta_A)
 
     return distance
 
-  # ============================== getEig ==============================
-  #
-  # @brief  To find the major and minor axes of a blob.
-  #         See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
-  #
-  # @param[in]   img       A mask image
-  # @param[out]  dict      A dict saving centerized points, main vectors
-  #
   @staticmethod
   def getEig(img):
+    """
+    @brief  To find the major and minor axes of a blob.
+    See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+
+    Args:
+      img: A mask image.
+
+    Returns:
+      A dict saving centerized points, main vectors.
+    """
     y, x = np.nonzero(img)
     x = x - np.mean(x)
     y = y - np.mean(y)

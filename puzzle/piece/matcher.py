@@ -32,52 +32,59 @@
 #
 class matcher:
 
-  #============================== matcher ==============================
-  #
-  # @brief  Constructor for the puzzle.piece.matcher class.
-  #
   def __init__(self, tau = float("NaN")):
+    """
+    @brief  Constructor for the matcher class.
+
+    Args:
+      tau: The comparison threshold.
+    """
 
     # super(matcher, self).__init__(y)
 
     self.tau = tau  # @< Threshold to use when comparing, if given.
 
-  #============================== process ==============================
-  #
-  # @brief  Process the raw puzzle piece data to obtain the encoded
-  #         description of the piece. Use to recognize the piece given
-  #         new measurements in the future.
-  #
-  # This member function should be overloaded.
-  #
-  def process(self, y):
-    pass
+  def process(self, piece):
+    """
+    @brief  Process the raw puzzle piece data to obtain the encoded
+    description of the piece. Use to recognize the piece given
+    new measurements in the future.
+    This member function should be overloaded.
 
-  #=============================== score ===============================
-  #
-  # @brief  Compute the score between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
-  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
-  #
-  # This member function should be overloaded. Currently returns NaN to
-  # indicate that a score cannot be computed.
-  #
-  def score(self, yA, yB):
-    # @note
-    # Yunzhi: since this function should be overloaded. It is better to raise an error here.
+    Args:
+      piece: A template instance saving a piece's info.
+    """
     raise NotImplementedError
 
-  #============================== compare ==============================
-  #
-  # @brief  Compare between two passed puzzle piece data.
-  #
-  # This member function should be overloaded. Currently returns false
-  # so that all comparisons fail.
-  #
-  def compare(self, yA, yB):
-    # @note
-    # Yunzhi: since this function should be overloaded. It is better to raise an error here.
+  def score(self, piece_A, piece_B):
+    """
+    @brief  Compute the score between two passed puzzle piece data.
+    This member function should be overloaded. Currently returns false
+    so that all comparisons fail.
+
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+
+    Returns:
+      Score.
+    """
+    raise NotImplementedError
+
+  def compare(self, piece_A, piece_B):
+    """
+    @brief  Compare between two passed puzzle piece data.
+    This member function should be overloaded. Currently returns false
+    so that all comparisons fail.
+
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+
+    Returns:
+      Comparison result.
+    """
+
     raise NotImplementedError
 #
 #========================= puzzle.piece.matcher =========================

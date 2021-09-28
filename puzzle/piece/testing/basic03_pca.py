@@ -50,6 +50,7 @@ thePiece_2.display()
 thePCA = pca(5)
 
 ret = thePCA.score(thePiece_1, thePiece_2)
+print('Create a PCA instance and compare puzzle 1 and 2. Should see -90.')
 print(ret)
 
 

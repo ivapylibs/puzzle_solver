@@ -32,26 +32,30 @@ from puzzle.piece.matcher import matcher
 #
 class matchDifferent(matcher):
 
-  #=========================== matchDifferent ==========================
-  #
-  # @brief  Constructor for the puzzle piece matchDifferent class.
-  #
   def __init__(self, tau=-float('inf')):
+    """
+    @brief  Constructor for the puzzle piece matchDifferent class.
+
+    Args:
+      tau: The threshold param to determine difference.
+    """
+
     super(matchDifferent, self).__init__(tau)
 
-  #============================== compare ==============================
-  #
-  # @brief  Compare between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
-  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
-  #
-  # @param[out]       Return comparison result
-  #
-  def compare(self, yA, yB):
+  def compare(self, piece_A, piece_B):
+    """
+    @brief  Compare between two passed puzzle piece data.
+
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+
+    Returns:
+      Comparison result
+    """
 
     # score is to calculate the similarity while it will call the feature extraction process inside
-    diffScore = self.score(yA, yB)
+    diffScore = self.score(piece_A, piece_B)
 
     return diffScore < self.tau
 

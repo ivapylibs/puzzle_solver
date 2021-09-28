@@ -27,6 +27,16 @@ from skimage.transform import warp, AffineTransform
 from puzzle.utils.dataProcessing import calculateMatches
 from puzzle.piece.matchSimilar import matchSimilar
 from puzzle.piece.template import template, puzzleTemplate
+
+
+# Tricks to pickle cv2.keypoint objects https://stackoverflow.com/a/48832618/5269146
+import copyreg
+def _pickle_keypoints(point):
+    return cv2.KeyPoint, (*point.pt, point.size, point.angle,
+                          point.response, point.octave, point.class_id)
+
+copyreg.pickle(cv2.KeyPoint().__class__, _pickle_keypoints)
+
 #
 #================================ puzzle.piece.moments ================================
 #
@@ -42,35 +52,36 @@ class sift(matchSimilar):
 
     super(sift, self).__init__(tau)
 
-  def process(self, y):
+  def process(self, piece):
     """
     @brief  Compute sift features from the raw puzzle data.
 
     Args:
-      y: A template instance or puzzleTemplate instance saving a piece's info.
+      piece: A template instance saving a piece's info.
 
     Returns:
       The sift keypoints & the sift descriptor.
 
     """
 
-    if isinstance(y, template):
-      y = y.y
-    elif isinstance(y, puzzleTemplate):
-      pass
+    if isinstance(piece, template):
+      if piece.feature is not None:
+        return piece.feature
     else:
-      raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
+      raise ('The input type is wrong. Need a template instance.')
 
 
     sift_builder = cv2.SIFT_create()
 
-    theImage = np.zeros_like(y.image)
-    theImage[y.rcoords[1], y.rcoords[0], :] = y.appear
+    # Focus on the puzzle piece image with mask
+    theImage = np.zeros_like(piece.y.image)
+    theImage[piece.y.rcoords[1], piece.y.rcoords[0], :] = piece.y.appear
     kp, des = sift_builder.detectAndCompute(theImage, None)
 
     # @todo Maybe it is wrong to put y.image here
     # kp, des = sift_builder.detectAndCompute(y.image, None)
 
+    piece.feature = (kp, des)
     return kp, des
 
   def score(self, yA, yB):
@@ -78,8 +89,8 @@ class sift(matchSimilar):
     @brief  Compute the score between two passed puzzle piece data.
 
     Args:
-        yA: A template instance or puzzleTemplate instance saving a piece's info.
-        yB: A template instance or puzzleTemplate instance saving a piece's info.
+        yA: A template instance saving a piece's info.
+        yB: A template instance saving a piece's info.
 
     Returns: 
         The distance between the two passed puzzle piece data.
@@ -93,28 +104,28 @@ class sift(matchSimilar):
 
     return distance
 
-  def compare(self, yA, yB):
+  def compare(self, piece_A, piece_B):
     """
     @brief Compare between two passed puzzle piece data.
     See https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html
     and https://scikit-image.org/docs/dev/auto_examples/transform/plot_matching.html
 
     Args:
-      yA: A template instance or puzzleTemplate instance saving a piece's info.
-      yB: A template instance or puzzleTemplate instance saving a piece's info.
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
 
     Returns:
       Comparison result & rotation angle(degree).
     """
 
-    # score is to calculate the similarity while it will call the feature extraction process inside
-    kp_A, des_A = self.process(yA)
-    kp_B, des_B = self.process(yB)
+    # Score is to calculate the similarity while it will call the feature extraction process inside
+    kp_A, des_A = self.process(piece_A)
+    kp_B, des_B = self.process(piece_B)
 
     matches = calculateMatches(des_A, des_B)
     distance = 100 * (len(matches) / min(len(kp_A), len(kp_B)))
 
-    # estimate affine transform model using all coordinates
+    # Estimate affine transform model using all coordinates
 
     src = []
     dst = []
@@ -127,7 +138,7 @@ class sift(matchSimilar):
     model = AffineTransform()
     model.estimate(src, dst)
 
-    # robustly estimate affine transform model with RANSAC
+    # Robustly estimate affine transform model with RANSAC
     model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
                                    residual_threshold=2, max_trials=100)
     outliers = inliers == False

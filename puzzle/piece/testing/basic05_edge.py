@@ -119,7 +119,7 @@ theMatcher = edge()
 #==[4] Display the new board and the comparison result.
 #
 print('Should see True.')
-print(theMatcher.compare(theRegular_A, theRegular_B,method=similaritymeasures.pcm))
+print(theMatcher.compare(theRegular_A, theRegular_B, method=similaritymeasures.pcm))
 
 theBoard.display()
 

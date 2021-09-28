@@ -49,7 +49,7 @@ class puzzleTemplate:
 
 class template:
 
-  def __init__(self, y = None, r = (0, 0), theta=0, id = None):
+  def __init__(self, y = None, r = (0, 0), id = None, theta=0, feature=None):
     """
     @brief  Constructor for the puzzle.piece.base class.
 
@@ -57,13 +57,15 @@ class template:
       y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
       r: The puzzle piece location in the whole image.
       theta: The puzzle piece aligned angle.
+      feature: The processed feature.
       id: The puzzle piece id in the measured board. Be set up by the board.
     """
 
     self.y = y
     self.rLoc = np.array(r) # The default location is the top left corner
     self.id = id
-    self.theta = theta  # Should be set up later by the align function
+    self.theta = theta  # Should be set up later by the alignment function
+    self.feature = feature # Should be set up later by the matcher class
 
   def size(self):
     """
@@ -95,7 +97,6 @@ class template:
       r: The puzzle piece location in the whole image.
 
     """
-
 
     self.y = y
 
@@ -169,7 +170,6 @@ class template:
 
     """
 
-
     if isCenter:
       if offset:
         self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size/2))
@@ -218,7 +218,6 @@ class template:
       CONTOUR_DISPLAY: The flag indicating whether to display the contours.
 
     """
-
 
     if theta is not None:
       thePiece= self.rotatePiece(theta)

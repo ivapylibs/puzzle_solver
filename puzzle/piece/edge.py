@@ -32,27 +32,33 @@ from puzzle.piece.regular import regular, EdgeDes
 #
 class edge(matchDifferent):
 
-  #=============================== puzzle.piece.edge ==============================
-  #
-  # @brief  Constructor for the puzzle piece edge class.
-  #
-  #
 
-  # 150 for lab space/400 for RGB space
   def __init__(self, tau_shape=100, tau_color=400):
+    """
+    @brief  Constructor for the puzzle piece edge class.
+            150 for lab space/400 for RGB space
+    Args:
+      tau_shape: The threshold for the shape feature.
+      tau_color: The threshold for the color feature.
+    """
+
     super(edge, self).__init__()
 
     self.tau_shape = tau_shape
     self.tau_color = tau_color
 
-  # ============================== shapeFeaExtrct ==============================
-  #
-  # @brief  Extract the edge shape feature from an input image of the edge.
-  #
-  # @param[in]   edge            An EdgeDes instance.
-  #
   @staticmethod
   def shapeFeaExtract(edge, method = None):
+    """
+    @brief  Extract the edge shape feature from an input image of the edge.
+
+    Args:
+      edge: An EdgeDes instance.
+      method: The comparison method, we have two modes: type or shape coords.
+
+    Returns:
+      Shape feature.
+    """
 
     if method == 'type':
       shapeFea = edge.type
@@ -61,14 +67,19 @@ class edge(matchDifferent):
       shapeFea = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
     return shapeFea
-  # ============================== colorFeaExtrct ==============================
-  #
-  # @brief  Extract the edge color feature from an input image of the edge.
-  #
-  # @param[in]   edge           An EdgeDes instance.
-  #
+
   @staticmethod
   def colorFeaExtract(edge, feaLength=300):
+    """
+    @brief  Extract the edge color feature from an input image of the edge.
+
+    Args:
+      edge:  An EdgeDes instance.
+      feaLength: The resized feature vector length setting.
+
+    Returns:
+      The resized feature vector.
+    """
     y, x = np.nonzero(edge.mask)
 
     # Extract the valid pts
@@ -85,32 +96,35 @@ class edge(matchDifferent):
 
     return feaResize.astype('float32')
 
-  #=========================== process ==========================
-  #
-  # @brief  Compute features from the data.
-  #
-  # @param[in]  y    An EdgeDes instance.
-  #
-  #
   def process(self, y, method=None):
+    """
+    @brief  Compute features from the data.
+
+    Args:
+      y: An EdgeDes instance.
+      method: The method option.
+
+    Returns:
+      The shape & color feature vector.
+    """
 
     feature_shape = edge.shapeFeaExtract(y, method=method)
     feature_color = edge.colorFeaExtract(y)
 
     return [feature_shape, feature_color]
 
-  #=============================== score ===============================
-  #
-  # @brief  Compute the score between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A regular instance or an EdgeDes instance.
-  # @param[in]  yB    A regular instance or an EdgeDes instance.
-  #
-  # @param[out]  distance_shape    The shape distance between the two passed data.
-  # @param[out]  distance_color    The color distance between the two passed data.
-  #
-  def score(self, yA, yB, method = 'type'):
+  def score(self, piece_A, piece_B, method = 'type'):
+    """
+    @brief  Compute the score between two passed puzzle piece data.
 
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+
+    Returns:
+      The shape & color distance between the two passed data.
+
+    """
     def dis_shape(feature_shape_A, feature_shape_B, method=method):
 
       # similaritymeasures.pcm
@@ -140,21 +154,21 @@ class edge(matchDifferent):
     distance_shape = []
     distance_color = []
 
-    if type(yA) != type(yB):
+    if type(piece_A) != type(piece_B):
       raise TypeError('Input should be of the same type.')
     else:
-      if isinstance(yA, regular):
+      if isinstance(piece_A, regular):
 
         for i in range(4):
-          feature_shape_A, feature_color_A = self.process(yA.edge[i],method=method)
-          feature_shape_B, feature_color_B = self.process(yB.edge[i],method=method)
+          feature_shape_A, feature_color_A = self.process(piece_A.edge[i], method=method)
+          feature_shape_B, feature_color_B = self.process(piece_B.edge[i], method=method)
 
           distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
           distance_color.append(dis_color(feature_color_A, feature_color_B))
 
-      elif isinstance(yA, EdgeDes):
-        feature_shape_A, feature_color_A = self.process(yA,method=method)
-        feature_shape_B, feature_color_B = self.process(yB,method=method)
+      elif isinstance(piece_A, EdgeDes):
+        feature_shape_A, feature_color_A = self.process(piece_A, method=method)
+        feature_shape_B, feature_color_B = self.process(piece_B, method=method)
         distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
         distance_color.append(dis_color(feature_color_A, feature_color_B))
 
@@ -163,20 +177,21 @@ class edge(matchDifferent):
 
     return distance_shape, distance_color
 
-  #============================== compare ==============================
-  #
-  # @brief  Compare between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
-  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
-  #
-  # @param[out]       Return comparison result
-  #
-  def compare(self, yA, yB, method= 'type'):
+  def compare(self, piece_A, piece_B, method= 'type'):
+    """
+    @brief  Compare between two passed puzzle piece data.
 
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+      method: The method option.
+
+    Returns:
+      The comparison result.
+    """
     # score is to calculate the similarity while it will call the feature extraction process inside
 
-    distance_shape, distance_color = self.score(yA, yB, method = method)
+    distance_shape, distance_color = self.score(piece_A, piece_B, method=method)
 
     if (np.array(distance_shape) < self.tau_shape).all() and (np.array(distance_color) < self.tau_color).all():
       return True

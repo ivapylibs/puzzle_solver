@@ -32,26 +32,30 @@ from puzzle.piece.matcher import matcher
 #
 class matchSimilar(matcher):
 
-  #============================ matchSimilar ===========================
-  #
-  # @brief  Constructor for the puzzle piece matchSimilar class.
-  #
   def __init__(self, tau=float('inf')):
+    """
+    @brief  Constructor for the puzzle piece matchSimilar class.
+
+    Args:
+      tau: The threshold param to determine similarity.
+    """
+
     super(matchSimilar, self).__init__(tau)
 
-  #============================== compare ==============================
-  #
-  # @brief  Compare between two passed puzzle piece data.
-  #
-  # @param[in]  yA    A template instance or puzzleTemplate instance saving a piece's info.
-  # @param[in]  yB    A template instance or puzzleTemplate instance saving a piece's info.
-  #
-  # @param[out]      Return comparison result
-  #
-  def compare(self, yA, yB):
+  def compare(self, piece_A, piece_B):
+    """
+    @brief  Compare between two passed puzzle piece data.
+
+    Args:
+      piece_A: A template instance saving a piece's info.
+      piece_B: A template instance saving a piece's info.
+
+    Returns:
+      Comparison result
+    """
 
     # score is to calculate the similarity while it will call the feature extraction process inside
-    simScore = self.score(yA, yB)
+    simScore = self.score(piece_A, piece_B)
 
     return simScore > self.tau
 
