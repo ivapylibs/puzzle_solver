@@ -156,17 +156,64 @@ class board:
 
         # Based on the nearest points on the contours
 
+        # # Obtain the pts locations after subsampling
+        # def obtain_sub_pts(piece, num_samples=500):
+        #     pts = np.array(np.flip(np.where(piece.y.contour), axis=0)) + piece.rLoc.reshape(
+        #         -1, 1)
+        #     pts = pts.T
+        #     idx = np.random.choice(np.arange(len(pts)), num_samples)
+        #     pts = pts[idx]
+        #     return pts
+
         # Obtain the pts locations after subsampling
-        def obtain_sub_pts(piece, num_samples=500):
-            pts = np.array(np.flip(np.where(piece.y.contour), axis=0)) + piece.rLoc.reshape(
-                -1, 1)
-            pts = pts.T
-            idx = np.random.choice(np.arange(len(pts)), num_samples)
-            pts = pts[idx]
+        def obtain_sub_pts(piece):
+            pts = []
+            cnt = piece.y.contour_pts
+            hull = cv2.convexHull(cnt, returnPoints=False)
+            defects = cv2.convexityDefects(cnt, hull)
+
+            if defects is not None:
+                for i in range(defects.shape[0]):
+                    s, e, f, d = defects[i, 0]
+
+                    start = cnt[s][0]
+                    end = cnt[e][0]
+                    far = cnt[f][0]
+
+                    # Debug only
+                    # start = tuple(cnt[s][0])
+                    # end = tuple(cnt[e][0])
+                    # far = tuple(cnt[f][0])
+                    # cv2.line(img, start, far, [0, 255, 0], 2)
+                    # cv2.line(img, far, end, [0, 255, 0], 2)
+                    # cv2.circle(img, far, 5, [0, 0, 255], -1)
+
+                    pts.append(start)
+                    pts.append(far)
+                    pts.append(end)
+                    if i > 0:
+                        pts.append(((start + far) / 2).astype('int'))
+                        pts.append(((far + end) / 2).astype('int'))
+
+
+                # Debug only
+                # cv2.imshow('demo',img)
+                # cv2.waitKey()
+            else:
+                for i in range(hull.shape[0]):
+                    pts.append(cnt[hull[i][0]][0])
+                    if i>0:
+                        pts.append(((cnt[hull[i][0]][0]+cnt[hull[i-1][0]][0])/2).astype('int'))
+
+
+            # Remove duplicates
+            pts = np.unique(pts, axis=0)
+
             return pts
 
-        pts_A = obtain_sub_pts(self.pieces[index_A])
-        pts_B = obtain_sub_pts(self.pieces[index_B])
+
+        pts_A = self.pieces[index_A].rLoc + obtain_sub_pts(self.pieces[index_A])
+        pts_B = self.pieces[index_B].rLoc + obtain_sub_pts(self.pieces[index_B])
 
         dists = cdist(pts_A, pts_B, 'euclidean')
 
