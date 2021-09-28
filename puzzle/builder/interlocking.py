@@ -42,7 +42,7 @@ from puzzle.builder.arrangement import arrangement
 
 @dataclass
 class paramInter(paramAdj):
-    tauInter: float = 30
+    tauInter: float = 35
 
 
 #

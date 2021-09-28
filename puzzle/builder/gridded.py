@@ -45,7 +45,7 @@ from puzzle.utils.dataProcessing import updateLabel
 
 @dataclass
 class paramGrid(paramInter):
-    tauGrid: float = 30  # Not used yet
+    tauGrid: float = 35  # Not used yet
     reorder: bool = False
 
 

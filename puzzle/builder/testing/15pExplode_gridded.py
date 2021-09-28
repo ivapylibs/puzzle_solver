@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.parser.fromSketch import fromSketch
+from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -33,8 +34,8 @@ cpath = fpath.rsplit('/', 1)[0]
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 # ==[1.1] Create an improcesser to obtain the mask.
 #

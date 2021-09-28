@@ -140,7 +140,7 @@ class fromLayer(centroidMulti):
             else:
                 keep.append(i)
 
-        cnts = np.array(cnts, dtype=object)
+        cnts = np.array(cnts)
         cnts = cnts[keep]
 
         desired_cnts = []
@@ -149,9 +149,9 @@ class fromLayer(centroidMulti):
         for c in cnts:
             # Draw the contours
             # cv2.drawContours(mask, [c], -1, (0, 255, 0), 2)
+
             area = cv2.contourArea(c)
 
-            # @todo Yunzhi: this basic processing may be put somewhere else.
 
             # Filtered by the area threshold
             if area > self.params.areaThreshold:

@@ -42,7 +42,7 @@ from puzzle.builder.arrangement import arrangement, paramArrange
 
 @dataclass
 class paramAdj(paramArrange):
-    tauAdj: float = 30
+    tauAdj: float = 35
 
 
 #
