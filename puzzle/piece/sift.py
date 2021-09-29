@@ -50,7 +50,8 @@ class sift(matchSimilar):
 
         super(sift, self).__init__(tau)
 
-    def process(self, piece):
+    @staticmethod
+    def kpFeaExtract(piece):
         """
         @brief  Compute sift features from the raw puzzle data.
 
@@ -79,7 +80,18 @@ class sift(matchSimilar):
         # kp, des = sift_builder.detectAndCompute(y.image, None)
 
         piece.y.kpFea = (kp, des)
+
         return kp, des
+
+    def process(self, piece):
+        """
+        @brief  Process the puzzle piece.
+
+        Returns:
+            The processed feature.
+        """
+
+        return sift.kpFeaExtract(piece)
 
     def score(self, yA, yB):
         """

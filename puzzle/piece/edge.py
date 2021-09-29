@@ -74,6 +74,7 @@ class edge(matchDifferent):
         Returns:
             The resized feature vector.
         """
+
         y, x = np.nonzero(edge.mask)
 
         # Extract the valid pts
@@ -95,11 +96,11 @@ class edge(matchDifferent):
         @brief  Compute features from the data.
 
         Args:
-          y: An EdgeDes instance.
-          method: The method option.
+            y: An EdgeDes instance.
+            method: The method option.
 
         Returns:
-          The shape & color feature vector.
+            The shape & color feature vector.
         """
 
         feature_shape = edge.shapeFeaExtract(y, method=method)
@@ -120,7 +121,6 @@ class edge(matchDifferent):
 
         Returns:
             The shape & color distance between the two passed data.
-
         """
 
         def dis_shape(feature_shape_A, feature_shape_B, method=method):
@@ -179,10 +179,10 @@ class edge(matchDifferent):
             method: The method option.
 
         Returns:
-          The comparison result.
+            The comparison result.
         """
-        # score is to calculate the similarity while it will call the feature extraction process inside
 
+        # score is to calculate the similarity while it will call the feature extraction process inside
         distance_shape, distance_color = self.score(piece_A, piece_B, method=method)
 
         if (np.array(distance_shape) < self.tau_shape).all() and (np.array(distance_color) < self.tau_color).all():

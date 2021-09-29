@@ -38,7 +38,8 @@ class histogram(matchDifferent):
 
         super(histogram, self).__init__(tau)
 
-    def process(self, piece):
+    @staticmethod
+    def colorFeaExtract(piece):
         """
         @brief  Compute histogram from the raw puzzle data.
                 See https://opencv-tutorial.readthedocs.io/en/latest/histogram/histogram.html
@@ -56,8 +57,8 @@ class histogram(matchDifferent):
         else:
             raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
-        cv2.imshow('demo',piece.y.mask)
-        cv2.waitKey()
+        # cv2.imshow('demo', piece.y.mask)
+        # cv2.waitKey()
 
         # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
         img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
@@ -68,7 +69,18 @@ class histogram(matchDifferent):
         #                     [0, 256, 0, 256, 0, 256])
 
         piece.y.colorFea = hist
+
         return hist
+
+    def process(self, piece):
+        """
+        @brief  Process the puzzle piece.
+
+        Returns:
+            The processed feature.
+        """
+
+        return histogram.colorFeaExtract(piece)
 
     def score(self, piece_A, piece_B):
         """

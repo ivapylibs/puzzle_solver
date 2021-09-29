@@ -40,7 +40,8 @@ class moments(matchDifferent):
 
         super(moments, self).__init__(tau)
 
-    def process(self, piece):
+    @staticmethod
+    def shapeFeaExtract(piece):
         """
         @brief  Compute moments from the raw puzzle data.
                 See https://learnopencv.com/shape-matching-using-hu-moments-c-python/
@@ -51,6 +52,7 @@ class moments(matchDifferent):
         Returns:
             A list of huMoments value.
         """
+
         if issubclass(type(piece), template):
             if piece.y.shapeFea:
                 return piece.y.shapeFea
@@ -64,6 +66,16 @@ class moments(matchDifferent):
 
         piece.y.shapeFea = huMoments
         return huMoments
+
+    def process(self, piece):
+        """
+        @brief  Process the puzzle piece.
+
+        Returns:
+            The processed feature.
+        """
+
+        return moments.shapeFeaExtract(piece)
 
     def score(self, piece_A, piece_B):
         """
