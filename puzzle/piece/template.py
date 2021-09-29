@@ -41,6 +41,9 @@ class puzzleTemplate:
     contour: np.ndarray = np.array([], dtype='uint8')  # @< Template binary contour image.
     contour_pts: np.ndarray = np.array([])  # @< Template contour points.
 
+    kpFea: tuple = ()  # @< The processed keypoint feature.
+    colorFea: np.ndarray = np.array([]) # @< The processed color feature.
+    shapeFea: np.ndarray = np.array([]) # @< The processed shape feature.
 
 #
 # ========================= puzzle.piece.template =========================
@@ -48,23 +51,21 @@ class puzzleTemplate:
 
 class template:
 
-    def __init__(self, y=None, r=(0, 0), id=None, theta=0, feature=None):
+    def __init__(self, y=None, r=(0, 0), id=None, theta=0):
         """
-        @brief  Constructor for the puzzle.piece.base class.
+        @brief  Constructor for template class.
 
         Args:
-          y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
-          r: The puzzle piece location in the whole image.
-          theta: The puzzle piece aligned angle.
-          feature: The processed feature.
-          id: The puzzle piece id in the measured board. Be set up by the board.
+            y: The puzzle piece template source data, if given. It is a class instance, see puzzleTemplate.
+            r: The puzzle piece location in the whole image.
+            id: The puzzle piece id in the measured board. Be set up by the board.
+            theta: The puzzle piece aligned angle.
         """
 
         self.y = y
         self.rLoc = np.array(r)  # The default location is the top left corner
         self.id = id
         self.theta = theta  # Should be set up later by the alignment function
-        self.feature = feature  # Should be set up later by the matcher class
 
     def size(self):
         """

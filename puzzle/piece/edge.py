@@ -32,8 +32,8 @@ class edge(matchDifferent):
         @brief  Constructor for the puzzle piece edge class.
                 150 for lab space/400 for RGB space
         Args:
-          tau_shape: The threshold for the shape feature.
-          tau_color: The threshold for the color feature.
+            tau_shape: The threshold for the shape feature.
+            tau_color: The threshold for the color feature.
         """
 
         super(edge, self).__init__()
@@ -47,11 +47,11 @@ class edge(matchDifferent):
         @brief  Extract the edge shape feature from an input image of the edge.
 
         Args:
-          edge: An EdgeDes instance.
-          method: The comparison method, we have two modes: type or shape coords.
+            edge: An EdgeDes instance.
+            method: The comparison method, we have two modes: type or shape coords.
 
         Returns:
-          Shape feature.
+            Shape feature.
         """
 
         if method == 'type':
@@ -68,11 +68,11 @@ class edge(matchDifferent):
         @brief  Extract the edge color feature from an input image of the edge.
 
         Args:
-          edge:  An EdgeDes instance.
-          feaLength: The resized feature vector length setting.
+            edge:  An EdgeDes instance.
+            feaLength: The resized feature vector length setting.
 
         Returns:
-          The resized feature vector.
+            The resized feature vector.
         """
         y, x = np.nonzero(edge.mask)
 
@@ -112,21 +112,18 @@ class edge(matchDifferent):
         @brief  Compute the score between two passed puzzle piece data.
 
         Args:
-          piece_A: A template instance saving a piece's info.
-          piece_B: A template instance saving a piece's info.
+            piece_A: A template instance saving a piece's info.
+            piece_B: A template instance saving a piece's info.
+            method: We use some built-in functions in similaritymeasures
+                    (pcm/frechet_dist/area_between_two_curves/curve_length_measure/dtw)
+                    or just the types of the edges.
 
         Returns:
-          The shape & color distance between the two passed data.
+            The shape & color distance between the two passed data.
 
         """
 
         def dis_shape(feature_shape_A, feature_shape_B, method=method):
-
-            # similaritymeasures.pcm
-            # similaritymeasures.frechet_dist
-            # similaritymeasures.area_between_two_curves
-            # similaritymeasures.curve_length_measure
-            # similaritymeasures.dtw
 
             if method == 'type':
                 if feature_shape_A == feature_shape_B:
@@ -177,9 +174,9 @@ class edge(matchDifferent):
         @brief  Compare between two passed puzzle piece data.
 
         Args:
-          piece_A: A template instance saving a piece's info.
-          piece_B: A template instance saving a piece's info.
-          method: The method option.
+            piece_A: A template instance saving a piece's info.
+            piece_B: A template instance saving a piece's info.
+            method: The method option.
 
         Returns:
           The comparison result.

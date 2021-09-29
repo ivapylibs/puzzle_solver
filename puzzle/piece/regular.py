@@ -71,7 +71,6 @@ class regular(template):
         r = (0, 0)
         id = None
         theta = None
-        feature = None
 
         if len(argv) == 1:
             if isinstance(argv[0], template):
@@ -79,20 +78,19 @@ class regular(template):
                 r = argv[0].rLoc
                 id = argv[0].id
                 theta = argv[0].theta
-                feature = argv[0].feature
             else:
                 y = argv[0]
         elif len(argv) == 2:
             y = argv[0]
             r = argv[1]
-        elif len(argv) >= 3 and len(argv) <= 5:
+        elif len(argv) >= 3 and len(argv) <= 4:
             y = argv[0]
             r = argv[1]
             id = argv[2]
-        elif len(argv) > 5:
+        elif len(argv) > 4:
             raise TypeError('Too many parameters!')
 
-        super(regular, self).__init__(y=y, r=r, id=id, theta=theta, feature=feature)
+        super(regular, self).__init__(y=y, r=r, id=id, theta=theta)
 
         # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
         self.edge = [EdgeDes() for i in range(4)]

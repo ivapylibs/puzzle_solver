@@ -42,10 +42,10 @@ class sift(matchSimilar):
 
     def __init__(self, tau=5):
         """
-        @brief  Constructor for the puzzle piece moments class.
+        @brief  Constructor for the puzzle piece sift class.
 
         Args:
-          tau: The threshold param to determine similarity.
+            tau: The threshold param to determine similarity.
         """
 
         super(sift, self).__init__(tau)
@@ -55,16 +55,16 @@ class sift(matchSimilar):
         @brief  Compute sift features from the raw puzzle data.
 
         Args:
-          piece: A template instance saving a piece's info.
+            piece: A template instance saving a piece's info.
 
         Returns:
-          The sift keypoints & the sift descriptor.
+            The sift keypoints & the sift descriptor.
 
         """
 
-        if isinstance(piece, template):
-            if piece.feature is not None:
-                return piece.feature
+        if issubclass(type(piece), template):
+            if piece.y.kpFea:
+                return piece.y.kpFea
         else:
             raise ('The input type is wrong. Need a template instance.')
 
@@ -78,7 +78,7 @@ class sift(matchSimilar):
         # @todo Maybe it is wrong to put y.image here
         # kp, des = sift_builder.detectAndCompute(y.image, None)
 
-        piece.feature = (kp, des)
+        piece.y.kpFea = (kp, des)
         return kp, des
 
     def score(self, yA, yB):
@@ -103,16 +103,16 @@ class sift(matchSimilar):
 
     def compare(self, piece_A, piece_B):
         """
-        @brief Compare between two passed puzzle piece data.
-        See https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html
-        and https://scikit-image.org/docs/dev/auto_examples/transform/plot_matching.html
+        @brief  Compare between two passed puzzle piece data.
+                See https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html
+                and https://scikit-image.org/docs/dev/auto_examples/transform/plot_matching.html
 
         Args:
-          piece_A: A template instance saving a piece's info.
-          piece_B: A template instance saving a piece's info.
+            piece_A: A template instance saving a piece's info.
+            piece_B: A template instance saving a piece's info.
 
         Returns:
-          Comparison result & rotation angle(degree).
+            Comparison result & rotation angle(degree).
         """
 
         # Score is to calculate the similarity while it will call the feature extraction process inside

@@ -66,7 +66,7 @@ theBoardSol = theLayer.getState()
 print('Running through test cases. Will take a bit.')
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
+                                         theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular, reorder=True))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 
@@ -88,12 +88,12 @@ theDet.process(epImage.copy())
 theMaskSol_new = theDet.getState().x
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular))
+                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular, reorder=True))
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
 #
 
-theRegular_A = regular(theBoardSol.pieces[36])
+theRegular_A = theGrid.solution.pieces[36]
 theRegular_B = theGrid_new.solution.pieces[36]
 
 # ==[2] Create a new board

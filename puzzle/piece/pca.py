@@ -27,10 +27,10 @@ class pca(matchDifferent):
 
     def __init__(self, tau=-float('inf')):
         """
-        @brief  Constructor for the puzzle piece matchDifferent class.
+        @brief  Constructor for the puzzle piece pca class.
 
         Args:
-          tau: The threshold param to determine difference.
+            tau: The threshold param to determine difference.
         """
 
         super(pca, self).__init__(tau)
@@ -40,13 +40,13 @@ class pca(matchDifferent):
         @brief  Compute PCA feature from the raw puzzle data.
 
         Args:
-          piece: A puzzleTemplate instance saving a passed puzzle piece's info
+            piece: A puzzleTemplate instance saving a passed puzzle piece's info
 
         Returns:
-          The rotation of the main vector.
+            The rotation of the main vector.
         """
 
-        if isinstance(piece, template):
+        if issubclass(type(piece), template):
             yfeature = pca.getEig(piece.y.contour)
             theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
 
@@ -59,11 +59,11 @@ class pca(matchDifferent):
         @brief  Compute the score between two passed puzzle piece data.
 
         Args:
-          piece_A: A template instance saving a piece's info.
-          piece_B: A template instance saving a piece's info.
+            piece_A: A template instance saving a piece's info.
+            piece_B: A template instance saving a piece's info.
 
         Returns:
-          The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
+            The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
         """
 
         theta_A = self.process(piece_A)
@@ -77,13 +77,13 @@ class pca(matchDifferent):
     def getEig(img):
         """
         @brief  To find the major and minor axes of a blob.
-        See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+                See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
 
         Args:
-          img: A mask image.
+            img: A mask image.
 
         Returns:
-          A dict saving centerized points, main vectors.
+            A dict saving centerized points, main vectors.
         """
         y, x = np.nonzero(img)
         x = x - np.mean(x)
