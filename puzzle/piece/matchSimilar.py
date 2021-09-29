@@ -34,7 +34,7 @@ class matchSimilar(matcher):
         @brief  Constructor for the puzzle piece matchSimilar class.
 
         Args:
-          tau: The threshold param to determine similarity.
+            tau: The threshold param to determine similarity.
         """
 
         super(matchSimilar, self).__init__(tau)
@@ -44,11 +44,11 @@ class matchSimilar(matcher):
         @brief  Compare between two passed puzzle piece data.
 
         Args:
-          piece_A: A template instance saving a piece's info.
-          piece_B: A template instance saving a piece's info.
+            piece_A: A template instance saving a piece's info.
+            piece_B: A template instance saving a piece's info.
 
         Returns:
-          Comparison result
+            Comparison result
         """
 
         # score is to calculate the similarity while it will call the feature extraction process inside

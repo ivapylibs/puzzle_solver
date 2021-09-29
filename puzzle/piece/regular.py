@@ -64,7 +64,7 @@ class regular(template):
         @brief  Constructor for the regular puzzle piece.
 
         Args:
-          *argv: Input params.
+            *argv: Input params.
         """
 
         y = None
@@ -108,8 +108,8 @@ class regular(template):
         @brief  Set up the img of the chosen edge.
 
         Args:
-          direction: The edge to be set up.
-          mask: The edge mask image.
+            direction: The edge to be set up.
+            mask: The edge mask image.
 
         """
 
@@ -129,9 +129,8 @@ class regular(template):
         @brief  Set up the type of the chosen edge.
 
         Args:
-          direction: The edge to be set up.
-          type: The type.
-
+            direction: The edge to be set up.
+            type: The type.
         """
 
         self.edge[direction].type = type
@@ -170,11 +169,10 @@ class regular(template):
         @brief  Rotate the regualar puzzle piece
 
         Args:
-          theta: The rotation angle.
+            theta: The rotation angle.
 
         Returns:
-          The rotated regular piece.
-
+            The rotated regular piece.
         """
 
         # @todo May need to change from redo everything to focus on transformation.
@@ -188,15 +186,15 @@ class regular(template):
     def buildFromMaskAndImage(theMask, theImage, rLoc=None):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
-        instantiate a puzzle piece template.
+                instantiate a puzzle piece template.
 
         Args:
-          theMask: The individual mask.
-          theImage: The source image.
-          rLoc: The puzzle piece location in the whole image.
+            theMask: The individual mask.
+            theImage: The source image.
+            rLoc: The puzzle piece location in the whole image.
 
         Returns:
-          The puzzle piece instance.
+            The puzzle piece instance.
         """
 
         thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc)
