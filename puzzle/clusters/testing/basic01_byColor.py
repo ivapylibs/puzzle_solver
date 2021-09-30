@@ -16,9 +16,13 @@
 
 # ==[0] Prep environment
 import os
-
+import numpy as np
+import matplotlib.pyplot as plt
 import cv2
 import improcessor.basic as improcessor
+
+from puzzle.piece.template import template
+from puzzle.board import board
 
 from puzzle.clusters.byColor import byColor
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
@@ -28,46 +32,36 @@ from puzzle.piece.regular import regular
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-# ==[1] Read the source image and template.
-#
-theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
-theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-
-theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
-
-# ==[1.1] Create an improcesser to obtain the mask.
+# ==[1] Create puzzle pieces.
 #
 
-improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+theBoard = board()
+for i in range(3):
+    squarePiece_A = template.buildSquare(100, color=(255, 0, 0), rLoc=(200, i*150+140))
+    theBoard.addPiece(squarePiece_A)
 
-theDet = fromSketch(improc)
-theDet.process(theMaskSol_src.copy())
-theMaskSol = theDet.getState().x
+    squarePiece_B = template.buildSquare(100, color=(0, 255, 0), rLoc=(600, i*150+140))
+    theBoard.addPiece(squarePiece_B)
 
-# ==[1.2] Extract info from theImage & theMask to obtain a board instance
-#
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000, pieceConstructor=regular))
+    squarePiece_C = template.buildSquare(100, color=(0, 255, 255), rLoc=(1000, i*150+140))
+    theBoard.addPiece(squarePiece_C)
 
-theLayer.process(theImageSol, theMaskSol)
-theBoardSol = theLayer.getState()
-
-# plt.show()
+theBoard.display(CONTOUR_DISPLAY=False, ID_DISPLAY=True)
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
 
-theColorCluster = byColor(theBoardSol)
+theColorCluster = byColor(theBoard)
 theColorCluster.process()
 
 # ==[3] Display the extracted features.
 #
 
-print('Should see 15 pieces, each of them will have 4 features.')
+print('Should see 9 pieces of 3 different colors. They are clustered into 3 groups.')
 print('The number of pieces:', len(theColorCluster.feature))
-print('The number of features for each piece:', len(theColorCluster.feature[0]))
+print('The cluster label:', theColorCluster.feaLabel)
+
+plt.show()
 
 #
 # ============================ basic01_byColor ===========================

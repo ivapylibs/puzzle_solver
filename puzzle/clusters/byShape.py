@@ -14,37 +14,49 @@
 
 # ===== Environment / Dependencies
 #
-
+import numpy as np
 from puzzle.board import board
-from puzzle.piece.edge import edge
+from puzzle.piece.moments import moments
 
+from puzzle.piece.histogram import histogram
+import sklearn.cluster
+
+import scipy.cluster.hierarchy as hcluster
 
 #
 # ================================ puzzle.clusters.byShape ================================
 #
 class byShape(board):
 
-    # =============================== puzzle.clusters.byShape ==============================
-    #
-    # @brief  Constructor for the byShape class.
-    #
-    #
-    def __init__(self, thePuzzle, extractor=edge()):
+    def __init__(self, thePuzzle, extractor=moments()):
+        """
+        @brief  Constructor for the byShape class.
+
+        Args:
+            thePuzzle: The input puzzle board.
+            extractor: A matcher instance.
+        """
+
         super(byShape, self).__init__(thePuzzle)
 
         self.feaExtractor = extractor
 
-        # A dict of id & feature for all the puzzle pieces
-        self.feature = {}
+        # A list of feature for all the puzzle pieces
+        self.feature = []
+        self.feaLabel = []
 
-    # =========================== process ==========================
-    #
-    # @brief  Extract features from the data.
-    #
-    #
     def process(self):
-        for piece in self.pieces:
-            self.feature[piece.id] = [self.feaExtractor.shapeFeaExtract(piece.edge[i]) for i in range(len(piece.edge))]
+        """
+        @ brief Extract shape features from the data.
+        """
 
+        for piece in self.pieces:
+            self.feature.append(self.feaExtractor.shapeFeaExtract(piece).flatten())
+        self.feature = np.array(self.feature)
+
+        # From 0
+        yhat = hcluster.fclusterdata(self.feature, 0.5, criterion="distance")-1
+
+        self.feaLabel = yhat
 #
 # ================================ puzzle.clusters.byShape ================================
