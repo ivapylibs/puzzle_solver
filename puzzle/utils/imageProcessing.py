@@ -27,11 +27,11 @@ def cropImage(image, template):
     @brief  Crop and resize a cover image, which has the same shape with the mask.
 
     Args:
-      image: The source image.
-      template: The mask image.
+        image: The source image.
+        template: The mask image.
 
     Returns:
-      The resized image.
+        The resized image.
     """
 
     template_x, template_y = template.shape[1], template.shape[0]
@@ -61,11 +61,11 @@ def rotate_im(image, angle, mask=None):
     @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
 
     Args:
-      image: The input image.
-      angle: The rotated angle.
+        image: The input image.
+        angle: The rotated angle.
 
     Returns:
-      The rotated image & the rotation matrix & padding_left & padding_top.
+        The rotated image & the rotation matrix & padding_left & padding_top.
     """
 
     image_height = image.shape[0]
