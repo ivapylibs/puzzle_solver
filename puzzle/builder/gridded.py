@@ -95,12 +95,12 @@ class gridded(interlocking):
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
         x_thresh = np.mean([piece.y.size[0] for piece in self.solution.pieces]) / 2
-        x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")
-        x_label = updateLabel(x_list, x_label)
+        x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance") # from 1
+        x_label = updateLabel(x_list, x_label) # from 0
 
         y_thresh = np.mean([piece.y.size[1] for piece in self.solution.pieces]) / 2
         y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
-        y_label = updateLabel(y_list, y_label)
+        y_label = updateLabel(y_list, y_label) # from 0
 
         # Reorder the pieces, so the id will correspond to the grid location
         if reorder:
