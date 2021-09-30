@@ -53,6 +53,9 @@ class EdgeDes:
     image: np.ndarray = np.array([])  # To save the image of the edge.
     mask: np.ndarray = np.array([])  # To save the mask of the edge.
 
+    colorFea: np.ndarray = np.array([])  # @< The processed color feature.
+    shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
+
 
 #
 # ================================ puzzle.piece.regular ================================

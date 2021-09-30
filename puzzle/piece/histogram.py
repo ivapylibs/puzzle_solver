@@ -49,7 +49,7 @@ class histogram(matchDifferent):
         """
 
         if issubclass(type(piece), template):
-            if piece.y.colorFea:
+            if len(piece.y.colorFea) > 0:
                 return piece.y.colorFea
         else:
             raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')

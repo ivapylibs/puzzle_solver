@@ -54,18 +54,31 @@ class edge(matchDifferent):
             Shape feature.
         """
 
-        shapeFea = []
+        if not issubclass(type(piece), regular):
+            raise ('The input type is wrong. Need a regular instance.')
+
+        shapeFeaList = []
         for i in range(4):
-            if method == 'type':
-                shapeFea.append(piece.edge[i].type)
+
+            # Check if the variable is an empty list
+            if (isinstance(piece.edge[i].shapeFea, list) and len(piece.edge[i].shapeFea) > 0) \
+                    or piece.edge[i].shapeFea:
+                shapeFeaList.append(piece.edge[i].shapeFea)
             else:
-                y, x = np.nonzero(piece.edge[i].mask)
-                coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
-                shapeFea.append(coords)
 
-        shapeFea = np.array(shapeFea)
+                if method == 'type':
+                    piece.edge[i].shapeFea = piece.edge[i].type
+                    shapeFeaList.append(piece.edge[i].type)
+                else:
+                    y, x = np.nonzero(piece.edge[i].mask)
+                    coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
-        return shapeFea
+                    piece.edge[i].shapeFea = coords
+                    shapeFeaList.append(coords)
+
+        shapeFeaList = np.array(shapeFeaList)
+
+        return shapeFeaList
 
     @staticmethod
     def colorFeaExtract(piece, feaLength=300):
@@ -80,25 +93,37 @@ class edge(matchDifferent):
             The resized feature vector.
         """
 
-        feaResize = []
+        if not issubclass(type(piece), regular):
+            raise ('The input type is wrong. Need a regular instance.')
+
+        colorFeaResizeList = []
         for i in range(4):
-            y, x = np.nonzero(piece.edge[i].mask)
 
-            # Extract the valid pts
-            pts = piece.edge[i].image[y, x]
+            if piece.edge[i].colorFea:
+                # if len(piece.edge[i].colorFea)>0:
+                colorFeaResizeList.append(piece.edge[i].colorFea)
+            else:
+                y, x = np.nonzero(piece.edge[i].mask)
 
-            # Expand dim for further processing
-            feaOri = np.expand_dims(pts, axis=0)
+                # Extract the valid pts
+                pts = piece.edge[i].image[y, x]
 
-            # Resize to a unit length
-            feaResize.append(cv2.resize(feaOri, (feaLength, 1)).flatten())
+                # Expand dim for further processing
+                colorFeaOri = np.expand_dims(pts, axis=0)
 
-            # # # @todo Yunzhi: May need to double check the color space
-            # feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
+                # Resize to a unit length
+                colorFeaResize = cv2.resize(colorFeaOri, (feaLength, 1)).flatten()
 
-        feaResize = np.array(feaResize, dtype='float32')
+                # # @todo Yunzhi: May need to double check the color space
+                # colorFeaResize = cv2.cvtColor(colorFeaResize, cv2.COLOR_RGB2Lab)
 
-        return feaResize
+                piece.edge[i].colorFea = colorFeaResize
+
+                colorFeaResizeList.append(colorFeaResize)
+
+        colorFeaResizeList = np.array(colorFeaResizeList, dtype='float32')
+
+        return colorFeaResizeList
 
     def process(self, piece, method=None):
         """
@@ -112,10 +137,10 @@ class edge(matchDifferent):
             The shape & color feature vectors.
         """
 
-        feature_shape = edge.shapeFeaExtract(piece, method=method)
-        feature_color = edge.colorFeaExtract(piece)
+        shapeFea = edge.shapeFeaExtract(piece, method=method)
+        colorFea = edge.colorFeaExtract(piece)
 
-        return list(zip(feature_shape, feature_color))
+        return list(zip(shapeFea, colorFea))
 
     def score(self, piece_A, piece_B, method='type'):
         """
@@ -132,26 +157,26 @@ class edge(matchDifferent):
             The shape & color distance between the two passed data.
         """
 
-        def dis_shape(feature_shape_A, feature_shape_B, method=method):
+        def dis_shape(shapeFea_A, shapeFea_B, method=method):
 
             if method == 'type':
-                if feature_shape_A == feature_shape_B:
+                if shapeFea_A == shapeFea_B:
                     distance = 0
                 else:
                     distance = float('inf')
             else:
-                distance = method(feature_shape_A, feature_shape_B)
+                distance = method(shapeFea_A, shapeFea_B)
             # For dtw
             if isinstance(distance, tuple):
                 distance = distance[0]
             return distance
 
-        def dis_color(feature_color_A, feature_color_B):
+        def dis_color(colorFea_A, colorFea_B):
 
             # distance = np.mean(np.sum((feature_color_A[0] - feature_color_B[0]) ** 2, axis=1) ** (1. / 2))
-            feature_color_A = feature_color_A.reshape(-1, 3)
-            feature_color_B = feature_color_B.reshape(-1, 3)
-            distance = np.mean(np.sum((feature_color_A - feature_color_B) ** 2, axis=1) ** (1. / 2))
+            colorFea_A = colorFea_A.reshape(-1, 3)
+            colorFea_B = colorFea_B.reshape(-1, 3)
+            distance = np.mean(np.sum((colorFea_A - colorFea_B) ** 2, axis=1) ** (1. / 2))
 
             return distance
 

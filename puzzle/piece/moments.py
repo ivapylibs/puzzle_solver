@@ -54,7 +54,7 @@ class moments(matchDifferent):
         """
 
         if issubclass(type(piece), template):
-            if piece.y.shapeFea:
+            if len(piece.y.shapeFea) > 0:
                 return piece.y.shapeFea
         else:
             raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
