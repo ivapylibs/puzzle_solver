@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.regular import regular, EdgeDes
+from puzzle.piece.regular import regular
 
 
 #
@@ -42,7 +42,7 @@ class edge(matchDifferent):
         self.tau_color = tau_color
 
     @staticmethod
-    def shapeFeaExtract(edge, method=None):
+    def shapeFeaExtract(piece, method=None):
         """
         @brief  Extract the edge shape feature from an input image of the edge.
 
@@ -54,16 +54,21 @@ class edge(matchDifferent):
             Shape feature.
         """
 
-        if method == 'type':
-            shapeFea = edge.type
-        else:
-            y, x = np.nonzero(edge.mask)
-            shapeFea = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
+        shapeFea = []
+        for i in range(4):
+            if method == 'type':
+                shapeFea.append(piece.edge[i].type)
+            else:
+                y, x = np.nonzero(piece.edge[i].mask)
+                coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
+                shapeFea.append(coords)
+
+        shapeFea = np.array(shapeFea)
 
         return shapeFea
 
     @staticmethod
-    def colorFeaExtract(edge, feaLength=300):
+    def colorFeaExtract(piece, feaLength=300):
         """
         @brief  Extract the edge color feature from an input image of the edge.
 
@@ -75,38 +80,42 @@ class edge(matchDifferent):
             The resized feature vector.
         """
 
-        y, x = np.nonzero(edge.mask)
+        feaResize = []
+        for i in range(4):
+            y, x = np.nonzero(piece.edge[i].mask)
 
-        # Extract the valid pts
-        pts = edge.image[y, x]
+            # Extract the valid pts
+            pts = piece.edge[i].image[y, x]
 
-        # Expand dim for further processing
-        feaOri = np.expand_dims(pts, axis=0)
+            # Expand dim for further processing
+            feaOri = np.expand_dims(pts, axis=0)
 
-        # Resize to a unit length
-        feaResize = cv2.resize(feaOri, (feaLength, 1))
+            # Resize to a unit length
+            feaResize.append(cv2.resize(feaOri, (feaLength, 1)).flatten())
 
-        # # # @todo Yunzhi: May need to double check the color space
-        # feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
+            # # # @todo Yunzhi: May need to double check the color space
+            # feaResize = cv2.cvtColor(feaResize, cv2.COLOR_RGB2Lab)
 
-        return feaResize.astype('float32')
+        feaResize = np.array(feaResize, dtype='float32')
 
-    def process(self, y, method=None):
+        return feaResize
+
+    def process(self, piece, method=None):
         """
         @brief  Compute features from the data.
 
         Args:
-            y: An EdgeDes instance.
+            piece: A puzzle piece instance.
             method: The method option.
 
         Returns:
-            The shape & color feature vector.
+            The shape & color feature vectors.
         """
 
-        feature_shape = edge.shapeFeaExtract(y, method=method)
-        feature_color = edge.colorFeaExtract(y)
+        feature_shape = edge.shapeFeaExtract(piece, method=method)
+        feature_color = edge.colorFeaExtract(piece)
 
-        return [feature_shape, feature_color]
+        return list(zip(feature_shape, feature_color))
 
     def score(self, piece_A, piece_B, method='type'):
         """
@@ -139,7 +148,10 @@ class edge(matchDifferent):
 
         def dis_color(feature_color_A, feature_color_B):
 
-            distance = np.mean(np.sum((feature_color_A[0] - feature_color_B[0]) ** 2, axis=1) ** (1. / 2))
+            # distance = np.mean(np.sum((feature_color_A[0] - feature_color_B[0]) ** 2, axis=1) ** (1. / 2))
+            feature_color_A = feature_color_A.reshape(-1, 3)
+            feature_color_B = feature_color_B.reshape(-1, 3)
+            distance = np.mean(np.sum((feature_color_A - feature_color_B) ** 2, axis=1) ** (1. / 2))
 
             return distance
 
@@ -151,18 +163,11 @@ class edge(matchDifferent):
         else:
             if isinstance(piece_A, regular):
 
+                ret_A = self.process(piece_A, method=method)
+                ret_B = self.process(piece_B, method=method)
                 for i in range(4):
-                    feature_shape_A, feature_color_A = self.process(piece_A.edge[i], method=method)
-                    feature_shape_B, feature_color_B = self.process(piece_B.edge[i], method=method)
-
-                    distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
-                    distance_color.append(dis_color(feature_color_A, feature_color_B))
-
-            elif isinstance(piece_A, EdgeDes):
-                feature_shape_A, feature_color_A = self.process(piece_A, method=method)
-                feature_shape_B, feature_color_B = self.process(piece_B, method=method)
-                distance_shape.append(dis_shape(feature_shape_A, feature_shape_B, method=method))
-                distance_color.append(dis_color(feature_color_A, feature_color_B))
+                    distance_shape.append(dis_shape(ret_A[i][0], ret_B[i][0], method=method))
+                    distance_color.append(dis_color(ret_A[i][1], ret_B[i][1]))
 
             else:
                 raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
