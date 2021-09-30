@@ -12,12 +12,9 @@
 #
 # ================================ puzzle.piece.histogram ================================
 
-import math
-
 # ===== Environment / Dependencies
 #
 import cv2
-import numpy as np
 
 from puzzle.piece.matchDifferent import matchDifferent
 from puzzle.piece.template import template
@@ -62,10 +59,10 @@ class histogram(matchDifferent):
 
         # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
         img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
-        hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, [180, 256], [0, 180, 0, 256])
+        hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, [180 / 3, 256 / 2], [0, 180, 0, 256])
         cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
-        # hist = cv2.calcHist([piece.y.image], [0, 1, 2], piece.y.mask, [32, 32, 32],
+        # hist = cv2.calcHist([piece.y.image], [0, 1, 2], piece.y.mask, [8, 8, 8],
         #                     [0, 256, 0, 256, 0, 256])
 
         piece.y.colorFea = hist
