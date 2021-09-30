@@ -419,8 +419,10 @@ class template:
         y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
         y.rcoords = np.array(y.rcoords)
 
-        y.image = np.zeros((size, size, 3), dtype=np.uint8)
-        y.image = cv2.rectangle(y.image, (0, 0), (size - 1, size - 1), color=color, thickness=-1)
+        # y.image = np.zeros((size, size, 3), dtype=np.uint8)
+        # y.image = cv2.rectangle(y.image, (0, 0), (size - 1, size - 1), color=color, thickness=-1)
+        y.image = np.full((size, size, 3), color, dtype=np.uint8)
+
         y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
         if not rLoc:
