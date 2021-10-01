@@ -64,7 +64,7 @@ theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
                                              theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular,
                                                                  reorder=True))
 
-epImage, epBoard = theGrid_src.explodedPuzzle(dx=100, dy=100)
+epImage, _ = theGrid_src.explodedPuzzle(dx=100, dy=100)
 
 # ==[2.1] Create a new Grid instance from the images
 #

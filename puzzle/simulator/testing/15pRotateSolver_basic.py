@@ -81,7 +81,6 @@ _, epBoard = theGrid_new.swapPuzzle()
 
 gt_rotation = []
 for i in range(epBoard.size()):
-    # gt_rotation.append(60)
     gt_rotation.append(np.random.randint(0, 70))
     epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
 
