@@ -65,7 +65,7 @@ def rotate_im(image, angle, mask=None):
         angle: The rotated angle.
 
     Returns:
-        The rotated image & the rotation matrix & padding_left & padding_top.
+        The rotated image (cropped) & The rotated image (not cropped) & the rotation matrix & padding_left & padding_top.
     """
 
     image_height = image.shape[0]
@@ -113,6 +113,7 @@ def rotate_im(image, angle, mask=None):
 
     final_image = rotated_image[y:y + h, x:x + w]
 
+    # Maybe this step is redundant
     final_image = cv2.copyMakeBorder(final_image,
                                      top=2,
                                      bottom=2,
@@ -123,7 +124,7 @@ def rotate_im(image, angle, mask=None):
                                      )
     # cv2.imshow('dst', final_image)
     # cv2.waitKey()
-    return final_image, rotated_image, transform_matrix, padding_left - x + 2, padding_top - y + 2
+    return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
 
 #
 # ====================== puzzle.utils.imageProcessing ======================

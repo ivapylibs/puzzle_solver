@@ -114,7 +114,7 @@ class template:
             img: A contour image.
 
         Returns:
-            The aligned angle (rad).
+            The aligned angle (degree).
 
         """
 
@@ -141,7 +141,7 @@ class template:
             'v2': v2,
         }
 
-        theta = np.arctan2(dict['v1'][1], dict['v1'][0])
+        theta = np.rad2deg(np.arctan2(dict['v1'][1], dict['v1'][0]))
 
         # # Debug only
         #
@@ -331,8 +331,8 @@ class template:
         else:
             thePiece = template(y, rLoc)
 
-        # Set up the rotation
-        thePiece.theta = template.getEig(thePiece.y.mask)
+        # Set up the rotation (with theta, we can correct the rotation)
+        thePiece.theta = -template.getEig(thePiece.y.mask)
 
         return thePiece
 
@@ -368,7 +368,10 @@ class template:
 
         thePiece.y.appear = thePiece.y.image[thePiece.y.rcoords[1], thePiece.y.rcoords[0], :]
 
-        # @note If we simply transform the original info, the result may be inaccurate?
+        '''
+        @todo   If we simply transform the original info, the result may be inaccurate?
+                May still worth it. 
+        '''
 
         # Create a contour of the mask
         cnts = cv2.findContours(thePiece.y.mask, cv2.RETR_TREE,
@@ -379,10 +382,10 @@ class template:
         cv2.drawContours(thePiece.y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
         # Might be negative
-        thePiece.rLoc = self.rLoc - np.array([x_pad, y_pad])
+        thePiece.rLoc = self.rLoc - np.array([np.sum(x_pad), np.sum(y_pad)])
 
         # Set up the new rotation
-        thePiece.theta = self.theta + np.deg2rad(theta)
+        thePiece.theta = self.theta + theta
 
         return thePiece
 

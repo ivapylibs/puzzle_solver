@@ -146,10 +146,10 @@ class manager(fromLayer):
 
                 # Some matchers calculate the rotation as well
                 if isinstance(ret, tuple):
-                    self.pAssignments_rotation.append(np.rad2deg(ret[1]))
+                    self.pAssignments_rotation.append(ret[1])
                 else:
                     self.pAssignments_rotation.append(
-                        np.rad2deg(self.solution.pieces[assignment[1]].theta - self.bMeas.pieces[assignment[0]].theta))
+                        self.solution.pieces[assignment[1]].theta - self.bMeas.pieces[assignment[0]].theta)
 
                 pFilteredAssignments.append(assignment)
 

@@ -152,7 +152,7 @@ class sift(matchSimilar):
                                        residual_threshold=2, max_trials=100)
         outliers = inliers == False
 
-        return distance > self.tau, model_robust.rotation
+        return distance > self.tau, np.rad2deg(model_robust.rotation)
 
 #
 # ================================ puzzle.piece.sift ================================
