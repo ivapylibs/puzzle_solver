@@ -16,17 +16,20 @@
 #
 # ================================ puzzle.utils.sideExtractor ================================
 
+# ===== Environment / Dependencies
+#
+
 from functools import partial
 
 import cv2
 import matplotlib.pyplot as plt
-# ===== Environment / Dependencies
-#
 import numpy as np
 import scipy
 import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
 from sklearn.cluster import KMeans
+
+from puzzle.utils.imageProcessing import rotate_im
 
 # ===== Helper Elements
 #
@@ -721,12 +724,22 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
     mask = puzzleTemplate.mask.copy()
     contour = puzzleTemplate.contour.copy()
+    image = puzzleTemplate.image.copy()
+
+    # # Debug only
+    # cv2.imshow('mask',mask)
+    # cv2.imshow('contour',contour)
+    # cv2.imshow('image',image)
+    # cv2.waitKey()
 
     # To enable cornerHarris to function properly, create an enlarged image
     mask_enlarged = np.zeros((mask.shape[0] + 20, mask.shape[1] + 20), dtype='uint8')
     contour_enlarged = mask_enlarged.copy()
+    image_enlarged = np.zeros((image.shape[0] + 20, image.shape[1] + 20, 3), dtype='uint8')
+
     mask_enlarged[10:mask.shape[0] + 10, 10:mask.shape[1] + 10] = mask
     contour_enlarged[10:contour.shape[0] + 10, 10:contour.shape[1] + 10] = contour
+    image_enlarged[10:image.shape[0] + 10, 10:image.shape[1] + 10, :] = image
 
     harris = cv2.cornerHarris(mask_enlarged, params['harris_blocksize'], params['harris_ksize'], 0.04)
 
@@ -755,24 +768,51 @@ def sideExtractor(puzzleTemplate, **kwargs):
         raise RuntimeError('No rectangle found')
 
     # @todo Rotate to get a horizontal puzzle piece
-    # if intersections[1, 0] == intersections[0, 0]:
-    #     rotation_angle = 90
-    # else:
-    #     rotation_angle = np.arctan2(intersections[1, 1] - intersections[0, 1],
-    #                                 intersections[1, 0] - intersections[0, 0]) * 180 / np.pi
+    if intersections[1, 0] == intersections[0, 0]:
+        rotation_angle = 90
+    else:
+        rotation_angle = np.arctan2(intersections[1, 1] - intersections[0, 1],
+                                    intersections[1, 0] - intersections[0, 0]) * 180 / np.pi
+
+    out_dict['rotation_angle'] = rotation_angle
 
     edges = contour_enlarged
 
     # Rotate all images
-    # # @todo Rotate
+    # @todo Rotate
     # edges, M = rotate(edges, rotation_angle)
-    out_dict['edges'] = edges[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
 
-    # # @todo Rotate
-    # # Rotate intersection points
-    # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(np.int)
+    edges, mask_temp, M, x_pad, y_pad = rotate_im(edges, rotation_angle)
+    theImage, _, _, _, _ = rotate_im(image_enlarged, rotation_angle, mask=mask_temp)
+    theMask, _, _, _, _ = rotate_im(mask_enlarged, rotation_angle, mask=mask_temp)
 
-    yb, xb = compute_barycentre(mask_enlarged)
+    # # Debug only
+    # masked = cv2.bitwise_and(theImage, theImage, mask=edges)
+    # cv2.imshow('demo', edges)
+    # cv2.imshow('demo2', theImage)
+    # cv2.imshow('demo3', masked)
+    # cv2.imshow('demo4', theMask)
+    # cv2.waitKey()
+
+    # With Rotation
+    # @todo I do not think we need to recover the original image. Not necessary to do that.
+    out_dict['edges'] = edges
+
+    # @todo Rotate
+    # Rotate intersection points
+
+    intersections = np.array(
+        np.round([M.dot((point[0] + x_pad[0], point[1] + y_pad[0], 1)) for point in intersections])).astype(np.int)
+
+    # With Rotation
+    intersections = intersections + np.array([x_pad[1] + x_pad[2], y_pad[1] + y_pad[2]])
+    yb, xb = compute_barycentre(theMask)
+
+    # # Debug only
+    # for point in intersections:
+    #     cv2.circle(theMask,point,3,0,10)
+    # cv2.imshow('demo4', theMask)
+    # cv2.waitKey()
 
     # # Refine the corner detections
     corners = corner_detection(edges, intersections, (xb, yb), params['corner_refine_rect_size'], show=False)
@@ -782,7 +822,31 @@ def sideExtractor(puzzleTemplate, **kwargs):
     line_params = compute_line_params(corners)
     class_image = shape_classification(edges, line_params, params['shape_classification_distance_threshold'],
                                        params['shape_classification_nhs'])
-    out_dict['class_image'] = class_image[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
+    out_dict['class_image'] = class_image
+
+    # # Archived without rotation
+    #
+    # edges = contour_enlarged
+    # # Rotate all images
+    # # # @todo Rotate
+    # # edges, M = rotate(edges, rotation_angle)
+    # out_dict['edges'] = edges[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
+    #
+    # # # @todo Rotate
+    # # # Rotate intersection points
+    # # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(np.int)
+    #
+    # yb, xb = compute_barycentre(mask_enlarged)
+    #
+    # # # Refine the corner detections
+    # corners = corner_detection(edges, intersections, (xb, yb), params['corner_refine_rect_size'], show=False)
+    # corners = order_corners(corners)
+    #
+    # # corners = intersections
+    # line_params = compute_line_params(corners)
+    # class_image = shape_classification(edges, line_params, params['shape_classification_distance_threshold'],
+    #                                    params['shape_classification_nhs'])
+    # out_dict['class_image'] = class_image[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
 
     inout = compute_inout(class_image, line_params, (xb, yb), params['inout_distance_threshold'])
     out_dict['inout'] = inout

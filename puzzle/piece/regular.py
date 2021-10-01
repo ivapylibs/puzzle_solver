@@ -49,8 +49,9 @@ class EdgeDirection(Enum):
 
 
 class EdgeDes:
+    # Here we save the rotated edges
     type: int = EdgeType.UNDEFINED  # To save the type: in/out/flat.
-    image: np.ndarray = np.array([])  # To save the image of the edge.
+    image: np.ndarray = np.array([])  # To save the whole image of the edge.
     mask: np.ndarray = np.array([])  # To save the mask of the edge.
 
     colorFea: np.ndarray = np.array([])  # @< The processed color feature.
@@ -103,29 +104,9 @@ class regular(template):
         self.rectangle_pts = None
         self.filtered_harris_pts = None
         self.simple_harris_pts = None
+        self.theta = None
 
         self._process()
-
-    def setEdgeImg(self, direction, mask):
-        """
-        @brief  Set up the img of the chosen edge.
-
-        Args:
-            direction: The edge to be set up.
-            mask: The edge mask image.
-
-        """
-
-        # image_masked = cv2.bitwise_and(self.y.image, self.y.image, mask=mask)
-
-        # @todo Yunzhi: Not sure if average filter is necessary or not
-        # Apply an average filter
-        # kernel = np.ones((5, 5), np.float32)/25
-        # dst = cv2.filter2D(self.y.image, -1, kernel)
-        dst = self.y.image
-
-        self.edge[direction].image = dst
-        self.edge[direction].mask = mask
 
     def setEdgeType(self, direction, type):
         """
@@ -159,10 +140,15 @@ class regular(template):
         # Set up the type/img of the chosen edge
         for direction in EdgeDirection:
             self.setEdgeType(direction.value, out_dict['inout'][direction.value])
-            self.setEdgeImg(direction.value, out_dict['side_images'][direction.value])
+
+            self.edge[direction.value].image = out_dict['class_image']
+            self.edge[direction.value].mask = out_dict['side_images'][direction.value]
 
         # @note Just for display for now
-        self.class_image = out_dict['class_image']
+        self.class_image = out_dict['class_image']  # with four edges
+        self.theta = out_dict['rotation_angle']
+
+        # Not rotated yet
         self.rectangle_pts = out_dict['rectangle_pts']
         self.filtered_harris_pts = out_dict['filtered_harris_pts']
         self.simple_harris_pts = out_dict['simple_harris_pts']

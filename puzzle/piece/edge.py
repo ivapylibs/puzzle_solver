@@ -99,8 +99,7 @@ class edge(matchDifferent):
         colorFeaResizeList = []
         for i in range(4):
 
-            if piece.edge[i].colorFea:
-                # if len(piece.edge[i].colorFea)>0:
+            if len(piece.edge[i].colorFea) > 0:
                 colorFeaResizeList.append(piece.edge[i].colorFea)
             else:
                 y, x = np.nonzero(piece.edge[i].mask)
