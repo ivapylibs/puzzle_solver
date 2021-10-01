@@ -25,7 +25,6 @@ import numpy as np
 
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.piece.sift import sift
 from puzzle.utils.imageProcessing import cropImage
@@ -55,27 +54,16 @@ theDet = fromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-# ==[1.2] Extract info from theImage & theMask to obtain a board instance
-#
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
-theLayer.process(theImageSol, theMaskSol)
-theBoardSol = theLayer.getState()
-
-# ==[1.3] Create a Grid instance to reorder the puzzle board
-#
-
-theGrid_src = gridded(theBoardSol, paramGrid(reorder=True))
-
 # ==[2] Create a Grid instance.
 #
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
+theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
 
 # ==[2.1] Explode it into a new board.
 #
-_, epBoard = theGrid.explodedPuzzle(dx=400, dy=400)
+_, epBoard = theGrid_src.explodedPuzzle(dx=400, dy=400)
 
 # ==[2.2] Randomly swap the puzzle pieces.
 #
