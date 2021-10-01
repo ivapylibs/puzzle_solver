@@ -358,6 +358,10 @@ class board:
                     cv2.putText(theImage, str(piece.id), pos, font,
                                 font_scale, COLOR, 2, cv2.LINE_AA)
 
+            # For better segmentation result, we need some black paddings
+            theImage_enlarged = np.zeros((lengths[1] + 4, lengths[0] + 4, 3), dtype='uint8')
+            theImage_enlarged[2:-2, 2:-2, :] = theImage
+            theImage = theImage_enlarged
         return theImage
 
     def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True):
