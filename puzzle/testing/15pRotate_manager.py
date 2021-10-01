@@ -134,8 +134,6 @@ axarr[0].title.set_text('Measurement')
 axarr[1].imshow(bsolImage)
 axarr[1].title.set_text('Solution')
 
-plt.show()
-
 # Show assignment
 print('The first index refers to the measured board while the second one refers to the solution board. Note that '
       'the index in different boards may refer to different puzzle pieces.')
@@ -147,5 +145,6 @@ print(np.sort(np.array(theManager.pAssignments_rotation).astype('int')))
 print('The gt rotation angles(degree):')
 print(np.sort(np.array(gt_rotation).astype('int')))
 
+plt.show()
 #
 # ============================= 15pRotate_manager =============================

@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-# ============================= 15p_manager =============================
+# ============================= 15pEdge_manager =============================
 #
 # @brief    Tests the core functionality of the puzzle.manager class. The manager
 #           will have access to measurement and solution images & masks to generate
 #           associations between them. (15p img)
 #
 #
-# ============================= 15p_manager =============================
+# ============================= 15pEdge_manager =============================
 #
-# @file     15p_manager.py
+# @file     15pEdge_manager.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/28 [created]
 #
-# ============================= 15p_manager =============================
+# ============================= 15pEdge_manager =============================
 
 import os
 
@@ -125,5 +125,6 @@ num_failure = num_failure + theManager.bMeas.size() - len(theManager.pAssignment
 print('Num. of failure cases:', num_failure)
 
 plt.show()
+
 #
-# ============================= 15p_manager =============================
+# ============================= 15pEdge_manager =============================

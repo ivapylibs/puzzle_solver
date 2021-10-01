@@ -158,8 +158,8 @@ theSim = basic(theGrid_new.solution)
 
 plt.ion()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 FINISHED = False
 i = 0

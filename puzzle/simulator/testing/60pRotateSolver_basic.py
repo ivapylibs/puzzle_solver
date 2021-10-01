@@ -195,7 +195,7 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/60pRotateSolver_step.gif', mode='I', fps=1) as writer:
+    with imageio.get_writer(cpath + f'/data/60pRotateSolver.gif', mode='I', fps=1) as writer:
         filename_list = glob.glob(cpath + f'/data/60pRotateSolver_step*.png')
         filename_list.sort()
         for filename in filename_list:
