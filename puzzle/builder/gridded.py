@@ -34,8 +34,8 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 
-from puzzle.board import board
 from puzzle.builder.arrangement import arrangement
+from puzzle.builder.board import board
 from puzzle.builder.interlocking import interlocking, paramInter
 from puzzle.utils.dataProcessing import updateLabel
 

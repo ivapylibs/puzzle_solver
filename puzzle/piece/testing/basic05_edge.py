@@ -23,7 +23,7 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import similaritymeasures
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.parser.fromSketch import fromSketch

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.piece.edge import edge
 from puzzle.piece.moments import moments
 

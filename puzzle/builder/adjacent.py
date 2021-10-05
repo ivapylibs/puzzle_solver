@@ -33,8 +33,8 @@ from dataclasses import dataclass
 #
 import numpy as np
 
-from puzzle.board import board
 from puzzle.builder.arrangement import arrangement, paramArrange
+from puzzle.builder.board import board
 
 
 # ===== Helper Elements

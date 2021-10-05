@@ -27,7 +27,7 @@ import cv2
 import numpy as np
 from trackpointer.centroidMulti import centroidMulti
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.piece.template import template
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 

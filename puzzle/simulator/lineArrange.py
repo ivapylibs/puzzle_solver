@@ -26,8 +26,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.board import board
 from puzzle.builder.arrangement import arrangement, paramArrange
+from puzzle.builder.board import board
 from puzzle.manager import manager, managerParms
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.basic import basic

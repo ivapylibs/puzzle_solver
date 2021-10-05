@@ -19,7 +19,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.piece.template import template
 
 # ==[1] Create raw puzzle piece data.

@@ -35,7 +35,7 @@ import improcessor.basic as improcessor
 import numpy as np
 
 import puzzle.parser.simple as perceiver
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 
 

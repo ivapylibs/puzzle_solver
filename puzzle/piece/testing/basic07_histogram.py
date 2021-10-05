@@ -22,12 +22,12 @@ import improcessor.basic as improcessor
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.regular import regular
 from puzzle.piece.histogram import histogram
+from puzzle.piece.regular import regular
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)

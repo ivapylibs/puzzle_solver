@@ -27,7 +27,7 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.piece.template import template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA

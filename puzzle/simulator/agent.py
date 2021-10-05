@@ -17,7 +17,7 @@
 #
 # ========================= puzzle.simulator.agent ========================
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.piece.template import template
 from puzzle.simulator.action import Actions
 from puzzle.simulator.planner import Planner_Base

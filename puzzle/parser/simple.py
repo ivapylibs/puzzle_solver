@@ -25,7 +25,7 @@
 #
 import perceiver.simple as perceiverSimple
 
-from puzzle.board import board
+from puzzle.builder.board import board
 
 
 #

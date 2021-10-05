@@ -23,7 +23,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.board import board
+from puzzle.builder.board import board
 from puzzle.simulator.agent import Agent
 
 

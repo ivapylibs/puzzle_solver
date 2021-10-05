@@ -16,18 +16,12 @@
 
 # ==[0] Prep environment
 import os
-import numpy as np
+
 import matplotlib.pyplot as plt
-import cv2
-import improcessor.basic as improcessor
 
-from puzzle.piece.template import template
-from puzzle.board import board
-
+from puzzle.builder.board import board
 from puzzle.clusters.byColor import byColor
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
-from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.regular import regular
+from puzzle.piece.template import template
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
