@@ -69,7 +69,7 @@ theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=
 # ==[2.1] Create a new Grid instance from the images
 #
 
-_, epBoard = theGrid_src.explodedPuzzle(dx=100, dy=100)
+_, epBoard = theGrid_src.explodedPuzzle(dx=125, dy=125)
 
 # ==[2.2] Randomly swap the puzzle pieces.
 #
