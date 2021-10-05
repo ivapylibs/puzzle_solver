@@ -133,9 +133,9 @@ class interlocking(adjacent):
             theParams = paramInter(tauAdj=data.tauInter)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -159,9 +159,9 @@ class interlocking(adjacent):
         aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -186,9 +186,9 @@ class interlocking(adjacent):
         aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -212,9 +212,9 @@ class interlocking(adjacent):
         aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -240,9 +240,9 @@ class interlocking(adjacent):
         aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -268,9 +268,9 @@ class interlocking(adjacent):
 
         aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle.solution, theParams)
+            thePuzzle = interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle.solution)
+            thePuzzle = interlocking(aPuzzle)
 
         return thePuzzle
 

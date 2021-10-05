@@ -114,7 +114,7 @@ print('Running through test cases. Will take a bit.')
 
 theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_15p.obj')
 
-bsolGrid_1 = theGrid_1.solution.toImage(ID_DISPLAY=True)
+bsolGrid_1 = theGrid_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolGrid_1)
 axarr[0, 1].title.set_text('Board 1')
 
@@ -123,7 +123,7 @@ axarr[0, 1].title.set_text('Board 1')
 
 theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_15p.obj', theParams=paramGrid(areaThreshold=5000))
 
-bsolGrid_2 = theGrid_2.solution.toImage(ID_DISPLAY=True)
+bsolGrid_2 = theGrid_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
 axarr[0, 2].title.set_text('Board 2')
 
@@ -135,7 +135,7 @@ theGrid_3 = gridded.buildFromFiles_ImageAndMask(
     cpath + '/data/balloon_15_mask.png', theParams=paramGrid(areaThreshold=5000)
 )
 
-bsolGrid_3 = theGrid_3.solution.toImage(ID_DISPLAY=True)
+bsolGrid_3 = theGrid_3.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolGrid_3)
 axarr[1, 0].title.set_text('Board 3')
 
@@ -144,7 +144,7 @@ axarr[1, 0].title.set_text('Board 3')
 
 theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
 
-bsolGrid_4 = theGrid_4.solution.toImage(ID_DISPLAY=True)
+bsolGrid_4 = theGrid_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
 axarr[1, 1].title.set_text('Board 4')
 
@@ -154,7 +154,7 @@ axarr[1, 1].title.set_text('Board 4')
 theGrid_5 = gridded.buildFrom_Sketch(theImageSol, theMaskSol_src, theDetector=theDet,
                                      theParams=paramGrid(areaThreshold=5000))
 
-bsolGrid_5 = theGrid_5.solution.toImage(ID_DISPLAY=True)
+bsolGrid_5 = theGrid_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)
 axarr[1, 2].title.set_text('Board 5')
 

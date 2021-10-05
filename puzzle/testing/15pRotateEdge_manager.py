@@ -40,9 +40,9 @@ theImageSol = cv2.imread(cpath + '/data/balloon.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-# theMaskSol_src = cv2.imread(cpath + '/data/puzzle_60p_AdSt408534841.png')
+theMaskSol_src = cv2.imread(cpath + '/data/puzzle_60p_AdSt408534841.png')
 
-theMaskSol_src = cv2.imread(cpath + '/data/puzzle_15p_123rf.png')
+# theMaskSol_src = cv2.imread(cpath + '/data/puzzle_15p_123rf.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 # ==[1.1] Create an improcesser to obtain the mask.
@@ -115,8 +115,8 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
-theManager.process(theGrid_new.solution)
+theManager = manager(theGrid_src, managerParms(matcher=edge()))
+theManager.process(theGrid_new)
 
 # ==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.

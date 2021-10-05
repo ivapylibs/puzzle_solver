@@ -61,7 +61,7 @@ theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
 # ==[2] Create a cluster instance and process the puzzle board.
 #
 
-theShapeCluster = byShape(theGrid.solution, extractor=edge())
+theShapeCluster = byShape(theGrid, extractor=edge())
 theShapeCluster.process()
 
 # ==[3] Display the extracted features.
@@ -71,7 +71,7 @@ print('Should see 15 pieces of 3 different types (inside/side/corner). They are 
 print('The number of pieces:', len(theShapeCluster.feature))
 print('The cluster label:', theShapeCluster.feaLabel)
 
-theGrid.solution.display(ID_DISPLAY=True)
+theGrid.display(ID_DISPLAY=True)
 plt.show()
 
 #

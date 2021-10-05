@@ -89,13 +89,14 @@ theDet.process(epImage.copy())
 theMaskSol_new = theDet.getState().x
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular, reorder=True))
+                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
+                                                                 reorder=True))
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
 #
 
-theRegular_A = theGrid.solution.pieces[36]
-theRegular_B = theGrid_new.solution.pieces[36]
+theRegular_A = theGrid.pieces[36]
+theRegular_B = theGrid_new.pieces[36]
 
 # ==[2] Create a new board
 #

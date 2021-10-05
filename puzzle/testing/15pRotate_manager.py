@@ -106,8 +106,8 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=sift()))
-theManager.process(theGrid_new.solution)
+theManager = manager(theGrid_src, managerParms(matcher=sift()))
+theManager.process(theGrid_new)
 
 # ==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.

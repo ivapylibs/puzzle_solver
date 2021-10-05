@@ -93,18 +93,18 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=sift()))
-theManager.process(theGrid_new.solution)
+theManager = manager(theGrid_src, managerParms(matcher=sift()))
+theManager.process(theGrid_new)
 
 # ==[4] Create simple sovler and set up the match
 #
-theSolver = simple(theGrid_src.solution, theGrid_new.solution)
+theSolver = simple(theGrid_src, theGrid_new)
 
 theSolver.setMatch(theManager.pAssignments)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theGrid_new.solution)
+theSim = basic(theGrid_new)
 
 # ==[6] Start the solver to take turns, display the updated board.
 #

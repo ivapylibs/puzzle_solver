@@ -66,23 +66,21 @@ axarr[0, 0].title.set_text('Source Board')
 
 # ==[1.3] Save theBoardSol
 #
-if not os.path.exists(cpath + '/data/board_6p_adj.obj'):
-    theData_save = dataBoard(theBoardSol)
+theData_save = dataBoard(theBoardSol)
 
-    with open(cpath + '/data/board_6p_adj.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/board_6p_adj.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[1.4] Save theImageSol & theMaskSol
 #
-if not os.path.exists(cpath + '/data/image_6p_adj.obj'):
-    theData_save = dataImage(theImageSol, theMaskSol)
+theData_save = dataImage(theImageSol, theMaskSol)
 
-    with open(cpath + '/data/image_6p_adj.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/image_6p_adj.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[2] Create an Adjacent instance
 #
@@ -92,7 +90,7 @@ if not os.path.exists(cpath + '/data/image_6p_adj.obj'):
 
 theAdj_1 = adjacent.buildFromFile_Puzzle(cpath + '/data/board_6p_adj.obj')
 
-bsolAdjacent_1 = theAdj_1.solution.toImage(ID_DISPLAY=True)
+bsolAdjacent_1 = theAdj_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolAdjacent_1)
 axarr[0, 1].title.set_text('Board 1')
 
@@ -101,7 +99,7 @@ axarr[0, 1].title.set_text('Board 1')
 
 theAdj_2 = adjacent.buildFromFile_ImageAndMask(cpath + '/data/image_6p_adj.obj')
 
-bsolAdjacent_2 = theAdj_2.solution.toImage(ID_DISPLAY=True)
+bsolAdjacent_2 = theAdj_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolAdjacent_2)
 axarr[0, 2].title.set_text('Board 2')
 
@@ -113,7 +111,7 @@ theAdj_3 = adjacent.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_adjacent.png'
 )
 
-bsolAdjacent_3 = theAdj_3.solution.toImage(ID_DISPLAY=True)
+bsolAdjacent_3 = theAdj_3.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolAdjacent_3)
 axarr[1, 0].title.set_text('Board 3')
 
@@ -122,7 +120,7 @@ axarr[1, 0].title.set_text('Board 3')
 
 theAdj_4 = adjacent.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolAdjacent_4 = theAdj_4.solution.toImage(ID_DISPLAY=True)
+bsolAdjacent_4 = theAdj_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolAdjacent_4)
 axarr[1, 1].title.set_text('Board 4')
 
@@ -131,7 +129,7 @@ axarr[1, 1].title.set_text('Board 4')
 
 theAdj_5 = adjacent.buildFrom_ImageProcessing(theImageSol)
 
-bsolAdjacent_5 = theAdj_5.solution.toImage(ID_DISPLAY=True)
+bsolAdjacent_5 = theAdj_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolAdjacent_5)
 axarr[1, 2].title.set_text('Board 5')
 

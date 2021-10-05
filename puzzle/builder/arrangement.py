@@ -59,9 +59,9 @@ class arrangement(board):
     #
     #
     def __init__(self, solBoard=[], theParams=paramArrange):
-        super(arrangement, self).__init__()
+        super(arrangement, self).__init__(solBoard)
 
-        self.solution = solBoard
+        # self.pieces = solBoard
         self.params = theParams  # @<A distance threshold for considering a piece
         # to be correctly placed.
 
@@ -102,12 +102,6 @@ class arrangement(board):
     #
     def corrections(self, pLoc):
         # @note
-        # CHECK THAT pLoc HAS SAME CARDINALITY AS puzzle board.
-        # DOES length(self.solution) or is it size(self.solution) == size(pLoc,2)
-        # WHAT SHOULD RETURN IN CASE OF FAILURE? A NONE. CALLING SCOPE SHOULD
-        # CHECK FOR A NONE RETURN VALUE.
-
-        # @note
         # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
         # theVects = pLocTrue - pLoc
         #
@@ -115,7 +109,7 @@ class arrangement(board):
         # SIMPLIFY PYTHON AS DESIRED.
 
         theVects = {}
-        pLocTrue = self.solution.pieceLocations()
+        pLocTrue = self.pieceLocations()
 
         for id in pLoc:
             theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
@@ -146,7 +140,7 @@ class arrangement(board):
     def distances(self, pLoc):
 
         theDists = {}
-        pLocTrue = self.solution.pieceLocations()
+        pLocTrue = self.pieceLocations()
 
         for id in pLoc:
             theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
@@ -204,7 +198,7 @@ class arrangement(board):
     #
     def scoreBoard(self, theBoard):
 
-        if theBoard.size() == self.solution.size():
+        if theBoard.size() == self.size():
             pLocs = theBoard.pieceLocations()
             theScore = self.scoreByLocation(pLocs)
         else:

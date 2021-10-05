@@ -85,7 +85,7 @@ class gridded(interlocking):
     #
     def __processGrid(self, reorder=False):
 
-        pLoc = self.solution.pieceLocations()
+        pLoc = self.pieceLocations()
 
         x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
         y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
@@ -94,17 +94,17 @@ class gridded(interlocking):
         # Check the puzzle shape size to determine the thresh here.
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
-        x_thresh = np.mean([piece.y.size[0] for piece in self.solution.pieces]) / 2
-        x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance") # from 1
+        x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
+        x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
         x_label = updateLabel(x_list, x_label) # from 0
 
-        y_thresh = np.mean([piece.y.size[1] for piece in self.solution.pieces]) / 2
+        y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
         y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
         y_label = updateLabel(y_list, y_label) # from 0
 
         # Reorder the pieces, so the id will correspond to the grid location
         if reorder:
-            pieces_src = deepcopy(self.solution.pieces)
+            pieces_src = deepcopy(self.pieces)
             num = 0
 
             # Save the changes, {new:old}
@@ -114,25 +114,25 @@ class gridded(interlocking):
                 for ii in range(max(x_label) + 1):
                     for idx, pts in enumerate(zip(x_label, y_label)):
                         if pts[0] == ii and pts[1] == jj:
-                            self.solution.pieces[num] = pieces_src[idx]
+                            self.pieces[num] = pieces_src[idx]
                             dict_conversion[num] = idx
-                            self.solution.pieces[num].id = num
+                            self.pieces[num].id = num
                             self.gc[:, num] = ii, jj
                             num = num + 1
                             break
 
             # Have to re-compute adjMat/ilMat
             adjMat_src = deepcopy(self.adjMat)
-            for ii in range(self.solution.size()):
-                for jj in range(ii + 1, self.solution.size()):
+            for ii in range(self.size()):
+                for jj in range(ii + 1, self.size()):
                     self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
                     self.adjMat[jj, ii] = self.adjMat[ii, jj]
 
             self.ilMat = self.adjMat
 
         else:
-            for ii in range(self.solution.size()):
-                # The order is in line with the one saving in self.solution.pieces
+            for ii in range(self.size()):
+                # The order is in line with the one saving in self.pieces
 
                 # @todo Yunzhi: Eventually, this has to be upgraded to a dict?
                 self.gc[:, ii] = x_label[ii], y_label[ii]
@@ -148,7 +148,7 @@ class gridded(interlocking):
         """
 
         # @note We do not care about id in this function.
-        epBoard = deepcopy(self.solution)
+        epBoard = deepcopy(self)
         for i in range(num):
             target_list = np.random.randint(0, epBoard.size(), 2)
 
@@ -183,8 +183,8 @@ class gridded(interlocking):
         # --[1] First figure out how big the exploded image should be based
         #      on the puzzle image dimensions, the number of puzzle pieces
         #      across rows and columns, and the chosen spacing.
-        [nc, nr] = self.solution.extents()
-        bbox = self.solution.boundingBox()
+        [nc, nr] = self.extents()
+        bbox = self.boundingBox()
         r_origin = bbox[0]
 
         # The max index of pieces for x,y
@@ -201,7 +201,7 @@ class gridded(interlocking):
         #
 
         # Work on the epBoard
-        epBoard = deepcopy(self.solution)
+        epBoard = deepcopy(self)
         for idx, piece in enumerate(epBoard.pieces):
             r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:, idx].flatten()
             r_new = r_new.astype('int')
@@ -242,9 +242,9 @@ class gridded(interlocking):
             theParams = paramGrid(data.tauGrid)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 
@@ -268,9 +268,9 @@ class gridded(interlocking):
         aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 
@@ -295,9 +295,9 @@ class gridded(interlocking):
         aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 
@@ -321,9 +321,9 @@ class gridded(interlocking):
         aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 
@@ -349,9 +349,9 @@ class gridded(interlocking):
         aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 
@@ -378,9 +378,9 @@ class gridded(interlocking):
         aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle.solution, theParams)
+            thePuzzle = gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle.solution)
+            thePuzzle = gridded(aPuzzle)
 
         return thePuzzle
 

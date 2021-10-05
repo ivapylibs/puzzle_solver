@@ -66,23 +66,21 @@ axarr[0, 0].title.set_text('Source Board')
 
 # ==[1.3] Save theBoardSol
 #
-if not os.path.exists(cpath + '/data/board_6p.obj'):
-    theData_save = dataBoard(theBoardSol)
+theData_save = dataBoard(theBoardSol)
 
-    with open(cpath + '/data/board_6p.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/board_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[1.4] Save theImageSol & theMaskSol
 #
-if not os.path.exists(cpath + '/data/image_6p.obj'):
-    theData_save = dataImage(theImageSol, theMaskSol)
+theData_save = dataImage(theImageSol, theMaskSol)
 
-    with open(cpath + '/data/image_6p.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/image_6p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[2] Create an Interlocking instance
 #
@@ -92,7 +90,7 @@ if not os.path.exists(cpath + '/data/image_6p.obj'):
 
 theInter_1 = interlocking.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
-bsolInterlocking_1 = theInter_1.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_1 = theInter_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolInterlocking_1)
 axarr[0, 1].title.set_text('Board 1')
 
@@ -101,7 +99,7 @@ axarr[0, 1].title.set_text('Board 1')
 
 theInter_2 = interlocking.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
-bsolInterlocking_2 = theInter_2.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_2 = theInter_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolInterlocking_2)
 axarr[0, 2].title.set_text('Board 2')
 
@@ -113,7 +111,7 @@ theInter_3 = interlocking.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
 
-bsolInterlocking_3 = theInter_3.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_3 = theInter_3.toImage(ID_DISPLAY=True)
 axarr[1, 0].imshow(bsolInterlocking_3)
 axarr[1, 0].title.set_text('Board 3')
 
@@ -122,7 +120,7 @@ axarr[1, 0].title.set_text('Board 3')
 
 theInter_4 = interlocking.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
-bsolInterlocking_4 = theInter_4.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_4 = theInter_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolInterlocking_4)
 axarr[1, 1].title.set_text('Board 4')
 
@@ -131,7 +129,7 @@ axarr[1, 1].title.set_text('Board 4')
 
 theInter_5 = interlocking.buildFrom_ImageProcessing(theImageSol)
 
-bsolInterlocking_5 = theInter_5.solution.toImage(ID_DISPLAY=True)
+bsolInterlocking_5 = theInter_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolInterlocking_5)
 axarr[1, 2].title.set_text('Board 5')
 

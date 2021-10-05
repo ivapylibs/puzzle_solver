@@ -78,10 +78,10 @@ class adjacent(arrangement):
     #
     def __processAdjacency(self):
 
-        for ii in range(self.solution.size()):
-            for jj in range(ii + 1, self.solution.size()):
+        for ii in range(self.size()):
+            for jj in range(ii + 1, self.size()):
 
-                if self.solution.testAdjacent(ii, jj, self.params.tauAdj):
+                if self.testAdjacent(ii, jj, self.params.tauAdj):
                     self.adjMat[ii, jj] = True
                     self.adjMat[jj, ii] = True
 
@@ -112,9 +112,9 @@ class adjacent(arrangement):
             theParams = paramAdj(tauAdj=data.tauAdj)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -138,9 +138,9 @@ class adjacent(arrangement):
         aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -165,9 +165,9 @@ class adjacent(arrangement):
         aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -191,9 +191,9 @@ class adjacent(arrangement):
         aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -218,9 +218,9 @@ class adjacent(arrangement):
 
         aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -246,9 +246,9 @@ class adjacent(arrangement):
 
         aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle.solution, theParams)
+            thePuzzle = adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle.solution)
+            thePuzzle = adjacent(aPuzzle)
 
         return thePuzzle
 

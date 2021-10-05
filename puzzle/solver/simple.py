@@ -23,7 +23,6 @@ from copy import deepcopy
 import numpy as np
 
 from puzzle.builder.arrangement import arrangement
-from puzzle.builder.gridded import gridded
 from puzzle.solver.base import base
 
 
@@ -169,7 +168,7 @@ class simple(base):
         """
 
         # Upgrade the solution board to a grid instance to have more functions
-        theGrid = gridded(self.desired)
+        # theGrid = gridded(self.desired)
 
         if self.rotation_match is not None:
             # Create a copy of the current board
@@ -190,20 +189,20 @@ class simple(base):
             pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
         # Obtain the correction plan for all the matched pieces
-        theCorrect = theGrid.corrections(pLoc_sol)
+        theCorrect = self.desired.corrections(pLoc_sol)
 
-        theScores = theGrid.piecesInPlace(pLoc_sol)
+        theScores = self.desired.piecesInPlace(pLoc_sol)
 
         if all(value == True for value in theScores.values()):
             print('All the puzzle pieces have been in position. No move.')
             return True
 
-        x_max, y_max = np.max(theGrid.gc, axis=1)
+        x_max, y_max = np.max(self.desired.gc, axis=1)
 
         for i, j in itertools.product(range(int(x_max + 1)), range(int(y_max + 1))):
 
             # best_index_sol is just the next target, no matter if the assignment is ready or not
-            best_index_sol = np.argwhere((theGrid.gc.T == [i, j]).all(axis=1)).flatten()[0]
+            best_index_sol = np.argwhere((self.desired.gc.T == [i, j]).all(axis=1)).flatten()[0]
 
             # Check if can find the match for best_index_sol
             if best_index_sol not in theScores:

@@ -56,7 +56,8 @@ theMaskSol = theDet.getState().x
 print('Running through test cases. Will take a bit.')
 
 theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
+                                             theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular,
+                                                                 reorder=True))
 
 epImage, _ = theGrid_src.explodedPuzzle(dx=100, dy=100)
 
@@ -84,8 +85,8 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_src.solution, managerParms(matcher=edge()))
-theManager.process(theGrid_new.solution)
+theManager = manager(theGrid_src, managerParms(matcher=edge()))
+theManager.process(theGrid_new)
 
 # ==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.
