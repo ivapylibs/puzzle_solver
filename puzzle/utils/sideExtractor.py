@@ -19,8 +19,6 @@
 # ===== Environment / Dependencies
 #
 
-from functools import partial
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,11 +105,11 @@ def compute_minmax_xy(thresh):
     return [np.array([coords.min(), coords.max()]) for coords in idx_shape]
 
 
-def segment_piece(image, bin_threshold=128):
-    """
-    Apply segmentation of the image by simple binarization
-    """
-    return cv2.threshold(image, bin_threshold, 255, cv2.THRESH_BINARY)[1]
+# def segment_piece(image, bin_threshold=128):
+#     """
+#     Apply segmentation of the image by simple binarization
+#     """
+#     return cv2.threshold(image, bin_threshold, 255, cv2.THRESH_BINARY)[1]
 
 
 # def extract_piece(thresh):
@@ -544,7 +542,7 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
     We perform a recursive search with max depth = 2:
     - At depth 0 we take one of the input point as the first corner of the rectangle
     - At depth 1 we select another input point (with distance from the first point greater
-    then d_threshold) as the second point
+    than d_threshold) as the second point
     - At depth 2 and 3 we take the other points. However, the lines 01-12 and 12-23 should be
     as perpendicular as possible. If the angle formed by these lines is too much far from the
     right angle, we discard the choice.
@@ -597,8 +595,8 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
             for right_point_idx in right_points_idx:
                 search_for_possible_rectangle(right_point_idx, [idx])
 
-            # if verbose >= 2:
-            #     print('')
+            if verbose >= 2:
+                print('')
 
             return
 
@@ -619,11 +617,12 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
 
             diff_to_explore = np.nonzero(np.logical_and(all_diffs, distances[idx] > 0))[0]
 
-            # if verbose >= 2:
-            #     print('\t' * depth, 'diff0:', np.nonzero(diff0)[0], 'diff180:', np.nonzero(diff180)[0], 'diff_to_explore:', diff_to_explore)
+            if verbose >= 2:
+                print('\t' * depth, 'diff0:', np.nonzero(diff0)[0], 'diff180:', np.nonzero(diff180_0)[0],
+                      'diff_to_explore:', diff_to_explore)
 
             for dte_idx in diff_to_explore:
-                if dte_idx not in prev_points:  # unlickly to happen but just to be certain
+                if dte_idx not in prev_points:  # unlikely to happen but just to be certain
                     next_points = prev_points[::]
                     next_points.append(idx)
 
@@ -658,8 +657,23 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
         print('Distances', distances)
         print('Angles', angles)
 
+    # # Debug only
+    # import time
+    # start = time.time()
+
     for i in range(N):
         search_for_possible_rectangle(i)
+
+    # # Debug only
+    # end = time.time()-start
+    # print(end)
+    # if end >5:
+    #     debug_mask = np.zeros((400,400))
+    #     for i in xy:
+    #         cv2.circle(debug_mask,i,5,255,-1)
+    #     cv2.imshow('debug',debug_mask)
+    #     cv2.waitKey()
+    #     print('s')
 
     if len(possible_rectangles) == 0:
         return None
@@ -696,10 +710,10 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
 
 def get_default_params():
     side_extractor_default_values = {
-        'before_segmentation_func': partial(cv2.medianBlur, ksize=5),
-        'bin_threshold': 130,
-        'after_segmentation_func': None,
-        'scale_factor': 0.5,
+        # 'before_segmentation_func': partial(cv2.medianBlur, ksize=5),
+        # 'bin_threshold': 130,
+        # 'after_segmentation_func': None,
+        'scale_factor': 1,
         'harris_blocksize': 5,
         'harris_ksize': 5,
         'corner_nsize': 5,
@@ -709,7 +723,9 @@ def get_default_params():
         'edge_erode_size': 3,
         'shape_classification_distance_threshold': 100,
         'shape_classification_nhs': 5,
-        'inout_distance_threshold': 5
+        'inout_distance_threshold': 5,
+        'perp_angle_thresh': 30,
+        'd_thresh': 30,
     }
 
     return side_extractor_default_values.copy()
@@ -762,7 +778,8 @@ def sideExtractor(puzzleTemplate, **kwargs):
         raise RuntimeError('Not enough corners')
 
     # Get the 4 rectangle points
-    intersections = get_best_fitting_rect_coords(xy, perp_angle_thresh=30)
+    intersections = get_best_fitting_rect_coords(xy, d_threshold=params['d_thresh'],
+                                                 perp_angle_thresh=params['perp_angle_thresh'])
     out_dict['rectangle_pts'] = intersections - 10
     if intersections is None:
         raise RuntimeError('No rectangle found')

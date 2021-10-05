@@ -132,10 +132,11 @@ class regular(template):
         @brief  Run the sideExtractor.
         """
 
+        # d_thresh is related to the size of the puzzle piece
         out_dict = sideExtractor(self.y, scale_factor=1,
                                  harris_block_size=5, harris_ksize=5,
                                  corner_score_threshold=0.15, corner_minmax_threshold=100,
-                                 shape_classification_nhs=3)
+                                 shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5)
 
         # Set up the type/img of the chosen edge
         for direction in EdgeDirection:

@@ -40,9 +40,9 @@ theImageSol = cv2.imread(cpath + '/data/balloon.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread(cpath + '/data/puzzle_60p_AdSt408534841.png')
+# theMaskSol_src = cv2.imread(cpath + '/data/puzzle_60p_AdSt408534841.png')
 
-# theMaskSol_src = cv2.imread(cpath + '/data/puzzle_15p_123rf.png')
+theMaskSol_src = cv2.imread(cpath + '/data/puzzle_15p_123rf.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 # ==[1.1] Create an improcesser to obtain the mask.
@@ -68,7 +68,7 @@ theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
 
 # ==[2.1] Explode it into a new board.
 #
-epImage, epBoard = theGrid_src.explodedPuzzle(dx=200, dy=200)
+epImage, epBoard = theGrid_src.explodedPuzzle(dx=250, dy=250)
 
 # ==[2.2] Randomly swap the puzzle pieces.
 #
