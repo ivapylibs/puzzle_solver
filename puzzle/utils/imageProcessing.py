@@ -16,10 +16,12 @@
 # ============================== Dependencies =============================
 
 import math
+import numpy as np
 
 import cv2
 
-
+import improcessor.basic as improcessor
+from puzzle.utils.shapeProcessing import bb_intersection_over_union
 # ====================== puzzle.utils.imageProcessing ======================
 
 def cropImage(image, template):
@@ -125,6 +127,56 @@ def rotate_im(image, angle, mask=None):
     # cv2.imshow('dst', final_image)
     # cv2.waitKey()
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
+
+
+def preprocess_real_puzzle(img, areaThresh = 1000):
+    """
+    @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
+
+    Args:
+        img: RGB image input.
+        areaThresh: The lower threshold of the area.
+
+    Returns:
+        The mask.
+    """
+
+    improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+                               cv2.medianBlur, (5,),
+                               cv2.Canny, (30, 200,),
+                               improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+
+    imout = improc.apply(img)
+
+    # cv2.imshow('debug',imout)
+    # cv2.waitKey()
+
+    cnts, hierarchy = cv2.findContours(imout, cv2.RETR_TREE,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+
+    # hierarchy = hierarchy[0]
+
+    regions = []
+
+    # Filter out some contours according to area threshold & circle area
+    for c in cnts:
+
+        area = cv2.contourArea(c)
+
+        # Filtered by the area threshold
+        if area > areaThresh:
+
+            seg_img = np.zeros(imout.shape[:2], dtype="uint8")  # reset a blank image every time
+            cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
+
+            circles = cv2.HoughCircles(seg_img, cv2.HOUGH_GRADIENT, 1.2, 100)
+
+            if circles is None:
+                regions.append([seg_img, area])
+
+    regions.sort(key=lambda x: x[1])
+
+    return regions[0][0]
 
 #
 # ====================== puzzle.utils.imageProcessing ======================

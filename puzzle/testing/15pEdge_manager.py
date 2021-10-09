@@ -38,7 +38,7 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 theMaskSol_src = cv2.imread(cpath + '/data/puzzle_15p_123rf.png')
 
-# ==[1.1] Create an improcesser to obtain the mask.
+# ==[1.1] Create an improcessor to obtain the mask.
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),

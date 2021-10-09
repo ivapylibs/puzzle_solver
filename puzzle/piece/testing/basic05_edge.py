@@ -42,7 +42,7 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
-# ==[1.1] Create an improcesser to obtain the mask.
+# ==[1.1] Create an improcessor to obtain the mask.
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
