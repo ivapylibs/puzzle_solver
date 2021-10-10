@@ -16,12 +16,14 @@
 # ============================== Dependencies =============================
 
 import math
-import numpy as np
 
 import cv2
-
 import improcessor.basic as improcessor
+import numpy as np
+
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
+
+
 # ====================== puzzle.utils.imageProcessing ======================
 
 def cropImage(image, template):
@@ -129,7 +131,7 @@ def rotate_im(image, angle, mask=None):
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
 
 
-def preprocess_real_puzzle(img, areaThresh = 1000):
+def preprocess_real_puzzle(img, areaThresh=1000, verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
 
@@ -146,37 +148,80 @@ def preprocess_real_puzzle(img, areaThresh = 1000):
                                cv2.Canny, (30, 200,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-    imout = improc.apply(img)
+    # Step 1: with threshold
+    im_preprocessed = improc.apply(img)
 
-    # cv2.imshow('debug',imout)
-    # cv2.waitKey()
+    if verbose:
+        cv2.imshow('debug', im_preprocessed)
+        cv2.waitKey()
 
-    cnts, hierarchy = cv2.findContours(imout, cv2.RETR_TREE,
+    cnts, hierarchy = cv2.findContours(im_preprocessed, cv2.RETR_TREE,
                                        cv2.CHAIN_APPROX_SIMPLE)
 
-    # hierarchy = hierarchy[0]
-
+    # Filter out the outermost contours
     regions = []
-
-    # Filter out some contours according to area threshold & circle area
     for c in cnts:
 
         area = cv2.contourArea(c)
 
-        # Filtered by the area threshold
-        if area > areaThresh:
+        seg_img = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+        cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
-            seg_img = np.zeros(imout.shape[:2], dtype="uint8")  # reset a blank image every time
-            cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
+        # Get ROI, OpenCV style
+        x, y, w, h = cv2.boundingRect(c)
 
-            circles = cv2.HoughCircles(seg_img, cv2.HOUGH_GRADIENT, 1.2, 100)
-
-            if circles is None:
-                regions.append([seg_img, area])
+        # Double check if ROI has a large IoU with the previous ones
+        skipflag = False
+        for region in regions:
+            if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.95:
+                skipflag = True
+                break
+        if not skipflag:
+            regions.append((seg_img, area, [x, y, x + w, y + h]))
 
     regions.sort(key=lambda x: x[1])
 
-    return regions[0][0]
+    # Step 2: Remove the outermost contour
+    seg_img_combined = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+    for i in range(len(regions) - 1):
+        seg_img_combined = seg_img_combined | regions[i][0]
+
+    if verbose:
+        cv2.imshow('seg_img_combined', seg_img_combined)
+        cv2.waitKey()
+
+    # Step 3: Dilation
+    kernel = np.ones((2, 2), np.uint8)
+    im_processed = cv2.dilate(seg_img_combined, kernel)
+
+    if verbose:
+        cv2.imshow('im_processed', im_processed)
+        cv2.waitKey()
+
+    # Step 4: Floodfill
+
+    # Copy the thresholded image.
+    im_floodfill = im_processed.copy()
+
+    # Mask used to flood filling.
+    # Notice the size needs to be 2 pixels than the image.
+    h, w = im_processed.shape[:2]
+    mask = np.zeros((h + 2, w + 2), np.uint8)
+
+    # Floodfill from point (0, 0)
+    cv2.floodFill(im_floodfill, mask, (0, 0), 255)
+
+    # Invert floodfilled image
+    im_floodfill_inv = cv2.bitwise_not(im_floodfill)
+
+    # Step3: Combine the two images to get the foreground.
+    im_floodfill = im_processed | im_floodfill_inv
+
+    if verbose:
+        cv2.imshow('im_floodfill', im_floodfill)
+        cv2.waitKey()
+
+    return im_floodfill
 
 #
 # ====================== puzzle.utils.imageProcessing ======================
