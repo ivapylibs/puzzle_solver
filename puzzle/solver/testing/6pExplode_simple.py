@@ -68,7 +68,7 @@ theManager.process(epBoard)
 
 # ==[4] Create simple sovler and set up the match
 #
-theSolver = simple(theBoardSol, epBoard)
+theSolver = simple(gridded(theBoardSol), gridded(epBoard))
 
 theSolver.setMatch(theManager.pAssignments)
 

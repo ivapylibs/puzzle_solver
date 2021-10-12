@@ -23,6 +23,7 @@ import cv2
 import imageio
 import matplotlib.pyplot as plt
 
+from puzzle.builder.gridded import gridded
 from puzzle.manager import manager
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.solver.simple import simple
@@ -73,7 +74,7 @@ theManager.process(theBoardMea)
 
 # ==[5] Create simple instance and set up the match
 #
-theSolver = simple(theBoardSol, theBoardMea)
+theSolver = simple(gridded(theBoardSol), gridded(theBoardMea))
 
 theSolver.setMatch(theManager.pAssignments)
 
@@ -83,8 +84,8 @@ theSolver.setMatch(theManager.pAssignments)
 plt.ion()
 fh = plt.figure()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 if saveMe:
     f.savefig(cpath + f'/data/theBoard.png')

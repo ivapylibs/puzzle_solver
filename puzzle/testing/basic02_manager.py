@@ -15,10 +15,10 @@
 #
 # ============================= basic02_manager =============================
 
+# ==[0] Prep environment
 import os
 
 import cv2
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
 
 from puzzle.manager import manager
@@ -55,12 +55,12 @@ theManager.process(theImageMea, theMaskMea)
 # while the ids in the assignment board refer to the ids in the solution board.
 #
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
-bsolImage = theManager.solution.toImage(ID_DISPLAY=True)
+bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
 
 f, axarr = plt.subplots(1, 2)
 axarr[0].imshow(bMeasImage)
 axarr[0].title.set_text('Measurement')
-axarr[1].imshow(bsolImage)
+axarr[1].imshow(bSolImage)
 axarr[1].title.set_text('Solution')
 
 # Show assignment

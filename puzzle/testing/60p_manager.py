@@ -15,12 +15,13 @@
 #
 # ============================= 60p_manager =============================
 
+# ==[0] Prep environment
 import os
 
 import cv2
 import improcessor.basic as improcessor
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
+import numpy as np
 
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
@@ -75,13 +76,12 @@ epImage, _ = theGrid_src.explodedPuzzle(dx=100, dy=100)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           cv2.dilate, (np.ones((3, 3), np.uint8),)
+                           )
+theMaskSol_new = improc.apply(epImage)
 
-theDet = fromSketch(improc)
-theDet.process(epImage.copy())
-theMaskSol_new = theDet.getState().x
+# cv2.imshow('debug', theMaskSol_new)
+# cv2.waitKey()
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
                                              theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
@@ -98,12 +98,12 @@ theManager.process(theGrid_new)
 # while the ids in the assignment board refer to the ids in the solution board.
 #
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
-bsolImage = theManager.solution.toImage(ID_DISPLAY=True)
+bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
 
 f, axarr = plt.subplots(1, 2)
 axarr[0].imshow(bMeasImage)
 axarr[0].title.set_text('Measurement')
-axarr[1].imshow(bsolImage)
+axarr[1].imshow(bSolImage)
 axarr[1].title.set_text('Solution')
 
 # Show assignment

@@ -78,13 +78,12 @@ epImage, epBoard = theGrid_src.explodedPuzzle(dx=100, dy=100)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           cv2.dilate, (np.ones((3, 3), np.uint8),)
+                           )
+theMaskSol_new = improc.apply(epImage)
 
-theDet = fromSketch(improc)
-theDet.process(epImage.copy())
-theMaskSol_new = theDet.getState().x
+# cv2.imshow('debug', theMaskSol_new)
+# cv2.waitKey()
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
                                              theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,

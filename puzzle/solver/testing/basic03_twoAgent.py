@@ -24,6 +24,7 @@ import cv2
 import imageio
 import matplotlib.pyplot as plt
 
+from puzzle.builder.gridded import gridded
 from puzzle.manager import manager
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.solver.twoAgent import twoAgent
@@ -74,7 +75,7 @@ theManager.process(theBoardMea)
 
 # ==[5] Create simple instance and set up the match
 #
-thetwoAgent = twoAgent(theBoardSol, theBoardMea)
+thetwoAgent = twoAgent(gridded(theBoardSol), gridded(theBoardMea))
 
 thetwoAgent.setMatch(theManager.pAssignments)
 
@@ -84,8 +85,8 @@ thetwoAgent.setMatch(theManager.pAssignments)
 plt.ion()
 fh = plt.figure()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 if saveMe:
     f.savefig(cpath + f'/data/theBoard.png')

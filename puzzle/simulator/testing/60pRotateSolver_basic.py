@@ -96,17 +96,13 @@ epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           cv2.dilate, (np.ones((3, 3), np.uint8),)
+                           )
+theMaskSol_new = improc.apply(epImage)
 
-theDet = fromSketch(improc)
-theDet.process(epImage.copy())
-theMaskSol_new = theDet.getState().x
-
-# temp_demo = cv2.resize(theMaskSol_new, (int(theMaskSol_new.shape[1] / 2), int(theMaskSol_new.shape[0] / 2)), interpolation=cv2.INTER_AREA)
-# cv2.imshow('debug',temp_demo)
+# cv2.imshow('debug', theMaskSol_new)
 # cv2.waitKey()
+
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
                                              theParams=paramGrid(areaThreshold=1000, reorder=True))
 
@@ -118,12 +114,12 @@ theManager.process(theGrid_new)
 
 # # Debug only
 # bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
-# bsolImage = theManager.solution.toImage(ID_DISPLAY = True)
+# bSolImage = theManager.solution.toImage(ID_DISPLAY = True)
 #
 # f, axarr = plt.subplots(1,2)
 # axarr[0].imshow(bMeasImage)
 # axarr[0].title.set_text('Measurement')
-# axarr[1].imshow(bsolImage)
+# axarr[1].imshow(bSolImage)
 # axarr[1].title.set_text('Solution')
 #
 # # Show assignment

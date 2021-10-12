@@ -14,13 +14,13 @@
 #
 # ============================ basic01_simple ===========================
 
-
+# ==[0] Prep environment
 import os
 
 import cv2
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
 
+from puzzle.builder.gridded import gridded
 from puzzle.manager import manager
 from puzzle.parser.fromLayer import fromLayer
 from puzzle.solver.simple import simple
@@ -71,7 +71,7 @@ theManager.process(theBoardMea)
 
 # ==[5] Create simple instance and set up the match
 #
-theSolver = simple(theBoardSol, theBoardMea)
+theSolver = simple(gridded(theBoardSol), gridded(theBoardMea))
 
 theManager = manager(theBoardSol)
 theManager.process(theBoardMea)
