@@ -78,8 +78,8 @@ theSolver.setMatch(theManager.pAssignments)
 plt.ion()
 fh = plt.figure()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 if saveMe:
     f.savefig(cpath + f'/data/theBoardExplode.png')
@@ -96,7 +96,7 @@ for i in range(1 + theSolver.desired.size()):
         print(f'The original measured board')
 
     if saveMe:
-        fh.savefig(cpath + f'/data/explode01_simple_step{str(i).zfill(2)}.png')
+        fh.savefig(cpath + f'/data/6pExplode_step{str(i).zfill(2)}.png')
 
     if i < theSolver.desired.size():
         print(f'Step {i + 1}:')
@@ -107,8 +107,8 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/demo_simple_explode01.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/explode01_simple_step*.png')
+    with imageio.get_writer(cpath + f'/data/6pExplode.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/6pExplode_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)

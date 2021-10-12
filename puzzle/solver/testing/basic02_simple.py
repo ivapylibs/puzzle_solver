@@ -102,7 +102,7 @@ for i in range(1 + theSolver.desired.size()):
         print(f'The original measured board')
 
     if saveMe:
-        fh.savefig(cpath + f'/data/theBoardMea_simple_step{i}.png')
+        fh.savefig(cpath + f'/data/basic02_step{i}.png')
 
     if i < theSolver.desired.size():
         print(f'Step {i + 1}:')
@@ -113,8 +113,8 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/demo_simple.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/theBoardMea_simple_*.png')
+    with imageio.get_writer(cpath + f'/data/basic02.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/basic02_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)
