@@ -131,97 +131,154 @@ def rotate_im(image, angle, mask=None):
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
 
 
-def preprocess_real_puzzle(img, areaThresh=1000, verbose=False):
+def white_balance(img):
+    """
+
+    Args:
+        img: Input image.
+
+    Returns:
+        Processed image with white balance.
+    """
+    result = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    avg_a = np.average(result[:, :, 1])
+    avg_b = np.average(result[:, :, 2])
+    result[:, :, 1] = result[:, :, 1] - ((avg_a - 128) * (result[:, :, 0] / 255.0) * 1.1)
+    result[:, :, 2] = result[:, :, 2] - ((avg_b - 128) * (result[:, :, 0] / 255.0) * 1.1)
+    result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
+    return result
+
+
+def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
 
     Args:
         img: RGB image input.
+        mask: Mask image input.
         areaThresh: The lower threshold of the area.
 
     Returns:
-        The mask.
+        The mask region list.
     """
 
+    if mask is None:
+
+        # Manually threshold the img if mask is not given. It should not be better than the one
+        # obtained by the surveillance system.
+        improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+                                   cv2.medianBlur, (5,),
+                                   improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
+                                   cv2.dilate, (np.ones((5, 5), np.uint8),)
+                                   )
+        mask = improc.apply(img)
+
+        if verbose:
+            cv2.imshow('mask', mask)
+            cv2.waitKey()
+
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                               cv2.medianBlur, (5,),
+                               # cv2.medianBlur, (5,),
                                cv2.Canny, (30, 200,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
     # Step 1: with threshold
-    im_preprocessed = improc.apply(img)
+    im_preprocessed_src = improc.apply(img)
 
     if verbose:
-        cv2.imshow('debug', im_preprocessed)
+        cv2.imshow('im_preprocessed_src', im_preprocessed_src)
         cv2.waitKey()
 
-    cnts, hierarchy = cv2.findContours(im_preprocessed, cv2.RETR_TREE,
-                                       cv2.CHAIN_APPROX_SIMPLE)
+    num_labels, labels = cv2.connectedComponents(mask)
 
-    # Filter out the outermost contours
-    regions = []
-    for c in cnts:
+    regions = []  # The mask region list.
+    for i in range(1, num_labels):
 
-        area = cv2.contourArea(c)
+        # if i == 5:
+        #     verbose = True
+        # else:
+        #     verbose = False
 
-        seg_img = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
-        cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
+        im_preprocessed = cv2.bitwise_and(im_preprocessed_src, im_preprocessed_src,
+                                          mask=np.where(labels == i, 1, 0).astype('uint8'))
 
-        # Get ROI, OpenCV style
-        x, y, w, h = cv2.boundingRect(c)
+        if verbose:
+            cv2.imshow('im_preprocessed', im_preprocessed)
+            cv2.waitKey()
 
-        # Double check if ROI has a large IoU with the previous ones
-        skipflag = False
-        for region in regions:
-            if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.95:
-                skipflag = True
-                break
-        if not skipflag:
-            regions.append((seg_img, area, [x, y, x + w, y + h]))
+        cnts, hierarchy = cv2.findContours(im_preprocessed, cv2.RETR_TREE,
+                                           cv2.CHAIN_APPROX_SIMPLE)
 
-    regions.sort(key=lambda x: x[1])
+        # Filter out the outermost contours
+        regions_single = []
+        for c in cnts:
 
-    # Step 2: Remove the outermost contour
-    seg_img_combined = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
-    for i in range(len(regions) - 1):
-        seg_img_combined = seg_img_combined | regions[i][0]
+            area = cv2.contourArea(c)
 
-    if verbose:
-        cv2.imshow('seg_img_combined', seg_img_combined)
-        cv2.waitKey()
+            seg_img = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+            cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
-    # Step 3: Dilation
-    kernel = np.ones((2, 2), np.uint8)
-    im_processed = cv2.dilate(seg_img_combined, kernel)
+            # Get ROI, OpenCV style
+            x, y, w, h = cv2.boundingRect(c)
 
-    if verbose:
-        cv2.imshow('im_processed', im_processed)
-        cv2.waitKey()
+            # Double check if ROI has a large IoU with the previous ones
+            skipflag = False
+            for region in regions_single:
+                if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.95:
+                    skipflag = True
+                    break
+            if not skipflag:
+                regions_single.append((seg_img, area, [x, y, x + w, y + h]))
 
-    # Step 4: Floodfill
+        regions_single.sort(key=lambda x: x[1])
 
-    # Copy the thresholded image.
-    im_floodfill = im_processed.copy()
+        # Step 2: Remove the outermost contour
+        seg_img_combined = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+        for i in range(len(regions_single) - 1):
+            seg_img_combined = seg_img_combined | regions_single[i][0]
 
-    # Mask used to flood filling.
-    # Notice the size needs to be 2 pixels than the image.
-    h, w = im_processed.shape[:2]
-    mask = np.zeros((h + 2, w + 2), np.uint8)
+        if verbose:
+            cv2.imshow('seg_img_combined', seg_img_combined)
+            cv2.waitKey()
 
-    # Floodfill from point (0, 0)
-    cv2.floodFill(im_floodfill, mask, (0, 0), 255)
+        # Step 3: Dilation
+        kernel = np.ones((3, 3), np.uint8)
+        im_processed = cv2.dilate(seg_img_combined, kernel)
 
-    # Invert floodfilled image
-    im_floodfill_inv = cv2.bitwise_not(im_floodfill)
+        if verbose:
+            cv2.imshow('im_processed', im_processed)
+            cv2.waitKey()
 
-    # Step3: Combine the two images to get the foreground.
-    im_floodfill = im_processed | im_floodfill_inv
+        # Step 4: Floodfill
 
-    if verbose:
-        cv2.imshow('im_floodfill', im_floodfill)
-        cv2.waitKey()
+        # Copy the thresholded image.
+        im_floodfill = im_processed.copy()
 
-    return im_floodfill
+        # Mask used to flood filling.
+        # Notice the size needs to be 2 pixels than the image.
+        h, w = im_processed.shape[:2]
+        mask = np.zeros((h + 2, w + 2), np.uint8)
+
+        # Floodfill from point (0, 0)
+        cv2.floodFill(im_floodfill, mask, (0, 0), 255)
+
+        # Invert floodfilled image
+        im_floodfill_inv = cv2.bitwise_not(im_floodfill)
+
+        # Step3: Combine the two images to get the foreground.
+        im_floodfill = im_processed | im_floodfill_inv
+
+        if verbose:
+            cv2.imshow('im_floodfill', im_floodfill)
+            cv2.waitKey()
+
+        regions.append(im_floodfill)
+
+    seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
+    for i in range(len(regions)):
+        seg_img_combined = seg_img_combined | regions[i]
+
+    return seg_img_combined
 
 #
 # ====================== puzzle.utils.imageProcessing ======================

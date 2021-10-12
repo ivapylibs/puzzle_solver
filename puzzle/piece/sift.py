@@ -74,10 +74,10 @@ class sift(matchSimilar):
         # Focus on the puzzle piece image with mask
         theImage = np.zeros_like(piece.y.image)
         theImage[piece.y.rcoords[1], piece.y.rcoords[0], :] = piece.y.appear
-        kp, des = sift_builder.detectAndCompute(theImage, None)
 
-        # @todo Maybe it is wrong to put y.image here
-        # kp, des = sift_builder.detectAndCompute(y.image, None)
+        # theImage = white_balance(theImage)
+
+        kp, des = sift_builder.detectAndCompute(theImage, None)
 
         piece.y.kpFea = (kp, des)
 
@@ -108,7 +108,7 @@ class sift(matchSimilar):
         kp_A, des_A = self.process(yA)
         kp_B, des_B = self.process(yB)
 
-        matches = calculateMatches(des_A, des_B)
+        matches = calculateMatches(des_A, des_B, 0.5)
         distance = 100 * (len(matches) / min(len(kp_A), len(kp_B)))
 
         return distance
@@ -149,10 +149,13 @@ class sift(matchSimilar):
 
         # Robustly estimate affine transform model with RANSAC
 
-        if len(src) >= 3:
-            model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
-                                           residual_threshold=2, max_trials=100)
-            outliers = inliers == False
+        if len(src) > 3:
+            try:
+                model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
+                                               residual_threshold=2, max_trials=100)
+                outliers = inliers == False
+            except:
+                print('s')
 
             return distance > self.tau, np.rad2deg(model_robust.rotation)
         else:

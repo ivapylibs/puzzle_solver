@@ -82,7 +82,7 @@ class copyAttributes(object):
         return target
 
 
-def calculateMatches(des1, des2):
+def calculateMatches(des1, des2, ratio_threshold=0.7):
     """
     @brief  Calculate the matches based on KNN
             See https://github.com/adumrewal/SIFTImageSimilarity/blob/master/SIFTSimilarityInteractive.ipynb
@@ -99,13 +99,13 @@ def calculateMatches(des1, des2):
     matches = bf.knnMatch(des1, des2, k=2)
     topResults1 = []
     for m, n in matches:
-        if m.distance < 0.7 * n.distance:
+        if m.distance < ratio_threshold * n.distance:
             topResults1.append([m])
 
     matches = bf.knnMatch(des2, des1, k=2)
     topResults2 = []
     for m, n in matches:
-        if m.distance < 0.7 * n.distance:
+        if m.distance < ratio_threshold * n.distance:
             topResults2.append([m])
 
     topResults = []
