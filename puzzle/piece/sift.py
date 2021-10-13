@@ -150,16 +150,12 @@ class sift(matchSimilar):
         # Robustly estimate affine transform model with RANSAC
 
         if len(src) > 3:
-            try:
-                model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
-                                               residual_threshold=2, max_trials=100)
-                outliers = inliers == False
-            except:
-                print('s')
-
+            model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
+                                           residual_threshold=2, max_trials=100)
+            outliers = inliers == False
             return distance > self.tau, np.rad2deg(model_robust.rotation)
         else:
-            return False, None
+            return distance > self.tau, np.rad2deg(model.rotation)
 
 #
 # ================================ puzzle.piece.sift ================================
