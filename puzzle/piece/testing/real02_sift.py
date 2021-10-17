@@ -2,7 +2,7 @@
 # ============================ real02_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (real images)
+#           for puzzle pieces. (real images + assume prev segmentation)
 #
 # ============================ real02_sift ===========================
 

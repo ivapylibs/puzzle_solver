@@ -2,7 +2,7 @@
 # ============================ real03_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (real images)
+#           for puzzle pieces. (real images + no prev segmentation)
 #
 # ============================ real03_sift ===========================
 
@@ -36,11 +36,11 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template.
 #
 # theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample/SinglePiece5_meaBoard.png')
-theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
+theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
 # theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample/SinglePiece2_meaBoard.png')
-theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
+theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_3.png')
 # theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
 
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
@@ -82,6 +82,13 @@ print('Should see two 100% overlapped pieces')
 
 thePiece_C = thePiece_A.rotatePiece(theta= -ret[1])
 thePiece_C.setPlacement(r=thePiece_B.rLoc-thePiece_A.rLoc, offset=True)
+
+
+# # Not accurate with translation from sift
+# thePiece_C = thePiece_A.rotatePiece(theta= -ret[1])
+# thePiece_C.setPlacement(r=ret[2].astype('int'), offset=True)
+
+
 theBoard.addPiece(thePiece_B)
 theBoard.addPiece(thePiece_C)
 

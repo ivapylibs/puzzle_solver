@@ -172,9 +172,9 @@ class sift(matchSimilar):
             #
             # plt.show()
 
-            return distance > self.tau, np.rad2deg(model_robust.rotation)
+            return distance > self.tau, np.rad2deg(model_robust.rotation), model_robust.translation
         else:
-            return distance > self.tau, np.rad2deg(model.rotation)
+            return distance > self.tau, np.rad2deg(model.rotation), model.translation
 
 #
 # ================================ puzzle.piece.sift ================================
