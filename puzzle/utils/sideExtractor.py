@@ -795,13 +795,15 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
     edges = contour_enlarged
 
-    # Rotate all images
-    # @todo Rotate
-    # edges, M = rotate(edges, rotation_angle)
+    # Without relative translation return
+    # edges, mask_temp, M, x_pad, y_pad = rotate_im(edges, rotation_angle)
+    # theImage, _, _, _, _ = rotate_im(image_enlarged, rotation_angle, mask=mask_temp)
+    # theMask, _, _, _, _ = rotate_im(mask_enlarged, rotation_angle, mask=mask_temp)
 
-    edges, mask_temp, M, x_pad, y_pad = rotate_im(edges, rotation_angle)
-    theImage, _, _, _, _ = rotate_im(image_enlarged, rotation_angle, mask=mask_temp)
-    theMask, _, _, _, _ = rotate_im(mask_enlarged, rotation_angle, mask=mask_temp)
+    # With relative translation return
+    edges, mask_temp, M, x_pad, y_pad, _ = rotate_im(edges, rotation_angle)
+    theImage, _, _, _, _, _ = rotate_im(image_enlarged, rotation_angle, mask=mask_temp)
+    theMask, _, _, _, _, _ = rotate_im(mask_enlarged, rotation_angle, mask=mask_temp)
 
     # # Debug only
     # masked = cv2.bitwise_and(theImage, theImage, mask=edges)

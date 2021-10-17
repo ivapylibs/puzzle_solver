@@ -83,10 +83,10 @@ thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
 # # transformed top-left to new top-left for a specific piece
 # trans = np.eye(3)
 # trans[0:2]= ret[2][0:2]
-# rloc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
-# rloc_new = rloc_new.flatten()[:2]
-# rloc_relative = rloc_new -thePiece_A.rLoc - thePiece_C.relative_pos
-# thePiece_C.setPlacement(r=rloc_relative.astype('int'), offset=True)
+# rLoc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
+# rLoc_new = rLoc_new.flatten()[:2]
+# rLoc_relative = rLoc_new -thePiece_A.rLoc - thePiece_C.rLoc_relative
+# thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
 
 # Method 2:
 thePiece_C.setPlacement(r=thePiece_B.rLoc - thePiece_A.rLoc, offset=True)
