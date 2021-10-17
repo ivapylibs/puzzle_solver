@@ -65,6 +65,8 @@ class simple(base):
         self.match = np.array(match)
         if rotation_match is not None:
             # The command should be minus rotation_match
+            # The computed angle is following counter-clockwise order
+            # while our rotation function is with clockwise order
             self.rotation_match = -np.array(rotation_match)
 
     # ============================== takeTurn =============================
@@ -167,9 +169,6 @@ class simple(base):
         @brief  Plan is to just solve in order (col-wise).
         """
 
-        # Upgrade the solution board to a grid instance to have more functions
-        # theGrid = gridded(self.desired)
-
         if self.rotation_match is not None:
             # Create a copy of the current board
             current_corrected = deepcopy(self.current)
@@ -183,19 +182,24 @@ class simple(base):
             # the pLoc of current ones
             pLoc_cur = self.current.pieceLocations()
 
-        # Rearrage the piece according to match in the solution board
+        # Rearrange the piece according to match in the solution board
         pLoc_sol = {}
         for i in self.match:
             pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
         # Obtain the correction plan for all the matched pieces
+        # with id
         theCorrect = self.desired.corrections(pLoc_sol)
 
+        # with id
         theScores = self.desired.piecesInPlace(pLoc_sol)
 
         if all(value == True for value in theScores.values()):
-            print('All the puzzle pieces have been in position. No move.')
-            return True
+
+            if self.rotation_match is None or np.isnan(self.rotation_match).all():
+                print('All the matched puzzle pieces have been in position. No move.')
+                return True
+
 
         x_max, y_max = np.max(self.desired.gc, axis=1)
 
@@ -203,37 +207,48 @@ class simple(base):
 
             # best_index_sol is just the next target, no matter if the assignment is ready or not
             best_index_sol = np.argwhere((self.desired.gc.T == [i, j]).all(axis=1)).flatten()[0]
+            # In sol, id and index share the same value
+            best_id_sol = best_index_sol
 
-            # Check if can find the match for best_index_sol
-            if best_index_sol not in theScores:
-                print(f'No assignment found')
+            # Check if can find the match for best_id_sol
+            if best_id_sol not in theScores:
+                # print(f'No assignment found')
                 continue
-            elif theScores[best_index_sol] == True:
-                # Skip if theScore is False
-                continue
-            else:
-                index = np.where(self.match[:, 1] == best_index_sol)[0]
 
-                # Obtain the corresponding index in the measured board
-                best_index_mea = self.match[:, 0][index][0]
+            index = np.where(self.match[:, 1] == best_index_sol)[0][0]
 
-                # Get the corresponding id
-                best_id_mea = self.current.pieces[best_index_mea].id
+            # Obtain the corresponding index in the measured board
+            best_index_mea = self.match[:, 0][index]
 
-                if self.rotation_match is not None and not np.isnan(self.rotation_match[best_index_mea]):
-                    # Display the plan
-                    print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[best_index_mea])} degree')
-                    self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
-                        self.rotation_match[best_index_mea])
-                    self.rotation_match[best_index_mea] = None
-                    break
+            # Skip if theScore is False
+            if theScores[best_id_sol] == True:
+                if self.rotation_match is None:
+                    # No rotation option
+                    continue
+                else:
+                    # With rotation option
+                    if np.isnan(self.rotation_match[index]):
+                        continue
 
+            # Get the corresponding id
+            best_id_mea = self.current.pieces[best_index_mea].id
+
+            if self.rotation_match is not None and not np.isnan(self.rotation_match[index]):
                 # Display the plan
-                print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
-
-                # Execute the plan and update the current board
-                self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+                if best_id_mea==0:
+                    print('s')
+                print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[index])} degree')
+                self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
+                    self.rotation_match[index])
+                self.rotation_match[index] = None
                 break
+
+            # Display the plan
+            print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
+
+            # Execute the plan and update the current board
+            self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+            break
 
         return False
 
