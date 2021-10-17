@@ -145,11 +145,12 @@ class manager(fromLayer):
             if ret:
 
                 # Some matchers calculate the rotation as well
+                # from mea to sol (counter-clockwise)
                 if isinstance(ret, tuple):
                     self.pAssignments_rotation.append(ret[1])
                 else:
                     self.pAssignments_rotation.append(
-                        self.solution.pieces[assignment[1]].theta - self.bMeas.pieces[assignment[0]].theta)
+                        self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta)
 
                 pFilteredAssignments.append(assignment)
 

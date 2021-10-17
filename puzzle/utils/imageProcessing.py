@@ -63,6 +63,7 @@ def cropImage(image, template):
 def rotate_im(image, angle, mask=None):
     """
     @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
+    (clockwise)
 
     Args:
         image: The input image.
