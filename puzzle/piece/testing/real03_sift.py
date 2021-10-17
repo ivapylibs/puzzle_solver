@@ -2,7 +2,7 @@
 # ============================ real03_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (real images + no prev segmentation)
+#           for puzzle pieces. (separate multiple pieces from real images)
 #
 # ============================ real03_sift ===========================
 
@@ -78,7 +78,7 @@ print('Should see two 100% overlapped pieces')
 
 thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
 
-# # Method 1 way: knowing thePiece_B's rLoc
+# # Method 1 way: without knowing thePiece_B's rLoc
 # # The most important part is to recompute the relative position from the
 # # transformed top-left to new top-left for a specific piece
 # trans = np.eye(3)

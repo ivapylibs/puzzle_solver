@@ -140,9 +140,9 @@ def rotate_im(image, angle, mask=None):
     # cv2.imshow('dst', final_image)
     # cv2.waitKey()
 
-    return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
+    # return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
 
-    # return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), temp
+    return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), temp
 
 
 def white_balance(img):
