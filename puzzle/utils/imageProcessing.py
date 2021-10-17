@@ -106,11 +106,18 @@ def rotate_im(image, angle, mask=None):
                                    (diagonal, diagonal),
                                    flags=cv2.INTER_NEAREST)
 
+    transform_matrix_full = np.eye(3)
+    transform_matrix_full[:2, :] = transform_matrix
+    temp = transform_matrix_full @ np.array([padding_left, padding_top, 1]).reshape(-1, 1)
+    temp = temp.flatten()[:2]
+
     # boundingRect is meant to work on a black and white image
     if mask is not None:
         x, y, w, h = cv2.boundingRect(mask)
     else:
         x, y, w, h = cv2.boundingRect(rotated_image)
+
+    temp = temp - np.array([x, y])
 
     # print(x, y, w, h)
     # cv2.imshow('rotate', rotated_image)
@@ -127,9 +134,15 @@ def rotate_im(image, angle, mask=None):
                                      borderType=cv2.BORDER_CONSTANT,
                                      value=0
                                      )
+
+    temp = temp + np.array([2, 2])
+
     # cv2.imshow('dst', final_image)
     # cv2.waitKey()
+
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
+
+    # return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), temp
 
 
 def white_balance(img):

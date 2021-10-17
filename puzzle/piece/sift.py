@@ -22,8 +22,6 @@ import numpy as np
 from skimage.measure import ransac
 from skimage.transform import AffineTransform
 
-from skimage.feature import plot_matches
-
 from puzzle.piece.matchSimilar import matchSimilar
 from puzzle.piece.template import template
 from puzzle.utils.dataProcessing import calculateMatches
@@ -146,6 +144,11 @@ class sift(matchSimilar):
             dst.append(kp_B[match[0].trainIdx].pt)
         src = np.array(src)
         dst = np.array(dst)
+
+        # It only makes sense for translation if both piece images have the same origin
+        src = np.array(src) + piece_A.rLoc
+        dst = np.array(dst) + piece_B.rLoc
+
         model = AffineTransform()
         model.estimate(src, dst)
 
@@ -157,7 +160,7 @@ class sift(matchSimilar):
                                            residual_threshold=2, max_trials=100)
             outliers = inliers == False
 
-            # Debug only
+            # # Debug only
             #
             # import matplotlib.pyplot as plt
             #
@@ -172,9 +175,9 @@ class sift(matchSimilar):
             #
             # plt.show()
 
-            return distance > self.tau, np.rad2deg(model_robust.rotation), model_robust.translation
+            return distance > self.tau, np.rad2deg(model_robust.rotation), model_robust.params
         else:
-            return distance > self.tau, np.rad2deg(model.rotation), model.translation
+            return distance > self.tau, np.rad2deg(model.rotation), model.params
 
 #
 # ================================ puzzle.piece.sift ================================

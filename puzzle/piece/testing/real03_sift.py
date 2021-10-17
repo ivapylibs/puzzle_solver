@@ -20,15 +20,11 @@ import os
 
 import cv2
 import matplotlib.pyplot as plt
-import numpy as np
-
-from puzzle.builder.board import board
-from puzzle.piece.sift import sift
-from puzzle.piece.template import template
-from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 from puzzle.builder.arrangement import arrangement, paramArrange
-
+from puzzle.builder.board import board
+from puzzle.piece.sift import sift
+from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -40,8 +36,8 @@ theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
 # theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample/SinglePiece2_meaBoard.png')
-theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_3.png')
-# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
+# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
+theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
 
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
@@ -54,10 +50,10 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGrid_Sol = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                             theParams=paramArrange(areaThreshold=1000))
-theGrid_Mea = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                             theParams=paramArrange(areaThreshold=1000))
+theGrid_Mea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                                 theParams=paramArrange(areaThreshold=1000))
+theGrid_Sol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+                                                 theParams=paramArrange(areaThreshold=1000))
 
 # ==[2] Create a new board
 #
@@ -80,14 +76,20 @@ print(ret)
 #
 print('Should see two 100% overlapped pieces')
 
-thePiece_C = thePiece_A.rotatePiece(theta= -ret[1])
-thePiece_C.setPlacement(r=thePiece_B.rLoc-thePiece_A.rLoc, offset=True)
+thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
 
+# # Method 1 way: knowing thePiece_B's rLoc
+# # The most important part is to recompute the relative position from the
+# # transformed top-left to new top-left for a specific piece
+# trans = np.eye(3)
+# trans[0:2]= ret[2][0:2]
+# rloc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
+# rloc_new = rloc_new.flatten()[:2]
+# rloc_relative = rloc_new -thePiece_A.rLoc - thePiece_C.relative_pos
+# thePiece_C.setPlacement(r=rloc_relative.astype('int'), offset=True)
 
-# # Not accurate with translation from sift
-# thePiece_C = thePiece_A.rotatePiece(theta= -ret[1])
-# thePiece_C.setPlacement(r=ret[2].astype('int'), offset=True)
-
+# Method 2:
+thePiece_C.setPlacement(r=thePiece_B.rLoc - thePiece_A.rLoc, offset=True)
 
 theBoard.addPiece(thePiece_B)
 theBoard.addPiece(thePiece_C)

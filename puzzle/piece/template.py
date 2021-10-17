@@ -353,6 +353,10 @@ class template:
         # By default the rotation is around its center (img center)
         thePiece.y.mask, mask_temp, M, x_pad, y_pad = rotate_im(thePiece.y.mask, theta)
 
+        # Not used yet
+        # thePiece.y.mask, mask_temp, M, x_pad, y_pad, relative_pos = rotate_im(thePiece.y.mask, theta)
+        # thePiece.relative_pos = relative_pos
+
         # Have to apply a thresh to deal with holes caused by interpolation
         _, thePiece.y.mask = cv2.threshold(thePiece.y.mask, 5, 255, cv2.THRESH_BINARY)
 
@@ -360,6 +364,9 @@ class template:
         thePiece.y.mask = cv2.GaussianBlur(thePiece.y.mask, (3, 3), 0)
 
         thePiece.y.image, _, _, _, _ = rotate_im(thePiece.y.image, theta, mask=mask_temp)
+
+        # Not used yet
+        # thePiece.y.image, _, _, _, _, _ = rotate_im(thePiece.y.image, theta, mask=mask_temp)
 
         thePiece.y.size = [thePiece.y.mask.shape[1], thePiece.y.mask.shape[0]]
 

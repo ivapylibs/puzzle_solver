@@ -69,6 +69,14 @@ theMatcher = sift()
 print('Should see True.')
 print(theMatcher.compare(thePiece_A, thePiece_B))
 
+# # Debug only
+#
+# ret = theMatcher.compare(thePiece_A, thePiece_B)
+# dst = cv2.warpAffine(thePiece_A.y.image, ret[2][:2], (thePiece_A.y.size[0], thePiece_A.y.size[1]))
+# cv2.imshow('B',thePiece_B.y.image)
+# cv2.imshow('A_transformed',dst)
+# cv2.waitKey()
+
 theBoard.display()
 
 plt.show()

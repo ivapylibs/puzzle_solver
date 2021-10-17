@@ -19,13 +19,11 @@ import os
 
 import cv2
 import imageio
-import improcessor.basic as improcessor
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
-from puzzle.parser.fromSketch import fromSketch
 from puzzle.piece.sift import sift
 from puzzle.simulator.basic import basic
 from puzzle.solver.simple import simple
@@ -43,8 +41,8 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 # theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample/ExplodedWithRotationAndExchange_meaBoard.png')
 # theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample/ExplodedWithRotation_meaBoard.png')
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
-# theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
+# theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
 
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
