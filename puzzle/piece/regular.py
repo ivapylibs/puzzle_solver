@@ -156,7 +156,7 @@ class regular(template):
 
     def rotatePiece(self, theta):
         """
-        @brief  Rotate the regualar puzzle piece
+        @brief  Rotate the regular puzzle piece
 
         Args:
             theta: The rotation angle.
