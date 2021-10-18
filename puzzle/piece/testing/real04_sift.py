@@ -65,7 +65,7 @@ for i in range(theGrid_Mea.size()):
         theBoard = board()
         thePiece_C = theGrid_Mea.pieces[i].rotatePiece(theta=-ret[1])
 
-        # Method 1 way: without knowing thePiece_B's rLoc
+        # Method 1: without knowing thePiece_B's rLoc
         # The most important part is to recompute the relative position from the
         # transformed top-left to new top-left for a specific piece
         trans = np.eye(3)

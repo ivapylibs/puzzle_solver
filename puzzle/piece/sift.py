@@ -161,13 +161,10 @@ class sift(matchSimilar):
             outliers = inliers == False
 
             # # Debug only
-            #
-            # import matplotlib.pyplot as plt
-            #
             # fig, ax = plt.subplots(nrows=1, ncols=1)
             # inlier_idxs = np.nonzero(inliers)[0]
-            # src2 = np.array([[i[1], i[0]] for i in src])
-            # dst2 = np.array([[i[1], i[0]] for i in dst])
+            # src2 = np.array([[i[1]-piece_A.rLoc[1], i[0]-piece_A.rLoc[0]] for i in src])
+            # dst2 = np.array([[i[1]-piece_B.rLoc[1], i[0]-piece_B.rLoc[0]] for i in dst])
             #
             # # Follow row, col order in plot_matches
             # plot_matches(ax, piece_A.y.image, piece_B.y.image, src2, dst2,
