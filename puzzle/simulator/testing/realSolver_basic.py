@@ -13,21 +13,23 @@
 #
 # ============================ realSolver_basic ===========================
 
-
+# ==[0] Prep environment
 import glob
 import os
 
 import cv2
 import imageio
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
+import numpy as np
 
+from puzzle.builder.board import board
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
+from puzzle.piece.regular import regular
 from puzzle.piece.sift import sift
 from puzzle.simulator.basic import basic
 from puzzle.solver.simple import simple
-from puzzle.utils.imageProcessing import preprocess_real_puzzle
+from puzzle.utils.imageProcessing import preprocess_real_puzzle, find_nonzero_mask
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -51,20 +53,46 @@ theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
 theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 
-# ==[2] Create a Grid instance.
+# ==[2] Create Grid instance to build up solution board & measured board.
 #
-print('Running through test cases. Will take a bit.')
 
-# cv2.imshow('debug', theMaskMea)
-# cv2.waitKey()
-theGrid_Sol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=paramGrid(areaThreshold=1000, reorder=True))
+theGrid_Sol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                 theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                                     pieceConstructor=regular))
+theBoard = board()
+theRegular_0 = theGrid_Sol_src.pieces[0]
+theRegular_0 = theRegular_0.rotatePiece(theta=theRegular_0.theta)
+theBoard.addPiece(theRegular_0)
+
+for i in range(1, theGrid_Sol_src.size()):
+
+    theRegular_0 = theBoard.pieces[i - 1]
+
+    theRegular_1 = theGrid_Sol_src.pieces[i]
+    theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
+
+    if i == 3:
+        theRegular_0 = theBoard.pieces[0]
+        piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+    else:
+        piece_A_coord = find_nonzero_mask(theRegular_0.edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+
+    x_relative = np.max(piece_B_coord[0, :]) - np.max(piece_A_coord[0, :])
+    y_relative = np.max(piece_B_coord[1, :]) - np.max(piece_A_coord[1, :])
+
+    theRegular_1.setPlacement([int(-x_relative), int(-y_relative)], offset=True)
+    theBoard.addPiece(theRegular_1)
+
+theGrid_Sol = gridded(theBoard)
+
 theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                             theParams=paramGrid(areaThreshold=1000, reorder=True))
+                                             theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                                 pieceConstructor=regular))
 
 # ==[3] Create a manager
 #
-# theManager = manager(theGrid_src, managerParms(matcher=edge()))
 
 theManager = manager(theGrid_Sol, managerParms(matcher=sift()))
 theManager.process(theGrid_Mea)
@@ -113,11 +141,8 @@ while 1:
 
     i = i + 1
 
-cv2.waitKey()
 plt.ioff()
 # plt.draw()
-
-
 
 if saveMe:
     # Build GIF
