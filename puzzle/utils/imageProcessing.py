@@ -294,5 +294,24 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
 
     return seg_img_combined
 
+
+def find_nonzero_mask(mask):
+    """
+    @brief Extract the coordinates of the non-zero elements (x,y style) from a mask image
+
+    Args:
+        mask: The input mask image with 0 or 1
+
+    Returns:
+        The coordinates of the non-zero elements (x,y style)
+    """
+
+    rcoords = list(np.nonzero(mask))  # 2 (row,col) x N
+    # Updated to OpenCV style -> (x,y)
+    rcoords[0], rcoords[1] = rcoords[1], rcoords[0]
+    rcoords = np.array(rcoords)
+
+    return rcoords
+
 #
 # ====================== puzzle.utils.imageProcessing ======================

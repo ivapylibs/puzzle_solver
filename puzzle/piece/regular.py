@@ -52,7 +52,7 @@ class EdgeDes:
     # Here we save the rotated edges
     type: int = EdgeType.UNDEFINED  # To save the type: in/out/flat.
     image: np.ndarray = np.array([])  # To save the whole image of the edge.
-    mask: np.ndarray = np.array([])  # To save the mask of the edge.
+    mask: np.ndarray = np.array([])  # To save the mask image of the edge.
 
     colorFea: np.ndarray = np.array([])  # @< The processed color feature.
     shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
@@ -106,7 +106,10 @@ class regular(template):
         self.simple_harris_pts = None
         self.theta = None
 
-        self._process()
+        if theta == 0:
+            self._process(enable_rotate=False)
+        else:
+            self._process()
 
     def setEdgeType(self, direction, type):
         """
@@ -127,7 +130,7 @@ class regular(template):
         for direction in EdgeDirection:
             print(f'{direction.name}:', self.edge[direction.value].type)
 
-    def _process(self):
+    def _process(self, enable_rotate=True):
         """
         @brief  Run the sideExtractor.
         """
@@ -136,7 +139,8 @@ class regular(template):
         out_dict = sideExtractor(self.y, scale_factor=1,
                                  harris_block_size=5, harris_ksize=5,
                                  corner_score_threshold=0.15, corner_minmax_threshold=100,
-                                 shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5)
+                                 shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5,
+                                 enable_rotate=enable_rotate)
 
         # Set up the type/img of the chosen edge
         for direction in EdgeDirection:
@@ -168,6 +172,8 @@ class regular(template):
         # @todo May need to change from redo everything to focus on transformation.
         thePiece = super().rotatePiece(theta)
 
+        # Hacked to disable rotation operation
+        thePiece.theta = 0
         theRegular = regular(thePiece)
 
         return theRegular
