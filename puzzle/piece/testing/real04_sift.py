@@ -36,7 +36,7 @@ theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black
 # theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
-theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_1.png')
+theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
