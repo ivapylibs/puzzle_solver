@@ -673,7 +673,6 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
     #         cv2.circle(debug_mask,i,5,255,-1)
     #     cv2.imshow('debug',debug_mask)
     #     cv2.waitKey()
-    #     print('s')
 
     if len(possible_rectangles) == 0:
         return None

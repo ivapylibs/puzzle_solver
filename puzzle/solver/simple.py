@@ -235,8 +235,6 @@ class simple(base):
 
             if self.rotation_match is not None and not np.isnan(self.rotation_match[index]):
                 # Display the plan
-                if best_id_mea==0:
-                    print('s')
                 print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[index])} degree')
                 self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
                     self.rotation_match[index])
