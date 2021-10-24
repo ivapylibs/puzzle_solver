@@ -126,7 +126,7 @@ theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theGridMea)
+theSim = basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, display the updated board.
 #
@@ -178,14 +178,7 @@ while 1:
     canvas = np.ones_like(theCurImage, np.uint8)
     canvas[imask] = theCurImage[imask]
 
-    # We skip the first piece
     if Move_id is not None:
-        # if Move_id is not None and Move_id!=0:
-        piece_src_rLoc = theGridMea_src.pieces[Move_id].rLoc
-        piece_src_size = theGridMea_src.pieces[Move_id].y.size
-
-        canvas[piece_src_rLoc[1]:piece_src_rLoc[1] + piece_src_size[1], \
-        piece_src_rLoc[0]:piece_src_rLoc[0] + piece_src_size[0]:] = 0
 
         theMaskMea = improc.apply(canvas)
         theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
@@ -193,7 +186,7 @@ while 1:
         theCalibrated.addPiece(theBoard_single.pieces[0])
 
         if saveMe:
-            theCalibratedImage = theCalibrated.toImage(theImage=np.zeros_like(epImage).astype('uint8'), ID_DISPLAY=True)
+            theCalibratedImage = theCalibrated.toImage(ID_DISPLAY=True)
             cv2.imwrite(cpath + f'/data/15pRotateSolverCalibrate_step{str(j).zfill(2)}.png',
                         cv2.cvtColor(thePrevImage, cv2.COLOR_RGB2BGR)
                         )

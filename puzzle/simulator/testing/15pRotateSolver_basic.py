@@ -136,7 +136,7 @@ theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theGrid_new)
+theSim = basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, display the updated board.
 #

@@ -106,7 +106,7 @@ theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theGrid_Mea)
+theSim = basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, display the updated board.
 #
@@ -138,7 +138,7 @@ while 1:
         theSim.fig.savefig(cpath + f'/data/realSolver_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
-    FINISHED = theSolver.takeTurn(defaultPlan='order')
+    _, FINISHED = theSolver.takeTurn(defaultPlan='order')
 
     i = i + 1
 

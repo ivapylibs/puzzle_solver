@@ -13,6 +13,7 @@
 #
 # ============================ 15pSolver_basic ===========================
 
+# ==[0] Prep environment
 
 import glob
 import os
@@ -20,7 +21,6 @@ import os
 import cv2
 import imageio
 import improcessor.basic as improcessor
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
 
 from puzzle.builder.gridded import gridded, paramGrid
@@ -99,7 +99,7 @@ theSolver.setMatch(theManager.pAssignments)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theGrid_new)
+theSim = basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, display the updated board.
 #
