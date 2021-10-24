@@ -113,10 +113,10 @@ class basic:
     #
     # @param[out] theImage    The image to insert pieces into.
     #
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True):
+    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
 
         theImage = self.puzzle.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, COLOR=COLOR,
-                                       CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                                       CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
 
         return theImage
 

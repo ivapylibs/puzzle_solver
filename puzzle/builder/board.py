@@ -299,7 +299,7 @@ class board:
 
         return pLocs
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True):
+    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
@@ -309,6 +309,7 @@ class board:
             ID_DISPLAY: The flag indicating displaying ID or not.
             COLOR: The background color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
+            BOUNDING_BOX: The flag indicating outputting a bounding box area or not.
 
         Returns:
             The rendered image.
@@ -318,9 +319,14 @@ class board:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
             lengths = self.extents().astype('int')
             bbox = self.boundingBox().astype('int')
-            if (theImage.shape[:2] - lengths > 0).all():
+            if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
                 for piece in self.pieces:
-                    piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+
+                    if BOUNDING_BOX:
+                        piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                    else:
+                        piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
                         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -328,8 +334,12 @@ class board:
 
                         y, x = np.nonzero(piece.y.mask)
 
-                        pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
-                               int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) - char_size[1])
+                        if BOUNDING_BOX:
+                            pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
+                                   int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
+                        else:
+                            pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
+                                   int(piece.rLoc[1] + np.mean(y)) + char_size[1])
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                         cv2.putText(theImage, str(piece.id), pos, font,
@@ -340,10 +350,18 @@ class board:
             # Create image with proper dimensions.
             lengths = self.extents().astype('int')
             bbox = self.boundingBox().astype('int')
-            theImage = np.zeros((lengths[1], lengths[0], 3), dtype='uint8')
+
+            if BOUNDING_BOX:
+                theImage = np.zeros((lengths[1], lengths[0], 3), dtype='uint8')
+            else:
+                theImage = np.zeros((bbox[1, 1], bbox[1, 0], 3), dtype='uint8')
 
             for piece in self.pieces:
-                piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                if BOUNDING_BOX:
+                    piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                else:
+                    piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+
                 if ID_DISPLAY == True:
                     txt = str(piece.id)
                     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -351,17 +369,22 @@ class board:
 
                     y, x = np.nonzero(piece.y.mask)
 
-                    pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
-                           int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
+                    if BOUNDING_BOX:
+                        pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
+                               int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
+                    else:
+                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
+                               int(piece.rLoc[1] + np.mean(y)) + char_size[1])
 
                     font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                     cv2.putText(theImage, str(piece.id), pos, font,
                                 font_scale, COLOR, 2, cv2.LINE_AA)
 
-            # For better segmentation result, we need some black paddings
-            theImage_enlarged = np.zeros((lengths[1] + 4, lengths[0] + 4, 3), dtype='uint8')
-            theImage_enlarged[2:-2, 2:-2, :] = theImage
-            theImage = theImage_enlarged
+            # # For better segmentation result, we need some black paddings
+            # # However, it may cause some problems
+            # theImage_enlarged = np.zeros((lengths[1] + 4, lengths[0] + 4, 3), dtype='uint8')
+            # theImage_enlarged[2:-2, 2:-2, :] = theImage
+            # theImage = theImage_enlarged
         return theImage
 
     def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True):
