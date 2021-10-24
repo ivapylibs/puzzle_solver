@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================ 15pRotateSolverCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver. (15p img)
+# @brief    Test script with command from the solver & for calibration process. (15p img)
 #
 # ============================ 15pRotateSolverCalibrate_basic ===========================
 
@@ -13,8 +13,9 @@
 #
 # ============================ 15pRotateSolverCalibrate_basic ===========================
 
-import copy
 # ==[0] Prep environment
+
+import copy
 import glob
 import os
 

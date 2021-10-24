@@ -128,7 +128,7 @@ theManager.process(theGrid_new)
 # plt.show()
 
 
-# ==[4] Create simple sovler and set up the match
+# ==[4] Create simple solver and set up the match
 #
 theSolver = simple(theGrid_src, theGrid_new)
 

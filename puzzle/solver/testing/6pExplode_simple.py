@@ -66,7 +66,7 @@ axarr[1].title.set_text('Exploded View')
 theManager = manager(theBoardSol)
 theManager.process(epBoard)
 
-# ==[4] Create simple sovler and set up the match
+# ==[4] Create simple solver and set up the match
 #
 theSolver = simple(gridded(theBoardSol), gridded(epBoard))
 

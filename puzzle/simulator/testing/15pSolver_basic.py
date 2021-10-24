@@ -91,7 +91,7 @@ theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
 theManager = manager(theGrid_src, managerParms(matcher=sift()))
 theManager.process(theGrid_new)
 
-# ==[4] Create simple sovler and set up the match
+# ==[4] Create simple solver and set up the match
 #
 theSolver = simple(theGrid_src, theGrid_new)
 
