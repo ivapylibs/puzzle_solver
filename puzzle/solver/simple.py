@@ -74,14 +74,15 @@ class simple(base):
     # @brief  Perform a single puzzle solving action, which move a piece
     #         to its correct location.
     #
-    def takeTurn(self, thePlan=None, defaultPlan='score'):
+    def takeTurn(self, thePlan=None, defaultPlan='score', STEP_WISE=True):
 
         if self.plan is None:
             if thePlan is None:
                 if defaultPlan == 'score':
-                    FINISHED = self.planByScore()
+                    # Todo: Need further development
+                    piece_id, FINISHED = self.planByScore()
                 elif defaultPlan == 'order':
-                    FINISHED = self.planOrdered()
+                    piece_id, FINISHED = self.planOrdered(STEP_WISE=STEP_WISE)
                 else:
                     print('No default plan has been correctly initlized.')
 
@@ -98,7 +99,7 @@ class simple(base):
             """
             pass
 
-        return FINISHED
+        return piece_id, FINISHED
 
     # ============================ planByScore ============================
     #
@@ -164,10 +165,20 @@ class simple(base):
 
         return False
 
-    def planOrdered(self):
+    def planOrdered(self, STEP_WISE=True):
         """
-        @brief  Plan is to just solve in order (col-wise).
+        @brief  Plan is to solve puzzle pieces in order (col-wise).
+
+        Args:
+            STEP_WISE: If disabled, we will change the puzzle piece's rotation & location
+                        in a single step.
+
+        Returns:
+            Moved piece id, Flag signaling whether the puzzle piece work is completed
         """
+
+        # Default value
+        best_id_mea = None
 
         if self.rotation_match is not None:
             # Create a copy of the current board
@@ -198,7 +209,7 @@ class simple(base):
 
             if self.rotation_match is None or np.isnan(self.rotation_match).all():
                 print('All the matched puzzle pieces have been in position. No move.')
-                return True
+                return best_id_mea, True
 
 
         x_max, y_max = np.max(self.desired.gc, axis=1)
@@ -239,6 +250,13 @@ class simple(base):
                 self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
                     self.rotation_match[index])
                 self.rotation_match[index] = None
+
+                if STEP_WISE == False:
+                    # Display the plan
+                    print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
+
+                    # Execute the plan and update the current board
+                    self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
                 break
 
             # Display the plan
@@ -248,7 +266,7 @@ class simple(base):
             self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
             break
 
-        return False
+        return best_id_mea, False
 
     def planGreedyTSP(self):
         """

@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-# ============================ 15pSolver_basic ===========================
+# ============================ 15pRotateSolver_basic ===========================
 #
 # @brief    Test script with command from the solver. (15p img)
 #
-# ============================ 15pSolver_basic ===========================
+# ============================ 15pRotateSolver_basic ===========================
 
 #
-# @file     15pSolver_basic.py
+# @file     15pRotateSolver_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/30  [created]
 #
-# ============================ 15pSolver_basic ===========================
+# ============================ 15pRotateSolver_basic ===========================
 
 # ==[0] Prep environment
 import glob
@@ -168,7 +168,7 @@ while 1:
         theSim.fig.savefig(cpath + f'/data/15pRotateSolver_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
-    FINISHED = theSolver.takeTurn(defaultPlan='order')
+    _, FINISHED = theSolver.takeTurn(defaultPlan='order')
 
     i = i + 1
 
@@ -185,4 +185,4 @@ if saveMe:
             writer.append_data(image)
 
 #
-# ============================ 15pSolver_basic ===========================
+# ============================ 15pRotateSolver_basic ===========================

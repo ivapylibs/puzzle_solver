@@ -71,6 +71,7 @@ for i in range(1, theGrid_Sol_src.size()):
     theRegular_1 = theGrid_Sol_src.pieces[i]
     theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
 
+    # Todo: Adhoc way, will update in the future
     if i == 3:
         theRegular_0 = theBoard.pieces[0]
         piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
