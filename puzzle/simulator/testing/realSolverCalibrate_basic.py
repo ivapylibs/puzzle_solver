@@ -174,7 +174,7 @@ while 1:
                         cv2.cvtColor(theCurImage, cv2.COLOR_RGB2BGR)
                         )
             j = j + 1
-            cv2.imwrite(cpath + f'/data/15pRotateSolverCalibrate_step{str(j).zfill(2)}.png',
+            cv2.imwrite(cpath + f'/data/realSolverCalibrate_step{str(j).zfill(2)}.png',
                         cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR)
                         )
             j = j + 1
@@ -192,7 +192,7 @@ theCalibrated.display(ID_DISPLAY=True)
 if saveMe:
     # Build GIF
     with imageio.get_writer(cpath + f'/data/realSolverCalibrate.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/v_step*.png')
+        filename_list = glob.glob(cpath + f'/data/realSolverCalibrate_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)

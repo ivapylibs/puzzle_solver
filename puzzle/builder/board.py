@@ -299,7 +299,8 @@ class board:
 
         return pLocs
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0), ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True,
+                BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
@@ -308,6 +309,7 @@ class board:
             theImage: The image to insert pieces into.
             ID_DISPLAY: The flag indicating displaying ID or not.
             COLOR: The background color.
+            ID_COLOR: The ID color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
             BOUNDING_BOX: The flag indicating outputting a bounding box area or not.
 
@@ -343,7 +345,7 @@ class board:
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                         cv2.putText(theImage, str(piece.id), pos, font,
-                                    font_scale, COLOR, 2, cv2.LINE_AA)
+                                    font_scale, ID_COLOR, 2, cv2.LINE_AA)
             else:
                 raise RuntimeError('The image is too small. Please try again.')
         else:
@@ -352,9 +354,9 @@ class board:
             bbox = self.boundingBox().astype('int')
 
             if BOUNDING_BOX:
-                theImage = np.zeros((lengths[1], lengths[0], 3), dtype='uint8')
+                theImage = np.full((lengths[1], lengths[0], 3), COLOR, dtype='uint8')
             else:
-                theImage = np.zeros((bbox[1, 1], bbox[1, 0], 3), dtype='uint8')
+                theImage = np.full((bbox[1, 1], bbox[1, 0], 3), COLOR, dtype='uint8')
 
             for piece in self.pieces:
                 if BOUNDING_BOX:
@@ -378,7 +380,7 @@ class board:
 
                     font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                     cv2.putText(theImage, str(piece.id), pos, font,
-                                font_scale, COLOR, 2, cv2.LINE_AA)
+                                font_scale, ID_COLOR, 2, cv2.LINE_AA)
 
             # # For better segmentation result, we need some black paddings
             # # However, it may cause some problems

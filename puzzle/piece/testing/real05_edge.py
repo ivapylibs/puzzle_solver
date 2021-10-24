@@ -47,6 +47,9 @@ theMaskSol_A = preprocess_real_puzzle(theImageSol_A, verbose=False)
 theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
                                              theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
                                                                  reorder=True))
+# theImage = theGrid_Mea.toImage(COLOR=(0,100,0), ID_DISPLAY=True, CONTOUR_DISPLAY=True)
+# plt.imshow(theImage)
+# plt.show()
 
 # ==[2] Assemble the puzzle according to grid pos
 # (we assume the relative location has not been changed)
