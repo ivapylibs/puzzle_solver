@@ -227,6 +227,15 @@ class fromLayer(centroidMulti):
                 if bb_intersection_over_union(region[3], [x, y, x + w, y + h]) > 0.5:
                     skipflag = True
                     break
+
+
+            # Todo: A triky solution to remove all black region
+            if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
+                                             cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
+                continue
+
+
+
             if not skipflag:
                 regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
 
