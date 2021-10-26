@@ -176,6 +176,15 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
         The mask region list.
     """
 
+    # Manually add a bounding box on the edges,
+    # otherwise, the region connected to the border will be removed
+    img_black_border = np.zeros_like(img, 'uint8')
+    img_black_border[2:-2,2:-2,:] = img[2:-2,2:-2,:]
+
+    if verbose:
+        cv2.imshow('img_black_border', img_black_border)
+        cv2.waitKey()
+
     if mask is None:
 
         # Manually threshold the img if mask is not given. It should not be better than the one
@@ -185,7 +194,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
                                    improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
                                    cv2.dilate, (np.ones((5, 5), np.uint8),)
                                    )
-        mask = improc.apply(img)
+        mask = improc.apply(img_black_border)
 
         if verbose:
             cv2.imshow('mask', mask)
@@ -197,30 +206,40 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
     # Step 1: with threshold
-    im_preprocessed_src = improc.apply(img)
+    im_pre_canny = improc.apply(img_black_border)
 
     if verbose:
-        cv2.imshow('im_preprocessed_src', im_preprocessed_src)
+        cv2.imshow('im_pre_canny+thresh', im_pre_canny)
         cv2.waitKey()
 
+    # # Cannot use connectedComponents assumption
     num_labels, labels = cv2.connectedComponents(mask)
+
+    # desired_cnts = findCorrectedContours(mask)
 
     regions = []  # The mask region list.
     for i in range(1, num_labels):
 
-        # if i == 5:
-        #     verbose = True
-        # else:
-        #     verbose = False
+        if i == 0:
+            verbose = True
+        else:
+            verbose = False
 
-        im_preprocessed = cv2.bitwise_and(im_preprocessed_src, im_preprocessed_src,
-                                          mask=np.where(labels == i, 1, 0).astype('uint8'))
+        im_pre_connected = cv2.bitwise_and(im_pre_canny, im_pre_canny,
+                                           mask=np.where(labels == i, 1, 0).astype('uint8'))
 
         if verbose:
-            cv2.imshow('im_preprocessed', im_preprocessed)
+            cv2.imshow('im_pre_connected', im_pre_connected)
             cv2.waitKey()
 
-        cnts, hierarchy = cv2.findContours(im_preprocessed, cv2.RETR_TREE,
+        kernel = np.ones((5,5), np.uint8)
+        im_pre_dilate = cv2.dilate(im_pre_connected, kernel)
+
+        if verbose:
+            cv2.imshow('im_pre_dilate', im_pre_dilate)
+            cv2.waitKey()
+
+        cnts, hierarchy = cv2.findContours(im_pre_dilate, cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter out the outermost contours
@@ -229,7 +248,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
 
             area = cv2.contourArea(c)
 
-            seg_img = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+            seg_img = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
             cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
             # Get ROI, OpenCV style
@@ -238,7 +257,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
             # Double check if ROI has a large IoU with the previous ones
             skipflag = False
             for region in regions_single:
-                if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.95:
+                if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:
                     skipflag = True
                     break
             if not skipflag:
@@ -246,8 +265,13 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
 
         regions_single.sort(key=lambda x: x[1])
 
+        # if verbose:
+        #     for i in range(len(regions_single)):
+        #         cv2.imshow('regions_single',regions_single[i][0])
+        #         cv2.waitKey()
+
         # Step 2: Remove the outermost contour
-        seg_img_combined = np.zeros(im_preprocessed.shape[:2], dtype="uint8")  # reset a blank image every time
+        seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
         for i in range(len(regions_single) - 1):
             seg_img_combined = seg_img_combined | regions_single[i][0]
 
