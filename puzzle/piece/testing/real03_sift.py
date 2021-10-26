@@ -2,7 +2,7 @@
 # ============================ real03_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (separate multiple pieces from real images)
+#           for puzzle pieces. (well-separated pieces from real images)
 #
 # ============================ real03_sift ===========================
 

@@ -2,7 +2,7 @@
 # ============================ real04_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (separate multiple pieces + connected solution from real images)
+#           for puzzle pieces. (well-separated pieces + connected solution from real images)
 #
 # ============================ real04_sift ===========================
 
@@ -53,9 +53,10 @@ theGrid_Sol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
 theGrid_Mea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
                                                  theParams=paramArrange(areaThreshold=1000))
 
-# ==[3] Create a sift matcher
+# ==[3] Create a sift matcher and display the match
 #
 
+print('Should see the match pieces one by one. Some fail to match.')
 
 for i in range(theGrid_Mea.size()):
     theMatcher = sift()
@@ -75,7 +76,6 @@ for i in range(theGrid_Mea.size()):
         rLoc_relative = rLoc_new - theGrid_Mea.pieces[i].rLoc - thePiece_C.rLoc_relative
         thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
 
-        # thePiece_C.setPlacement(r=theGrid_Sol.pieces[0].rLoc - theGrid_Mea.pieces[i].rLoc, offset=True)
         theBoard.addPiece(theGrid_Sol.pieces[0])
         theBoard.addPiece(thePiece_C)
 
