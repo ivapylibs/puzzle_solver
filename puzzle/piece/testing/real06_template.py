@@ -3,6 +3,7 @@
 #
 # @brief    Test script for the most basic functionality of template
 #           puzzle piece class for a real puzzle piece input.
+#           (pieces close to each other from real images)
 #
 # ============================ real06_template ===========================
 
@@ -41,8 +42,9 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 #
 
 theMaskSol = preprocess_real_puzzle(theImageSol, verbose=True)
-cv2.imshow('debug',theMaskSol)
-cv2.waitKey()
+# cv2.imshow('debug',theMaskSol)
+# cv2.waitKey()
+
 # ==[1.2] Create raw puzzle piece data.
 #
 
