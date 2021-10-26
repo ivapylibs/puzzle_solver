@@ -31,7 +31,6 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-# theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample/SinglePiece5_meaBoard.png')
 theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
