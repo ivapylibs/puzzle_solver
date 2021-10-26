@@ -35,9 +35,8 @@ cpath = fpath.rsplit('/', 1)[0]
 theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
-# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample/SinglePiece2_meaBoard.png')
-# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
-theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
+theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
+# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
 
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
@@ -50,16 +49,16 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGrid_Mea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                 theParams=paramArrange(areaThreshold=1000))
-theGrid_Sol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                 theParams=paramArrange(areaThreshold=1000))
+theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                                theParams=paramArrange(areaThreshold=1000))
+theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+                                                theParams=paramArrange(areaThreshold=1000))
 
 # ==[2] Create a new board
 #
 theBoard = board()
-thePiece_A = theGrid_Mea.pieces[0]
-thePiece_B = theGrid_Sol.pieces[0]
+thePiece_A = theGridMea.pieces[0]
+thePiece_B = theGridSol.pieces[0]
 
 # ==[3] Create a sift matcher
 #
@@ -69,7 +68,7 @@ theMatcher = sift()
 #
 print('Should see True')
 
-ret = theMatcher.compare(theGrid_Mea.pieces[0], theGrid_Sol.pieces[0])
+ret = theMatcher.compare(theGridMea.pieces[0], theGridSol.pieces[0])
 print(ret)
 
 # ==[5] Manipulate the pieces following sift result.

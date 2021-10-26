@@ -44,10 +44,10 @@ theMaskSol_A = preprocess_real_puzzle(theImageSol_A, verbose=False)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
+theGridMea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                            theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
                                                                  reorder=True))
-# theImage = theGrid_Mea.toImage(COLOR=(0,100,0), ID_DISPLAY=True, CONTOUR_DISPLAY=True)
+# theImage = theGridMea.toImage(COLOR=(0,100,0), ID_DISPLAY=True, CONTOUR_DISPLAY=True)
 # plt.imshow(theImage)
 # plt.show()
 
@@ -56,15 +56,15 @@ theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
 #
 
 theBoard = board()
-theRegular_0 = theGrid_Mea.pieces[0]
+theRegular_0 = theGridMea.pieces[0]
 theRegular_0 = theRegular_0.rotatePiece(theta=theRegular_0.theta)
 theBoard.addPiece(theRegular_0)
 
-for i in range(1, theGrid_Mea.size()):
+for i in range(1, theGridMea.size()):
 
     theRegular_0 = theBoard.pieces[i - 1]
 
-    theRegular_1 = theGrid_Mea.pieces[i]
+    theRegular_1 = theGridMea.pieces[i]
     theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
 
     if i == 3:
@@ -86,7 +86,7 @@ for i in range(1, theGrid_Mea.size()):
 
 f, axarr = plt.subplots(1, 2)
 
-axarr[0].imshow(theGrid_Mea.toImage(ID_DISPLAY=True))
+axarr[0].imshow(theGridMea.toImage(ID_DISPLAY=True))
 axarr[0].title.set_text('The original puzzle pieces')
 
 axarr[1].imshow(theBoard.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY=False))

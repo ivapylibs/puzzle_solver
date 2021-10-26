@@ -6,7 +6,7 @@
 #
 # Upgrades earlier test scripts to use a depth image plus upper and lower
 # depth limits to establish a detection depth zone. The "depth image" here
-# is simply ficticious data placed into an array (same as fake data in
+# is simply fictitious data placed into an array (same as fake data in
 # earlier test scripts).
 #
 # ============================ basic04_fromSketch ============================

@@ -48,35 +48,35 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGrid_Sol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                 theParams=paramArrange(areaThreshold=1000))
-theGrid_Mea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                 theParams=paramArrange(areaThreshold=1000))
+theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+                                                theParams=paramArrange(areaThreshold=1000))
+theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                                theParams=paramArrange(areaThreshold=1000))
 
 # ==[3] Create a sift matcher and display the match
 #
 
 print('Should see the match pieces one by one. Some fail to match.')
 
-for i in range(theGrid_Mea.size()):
+for i in range(theGridMea.size()):
     theMatcher = sift()
 
-    ret = theMatcher.compare(theGrid_Mea.pieces[i], theGrid_Sol.pieces[0])
+    ret = theMatcher.compare(theGridMea.pieces[i], theGridSol.pieces[0])
     if ret[0]:
         theBoard = board()
-        thePiece_C = theGrid_Mea.pieces[i].rotatePiece(theta=-ret[1])
+        thePiece_C = theGridMea.pieces[i].rotatePiece(theta=-ret[1])
 
         # Method 1: without knowing thePiece_B's rLoc
         # The most important part is to recompute the relative position from the
         # transformed top-left to new top-left for a specific piece
         trans = np.eye(3)
         trans[0:2] = ret[2][0:2]
-        rLoc_new = trans @ np.array([theGrid_Mea.pieces[i].rLoc[0], theGrid_Mea.pieces[i].rLoc[1], 1]).reshape(-1, 1)
+        rLoc_new = trans @ np.array([theGridMea.pieces[i].rLoc[0], theGridMea.pieces[i].rLoc[1], 1]).reshape(-1, 1)
         rLoc_new = rLoc_new.flatten()[:2]
-        rLoc_relative = rLoc_new - theGrid_Mea.pieces[i].rLoc - thePiece_C.rLoc_relative
+        rLoc_relative = rLoc_new - theGridMea.pieces[i].rLoc - thePiece_C.rLoc_relative
         thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
 
-        theBoard.addPiece(theGrid_Sol.pieces[0])
+        theBoard.addPiece(theGridSol.pieces[0])
         theBoard.addPiece(thePiece_C)
 
         theBoard.display(ID_DISPLAY=True)
