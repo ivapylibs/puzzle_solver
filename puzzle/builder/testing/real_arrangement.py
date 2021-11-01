@@ -1,19 +1,18 @@
 #!/usr/bin/python3
-# ============================ real06_template ===========================
+# ============================ real_arrangement ===========================
 #
-# @brief    Test script for the most basic functionality of template
-#           puzzle piece class for a real puzzle piece input.
+# @brief    Test script for building up an arrangement board.
 #           (pieces close to each other from real images)
 #
-# ============================ real06_template ===========================
+# ============================ real_arrangement ===========================
 
 #
-# @file     real06_template.py
+# @file     real_arrangement.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/10/25  [created]
+# @date     2021/11/1  [created]
 #
-# ============================ real06_template ===========================
+# ============================ real_arrangement ===========================
 
 # ==[0] Prep environment
 
@@ -55,4 +54,4 @@ plt.imshow(theImage)
 
 plt.show()
 #
-# ============================ real06_template ===========================
+# ============================ real_arrangement ===========================
