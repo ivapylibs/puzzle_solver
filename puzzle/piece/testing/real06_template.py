@@ -18,23 +18,21 @@
 # ==[0] Prep environment
 
 import os
+
 import cv2
 import matplotlib.pyplot as plt
 
 from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
-
-from puzzle.piece.template import template
-
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/GTSolBoard_mea_1.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/4.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/GTSolBoard_mea_3.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/MeaBoard_5.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 

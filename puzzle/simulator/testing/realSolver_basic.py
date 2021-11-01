@@ -16,6 +16,7 @@
 # ==[0] Prep environment
 import glob
 import os
+import shutil
 
 import cv2
 import imageio
@@ -36,16 +37,16 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample/Exploded_meaBoard.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
+
+# Case 1
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
+# theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
+
+# Case 2
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/GTSolBoard_mea_3.png')
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/MeaBoard_5.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-
-# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample/ExplodedWithRotationAndExchange_meaBoard.png')
-# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample/ExplodedWithRotation_meaBoard.png')
-# theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
-
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
@@ -56,23 +57,23 @@ theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 # ==[2] Create Grid instance to build up solution board & measured board.
 #
 
-theGrid_Sol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                 theParams=paramGrid(areaThreshold=1000, reorder=True,
-                                                                     pieceConstructor=regular))
+theGridSol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                                    pieceConstructor=regular))
 theBoard = board()
-theRegular_0 = theGrid_Sol_src.pieces[0]
+theRegular_0 = theGridSol_src.pieces[0]
 theRegular_0 = theRegular_0.rotatePiece(theta=theRegular_0.theta)
 theBoard.addPiece(theRegular_0)
 
-for i in range(1, theGrid_Sol_src.size()):
+for i in range(1, theGridSol_src.size()):
 
     theRegular_0 = theBoard.pieces[i - 1]
 
-    theRegular_1 = theGrid_Sol_src.pieces[i]
+    theRegular_1 = theGridSol_src.pieces[i]
     theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
 
     # Todo: Adhoc way, will update in the future
-    if i == 3:
+    if i == theGridSol_src.gc.shape[1] / theGridSol_src.gc.shape[0]:
         theRegular_0 = theBoard.pieces[0]
         piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
         piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
@@ -86,21 +87,21 @@ for i in range(1, theGrid_Sol_src.size()):
     theRegular_1.setPlacement([int(-x_relative), int(-y_relative)], offset=True)
     theBoard.addPiece(theRegular_1)
 
-theGrid_Sol = gridded(theBoard)
+theGridSol = gridded(theBoard)
 
-theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                             theParams=paramGrid(areaThreshold=1000, reorder=True,
-                                                                 pieceConstructor=regular))
+theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                            theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                                pieceConstructor=regular))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_Sol, managerParms(matcher=sift()))
-theManager.process(theGrid_Mea)
+theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager.process(theGridMea)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGrid_Sol, theGrid_Mea)
+theSolver = simple(theGridSol, theGridMea)
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
@@ -115,6 +116,11 @@ plt.ion()
 
 # saveMe = True
 saveMe = False
+
+if saveMe:
+    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    for filename in filename_list:
+        shutil.rmtree(filename)
 
 FINISHED = False
 i = 0

@@ -109,7 +109,7 @@ class fromLayer(centroidMulti):
 
             self.haveMeas = True
 
-    def findCorrectedContours(self, mask):
+    def findCorrectedContours(self, mask, FILTER=True):
         """
         @brief Find the right contours given a binary mask image.
 
@@ -131,17 +131,29 @@ class fromLayer(centroidMulti):
 
         hierarchy = hierarchy[0]
 
-        # Filter out the outermost contour
-        # See https://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html
-        keep = []
-        for i in range(hierarchy.shape[0]):
-            if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:, 3] == i) >= 2:
-                pass
-            else:
-                keep.append(i)
+        if FILTER:
+            # Filter out the outermost contour
+            # See https://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html
+            keep = []
+            for i in range(hierarchy.shape[0]):
+                # We assume a valid contour should not contain too many small contours
+                if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:, 3] == i) >= 2:
 
-        cnts = np.array(cnts)
-        cnts = cnts[keep]
+                    # # Debug only
+                    # temp_mask = np.zeros_like(mask).astype('uint8')
+                    # cv2.drawContours(temp_mask, cnts[i], -1, (255, 255, 255), 2)
+                    # _, temp_mask = cv2.threshold(temp_mask, 10, 255, cv2.THRESH_BINARY)
+                    # cv2.imshow('temp_mask', temp_mask)
+                    # cv2.waitKey()
+
+                    pass
+                else:
+                    keep.append(i)
+
+            cnts = np.array(cnts)
+            cnts = cnts[keep]
+        else:
+            cnts = np.array(cnts)
 
         desired_cnts = []
 
@@ -196,6 +208,10 @@ class fromLayer(centroidMulti):
         # cv2.waitKey()
 
         desired_cnts = self.findCorrectedContours(mask)
+
+        # In rare case, a valid contour may contain some small contours
+        if len(desired_cnts) == 0:
+            desired_cnts = self.findCorrectedContours(mask, FILTER=False)
 
         # print('size of desired_cnts is', len(desired_cnts))
 

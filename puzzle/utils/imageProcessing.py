@@ -202,7 +202,8 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                # cv2.medianBlur, (5,),
-                               cv2.Canny, (30, 200,),
+                               cv2.Canny, (30, 50, None, 3, True,),
+                               # cv2.Canny, (30, 200,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
     # Step 1: with threshold
@@ -220,10 +221,10 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
     regions = []  # The mask region list.
     for i in range(1, num_labels):
 
-        if i == 0:
-            verbose = True
-        else:
-            verbose = False
+        # if i == 1:
+        #     verbose = True
+        # else:
+        #     verbose = False
 
         im_pre_connected = cv2.bitwise_and(im_pre_canny, im_pre_canny,
                                            mask=np.where(labels == i, 1, 0).astype('uint8'))
@@ -232,7 +233,8 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
             cv2.imshow('im_pre_connected', im_pre_connected)
             cv2.waitKey()
 
-        kernel = np.ones((5,5), np.uint8)
+        # 3 will lead to better split while 5 is with fewer holes
+        kernel = np.ones((3, 3), np.uint8)
         im_pre_dilate = cv2.dilate(im_pre_connected, kernel)
 
         if verbose:
@@ -283,8 +285,11 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
         kernel = np.ones((3, 3), np.uint8)
         im_processed = cv2.dilate(seg_img_combined, kernel)
 
+        # Alternative, not to use dilation
+        # im_processed = seg_img_combined
+
         if verbose:
-            cv2.imshow('im_processed', im_processed)
+            cv2.imshow('im_processed_dilation', im_processed)
             cv2.waitKey()
 
         # Step 4: Floodfill

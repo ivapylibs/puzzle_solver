@@ -18,6 +18,7 @@
 import copy
 import glob
 import os
+import shutil
 
 import cv2
 import imageio
@@ -40,14 +41,20 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample/Exploded_meaBoard.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
+
+# Case 1
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
+
+# Case 2
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/GTSolBoard_mea_3.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
 #
-theMaskSol = preprocess_real_puzzle(theImageSol)
+theMaskSol = preprocess_real_puzzle(theImageSol, verbose=False)
+# cv2.imshow('debug', theMaskSol)
+# cv2.waitKey()
 
 # ==[2] Create Grid instance to build up solution board & measured board.
 #
@@ -70,7 +77,7 @@ for i in range(1, theGridSol_src.size()):
     theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
 
     # Todo: Adhoc way, will update in the future
-    if i == 3:
+    if i == theGridSol_src.gc.shape[1] / theGridSol_src.gc.shape[0]:
         theRegular_0 = theBoard.pieces[0]
         piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
         piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
@@ -84,17 +91,17 @@ for i in range(1, theGridSol_src.size()):
     theRegular_1.setPlacement([int(-x_relative), int(-y_relative)], offset=True)
     theBoard.addPiece(theRegular_1)
 
-theGrid_Sol = gridded(theBoard)
+theGridSol = gridded(theBoard)
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_Sol, managerParms(matcher=sift()))
+theManager = manager(theGridSol, managerParms(matcher=sift()))
 theManager.process(theGridSol_src)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGrid_Sol, copy.deepcopy(theGridSol_src))
+theSolver = simple(theGridSol, copy.deepcopy(theGridSol_src))
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
@@ -109,6 +116,11 @@ plt.ion()
 
 # saveMe = True
 saveMe = False
+
+if saveMe:
+    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    for filename in filename_list:
+        shutil.rmtree(filename)
 
 FINISHED = False
 # To demonstrate assembly process
@@ -162,7 +174,16 @@ while 1:
         # cv2.waitKey()
         theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
                                                              theParams=paramPuzzle(areaThreshold=1000))
+
         theCalibrated.addPiece(theBoard_single.pieces[0])
+
+        # # Debug only
+        # try:
+        #     theCalibrated.addPiece(theBoard_single.pieces[0])
+        # except:
+        #     cv2.imshow('theMaskMea', theMaskMea)
+        #     cv2.imshow('canvas', canvas)
+        #     cv2.waitKey()
 
         if saveMe:
             theCalibratedImage = theCalibrated.toImage(ID_DISPLAY=True)
