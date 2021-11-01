@@ -18,6 +18,7 @@
 import copy
 import glob
 import os
+import shutil
 
 import cv2
 import imageio
@@ -135,6 +136,11 @@ plt.ion()
 
 # saveMe = True
 saveMe = False
+
+if saveMe:
+    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    for filename in filename_list:
+        shutil.rmtree(filename)
 
 FINISHED = False
 
