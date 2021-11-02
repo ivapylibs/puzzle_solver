@@ -49,9 +49,9 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 #
 
 theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                theParams=paramArrange(areaThreshold=1000))
+                                                theParams=paramArrange(areaThresholdLower=1000))
 theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                theParams=paramArrange(areaThreshold=1000))
+                                                theParams=paramArrange(areaThresholdLower=1000))
 
 # ==[2] Create a new board
 #

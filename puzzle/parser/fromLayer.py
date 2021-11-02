@@ -37,7 +37,8 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 @dataclass
 class paramPuzzle:
-    areaThreshold: float = 20
+    areaThresholdLower: float = 20
+    areaThresholdUpper: float = float('inf')
     pieceConstructor: any = template
 
 
@@ -164,9 +165,10 @@ class fromLayer(centroidMulti):
 
             area = cv2.contourArea(c)
 
-
             # Filtered by the area threshold
-            if area > self.params.areaThreshold:
+            if area > self.params.areaThresholdUpper:
+                continue
+            elif area > self.params.areaThresholdLower:
                 desired_cnts.append(c)
             else:
 

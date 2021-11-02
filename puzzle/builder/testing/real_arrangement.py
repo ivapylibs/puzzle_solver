@@ -46,7 +46,7 @@ theMaskSol = preprocess_real_puzzle(theImageSol, verbose=True)
 #
 
 theArrange = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramArrange(areaThreshold=1000))
+                                                theParams=paramArrange(areaThresholdLower=1000))
 # ==[1.3] Display.
 #
 theImage = theArrange.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY=True, COLOR=(0,255,0))

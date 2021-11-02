@@ -66,7 +66,7 @@ theMaskSol = theDet.getState().x
 print('Running through test cases. Will take a bit.')
 
 theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular))
+                                             theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular))
 
 epImage, epBoard = theGrid_src.explodedPuzzle(dx=100, dy=100)
 
@@ -87,7 +87,7 @@ theMaskSol_new = improc.apply(epImage)
 # cv2.waitKey()
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
+                                             theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
                                                                  reorder=True))
 
 # ==[3] Create a manager

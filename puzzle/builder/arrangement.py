@@ -365,7 +365,7 @@ class arrangement(board):
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
-        if hasattr(theParams, 'areaThreshold'):
+        if hasattr(theParams, 'areaThresholdLower'):
             pParser = fromLayer(theParams)
         else:
             pParser = fromLayer()
@@ -411,7 +411,7 @@ class arrangement(board):
         elif theDetector is None and theProcessor is not None:
             theDetector = detector.inImage(theProcessor)
 
-        if hasattr(theParams, 'areaThreshold'):
+        if hasattr(theParams, 'areaThresholdLower'):
             theLayer = fromLayer(theParams)
         else:
             theLayer = fromLayer()
@@ -461,7 +461,7 @@ class arrangement(board):
         elif theDetector is None and theProcessor is not None:
             theDetector = detector.inImage(theProcessor)
 
-        if hasattr(theParams, 'areaThreshold'):
+        if hasattr(theParams, 'areaThresholdLower'):
             theLayer = fromLayer(theParams)
         else:
             theLayer = fromLayer()

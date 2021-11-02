@@ -55,7 +55,7 @@ theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular,
+                                         theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
                                                              reorder=True))
 
 # ==[2] Create a cluster instance and process the puzzle board.

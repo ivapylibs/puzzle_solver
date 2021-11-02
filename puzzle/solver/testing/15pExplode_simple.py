@@ -54,7 +54,7 @@ theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
+theLayer = fromLayer(paramPuzzle(areaThresholdLower=5000))
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
@@ -71,7 +71,7 @@ axarr[0].title.set_text('Source solution board')
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThreshold=5000))
+theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThresholdLower=5000))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 

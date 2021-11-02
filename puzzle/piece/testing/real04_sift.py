@@ -49,9 +49,9 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 #
 
 theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                theParams=paramArrange(areaThreshold=1000))
+                                                theParams=paramArrange(areaThresholdLower=1000))
 theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                theParams=paramArrange(areaThreshold=1000))
+                                                theParams=paramArrange(areaThresholdLower=1000))
 
 # ==[3] Create a sift matcher and display the match
 #

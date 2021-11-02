@@ -69,7 +69,7 @@ print('Running through test cases. Will take a bit.')
 
 # theGridSol is unknown to the calibrated board but we will use it for simulator
 theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                            theParams=paramGrid(areaThreshold=5000, reorder=True))
+                                            theParams=paramGrid(areaThresholdLower=5000, reorder=True))
 
 # ==[2.1] Create a new Grid instance from the images
 #
@@ -109,7 +109,7 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
 theMaskMea = improc.apply(epImage)
 
 theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=paramGrid(areaThreshold=1000, reorder=True))
+                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True))
 
 # We will simulate the hand movement
 theGridMea_src = copy.deepcopy(theGridMea)
@@ -188,7 +188,7 @@ while 1:
 
         theMaskMea = improc.apply(canvas)
         theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
-                                                             theParams=paramPuzzle(areaThreshold=1000))
+                                                             theParams=paramPuzzle(areaThresholdLower=1000))
         theCalibrated.addPiece(theBoard_single.pieces[0])
 
         if saveMe:

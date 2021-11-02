@@ -52,7 +52,7 @@ theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance.
 #
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
+theLayer = fromLayer(paramPuzzle(areaThresholdLower=5000))
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()

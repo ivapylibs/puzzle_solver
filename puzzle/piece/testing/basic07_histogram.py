@@ -55,7 +55,7 @@ theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer(paramPuzzle(areaThreshold=5000))
+theLayer = fromLayer(paramPuzzle(areaThresholdLower=5000))
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
@@ -66,7 +66,8 @@ theBoardSol = theLayer.getState()
 print('Running through test cases. Will take a bit.')
 
 theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=paramGrid(areaThreshold=5000, pieceConstructor=regular, reorder=True))
+                                         theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
+                                                             reorder=True))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 
@@ -87,7 +88,7 @@ theMaskSol_new = improc.apply(epImage)
 # cv2.waitKey()
 
 theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
+                                             theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
                                                                  reorder=True))
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location

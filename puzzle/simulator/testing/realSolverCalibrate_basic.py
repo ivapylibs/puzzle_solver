@@ -60,7 +60,7 @@ theMaskSol = preprocess_real_puzzle(theImageSol, verbose=False)
 #
 
 theGridSol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                theParams=paramGrid(areaThresholdLower=1000, reorder=True,
                                                                     pieceConstructor=regular))
 theBoard = board()
 theRegular_0 = theGridSol_src.pieces[0]
@@ -173,7 +173,7 @@ while 1:
         # cv2.imshow('debug', theMaskMea)
         # cv2.waitKey()
         theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
-                                                             theParams=paramPuzzle(areaThreshold=1000))
+                                                             theParams=paramPuzzle(areaThresholdLower=1000))
 
         theCalibrated.addPiece(theBoard_single.pieces[0])
 

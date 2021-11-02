@@ -58,7 +58,7 @@ theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 #
 
 theGridSol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                                theParams=paramGrid(areaThresholdLower=1000, reorder=True,
                                                                     pieceConstructor=regular))
 theBoard = board()
 theRegular_0 = theGridSol_src.pieces[0]
@@ -90,7 +90,7 @@ for i in range(1, theGridSol_src.size()):
 theGridSol = gridded(theBoard)
 
 theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                            theParams=paramGrid(areaThreshold=1000, reorder=True,
+                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True,
                                                                 pieceConstructor=regular))
 
 # ==[3] Create a manager

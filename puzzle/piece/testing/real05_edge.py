@@ -45,8 +45,8 @@ theMaskSol_A = preprocess_real_puzzle(theImageSol_A, verbose=False)
 #
 
 theGridMea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                            theParams=paramGrid(areaThreshold=1000, pieceConstructor=regular,
-                                                                 reorder=True))
+                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+                                                                reorder=True))
 # theImage = theGridMea.toImage(COLOR=(0,100,0), ID_DISPLAY=True, CONTOUR_DISPLAY=True)
 # plt.imshow(theImage)
 # plt.show()
