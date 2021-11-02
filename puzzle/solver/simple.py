@@ -69,12 +69,18 @@ class simple(base):
             # while our rotation function is with clockwise order
             self.rotation_match = -np.array(rotation_match)
 
-    # ============================== takeTurn =============================
-    #
-    # @brief  Perform a single puzzle solving action, which move a piece
-    #         to its correct location.
-    #
     def takeTurn(self, thePlan=None, defaultPlan='score', STEP_WISE=True):
+        """
+        @brief  Perform a single puzzle solving action, which move a piece
+                to its correct location.
+        Args:
+            thePlan: A specific desired action plan.
+            defaultPlan: The default plan strategy.
+            STEP_WISE: Perform STEP_WISE(move&rotation) action or not.
+
+        Returns:
+            piece_id (The moved piece id) FINISHED (Finish flag)
+        """
 
         if self.plan is None:
             if thePlan is None:
@@ -101,11 +107,6 @@ class simple(base):
 
         return piece_id, FINISHED
 
-    # ============================ planByScore ============================
-    #
-    # @brief      Plan is to solve in the order of lowest score.
-    #             Will display the plan and update the puzzle piece.
-    #
     def planByScore(self):
         """
         @brief      Plan is to solve in the order of lowest score

@@ -35,13 +35,17 @@ from puzzle.solver.simple import simple
 
 class twoAgent(simple):
 
-    # =============================== simple ==============================
-    #
-    # @brief  Derived from the simple puzzle solver, it also takes in two
-    #         solver build functiond to seed with information.  Defaults
-    #         to simple solvers if none given.
-    #
     def __init__(self, theSol, thePuzzle, agent1=None, agent2=None):
+        """
+        @brief  Derived from the simple puzzle solver, it also takes in two
+                solver build functiond to seed with information.  Defaults
+                to simple solvers if none given.
+        Args:
+            theSol: The solution board.
+            thePuzzle: The actual board.
+            agent1: The agent 1.
+            agent2: The agent 2.
+        """
 
         super(twoAgent, self).__init__(theSol, thePuzzle)
 
@@ -54,14 +58,13 @@ class twoAgent(simple):
         self.agents = [agent1, agent2]  # Make a list/array.
         self.iMove = 0  # Move index.
 
-    # ============================== setMatch =============================
-    #
-    # @brief  Set up the match
-    #
-    # @param[in]  match   The match between the id in the measured board
-    #                     and the solution board.
-    #
     def setMatch(self, match):
+        """
+        @brief  Set up the match
+
+        Args:
+            match: The match between the id in the measured board and the solution board.
+        """
 
         for agent in self.agents:
             agent.match = np.array(match)
@@ -72,6 +75,15 @@ class twoAgent(simple):
     #         to its correct location.
     #
     def takeTurn(self, thePlan=None, defaultPlan='score'):
+        """
+
+        Args:
+            thePlan: A specific desired action plan.
+            defaultPlan: The default plan strategy.
+
+        Returns:
+            FINISHED (Finish flag)
+        """
 
         print(f'It is agent {self.iMove}\'s turn:')
 

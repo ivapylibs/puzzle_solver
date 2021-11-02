@@ -29,22 +29,29 @@
 
 class base:
 
-    # ================================ base ===============================
-    #
-    # @brief  Constructor for the base puzzle solver class.  Assumes
-    #         existence of solution state and current puzzle state.
-    #
     def __init__(self, theSol, thePuzzle):
+        """
+        @brief  Constructor for the base puzzle solver class.  Assumes
+                existence of solution state and current puzzle state.
+        Args:
+            theSol: The solution board.
+            thePuzzle: The actual board.
+        """
+
         self.desired = theSol  # @< Desired/solution puzzle board.
         self.current = thePuzzle  # @< Actual puzzle board.
 
-    # ============================== takeTurn =============================
-    #
-    # @brief  Perform a single puzzle solving action, which move a piece
-    #         to its correct location. Base class is empty and should be
-    #         overloaded.
-    #
     def takeTurn(self, thePlan=None):
+        """
+        @brief  Perform a single puzzle solving action, which move a piece
+                to its correct location. Base class is empty and should be
+                overloaded.
+
+        Args:
+            thePlan: A specific desired action plan.
+
+        """
+
         pass
 
 #
