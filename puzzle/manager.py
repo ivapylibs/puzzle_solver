@@ -86,14 +86,15 @@ class manager(fromLayer):
     # @note
     # Yunzhi: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
-    # =============================== manager ==============================
-    #
-    # @brief  Constructor for the puzzle piece manager class.
-    #
-    # @param[in]  solution    A solution/calibrated board instance.
-    # @param[in]  theParms    Any additional parameters in a structure.
-    #
-    def __init__(self, solution, theParms=managerParms):
+    def __init__(self, solution, theParams=managerParms):
+        """
+        @brief  Constructor for the puzzle piece manager class.
+
+        Args:
+            solution: A solution/calibrated board instance.
+            theParams: Any additional parameters in a structure.
+        """
+
         super(manager, self).__init__()
 
         self.solution = solution  # @< The solution puzzle board.
@@ -101,7 +102,7 @@ class manager(fromLayer):
         self.pAssignments_rotation = []  # @< Assignments: meas to sol. The rotation angles (degree).
         # self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
-        self.matcher = theParms.matcher  # @< Matcher instance
+        self.matcher = theParams.matcher  # @< Matcher instance
 
         if isinstance(self.matcher, matchDifferent):
             self.scoreType = SCORE_DIFFERENCE  # @< The type of comparator.
@@ -114,17 +115,17 @@ class manager(fromLayer):
     #
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
 
-    # ============================== measure ==============================
-    #
-    # @brief  Process the passed imagery to recover puzzle pieces and
-    #         manage their track states.
-    #
-    # @param[in]  I   Source image.
-    # @param[in]  M   Layer mask (binary)
-    # OR
-    # @param[in]  board The measured board.
-    #
     def measure(self, *argv):
+        """
+
+        Args:
+            I:          RGB image.
+            M:          Mask image.
+            board:      The measured board.
+
+        Returns:
+
+        """
 
         if len(argv) == 1:
             self.bMeas = argv[0]
@@ -157,14 +158,11 @@ class manager(fromLayer):
         # pAssignments refers to the index but not the id of the puzzle piece
         self.pAssignments = pFilteredAssignments
 
-        # self.bAssigned = self.bMeas.getAssigned(self.pAssignments)
-
-    # =========================== matchPieces ==========================
-    #
-    # @brief  Match all the measured puzzle pieces with the ground truth in a pairwise manner
-    #         to get meas to sol.
-    #
     def matchPieces(self):
+        """
+        @brief  Match all the measured puzzle pieces with the ground truth in a pairwise manner
+                to get meas to sol.
+        """
 
         scoreTable_shape = np.zeros((self.bMeas.size(), self.solution.size()))
         scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
@@ -189,16 +187,18 @@ class manager(fromLayer):
         # However, for some measured piece, they may not have a match according to the threshold.
         self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
 
-    # =========================== greedyAssignment ==========================
-    #
-    # @brief  Run the greedyAssignment for the score table.
-    #
-    # @param[in]  scoreTable   The score table for the pairwise comparison.
-    #
-    # @param[out]  matched_indices   The matched pairs. N x 2
-    #
     def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
+        """
+        @brief  Run the greedyAssignment for the score table.
 
+        Args:
+            scoreTable_shape:  The score table for the pairwise comparison (shape).
+            scoreTable_color:  The score table for the pairwise comparison (color).
+            scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
+
+        Returns:
+            The matched pairs. N x 2
+        """
         # Single feature
         if np.count_nonzero(scoreTable_color) == 0:
             # @note Yunzhi: Only focus on the difference in the scoreTable_shape
@@ -315,17 +315,18 @@ class manager(fromLayer):
     #
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
 
-    # =========================== process ==========================
-    #
-    # @brief  Run the tracking pipeline for image measurement or directly work
-    #         on a measured board. Assume two modes: 1. I & M 2. the measured board.
-    #
-    # @param[in]  I   Source image.
-    # @param[in]  M   Layer mask (binary)
-    # @param[in]  board The measured board.
-    #
     def process(self, *argv):
+        """
+        @brief  Run the tracking pipeline for image measurement or directly work
+                on a measured board. Assume two modes: 1. I & M 2. the measured board.
+        Args:
+            I:   RGB image.
+            M:   Mask image.
+            board: The measured board.
 
+        Returns:
+
+        """
         self.measure(*argv)
 
 #

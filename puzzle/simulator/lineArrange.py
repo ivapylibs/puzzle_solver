@@ -121,7 +121,7 @@ class manager_LA(manager):
     """
 
     def __init__(self, solution: board, theParms: managerParms = managerParms()):
-        super().__init__(solution, theParms=theParms)
+        super().__init__(solution, theParams=theParms)
 
         # self.solution             The solution board
         # self.pAssignment          meas-to-sol association
