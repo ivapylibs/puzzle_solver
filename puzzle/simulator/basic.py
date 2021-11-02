@@ -31,14 +31,14 @@ import matplotlib.pyplot as plt
 
 class basic:
 
-    # =============================== basic ===============================
-    #
-    # @brief  Constructor for the class. Requires a puzzle board.
-    #
-    # @param[in]  thePuzzle   The puzzle board info for simulation.
-    # @param[in]  theFig      The figure handle to use (optional).
-    #
     def __init__(self, thePuzzle, theFig=None):
+        """
+        @brief  Constructor for the class. Requires a puzzle board.
+
+        Args:
+            thePuzzle: The puzzle board info for simulation.
+            theFig: The figure handle to use (optional).
+        """
 
         self.puzzle = thePuzzle
         self.layers = list(range(self.puzzle.size()))
@@ -53,78 +53,82 @@ class basic:
         #       rather part of the interpretation of the puzzle board.
         #
 
-    # =========================== addPiece ==========================
-    #
-    # @brief      Add puzzle piece instance to the board
-    #
-    # @param[in]  piece   A puzzle piece instance
-    #
     def addPiece(self, piece):
+        """
+        @brief  Add puzzle piece instance to the board.
+
+        Args:
+            piece:  A puzzle piece instance.
+        """
 
         self.puzzle.addPiece(piece)
 
-    # =========================== rmPiece ==========================
-    #
-    # @brief      Remove puzzle piece instance from the board
-    #
-    # @param[in]  id   The puzzle piece id
-    #
     def rmPiece(self, id):
+        """
+        @brief  Remove puzzle piece instance from the board.
+
+        Args:
+            id: The puzzle piece id.
+        """
 
         self.puzzle.rmPiece(id)
 
-    # ============================ setPieces ===========================
-    #
-    # @brief  Sets the positions of pieces.
-    #
-    # @param[in]  pLocs   A dict of puzzle pieces ids and their locations.
-    #
-    # If the array of locations is correct, then the puzzle board is updated
-    # according to the specified locations.
-    #
-    # @note
-    # Yunzhi: Since we use a dict to manage the pLocs input, it does not matter
-    # if pLocs have less pieces or not. So we can combine several functions together.
-    #
     def setPieces(self, pLocs):
+        """
+        @brief  Sets the positions of pieces.
+        @note
+        Yunzhi: Since we use a dict to manage the pLocs input, it does not matter
+        if pLocs have less pieces or not. So we can combine several functions together.
 
+        Args:
+            pLocs: A dict of puzzle pieces ids and their locations.
+
+        Returns:
+
+        """
         for ii in range(self.puzzle.size()):
             if self.puzzle.pieces[ii].id in pLocs.keys():
                 self.puzzle.pieces[ii].setPlacement(pLocs[self.puzzle.pieces[ii].id])
 
-    # ============================= dragPieces =============================
-    #
-    # @brief  Moves pieces incrementally from where it is.
-    #
-    # @param[in]  pVecs    A dict of puzzle pieces ids and movement vector.
-    #
     def dragPieces(self, pVecs):
+        """
+        @brief  Moves pieces incrementally from where it is.
+
+        Args:
+            pVecs: A dict of puzzle pieces ids and movement vector.
+        """
 
         for ii in range(self.puzzle.size()):
             if self.puzzle.pieces[ii].id in pVecs.keys():
                 self.puzzle.pieces[ii].setPlacement(pVecs[self.puzzle.pieces[ii].id], offset=True)
 
-    # ============================== toImage ==============================
-    #
-    # @brief  Uses puzzle piece locations to create an image for
-    #         visualizing them.  If given an image, then will place in it.
-    #
-    # @param[in]  theImage    The image to insert pieces into. (optional)
-    #
-    # @param[out] theImage    The image to insert pieces into.
-    #
     def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+        """
+        @brief  Uses puzzle piece locations to create an image for
+                visualizing them.  If given an image, then will place in it.
+        Args:
+            theImage: The image to insert pieces into. (optional)
+            ID_DISPLAY:  Flag indicating ID_DISPLAY or not.
+            COLOR: The color of the background.
+            CONTOUR_DISPLAY:  Flag indicating CONTOUR_DISPLAY or not.
+            BOUNDING_BOX: Flag indicating display with a limited bouding box region or not.
+
+        Returns:
+            theImage(the output image)
+        """
 
         theImage = self.puzzle.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, COLOR=COLOR,
                                        CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
 
         return theImage
 
-    # ============================== display ==============================
-    #
-    # @brief  Displays the current puzzle board.
-    #
     def display(self, ID_DISPLAY=True):
+        """
+        @brief  Displays the current puzzle board.
+
+        Args:
+            ID_DISPLAY: Flag indicating ID_DISPLAY or not.
+        """
 
         if not self.fig:
             self.fig = plt.figure()
