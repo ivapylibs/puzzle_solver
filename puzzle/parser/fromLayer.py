@@ -41,18 +41,20 @@ class paramPuzzle:
     areaThresholdUpper: float = float('inf')
     pieceConstructor: any = template
 
-
 #
 # ======================== puzzle.parser.fromLayer ========================
 #
 
 class fromLayer(centroidMulti):
 
-    # ============================= fromLayer =============================
-    #
-    # @brief  Constructor for the puzzle piece layer parsing class.
-    #
     def __init__(self, theParams=paramPuzzle):
+        """
+        @brief  Constructor for the puzzle piece layer parsing class.
+
+        Args:
+            theParams: The parameters.
+        """
+
         super(fromLayer, self).__init__()
 
         self.bMeas = board()  # @< The measured board.
@@ -61,27 +63,26 @@ class fromLayer(centroidMulti):
 
         self.pieceConstructor = theParams.pieceConstructor  # @< The basic constructor for pieces: template or regular
 
-    # ============================== getState =============================
-    #
-    # @brief  Return the track-pointer state. Override the original one.
-    #
-    # @param[out] tstate  The board measurement.
-    #
     def getState(self):
+        """
+        @brief  Return the track-pointer state. Override the original one.
 
+        Returns:
+            tstate(The board measurement)
+        """
         tstate = self.bMeas
 
         return tstate
 
-    # ============================== measure ==============================
-    #
-    # @brief  Process the passed imagery to recover puzzle pieces and
-    #         manage their track states.
-    #
-    # @param[in]  I   Source image.
-    # @param[in]  M   Layer mask (binary)
-    #
     def measure(self, I, M):
+        """
+        @brief  Process the passed imagery to recover puzzle pieces and
+                manage their track states.
+
+        Args:
+            I:  RGB image.
+            M:  Mask image.
+        """
 
         # 1] Extract pieces based on disconnected component regions
         #
@@ -190,18 +191,18 @@ class fromLayer(centroidMulti):
 
         return desired_cnts
 
-    # =========================== mask2regions ============================
-    #
-    # @brief      Convert the selection mask into a bunch of regions.
-    #             Mainly based on findContours function.
-    #
-    # @param[in]  I   Source image.
-    # @param[in]  M   Layer mask (binary).
-    #
-    # @param[out] regions   A list of regions (mask, segmented image, location in the source image).
-    #
     def mask2regions(self, I, M):
+        """
+        @brief      Convert the selection mask into a bunch of regions.
+                    Mainly based on findContours function.
 
+        Args:
+            I:  RGB image.
+            M:  Mask image.
+
+        Returns:
+            regions(A list of regions (mask, segmented image, location in the source image))
+        """
         # Convert mask to an image
         mask = M.astype('uint8')
 
@@ -252,23 +253,21 @@ class fromLayer(centroidMulti):
                                              cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
                 continue
 
-
-
             if not skipflag:
                 regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
 
         return regions
 
-    # ========================== regions2pieces ===========================
-    #
-    # @brief  Convert the region information into puzzle pieces.
-    #
-    # @param[in]  regions   a list of region pairs (mask, segmented image, location in the source image).
-    #
-    # @param[out]  pieces   a list of puzzle pieces instances.
-    #
     def regions2pieces(self, regions):
+        """
+        @brief  Convert the region information into puzzle pieces.
 
+        Args:
+            regions:    A list of region pairs (mask, segmented image, location in the source image).
+
+        Returns:
+            pieces(A list of puzzle pieces instances.)
+        """
         pieces = []
         for region in regions:
             theMask = region[0]
@@ -288,15 +287,17 @@ class fromLayer(centroidMulti):
     #
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
 
-    # =========================== process ==========================
-    #
-    # @brief  Run the tracking pipeline for image measurement.
-    #
-    # @param[in]  I   Source image.
-    # @param[in]  M   Layer mask (binary)
-    #
     def process(self, I, M):
+        """
+        @brief  Run the tracking pipeline for image measurement.
 
+        Args:
+            I: RGB image.
+            M: Mask image.
+
+        Returns:
+
+        """
         self.measure(I, M)
 
 #

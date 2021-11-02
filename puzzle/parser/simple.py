@@ -33,27 +33,31 @@ from puzzle.builder.board import board
 #
 class simple(perceiverSimple.simple):
 
-    # =============================== simple ==============================
-    #
-    # @brief  Constructor for the simple puzzler parser. Lacks a filter.
-    #
     def __init__(self, theDetector, theTracker, theParams=[]):
+        """
+        @brief  Constructor for the simple puzzler parser. Lacks a filter.
+
+        Args:
+            theDetector: The detector instance.
+            theTracker: The tracker instance.
+            theParams: The parameters.
+        """
 
         super(simple, self).__init__(theDetector, theTracker, [], theParams)
         self.board = board()
         self.Mask = []
 
-    # ============================== measure ==============================
-    #
-    # @brief      Process data from mask layer and image
-    #
-    # @param[in]  I   The puzzle image source.
-    # @param[in]  LM  The puzzle template mask.
-    #
-    def measure(self, I, LM=None):
+    def measure(self, I, M=None):
+        """
+        @brief      Process data from mask layer and image.
+
+        Args:
+            I:  The puzzle image source.
+            M:  The puzzle template mask.
+        """
 
         self.I = I
-        self.Mask = LM
+        self.Mask = M
 
         # --[1] Parse image and mask to get distinct candidate puzzle objects
         #      from it. Generates mask or revises existing mask.
@@ -82,19 +86,26 @@ class simple(perceiverSimple.simple):
             self.haveRun = True
             # @note   Is this right? Review meanings and correct/confirm.
 
-    def process(self, I, LM=None):
+    def process(self, I, M=None):
+        """
+        @brief  Process the passed imagery.
+
+        Args:
+            I:  The puzzle image source.
+            M:  The puzzle template mask.
+        """
 
         self.predict()
-        self.measure(I, LM)
+        self.measure(I, M)
         self.correct()
         self.adapt()
 
-    # ========================= buildBasicPipeline ========================
-    #
-    # @brief      Creates a simple puzzle parser employing a very basic
-    #             (practically trivial) processing pipeline for
     @staticmethod
     def buildBasicPipeline():
+        """
+        @brief      Creates a simple puzzle parser employing a very basic
+                    (practically trivial) processing pipeline for
+        """
 
         # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
         # file is not yet created for fully known at this moment.

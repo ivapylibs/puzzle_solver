@@ -39,18 +39,34 @@ class fromSketch(inImage):
     def predict(self):
         pass
 
-    def measure(self, I, LM=None):
+    def measure(self, I, M=None):
+        """
+        @brief Process the passed imagery to get the mask.
+
+        Args:
+            I:  RGB image.
+            M:  Mask image.
+        """
+
         # We may still need some simple image processing at the very beginning
         if self.processor is not None:
-            if LM is not None:
+            if M is not None:
                 # Preferred to work on the mask
-                self.Ip = self.processor.apply(LM)
+                self.Ip = self.processor.apply(M)
             else:
                 self.Ip = self.processor.apply(I)
 
-    def process(self, I, LM=None):
+    def process(self, I, M=None):
+        """
+        @brief Process the passed imagery.
+
+        Args:
+            I:  RGB image.
+            M:  Mask image.
+        """
+
         self.predict()
-        self.measure(I, LM)
+        self.measure(I, M)
         self.correct()
         self.adapt()
 
