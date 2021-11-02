@@ -57,7 +57,7 @@ theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
 
 # ==[3] Create a manager
 #
-# theManager = manager(theGrid_src, managerParms(matcher=edge()))
+# theManager = manager(theGridSol, managerParms(matcher=edge()))
 
 theManager = manager(theGrid_Sol, managerParms(matcher=sift()))
 theManager.process(theGrid_Mea)

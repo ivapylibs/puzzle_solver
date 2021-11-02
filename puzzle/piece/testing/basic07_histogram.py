@@ -82,20 +82,20 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
                            cv2.dilate, (np.ones((3, 3), np.uint8),)
                            )
-theMaskSol_new = improc.apply(epImage)
+theMaskMea = improc.apply(epImage)
 
-# cv2.imshow('debug', theMaskSol_new)
+# cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
-                                                                 reorder=True))
+theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+                                                                reorder=True))
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
 #
 
 theRegular_A = theGrid.pieces[1]
-theRegular_B = theGrid_new.pieces[1]
+theRegular_B = theGridMea.pieces[1]
 
 # ==[2] Create a new board
 #

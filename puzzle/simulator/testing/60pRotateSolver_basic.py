@@ -64,18 +64,18 @@ theMaskSol = theDet.getState().x
 
 print('Running through test cases. Will take a bit.')
 
-theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThresholdLower=5000))
+theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThresholdLower=5000))
 
 # ==[2.1] Create a new Grid instance from the images
 #
 
-_, epBoard = theGrid_src.explodedPuzzle(dx=125, dy=125)
+_, epBoard = theGridSol.explodedPuzzle(dx=125, dy=125)
 
 # ==[2.2] Randomly swap the puzzle pieces.
 #
-theGrid_new = gridded(epBoard, paramGrid(reorder=True))
+theGridMea = gridded(epBoard, paramGrid(reorder=True))
 
-_, epBoard = theGrid_new.swapPuzzle()
+_, epBoard = theGridMea.swapPuzzle()
 
 # ==[2.3] Randomly rotate the puzzle pieces.
 #
@@ -98,19 +98,19 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
                            cv2.dilate, (np.ones((3, 3), np.uint8),)
                            )
-theMaskSol_new = improc.apply(epImage)
+theMaskMea = improc.apply(epImage)
 
-# cv2.imshow('debug', theMaskSol_new)
+# cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThresholdLower=1000, reorder=True))
+theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGrid_src, managerParms(matcher=sift()))
-theManager.process(theGrid_new)
+theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager.process(theGridMea)
 
 # # Debug only
 # bMeasImage = theManager.bMeas.toImage(ID_DISPLAY = True)
@@ -131,7 +131,7 @@ theManager.process(theGrid_new)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGrid_src, theGrid_new)
+theSolver = simple(theGridSol, theGridMea)
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 

@@ -61,11 +61,11 @@ theMaskSol = theDet.getState().x
 
 print('Running through test cases. Will take a bit.')
 
-theGrid_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
-                                                                 reorder=True))
+theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                            theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
+                                                                reorder=True))
 
-epImage, _ = theGrid_src.explodedPuzzle(dx=100, dy=100)
+epImage, _ = theGridSol.explodedPuzzle(dx=100, dy=100)
 
 # ==[2.1] Create a new Grid instance from the images
 #
@@ -78,21 +78,21 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
                            cv2.dilate, (np.ones((3, 3), np.uint8),)
                            )
-theMaskSol_new = improc.apply(epImage)
+theMaskMea = improc.apply(epImage)
 
-# cv2.imshow('debug', theMaskSol_new)
+# cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGrid_new = gridded.buildFrom_ImageAndMask(epImage, theMaskSol_new,
-                                             theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
-                                                                 reorder=True))
+theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+                                                                reorder=True))
 
 # ==[3] Create a manager
 #
-# theManager = manager(theGrid_src, managerParms(matcher=edge()))
+# theManager = manager(theGridSol, managerParms(matcher=edge()))
 
-theManager = manager(theGrid_src, managerParms(matcher=sift()))
-theManager.process(theGrid_new)
+theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager.process(theGridMea)
 
 # ==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.
