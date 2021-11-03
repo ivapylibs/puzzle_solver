@@ -51,6 +51,8 @@ class simple(base):
         self.match = None  # @< Mapping from current to desired.
         self.rotation_match = None  # @< Mapping from current to desired.
 
+        # We assume it has followed the plan structure:
+        # [(piece_id, piece_index, action_type, action), ...]
         self.plan = None
 
     def setMatch(self, match, rotation_match=None):
@@ -69,97 +71,45 @@ class simple(base):
             # while our rotation function is with clockwise order
             self.rotation_match = -np.array(rotation_match)
 
-    def takeTurn(self, thePlan=None, defaultPlan='order', STEP_WISE=True):
+    def takeTurn(self, thePlan=None, defaultPlan='order', STEP_WISE=True, COMPLETE_PLAN=False):
         """
-        @brief  Perform a single puzzle solving action, which move a piece
-                to its correct location.
+        @brief  Create a plan.
+
         Args:
-            thePlan: A specific desired action plan.
+            thePlan: A specific desired action plan. We assume it only knows (piece_id, action_type, action).
             defaultPlan: The default plan strategy.
-            STEP_WISE: Perform STEP_WISE(move&rotation) action or not.
+            STEP_WISE: Perform STEP_WISE(move & rotation together) action or not.
 
         Returns:
-            piece_id (The moved piece id) FINISHED (Finish flag)
+            plan(Processed plan list)
         """
 
         if self.plan is None:
             if thePlan is None:
-                if defaultPlan == 'score':
-                    # Todo: Need further development, do not support rotation
-                    piece_id, FINISHED = self.planByScore()
-                elif defaultPlan == 'order':
-                    plan = self.planOrdered(STEP_WISE=STEP_WISE)
+                if defaultPlan == 'order':
+                    plan = self.planOrdered(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
                 else:
-                    print('No default plan has been correctly initlized.')
+                    print('No default plan has been correctly initialized.')
 
             else:
-                """
-                @todo Get and apply move from thePlan
-                Plans not figured out yet, so ignore for now.
-                """
-                pass
+                piece_id = thePlan[0]
+                action_type = thePlan[1]
+                action = thePlan[2]
+
+                for i, piece in enumerate(self.current.pieces):
+                    if piece_id == piece.id:
+                        piece_index = i
+                        plan = [(piece_id, piece_index, action_type, action)]
+                        break
+                    else:
+                        raise RuntimeError('Cannot find this id!')
+
         else:
-            """
-            @todo Get and apply move from self.plan
-            Plans not figured out yet, so ignore for now.
-            """
-            pass
+            # Pop out the first action
+            plan = self.plan[0]
+            self.plan.pop(0)
 
         return plan
-
-    def planByScore(self):
-        """
-        @brief      Plan is to solve in the order of lowest score
-                    Will display the plan and update the puzzle piece.
-
-        """
-
-        if self.rotation_match is not None:
-            print('Not fully developed. Currently, do not support rotation_match')
-            exit(1)
-
-        # the pLoc of current ones
-        pLoc_cur = self.current.pieceLocations()
-
-        # Obtain the id in the solution board according to match
-        pLoc_sol = {}
-        for i in self.match:
-            pLoc_sol[i[1]] = pLoc_cur[i[0]]
-
-        theScores = self.desired.piecesInPlace(pLoc_sol)
-        theDists = self.desired.distances(pLoc_sol)
-
-        # Filter the result by piecesInPlace, only take the False into consideration
-        theDists_filtered = {}
-        for key in theScores:
-            if theScores[key] == False:
-                theDists_filtered[key] = theDists[key]
-
-        if len(theDists_filtered) > 0:
-            # Note that the key refers to the index in the solution board.
-            best_index_sol = min(theDists_filtered, key=theDists_filtered.get)
-
-            # Obtain the correction plan for all the matched pieces
-            theCorrect = self.desired.corrections(pLoc_sol)
-
-            index = np.where(self.match[:, 1] == best_index_sol)[0]
-
-            if index.size > 0:
-                # Obtain the corresponding index in the measured board
-                best_index_mea = self.match[:, 0][index][0]
-
-                # Display the plan
-                print(f'Move piece {best_index_mea} by', theCorrect[best_index_sol])
-
-                # Execute the plan and update the current board
-                self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
-            else:
-                print('No assignment found')
-        else:
-            print('All the puzzle pices have been in position. No move.')
-            return True
-
-        return False
 
     def planOrdered(self, STEP_WISE=True, COMPLETE_PLAN=False):
         """
@@ -170,7 +120,7 @@ class simple(base):
                         in a single step.
 
         Returns:
-            Moved piece id, Flag signaling whether the puzzle piece work is completed
+            plan(The plan list)
         """
 
         # The plan list
@@ -269,7 +219,7 @@ class simple(base):
 
                     plan.append((best_id_mea, best_index_mea, 'move', theCorrect[best_index_sol]))
 
-                if COMPLETE_PLAN:
+                if COMPLETE_PLAN == False:
                     break
 
             # # Display the plan
@@ -280,7 +230,7 @@ class simple(base):
 
             plan.append((best_id_mea, best_index_mea, 'move', theCorrect[best_index_sol]))
 
-            if COMPLETE_PLAN:
+            if COMPLETE_PLAN == False:
                 break
 
         # return best_id_mea,  False
@@ -292,14 +242,13 @@ class simple(base):
         The travelling salesman problem is to visit a set of cities in a
         path optimal manner.  This version applies the same idea in a greed
         manner. That involves finding the piece closest to the true
-        solution, then placing it.  After that it seearches for a piece that
+        solution, then placing it.  After that it searches for a piece that
         minimizes to distance to pick and to place (e.g., distance to the
         next piece + distance to its true location).  That piece is added to
         the plan, and the process repeats until all pieces are planned.
 
         """
 
-        self.plan = None  # EVENTUALLY NEED TO CODE. IGNORE FOR NOW.
-
+        pass
 #
 # ========================== puzzle.solver.simple =========================
