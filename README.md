@@ -13,6 +13,19 @@ The test files are shell command line executable and should work when invoked, p
 performed. If no modifications to the source code will be performed then the ``-e`` flag is not necessary (e.g., use the
 flag if the underlying code will be modified).
 
+This repo is also backed up by several other libraries from our group:
+
+```
+git clone git@github.com:ivapylibs/trackpointer.git
+pip3 install -e trackpointer/
+git clone git@github.com:ivapylibs/detector.git
+pip3 install -e detector/
+git clone git@github.com:ivapylibs/improcessor.git
+pip3 install -e improcessor/
+git clone git@github.com:ivapylibs/Lie.git
+pip3 install -e Lie/
+```
+
 ## Dependencies
 
 Requires the installation of the following python packages:
@@ -24,4 +37,6 @@ Requires the installation of the following python packages:
 - ```scikit-image```
 - ```opencv-python >= 4.0.0.21```
 - ```similaritymeasures```
+
+
 
