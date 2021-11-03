@@ -61,7 +61,7 @@ class simple(base):
 
         Args:
           match: The match between the index in the measured board and the solution board.
-          rotation_match: The rotation match between the index in the measured board and the solution board.
+          rotation_match: The rotation angle for each piece in the match.
         """
 
         self.match = np.array(match)
@@ -88,6 +88,8 @@ class simple(base):
             if thePlan is None:
                 if defaultPlan == 'order':
                     plan = self.planOrdered(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
+                elif defaultPlan == 'new':
+                    plan = self.planNew(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
                 else:
                     print('No default plan has been correctly initialized.')
 
@@ -116,8 +118,9 @@ class simple(base):
         @brief  Plan is to solve puzzle pieces in order (col-wise).
 
         Args:
-            STEP_WISE: If disabled, we will change the puzzle piece's rotation & location
+            STEP_WISE: If disabled, we will put the puzzle piece's rotation & location
                         in a single step.
+            COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
 
         Returns:
             plan(The plan list)
@@ -125,9 +128,6 @@ class simple(base):
 
         # The plan list
         plan = []
-
-        # Default value
-        best_id_mea = None
 
         # With rotation action
         if self.rotation_match is not None:
@@ -180,6 +180,7 @@ class simple(base):
                 # print(f'No assignment found')
                 continue
 
+            # Find the corresponding index in the match, also for best_index_cur
             index = np.where(self.match[:, 1] == best_index_sol)[0][0]
 
             # Obtain the corresponding index in the measured board
@@ -234,6 +235,84 @@ class simple(base):
                 break
 
         # return best_id_mea,  False
+        return plan
+
+    def planNew(self, STEP_WISE=True, COMPLETE_PLAN=False):
+        """
+        @brief Not ready yet
+
+        Args:
+            STEP_WISE: If disabled, we will put the puzzle piece's rotation & location
+                        in a single step.
+            COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
+
+        Returns:
+            plan(The plan list)
+        """
+
+        # The plan list
+        plan = []
+
+        # With rotation action
+        if self.rotation_match is not None:
+            # Create a copy of the current board
+            current_corrected = deepcopy(self.current)
+
+            for idx, angle in enumerate(self.rotation_match):
+                if not np.isnan(angle):
+                    current_corrected.pieces[idx] = current_corrected.pieces[idx].rotatePiece(angle)
+
+            pLoc_cur = current_corrected.pieceLocations()
+        else:
+            # the pLoc of current ones: {id_1: location_1, id_2: location_2 ...}
+            pLoc_cur = self.current.pieceLocations()
+
+        # Rearrange the piece according to the match in the solution board
+        pLoc_sol = {}
+        for i in self.match:
+            pLoc_sol[i[1]] = pLoc_cur[i[0]]
+
+        theCorrect = self.desired.corrections(pLoc_sol)
+
+        # ==========================
+        # @note
+        # theCorrect: saves displacement from x_o (initial x,y position) to x_d (desired x,y position)
+        # like {piece_id_1: displacement_1, piece_id_2: displacement_2, ...}
+        #
+        # pLoc_sol: saves x_o (initial x,y position)
+        # like {piece_id_1: location_1, piece_id_2: location_2, ...}
+        #
+        # self.desired.pieceLocations(): saves x_d (initial x,y position)
+        # like {piece_id_1: location_1, piece_id_2: location_2, ...}
+        #
+        # New Strategy implementation here, You can output a list of piece_id or a single piece_id
+        #
+        # Assume you save them to a list called piece_id_list like
+        # piece_id_list = list(range(0,60))
+        #
+        # ==========================
+
+        # Todo: Comment this line when New Strategy implementation is ready
+        piece_id_list = list(range(0, 60))
+
+        # Generate the action plan following the piece_id_list
+        for piece_id_sol in piece_id_list:
+            # piece_id_sol is the one in the solution board
+
+            for i in self.match:
+                if i[1] == piece_id_sol:
+                    piece_index = i[0]
+                    break
+
+            piece_id = self.current.pieces[piece_index].id
+            index = np.where(self.match[:, 1] == piece_id_sol)[0][0]
+
+            if self.rotation_match is not None:
+                plan.append((piece_id, piece_index, 'rotate', self.rotation_match[index]))
+
+            plan.append((piece_id, piece_index, 'move', theCorrect[piece_id_sol]))
+
+        plan.append(None)
         return plan
 
     def planGreedyTSP(self):
