@@ -109,7 +109,7 @@ theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 #
 theSim = basic(theSolver.current)
 
-# ==[6] Start the solver to take turns, display the updated board.
+# ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #
 
 plt.ion()
