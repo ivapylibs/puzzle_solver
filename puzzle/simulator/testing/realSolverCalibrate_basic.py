@@ -118,7 +118,7 @@ plt.ion()
 saveMe = False
 
 if saveMe:
-    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    filename_list = glob.glob(cpath + f'/data/realSolverCalibrate_step*.png')
     for filename in filename_list:
         shutil.rmtree(filename)
 
