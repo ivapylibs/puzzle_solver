@@ -95,7 +95,7 @@ class basic:
         @brief  Perform the plan.
 
         Args:
-            plan: A tuple (piece_id, piece_index, action_type, action
+            plan: A tuple (piece_id, piece_index, action_type, action)
 
         Returns:
             FINISHED(Signal indicating the end of plan)

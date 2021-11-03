@@ -107,39 +107,39 @@ class board:
         self.pieces = []
         self.id_count = 0
 
-    def getSubset(self, subset):
-        """
-        @brief  Return a new board consisting of a subset of pieces.
+    # def getSubset(self, subset):
+    #     """
+    #     @brief  Return a new board consisting of a subset of pieces.
+    #
+    #     Args:
+    #         subset: A list of indexes for the subset of puzzle pieces.
+    #
+    #     Returns:
+    #         A new board following the input subset.
+    #     """
+    #
+    #     theBoard = board(np.array(self.pieces)[subset], len(subset))
+    #
+    #     return theBoard
 
-        Args:
-            subset: A list of indexes for the subset of puzzle pieces.
-
-        Returns:
-            A new board following the input subset.
-        """
-
-        theBoard = board(np.array(self.pieces)[subset], len(subset))
-
-        return theBoard
-
-    def getAssigned(self, pAssignments):
-        """
-        @brief  Return a new board consisting of a subset of pieces.
-
-        Args:
-            pAssignments: A list of assignments for the subset.
-
-        Returns:
-            A new board following assignment.
-        """
-
-        if len(pAssignments) > 0:
-            theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
-        else:
-            print('No assignments is found. Return an empty board.')
-            theBoard = board()
-
-        return theBoard
+    # def getAssigned(self, pAssignments):
+    #     """
+    #     @brief  Return a new board consisting of a subset of pieces.
+    #
+    #     Args:
+    #         pAssignments: A list of assignments for the subset.
+    #
+    #     Returns:
+    #         A new board following assignment.
+    #     """
+    #
+    #     if len(pAssignments) > 0:
+    #         theBoard = board(np.array(self.pieces)[np.array(pAssignments)[:, 0]], self.id_count)
+    #     else:
+    #         print('No assignments is found. Return an empty board.')
+    #         theBoard = board()
+    #
+    #     return theBoard
 
     def testAdjacent(self, index_A, index_B, tauAdj):
         """
@@ -210,7 +210,6 @@ class board:
             pts = np.unique(pts, axis=0)
 
             return pts
-
 
         pts_A = self.pieces[index_A].rLoc + obtain_sub_pts(self.pieces[index_A])
         pts_B = self.pieces[index_B].rLoc + obtain_sub_pts(self.pieces[index_B])

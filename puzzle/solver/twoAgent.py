@@ -74,7 +74,7 @@ class twoAgent(simple):
     # @brief  Perform a single puzzle solving action, which move a piece
     #         to its correct location.
     #
-    def takeTurn(self, thePlan=None, defaultPlan='score'):
+    def takeTurn(self, thePlan=None, defaultPlan='order'):
         """
 
         Args:
@@ -82,19 +82,19 @@ class twoAgent(simple):
             defaultPlan: The default plan strategy.
 
         Returns:
-            FINISHED (Finish flag)
+            plan (The action plan)
         """
 
         print(f'It is agent {self.iMove}\'s turn:')
 
-        FINISHED = self.agents[self.iMove].takeTurn(defaultPlan=defaultPlan)
+        plan = self.agents[self.iMove].takeTurn(thePlan=thePlan, defaultPlan=defaultPlan)
 
         if (self.iMove == 0):  # Toggle back and forth between agents.
             self.iMove = 1
         else:
             self.iMove = 0
 
-        return FINISHED
+        return plan
 
 #
 # ========================= puzzle.solver.twoAgent ========================

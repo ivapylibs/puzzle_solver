@@ -91,23 +91,49 @@ saveMe = False
 if saveMe:
     f.savefig(cpath + f'/data/theBoard.png')
 
-# num of size() actions at most
-for i in range(1 + thetwoAgent.desired.size()):
+FINISHED = False
+i = 0
 
+while 1:
+
+    # Since we use the same instance in the simulator and the solver,
+    # it will update automatically
     thetwoAgent.current.display(fh=fh, ID_DISPLAY=True)
     fh.suptitle(f'Step {i}, Agent {thetwoAgent.iMove}\'s turn', fontsize=20)
     plt.pause(1)
 
+    if FINISHED:
+        break
     if i == 0:
         # Display the original one at the very beginning
         print(f'The original measured board')
 
     if saveMe:
-        fh.savefig(cpath + f'/data/basic03_step{i}.png')
+        fh.savefig(cpath + f'/data/basic03_step{str(i).zfill(2)}.png')
 
-    if i < thetwoAgent.desired.size():
-        print(f'Step {i + 1}:')
-        thetwoAgent.takeTurn()
+    print(f'Step {i + 1}:')
+
+    plan = thetwoAgent.takeTurn(defaultPlan='order')
+
+    if plan[0] is None:
+        print('All the matched puzzle pieces have been in position. No move.')
+        FINISHED = True
+    else:
+
+        piece_id = plan[0][0]
+        piece_index = plan[0][1]
+        action_type = plan[0][2]
+        action = plan[0][3]
+
+        if action_type == 'rotate':
+            print(f'Rotate piece {piece_id} by {int(action)} degree')
+            thetwoAgent.current.pieces[piece_index] = thetwoAgent.current.pieces[piece_index].rotatePiece(
+                action)
+        elif action_type == 'move':
+            print(f'Move piece {piece_id} by {action}')
+            thetwoAgent.current.pieces[piece_index].setPlacement(action, offset=True)
+
+    i = i + 1
 
 plt.ioff()
 # plt.draw()
