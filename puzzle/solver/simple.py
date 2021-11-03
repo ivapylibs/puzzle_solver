@@ -22,7 +22,6 @@ from copy import deepcopy
 #
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement
 from puzzle.solver.base import base
 
 
@@ -60,8 +59,9 @@ class simple(base):
 
         Args:
           match: The match between the index in the measured board and the solution board.
-          rotation_match: The rotation for each piece in the measured board to the one in the solution board.
+          rotation_match: The rotation match between the index in the measured board and the solution board.
         """
+
         self.match = np.array(match)
         if rotation_match is not None:
             # The command should be minus rotation_match
@@ -69,7 +69,7 @@ class simple(base):
             # while our rotation function is with clockwise order
             self.rotation_match = -np.array(rotation_match)
 
-    def takeTurn(self, thePlan=None, defaultPlan='score', STEP_WISE=True):
+    def takeTurn(self, thePlan=None, defaultPlan='order', STEP_WISE=True):
         """
         @brief  Perform a single puzzle solving action, which move a piece
                 to its correct location.
@@ -85,10 +85,10 @@ class simple(base):
         if self.plan is None:
             if thePlan is None:
                 if defaultPlan == 'score':
-                    # Todo: Need further development
+                    # Todo: Need further development, do not support rotation
                     piece_id, FINISHED = self.planByScore()
                 elif defaultPlan == 'order':
-                    piece_id, FINISHED = self.planOrdered(STEP_WISE=STEP_WISE)
+                    plan = self.planOrdered(STEP_WISE=STEP_WISE)
                 else:
                     print('No default plan has been correctly initlized.')
 
@@ -105,23 +105,18 @@ class simple(base):
             """
             pass
 
-        return piece_id, FINISHED
+        return plan
 
     def planByScore(self):
         """
         @brief      Plan is to solve in the order of lowest score
-        Will display the plan and update the puzzle piece.
+                    Will display the plan and update the puzzle piece.
 
         """
 
-        # @note
-        # Check current puzzle against desired for correct placement boolean
-        # Find lowest false instance
-        # Establish were it must be placed to be correct.
-        # Move to that location.
-
-        # Upgrade to a builder instance to have more functions
-        theArrange = arrangement(self.desired)
+        if self.rotation_match is not None:
+            print('Not fully developed. Currently, do not support rotation_match')
+            exit(1)
 
         # the pLoc of current ones
         pLoc_cur = self.current.pieceLocations()
@@ -131,8 +126,8 @@ class simple(base):
         for i in self.match:
             pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
-        theScores = theArrange.piecesInPlace(pLoc_sol)
-        theDists = theArrange.distances(pLoc_sol)
+        theScores = self.desired.piecesInPlace(pLoc_sol)
+        theDists = self.desired.distances(pLoc_sol)
 
         # Filter the result by piecesInPlace, only take the False into consideration
         theDists_filtered = {}
@@ -145,7 +140,7 @@ class simple(base):
             best_index_sol = min(theDists_filtered, key=theDists_filtered.get)
 
             # Obtain the correction plan for all the matched pieces
-            theCorrect = theArrange.corrections(pLoc_sol)
+            theCorrect = self.desired.corrections(pLoc_sol)
 
             index = np.where(self.match[:, 1] == best_index_sol)[0]
 
@@ -166,7 +161,7 @@ class simple(base):
 
         return False
 
-    def planOrdered(self, STEP_WISE=True):
+    def planOrdered(self, STEP_WISE=True, COMPLETE_PLAN=False):
         """
         @brief  Plan is to solve puzzle pieces in order (col-wise).
 
@@ -178,9 +173,13 @@ class simple(base):
             Moved piece id, Flag signaling whether the puzzle piece work is completed
         """
 
+        # The plan list
+        plan = []
+
         # Default value
         best_id_mea = None
 
+        # With rotation action
         if self.rotation_match is not None:
             # Create a copy of the current board
             current_corrected = deepcopy(self.current)
@@ -194,13 +193,14 @@ class simple(base):
             # the pLoc of current ones
             pLoc_cur = self.current.pieceLocations()
 
-        # Rearrange the piece according to match in the solution board
+        # Rearrange the piece according to the match in the solution board
         pLoc_sol = {}
         for i in self.match:
             pLoc_sol[i[1]] = pLoc_cur[i[0]]
 
         # Obtain the correction plan for all the matched pieces
         # with id
+        # may be incomplete
         theCorrect = self.desired.corrections(pLoc_sol)
 
         # with id
@@ -209,8 +209,11 @@ class simple(base):
         if all(value == True for value in theScores.values()):
 
             if self.rotation_match is None or np.isnan(self.rotation_match).all():
-                print('All the matched puzzle pieces have been in position. No move.')
-                return best_id_mea, True
+                # print('All the matched puzzle pieces have been in position. No move.')
+                # return best_id_mea, True
+
+                plan.append(None)
+                return plan
 
 
         x_max, y_max = np.max(self.desired.gc, axis=1)
@@ -246,28 +249,42 @@ class simple(base):
             best_id_mea = self.current.pieces[best_index_mea].id
 
             if self.rotation_match is not None and not np.isnan(self.rotation_match[index]):
-                # Display the plan
-                print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[index])} degree')
-                self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
-                    self.rotation_match[index])
+                # # Display the plan
+                # print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[index])} degree')
+
+                # self.current.pieces[best_index_mea] = self.current.pieces[best_index_mea].rotatePiece(
+                #     self.rotation_match[index])
+
+                plan.append((best_id_mea, best_index_mea, 'rotate', self.rotation_match[index]))
+
                 self.rotation_match[index] = None
 
                 if STEP_WISE == False:
-                    # Display the plan
-                    print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
+                    # # Display the plan
+                    # # In sol, id and index share the same value, so it is safe to use theCorrect[best_index_sol]
+                    # print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
 
-                    # Execute the plan and update the current board
-                    self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+                    # # Execute the plan and update the current board
+                    # self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+
+                    plan.append((best_id_mea, best_index_mea, 'move', theCorrect[best_index_sol]))
+
+                if COMPLETE_PLAN:
+                    break
+
+            # # Display the plan
+            # print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
+
+            # # Execute the plan and update the current board
+            # self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
+
+            plan.append((best_id_mea, best_index_mea, 'move', theCorrect[best_index_sol]))
+
+            if COMPLETE_PLAN:
                 break
 
-            # Display the plan
-            print(f'Move piece {best_id_mea} by {theCorrect[best_index_sol]}')
-
-            # Execute the plan and update the current board
-            self.current.pieces[best_index_mea].setPlacement(theCorrect[best_index_sol], offset=True)
-            break
-
-        return best_id_mea, False
+        # return best_id_mea,  False
+        return plan
 
     def planGreedyTSP(self):
         """

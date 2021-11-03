@@ -174,7 +174,10 @@ while 1:
         theSim.fig.savefig(cpath + f'/data/60pRotateSolver_step{str(i).zfill(3)}.png')
 
     print(f'Step {i + 1}:')
-    _, FINISHED = theSolver.takeTurn(defaultPlan='order')
+
+    plan = theSolver.takeTurn(defaultPlan='order')
+
+    FINISHED = theSim.takeAction(plan)
 
     i = i + 1
 

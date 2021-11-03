@@ -101,13 +101,19 @@ saveMe = False
 if saveMe:
     f.savefig(cpath + f'/data/theBoardExplode.png')
 
-# num of size() actions at most
-for i in range(1 + theSolver.desired.size()):
+FINISHED = False
+i = 0
 
+while 1:
+
+    # Since we use the same instance in the simulator and the solver,
+    # it will update automatically
     theSolver.current.display(fh=fh, ID_DISPLAY=True)
     fh.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)
 
+    if FINISHED:
+        break
     if i == 0:
         # Display the original one at the very beginning
         print(f'The original measured board')
@@ -115,10 +121,29 @@ for i in range(1 + theSolver.desired.size()):
     if saveMe:
         fh.savefig(cpath + f'/data/15pExplode_step{str(i).zfill(2)}.png')
 
-    if i < theSolver.desired.size():
-        print(f'Step {i + 1}:')
-        theSolver.takeTurn(defaultPlan='order')
+    print(f'Step {i + 1}:')
 
+    plan = theSolver.takeTurn(defaultPlan='order')
+
+    if plan[0] is None:
+        print('All the matched puzzle pieces have been in position. No move.')
+        FINISHED = True
+    else:
+
+        piece_id = plan[0][0]
+        piece_index = plan[0][1]
+        action_type = plan[0][2]
+        action = plan[0][3]
+
+        if action_type == 'rotate':
+            print(f'Rotate piece {piece_id} by {int(action)} degree')
+            theSolver.current.pieces[piece_index] = theSolver.current.pieces[piece_index].rotatePiece(
+                action)
+        elif action_type == 'move':
+            print(f'Move piece {piece_id} by {action}')
+            theSolver.current.pieces[piece_index].setPlacement(action, offset=True)
+
+    i = i + 1
 plt.ioff()
 # plt.draw()
 

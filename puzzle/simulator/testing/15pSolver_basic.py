@@ -23,6 +23,7 @@ import cv2
 import imageio
 import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
+import numpy as np
 
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
@@ -115,8 +116,10 @@ if saveMe:
     for filename in filename_list:
         shutil.rmtree(filename)
 
-# num of size() actions at most
-for i in range(1 + theSolver.desired.size()):
+FINISHED = False
+i = 0
+
+while 1:
 
     # Since we use the same instance in the simulator and the solver,
     # it will update automatically
@@ -125,6 +128,8 @@ for i in range(1 + theSolver.desired.size()):
     theSim.fig.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)
 
+    if FINISHED:
+        break
     if i == 0:
         # Display the original one at the very beginning
         print(f'The original measured board')
@@ -132,9 +137,13 @@ for i in range(1 + theSolver.desired.size()):
     if saveMe:
         theSim.fig.savefig(cpath + f'/data/15pSolver_step{str(i).zfill(2)}.png')
 
-    if i < theSolver.desired.size():
-        print(f'Step {i + 1}:')
-        theSolver.takeTurn(defaultPlan='order')
+    print(f'Step {i + 1}:')
+
+    plan = theSolver.takeTurn(defaultPlan='order')
+
+    FINISHED = theSim.takeAction(plan)
+
+    i = i + 1
 
 plt.ioff()
 # plt.draw()

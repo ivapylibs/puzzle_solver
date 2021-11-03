@@ -144,7 +144,10 @@ while 1:
         theSim.fig.savefig(cpath + f'/data/realSolver_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
-    _, FINISHED = theSolver.takeTurn(defaultPlan='order')
+
+    plan = theSolver.takeTurn(defaultPlan='order')
+
+    FINISHED = theSim.takeAction(plan)
 
     i = i + 1
 

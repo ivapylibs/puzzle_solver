@@ -152,7 +152,10 @@ while 1:
         print(f'The original measured board')
 
     print(f'Step {i + 1}:')
-    Move_id, FINISHED = theSolver.takeTurn(defaultPlan='order', STEP_WISE=False)
+
+    plan = theSolver.takeTurn(defaultPlan='order', STEP_WISE=False)
+
+    FINISHED = theSim.takeAction(plan)
 
     theCurImage = theSim.toImage(theImage=np.zeros_like(theImageSol).astype('uint8'), CONTOUR_DISPLAY=False,
                                  BOUNDING_BOX=False)
@@ -167,7 +170,7 @@ while 1:
     canvas = np.ones_like(theCurImage, np.uint8)
     canvas[imask] = theCurImage[imask]
 
-    if Move_id is not None:
+    if FINISHED is False:
 
         theMaskMea = improc.apply(canvas)
         # cv2.imshow('debug', theMaskMea)
@@ -175,15 +178,17 @@ while 1:
         theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
                                                              theParams=paramPuzzle(areaThresholdLower=1000))
 
-        theCalibrated.addPiece(theBoard_single.pieces[0])
+        # theCalibrated.addPiece(theBoard_single.pieces[0])
 
-        # # Debug only
-        # try:
-        #     theCalibrated.addPiece(theBoard_single.pieces[0])
-        # except:
-        #     cv2.imshow('theMaskMea', theMaskMea)
-        #     cv2.imshow('canvas', canvas)
-        #     cv2.waitKey()
+        # Debug only
+        try:
+            theCalibrated.addPiece(theBoard_single.pieces[0])
+        except:
+            cv2.imshow('theMaskMea', theMaskMea)
+            cv2.imshow('thePrevImage', thePrevImage)
+            cv2.imshow('theCurImage', theCurImage)
+            cv2.imshow('canvas', canvas)
+            cv2.waitKey()
 
         if saveMe:
             theCalibratedImage = theCalibrated.toImage(ID_DISPLAY=True)

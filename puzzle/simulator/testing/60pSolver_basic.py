@@ -119,34 +119,42 @@ if saveMe:
     for filename in filename_list:
         shutil.rmtree(filename)
 
-# num of size() actions at most
-for i in range(1 + theSolver.desired.size()):
+FINISHED = False
+i = 0
+
+while 1:
 
     # Since we use the same instance in the simulator and the solver,
-    # it will update automatically
+    # it will update automatically.
     theSim.display(ID_DISPLAY=True)
 
     theSim.fig.suptitle(f'Step {i}', fontsize=20)
-    plt.pause(0.1)
+    plt.pause(1)
 
+    if FINISHED:
+        break
     if i == 0:
         # Display the original one at the very beginning
         print(f'The original measured board')
 
     if saveMe:
-        theSim.fig.savefig(cpath + f'/data/explode03_simple_step{str(i).zfill(2)}.png')
+        theSim.fig.savefig(cpath + f'/data/60pSolver_step{str(i).zfill(3)}.png')
 
-    if i < theSolver.desired.size():
-        print(f'Step {i + 1}:')
-        theSolver.takeTurn(defaultPlan='order')
+    print(f'Step {i + 1}:')
+
+    plan = theSolver.takeTurn(defaultPlan='order')
+
+    FINISHED = theSim.takeAction(plan)
+
+    i = i + 1
 
 plt.ioff()
 # plt.draw()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/demo_simple_explode03.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/explode03_simple_step*.png')
+    with imageio.get_writer(cpath + f'/data/60pSolver.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/60pSolver_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)

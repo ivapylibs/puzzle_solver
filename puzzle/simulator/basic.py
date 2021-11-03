@@ -90,6 +90,40 @@ class basic:
             if self.puzzle.pieces[ii].id in pLocs.keys():
                 self.puzzle.pieces[ii].setPlacement(pLocs[self.puzzle.pieces[ii].id])
 
+    def takeAction(self, plan):
+        """
+        @brief  Perform the plan.
+
+        Args:
+            plan: A tuple (piece_id, piece_index, action_type, action
+
+        Returns:
+            FINISHED(Signal indicating the end of plan)
+        """
+
+        FINISHED = False
+
+        for i in plan:
+            if i is None:
+                print('All the matched puzzle pieces have been in position. No move.')
+                FINISHED = True
+            else:
+
+                piece_id = i[0]
+                piece_index = i[1]
+                action_type = i[2]
+                action = i[3]
+
+                if action_type == 'rotate':
+                    print(f'Rotate piece {piece_id} by {int(action)} degree')
+                    self.puzzle.pieces[piece_index] = self.puzzle.pieces[piece_index].rotatePiece(
+                        action)
+                elif action_type == 'move':
+                    print(f'Move piece {piece_id} by {action}')
+                    self.puzzle.pieces[piece_index].setPlacement(action, offset=True)
+
+        return FINISHED
+
     def dragPieces(self, pVecs):
         """
         @brief  Moves pieces incrementally from where it is.
