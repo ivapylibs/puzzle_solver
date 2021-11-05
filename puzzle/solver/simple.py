@@ -21,6 +21,7 @@ from copy import deepcopy
 # ===== Environment / Dependencies
 #
 import numpy as np
+from puzzleSolver import PuzzlePieces, PuzzleSolver
 
 from puzzle.solver.base import base
 
@@ -78,21 +79,29 @@ class simple(base):
         Args:
             thePlan: A specific desired action plan. We assume it only knows (piece_id, action_type, action).
             defaultPlan: The default plan strategy.
-            STEP_WISE: Perform STEP_WISE(move & rotation together) action or not.
+            STEP_WISE: Perform STEP_WISE(rotation & movement together) action or not.
+            COMPLETE_PLAN: Create a complete plan or just a single step action.
 
         Returns:
             plan(Processed plan list)
         """
+
+        # Mandatory check on STEP_WISE. Only rotation exists, the option is valid
+        if self.rotation_match is None:
+            STEP_WISE = True
 
         if self.plan is None:
             if thePlan is None:
                 if defaultPlan == 'order':
                     plan = self.planOrdered(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
                 elif defaultPlan == 'new':
-                    plan = self.planNew(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
+                    plan = self.planNew()
                 else:
                     print('No default plan has been correctly initialized.')
 
+                if COMPLETE_PLAN == True:
+                    # Save the complete plan and keep executing it
+                    self.plan = plan
             else:
                 piece_id = thePlan[0]
                 action_type = thePlan[1]
@@ -106,10 +115,18 @@ class simple(base):
                     else:
                         raise RuntimeError('Cannot find this id!')
 
-        else:
+        if self.plan is not None:
             # Pop out the first action
-            plan = self.plan[0]
-            self.plan.pop(0)
+            if len(self.plan) > 0:
+                plan = [self.plan[0]]
+                self.plan.pop(0)
+                if STEP_WISE == False and len(self.plan) > 0:
+                    plan.append(self.plan[0])
+                    self.plan.pop(0)
+            else:
+                # Reset self.plan
+                self.plan = None
+                plan = None
 
         return plan
 
@@ -237,7 +254,7 @@ class simple(base):
         # return best_id_mea,  False
         return plan
 
-    def planNew(self, STEP_WISE=True, COMPLETE_PLAN=False):
+    def planNew(self):
         """
         @brief Not ready yet
 
@@ -276,10 +293,10 @@ class simple(base):
 
         # ==========================
         # @note
-        # theCorrect: saves displacement from x_o (initial x,y position) to x_d (desired x,y position)
+        # theCorrect: saves displacement from x_0 (initial x,y position) to x_d (desired x,y position)
         # like {piece_id_1: displacement_1, piece_id_2: displacement_2, ...}
         #
-        # pLoc_sol: saves x_o (initial x,y position)
+        # pLoc_sol: saves x_0 (initial x,y position)
         # like {piece_id_1: location_1, piece_id_2: location_2, ...}
         #
         # self.desired.pieceLocations(): saves x_d (initial x,y position)
@@ -292,8 +309,28 @@ class simple(base):
         #
         # ==========================
 
-        # Todo: Comment this line when New Strategy implementation is ready
-        piece_id_list = list(range(0, 60))
+        # ==========================
+        # Adapted from Prof. Adan Vela's code
+        xy_0 = []
+        xy_d = []
+        uid_list = []
+        for key in pLoc_sol:
+            xy_0.append(pLoc_sol[key])
+            xy_d.append(self.desired.pieceLocations()[key])
+            uid_list.append(key)
+        pps = PuzzlePieces()
+        pps.addPuzzlePieceXYs(xy_0, xy_d, uid_list=uid_list)
+        mySolver = PuzzleSolver(pps, useMethod='local')
+        mySolver.optimize()
+
+        # Our id starts from 0
+        piece_id_list = np.array(mySolver.solution) - 1
+
+        # ==========================
+
+        #
+        # # Todo: Comment this line when New Strategy implementation is ready
+        # piece_id_list = list(range(0, 60))
 
         # Generate the action plan following the piece_id_list
         for piece_id_sol in piece_id_list:

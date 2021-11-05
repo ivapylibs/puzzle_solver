@@ -83,6 +83,11 @@ theGridMea = gridded(epBoard, paramGrid(reorder=True))
 
 _, epBoard = theGridMea.swapPuzzle()
 
+# ==[2.2] Put pieces at the right side of the image
+#
+for i in range(epBoard.size()):
+    epBoard.pieces[i].setPlacement(r=np.array([2000, 0]), offset=True)
+
 # ==[2.3] Randomly rotate the puzzle pieces.
 #
 
@@ -92,7 +97,7 @@ if ROTATION_ENABLED:
         gt_rotation.append(np.random.randint(0, 70))
         epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
 
-epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
+epImage = epBoard.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
 
 # ==[2.4] Create a new Grid instance from the images
 #
@@ -134,8 +139,8 @@ theSim = basic(theSolver.current)
 
 plt.ion()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
 
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/60pRotateSolverNewPlan_step*.png')
@@ -165,7 +170,7 @@ while 1:
 
     print(f'Step {i + 1}:')
 
-    plan = theSolver.takeTurn(defaultPlan='new')
+    plan = theSolver.takeTurn(defaultPlan='new', STEP_WISE=False, COMPLETE_PLAN=True)
 
     FINISHED = theSim.takeAction(plan)
 
