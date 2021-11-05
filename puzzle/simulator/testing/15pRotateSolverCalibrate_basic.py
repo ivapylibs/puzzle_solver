@@ -18,7 +18,6 @@
 import copy
 import glob
 import os
-import shutil
 
 import cv2
 import imageio
@@ -140,7 +139,7 @@ saveMe = False
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/15pRotateSolverCalibrate_step*.png')
     for filename in filename_list:
-        shutil.rmtree(filename)
+        os.remove(filename)
 
 FINISHED = False
 

@@ -22,7 +22,6 @@ ROTATION_ENABLED = True
 # ==[0] Prep environment
 import glob
 import os
-import shutil
 
 import cv2
 import imageio
@@ -145,7 +144,7 @@ saveMe = True
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/60pRotateSolverNewPlan_step*.png')
     for filename in filename_list:
-        shutil.rmtree(filename)
+        os.remove(filename)
 
 FINISHED = False
 i = 0

@@ -16,7 +16,6 @@
 # ==[0] Prep environment
 import glob
 import os
-import shutil
 
 import cv2
 import imageio
@@ -120,7 +119,7 @@ saveMe = False
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
     for filename in filename_list:
-        shutil.rmtree(filename)
+        os.remove(filename)
 
 FINISHED = False
 i = 0
