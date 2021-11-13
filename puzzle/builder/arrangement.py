@@ -53,54 +53,33 @@ class paramArrange(paramPuzzle):
 
 class arrangement(board):
 
-    # ============================ arrangement ============================
-    #
-    # @brief  Constructor for the puzzle.builder.arrangement class.
-    #
-    #
-    def __init__(self, solBoard=[], theParams=paramArrange):
-        super(arrangement, self).__init__(solBoard)
+    def __init__(self, theBoard=[], theParams=paramArrange):
+        """
+        @brief  Constructor for the puzzle.builder.arrangement class.
 
-        # self.pieces = solBoard
+        Args:
+            theBoard: A board instance.
+            theParams: The parameters.
+        """
+
+        super(arrangement, self).__init__(theBoard)
+
         self.params = theParams  # @<A distance threshold for considering a piece
         # to be correctly placed.
 
-        # # Initialize with a solBoard but will update in the further processing
-        # self.pieces = solBoard.pieces
-        # self.id_count = solBoard.id_count
-
-        # @note
-        # WHAT DO WE NEED? ADDING TWO ARGUMENTS FOR NOW.
-        # AT MINIMUM, WE NEED A SOLUTION TO THE PUZZLE.
-        # WE PROBABLY ALSO NEED A DISTANCE THRESHOLD FOR CONSIDERING A PIECE
-        # TO BE CORRECTLY PLACED.
-        #
-        # WHAT MAKES THIS DIFFERENCE FROM A BOARD?
-        # IT SHOULD HAVE SCORING FUNCTIONS FOR A NEW BOARD LAYOUT
-        # WHOSE PIECE SORT ORDERING DIRECTLY MATCHES THE SOLUTION.
-        #
-        # IT SHOULD HAVE AN INPLACE DETECTION ROUTINE THAT GETS USED TO
-        # ESTIMATE PROGRESS (OR WHAT FRACTION OF PIECE ARE CORRECTLY IN
-        # PLACE).
-        #
-        # CHECK THAT DOCUMENTATION IS CONSISTENT WITH ABOVE.  ADD CODE AND
-        # UPDATE DOCUMENTATION.
-
-    # ============================ corrections ============================
-    #
-    # @brief  Given an array of locations that correspond to the puzzle
-    #         board (e.g., in the same order as puzzle board list), provide
-    #         the correction vector that would move them to the calibrated
-    #         locations.
-    #
-    # The locations are assumed to be ordered according to puzzle piece
-    # ordering in the calibrated puzzle board.
-    #
-    # @param[in]  pLoc       A dict of puzzle piece id & location.
-    #
-    # @param[out] theVects   A dict of puzzle piece id & solution vectors.
-    #
     def corrections(self, pLoc):
+        """
+        @brief  Given an array of locations that correspond to the puzzle
+                board (e.g., in the same order as puzzle board list), provide
+                the correction vector that would move them to the calibrated
+                locations.
+
+        Args:
+            pLoc: A dict of puzzle piece id & location.
+
+        Returns:
+            theVects(A dict of puzzle piece id & vectors)
+        """
         # @note
         # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
         # theVects = pLocTrue - pLoc
@@ -123,21 +102,19 @@ class arrangement(board):
 
         return theVects
 
-    # ============================= distances =============================
-    #
-    # @brief  Given an array of locations that correspond to the puzzle
-    #         board (e.g., in same order as puzzle board list), provide
-    #         the distances between the locations and the calibrated
-    #         locations.
-    #
-    # The locations are assumed to be ordered according to puzzle piece
-    # ordering in the calibrated puzzle board.
-    #
-    # @param[in]  pLoc        A dict of puzzle piece id & location.
-    #
-    # @param[out] theDists    A dict of puzzle piece id & distance to the solution.
-    #
     def distances(self, pLoc):
+        """
+        @brief  Given an array of locations that correspond to the puzzle
+                board (e.g., in same order as puzzle board list), provide
+                the distances between the locations and the calibrated
+                locations.
+
+        Args:
+            pLoc: A dict of puzzle piece id & location.
+
+        Returns:
+            theDists(A dict of puzzle piece id & distance to the solution)
+        """
 
         theDists = {}
         pLocTrue = self.pieceLocations()
@@ -154,23 +131,24 @@ class arrangement(board):
 
         return theDists
 
-    # ========================== scoreByLocation ==========================
-    #
-    # @brief  Given an array of locations that correspond to the puzzle
-    #         board (e.g., in same order as puzzle board list), provide a
-    #         score for the distance between the locations and the
-    #         calibrated locations.
-    #
-    # The score here is just the sum of the error norms (or the incorrect
-    # distance of the placed part to the true placement). The locations
-    # are assumed to be ordered according to puzzle piece ordering in the
-    # calibrated puzzle board.
-    #
-    # @param[in]  pLoc        A dict of puzzle piece id & location.
-    #
-    # @param[out] theScore    The score for the given board.
-    #
     def scoreByLocation(self, pLoc):
+        """
+        @brief  Given an array of locations that correspond to the puzzle
+                board (e.g., in same order as puzzle board list), provide a
+                score for the distance between the locations and the
+                calibrated locations.
+
+        The score here is just the sum of the error norms (or the incorrect
+        distance of the placed part to the true placement). The locations
+        are assumed to be ordered according to puzzle piece ordering in the
+        calibrated puzzle board.
+
+        Args:
+            pLoc: A dict of puzzle piece id & location.
+
+        Returns:
+            theScore(The score for the current board)
+        """
 
         errDists = self.distances(pLoc)
 
@@ -181,22 +159,22 @@ class arrangement(board):
 
         return theScore
 
-    # ============================= scoreBoard ============================
-    #
-    # @brief  Given a puzzle board with in ordered correspondence with the
-    #         calibrated puzzle board, in the same order as puzzle board
-    #         list), provide a score for the distance between the puzzle
-    #         piece locations and the calibrated locations.
-    #
-    # The score here is just the sum of the error norms (or the incorrect
-    # distance of the placed part to the true placement).
-    #
-    # @param[in]  theBoard    A puzzle board in 1-1 ordered correspondence
-    #                         with solution.
-    #
-    # @param[out] theScore    The score for the given board.
-    #
     def scoreBoard(self, theBoard):
+        """
+        @brief  Given a puzzle board with in ordered correspondence with the
+                calibrated puzzle board, in the same order as puzzle board
+                list), provide a score for the distance between the puzzle
+                piece locations and the calibrated locations.
+
+        The score here is just the sum of the error norms (or the incorrect
+        distance of the placed part to the true placement).
+
+        Args:
+            theBoard: A puzzle board in 1-1 ordered correspondence with solution.
+
+        Returns:
+            theScore(The score compared with the given board)
+        """
 
         if theBoard.size() == self.size():
             pLocs = theBoard.pieceLocations()
@@ -206,17 +184,17 @@ class arrangement(board):
 
         return theScore
 
-    # =========================== piecesInPlace ===========================
-    #
-    # @brief  Return boolean array indicating whether the piece is
-    #         correctly in place or not.
-    #
-    # @param[in]  pLoc        A dict of puzzle piece id & location.
-    #
-    # @param[out] theScores    A dict of id & bool variable indicating
-    #                         whether the piece is correctly in place or not.
-    #
     def piecesInPlace(self, pLoc):
+        """
+        @brief  Return boolean array indicating whether the piece is
+                correctly in place or not.
+
+        Args:
+            pLoc: A dict of puzzle piece id & location.
+
+        Returns:
+            theScores(A dict of id & bool variable indicating whether the piece is correctly in place or not.)
+        """
 
         errDists = self.distances(pLoc)
 

@@ -45,9 +45,8 @@ from puzzle.utils.dataProcessing import updateLabel
 
 @dataclass
 class paramGrid(paramInter):
-    tauGrid: float = 35  # Not used yet
+    tauGrid: float = float('inf')  # The fixed size of the puzzle piece.
     reorder: bool = False
-
 
 #
 # ====================== puzzle.builder.interlocking ======================
@@ -60,30 +59,30 @@ class gridded(interlocking):
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, solBoard=[], theParams=paramGrid):
+    def __init__(self, theBoard=[], theParams=paramGrid):
 
-        super(gridded, self).__init__(solBoard, theParams)
+        super(gridded, self).__init__(theBoard, theParams)
 
-        if isinstance(solBoard, board):
+        if isinstance(theBoard, board):
             # Store the calibrated grid location of the puzzle piece.
-            self.gc = np.zeros((2, solBoard.size()))
+            self.gc = np.zeros((2, theBoard.size()))
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processGrid(theParams.reorder)
+        self.__processGrid(theParams.reorder, theParams.tauGrid)
 
-    # ============================ processGrid ============================
-    #
-    # @brief  Process the solution board and determine what pieces are
-    #         interlocking and the grid ordering. Grid ordering helps to
-    #         determine adjacency.
-    #
-    # Some pieces might be close to each other but not really
-    # interlocking.  Mostly this happens at the corners, but maybe there
-    # are weird puzzles that can be thought of with a mix of adjacent and
-    # interlocking.
-    #
-    def __processGrid(self, reorder=False):
+    def __processGrid(self, reorder=False, piece_thresh=float('inf')):
+        """
+        @brief  Process the solution board and determine what pieces are
+                interlocking and the grid ordering. Grid ordering helps to
+                determine adjacency.
+
+        @note   If the pieces are close to each other, this function may fail when thge location of a piece is not computed properly.
+
+        Args:
+            reorder: The flag signaling whether to reorder the piece id according to the location.
+            piece_thresh: The threshold for x,y
+        """
 
         pLoc = self.pieceLocations()
 
@@ -95,10 +94,12 @@ class gridded(interlocking):
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
         x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
+        x_thresh = min(x_thresh, piece_thresh)
         x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
         x_label = updateLabel(x_list, x_label) # from 0
 
         y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
+        y_thresh = min(y_thresh, piece_thresh)
         y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
         y_label = updateLabel(y_list, y_label) # from 0
 

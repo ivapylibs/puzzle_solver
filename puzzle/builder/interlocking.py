@@ -56,12 +56,12 @@ class interlocking(adjacent):
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, solBoard=[], theParams=paramInter):
+    def __init__(self, theBoard=[], theParams=paramInter):
 
-        super(interlocking, self).__init__(solBoard, theParams)
+        super(interlocking, self).__init__(theBoard, theParams)
 
-        if isinstance(solBoard, board):
-            self.ilMat = np.eye(solBoard.size()).astype('bool')
+        if isinstance(theBoard, board):
+            self.ilMat = np.eye(theBoard.size()).astype('bool')
         else:
             raise TypeError('Not initialized properly')
 

@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # ============================ realSolverCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver & for calibration process. (real img)
+# @brief    Test script with command from the solver & for calibration process
+#           We simulate the real image sequences. (real img)
 #
 # ============================ realSolverCalibrate_basic ===========================
 
@@ -128,7 +129,7 @@ i = 0
 j = 0
 
 theCalibrated = board()
-improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
                            )
 

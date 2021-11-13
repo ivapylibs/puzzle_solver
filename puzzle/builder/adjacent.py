@@ -56,17 +56,17 @@ class adjacent(arrangement):
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, solBoard=[], theParams=paramAdj):
+    def __init__(self, theBoard=[], theParams=paramAdj):
 
-        super(adjacent, self).__init__(solBoard, theParams)
+        super(adjacent, self).__init__(theBoard, theParams)
 
-        if isinstance(solBoard, board):
-            self.adjMat = np.eye(solBoard.size()).astype('bool')
+        if isinstance(theBoard, board):
+            self.adjMat = np.eye(theBoard.size()).astype('bool')
         else:
             raise TypeError('Not initialized properly')
 
         # Todo: May have problems if the pieces are not good
-        # self.__processAdjacency()
+        self.__processAdjacency()
 
     # ========================== processAdjacency =========================
     #
