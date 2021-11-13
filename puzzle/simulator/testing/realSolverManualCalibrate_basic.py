@@ -9,7 +9,7 @@
 # @file     realSolverManualCalibrate_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/11/12  [created]
+# @date     2021/11/13  [created]
 #
 # ============================ realSolverManualCalibrate_basic ===========================
 
@@ -23,9 +23,7 @@ import cv2
 import imageio
 import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
-import numpy as np
 
-from puzzle.builder.arrangement import arrangement, paramPuzzle
 from puzzle.builder.board import board
 from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
@@ -33,74 +31,38 @@ from puzzle.piece.regular import regular
 from puzzle.piece.sift import sift
 from puzzle.simulator.basic import basic
 from puzzle.solver.simple import simple
-from puzzle.utils.imageProcessing import preprocess_real_puzzle, find_nonzero_mask
+from puzzle.utils.imageProcessing import preprocess_real_puzzle
+from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-# ==[1] Read the source image.
+# ==[1] Read the source image (exploded).
 #
 
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard2/sol_cali_mea_16.png')
+theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
 # ==[2] Read the source images and reconstruct the solution board.
 #
-# Number of pieces
-N = 15
 
-theCalibrated = board()
-
-improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
-                           )
-
-for i in range(1,N+1):
-    if i==1:
-        thePrevImage = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_cali/sol_cali_mea_{i-1}.png')
-        thePrevImage = cv2.cvtColor(thePrevImage, cv2.COLOR_BGR2RGB)
-
-    else:
-        thePrevImage = theCurImage
-
-    theCurImage = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_cali/sol_cali_mea_{i}.png')
-    theCurImage = cv2.cvtColor(theCurImage, cv2.COLOR_BGR2RGB)
-
-    # Todo: We may have to use other strategies with real data input
-    diff = cv2.absdiff(theCurImage, thePrevImage)
-    # cv2.imshow('diff', diff)
-    # cv2.waitKey()
-    mask = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
-
-    th = 50
-    imask = mask > th
-
-    canvas = np.ones_like(theCurImage, np.uint8)
-    canvas[imask] = theCurImage[imask]
-
-    theMaskMea = improc.apply(canvas)
-    cv2.imshow('debug', theMaskMea)
-    cv2.waitKey()
-    # theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
-    #                                                      theParams=paramPuzzle(areaThresholdLower=1000))
-    #
-    # theCalibrated.addPiece(theBoard_single.pieces[0])
+# theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_1', 0)
+theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_2', 1)
 
 theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
 plt.show()
 
-
-# ==[3] Create Grid instance to build up solution board.
+# ==[3] Create Grid instance to build up solution board & measured board.
 #
 
-theGridSol = gridded(theCalibrated,theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                                pieceConstructor=regular))
-
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard2/sol_cali_mea_23.png')
-theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
+theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000, reorder=True,
+                                                        pieceConstructor=regular, tauGrid=20))
 
 theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True,
+                                            theParams=paramGrid(areaThresholdLower=1000,
                                                                 pieceConstructor=regular))
+
 
 # ==[4] Create a manager
 #
@@ -144,7 +106,7 @@ plt.ion()
 saveMe = False
 
 if saveMe:
-    filename_list = glob.glob(cpath + f'/data/realSolverCalibrate_step*.png')
+    filename_list = glob.glob(cpath + f'/data/realSolverManualCalibrate_step*.png')
     for filename in filename_list:
         os.remove(filename)
 
@@ -175,7 +137,7 @@ while 1:
         print(f'The original measured board')
 
     if saveMe:
-        theSim.fig.savefig(cpath + f'/data/realSolver_step{str(i).zfill(2)}.png')
+        theSim.fig.savefig(cpath + f'/data/realSolverManualCalibrate_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
 
@@ -190,8 +152,8 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/realSolverCalibrate.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/realSolverCalibrate_step*.png')
+    with imageio.get_writer(cpath + f'/data/realSolverManualCalibrate.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/realSolverManualCalibrate_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)
