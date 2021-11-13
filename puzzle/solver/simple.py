@@ -188,7 +188,10 @@ class simple(base):
         for i, j in itertools.product(range(int(x_max + 1)), range(int(y_max + 1))):
 
             # best_index_sol is just the next target, no matter if the assignment is ready or not
-            best_index_sol = np.argwhere((self.desired.gc.T == [i, j]).all(axis=1)).flatten()[0]
+            try:
+                best_index_sol = np.argwhere((self.desired.gc.T == [i, j]).all(axis=1)).flatten()[0]
+            except:
+                print('s')
             # In sol, id and index share the same value
             best_id_sol = best_index_sol
 

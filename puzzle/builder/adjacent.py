@@ -65,7 +65,8 @@ class adjacent(arrangement):
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processAdjacency()
+        # Todo: May have problems if the pieces are not good
+        # self.__processAdjacency()
 
     # ========================== processAdjacency =========================
     #

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================ realSolver_basic ===========================
 #
-# @brief    Test script with command from the solver. (real)
+# @brief    Test script with command from the solver. (real img)
 #
 # ============================ realSolver_basic ===========================
 

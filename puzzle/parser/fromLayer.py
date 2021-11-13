@@ -251,6 +251,9 @@ class fromLayer(centroidMulti):
             # Todo: A triky solution to remove all black region
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
                                              cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
+                # cv2.imshow('seg_img', seg_img)
+                # cv2.imshow('I', I)
+                # cv2.waitKey()
                 continue
 
             if not skipflag:
