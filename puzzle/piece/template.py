@@ -17,13 +17,14 @@
 #
 # ========================= puzzle.piece.template =========================
 
+# ===== Environment / Dependencies
+#
 from copy import deepcopy
 from dataclasses import dataclass
+from enum import Enum
 
 import cv2
 import matplotlib.pyplot as plt
-# ===== Environment / Dependencies
-#
 import numpy as np
 
 from puzzle.utils.imageProcessing import rotate_im
@@ -31,6 +32,18 @@ from puzzle.utils.imageProcessing import rotate_im
 
 # ===== Helper Elements
 #
+
+class PieceStatus(Enum):
+    """
+    @brief PieceStatus used to keep track of the status of pieces.
+    """
+
+    UNKNOWN = 0
+    PERCEIVED = 1
+    MEASURED = 2
+    INHAND = 3
+
+
 @dataclass
 class puzzleTemplate:
     size: np.ndarray = np.array([])  # @< Tight bbox size of puzzle piece image.
@@ -51,7 +64,7 @@ class puzzleTemplate:
 
 class template:
 
-    def __init__(self, y=None, r=(0, 0), id=None, theta=0):
+    def __init__(self, y=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         """
         @brief  Constructor for template class.
 
@@ -65,6 +78,7 @@ class template:
         self.y = y
         self.rLoc = np.array(r)  # The default location is the top left corner
         self.id = id
+        self.status = pieceStatus
         self.theta = theta  # Should be set up later by the alignment function
 
     def size(self):
@@ -277,7 +291,7 @@ class template:
         return fh
 
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None):
+    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.PERCEIVED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.
@@ -333,6 +347,9 @@ class template:
 
         # Set up the rotation (with theta, we can correct the rotation)
         thePiece.theta = -template.getEig(thePiece.y.mask)
+
+        # Set up the status of the piece
+        thePiece.status = pieceStatus
 
         return thePiece
 

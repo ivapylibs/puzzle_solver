@@ -19,7 +19,7 @@ from enum import Enum
 
 import numpy as np
 
-from puzzle.piece.template import template
+from puzzle.piece.template import template, PieceStatus
 from puzzle.utils.sideExtractor import sideExtractor
 
 
@@ -75,6 +75,7 @@ class regular(template):
         r = (0, 0)
         id = None
         theta = None
+        status = PieceStatus.UNKNOWN
 
         if len(argv) == 1:
             if isinstance(argv[0], template):
@@ -82,6 +83,7 @@ class regular(template):
                 r = argv[0].rLoc
                 id = argv[0].id
                 theta = argv[0].theta
+                status = argv[0].status
             else:
                 y = argv[0]
         elif len(argv) == 2:
@@ -94,7 +96,7 @@ class regular(template):
         elif len(argv) > 4:
             raise TypeError('Too many parameters!')
 
-        super(regular, self).__init__(y=y, r=r, id=id, theta=theta)
+        super(regular, self).__init__(y=y, r=r, id=id, theta=theta, status=status)
 
         # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
         self.edge = [EdgeDes() for i in range(4)]
@@ -179,7 +181,7 @@ class regular(template):
         return theRegular
 
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None):
+    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.PERCEIVED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.
@@ -193,7 +195,7 @@ class regular(template):
             The puzzle piece instance.
         """
 
-        thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc)
+        thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)
         theRegular = regular(thePiece)
 
         return theRegular

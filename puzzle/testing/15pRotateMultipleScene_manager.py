@@ -27,6 +27,7 @@ from puzzle.builder.gridded import gridded, paramGrid
 from puzzle.manager import manager, managerParms
 from puzzle.parser.fromSketch import fromSketch
 from puzzle.piece.sift import sift
+from puzzle.piece.template import PieceStatus
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -60,7 +61,8 @@ theMaskSol = theDet.getState().x
 print('Running through test cases. Will take a bit.')
 
 theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                            theParams=paramGrid(areaThresholdLower=5000, reorder=True))
+                                            theParams=paramGrid(areaThresholdLower=5000, reorder=True,
+                                                                pieceStatus=PieceStatus.MEASURED))
 
 # ==[2.1] Explode it into a new board.
 #
@@ -136,6 +138,9 @@ axarr[1].imshow(bMeasImage)
 axarr[1].title.set_text('Measured')
 axarr[2].imshow(bSolImage)
 axarr[2].title.set_text('Solution')
+
+for match in theManager.pAssignments:
+    theManager.bMeas.pieces[match[0]].status = PieceStatus.MEASURED
 
 text = f'The first index refers to the measured board while the second one refers to the solution board. \n ' \
        f'Note that the index in different boards may refer to different puzzle pieces. \n' \

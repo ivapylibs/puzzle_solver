@@ -28,7 +28,7 @@ import numpy as np
 from trackpointer.centroidMulti import centroidMulti
 
 from puzzle.builder.board import board
-from puzzle.piece.template import template
+from puzzle.piece.template import template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 
@@ -40,6 +40,7 @@ class paramPuzzle:
     areaThresholdLower: float = 20
     areaThresholdUpper: float = float('inf')
     pieceConstructor: any = template
+    pieceStatus: int = PieceStatus.PERCEIVED
 
 #
 # ======================== puzzle.parser.fromLayer ========================
@@ -276,7 +277,8 @@ class fromLayer(centroidMulti):
             theMask = region[0]
             theImage = region[1]
             rLoc = region[2]
-            thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc)
+            thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc,
+                                                                   pieceStatus=self.params.pieceStatus)
 
             pieces.append(thePiece)
 
