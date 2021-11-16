@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-# ============================= 15pRotateOverlap_manager =============================
+# ============================= 15pRotateMultipleScene_manager =============================
 #
 # @brief    Tests the core functionality of the puzzle.manager class. The manager
 #           will have access to measurement and solution images & masks to generate
 #           associations between them. (15p img + random rotation & overlapping)
 #
 #
-# ============================= 15pRotateOverlap_manager =============================
+# ============================= 15pRotateMultipleScene_manager =============================
 #
-# @file     15pRotateOverlap_manager.py
+# @file     15pRotateMultipleScene_manager.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/11/15 [created]
 #
-# ============================= 15pRotateOverlap_manager =============================
+# ============================= 15pRotateMultipleScene_manager =============================
 
 # ==[0] Prep environment
 import os
@@ -150,4 +150,4 @@ print(theManager.pAssignments)
 
 plt.show()
 #
-# ============================= 15pRotate_manager =============================
+# ============================= 15pRotateMultipleScene_manager =============================

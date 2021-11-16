@@ -32,13 +32,14 @@ cpath = fpath.rsplit('/', 1)[0]
 # ====================== puzzle.utils.puzzleProcessing ======================
 
 
-def calibrate_real_puzzle(img_folder, option, verbose=False):
+def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
     """
     @brief  To obtain the solution board from an image sequence for calibration.
 
     Args:
         img_folder: The path to the image folder. We assume the image name like XX_0.png
         option: The option 0 is to assemble the puzzle while option 1 is to disassemble the puzzle
+        fsize: The scale to resize the input image.
         verbose: Whether to debug
 
     Returns:
@@ -51,14 +52,17 @@ def calibrate_real_puzzle(img_folder, option, verbose=False):
     theCalibrated = board()
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
-                               improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),),
+                               improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
                                )
 
     for i in range(1, len(img_path_list)):
         if i == 1:
             thePrevImage = cv2.imread(img_path_list[i - 1])
-            thePrevImage = cv2.cvtColor(thePrevImage, cv2.COLOR_BGR2RGB)
 
+            if fsize != 1:
+                thePrevImage = cv2.resize(thePrevImage, (0, 0), fx=fsize, fy=fsize)
+
+            thePrevImage = cv2.cvtColor(thePrevImage, cv2.COLOR_BGR2RGB)
             thePrevMask = preprocess_real_puzzle(thePrevImage, verbose=False)
             thePrevImage = cv2.bitwise_and(thePrevImage, thePrevImage, mask=thePrevMask)
         else:
@@ -66,6 +70,10 @@ def calibrate_real_puzzle(img_folder, option, verbose=False):
 
         # Step 1: preprocess real imgs
         theCurImage = cv2.imread(img_path_list[i])
+
+        if fsize !=1:
+            theCurImage = cv2.resize(theCurImage, (0,0), fx=fsize, fy=fsize)
+
         theCurImage = cv2.cvtColor(theCurImage, cv2.COLOR_BGR2RGB)
 
         theCurMask = preprocess_real_puzzle(theCurImage, verbose=False)

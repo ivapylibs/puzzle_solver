@@ -266,10 +266,9 @@ class board:
             # piece is a puzzleTemplate instance, see template.py for details.
             for piece in self.pieces:
                 # top left coordinate
-                try:
-                    tl = piece.rLoc
-                except:
-                    print('s')
+
+                tl = piece.rLoc
+
                 # bottom right coordinate
                 br = piece.rLoc + piece.size()
 

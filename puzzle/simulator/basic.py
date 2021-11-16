@@ -156,7 +156,7 @@ class basic:
 
         return theImage
 
-    def display(self, ID_DISPLAY=True):
+    def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
         """
         @brief  Displays the current puzzle board.
 
@@ -167,7 +167,7 @@ class basic:
         if not self.fig:
             self.fig = plt.figure()
 
-        self.puzzle.display(fh=self.fig, ID_DISPLAY=ID_DISPLAY)
+        self.puzzle.display(fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
 #
 # ========================= puzzle.simulator.basic ========================

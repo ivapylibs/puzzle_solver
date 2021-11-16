@@ -37,26 +37,37 @@ from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
+
 # ==[1] Read the source image (exploded).
 #
-
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard2/sol_cali_mea_16.png')
+fsize= 0.8
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard3/sol_cali_mea_002.png')
+theImageMea = cv2.resize(theImageMea, (0, 0), fx=fsize, fy=fsize)
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
 # ==[2] Read the source images and reconstruct the solution board.
 #
 
 # theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_1', 0)
-theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_2', 1)
+theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_4', 1, fsize=fsize)
 
-theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
-plt.show()
+# # Debug only
+# theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
+# plt.show()
+
+# # Debug only
+# for piece in theCalibrated.pieces:
+#     piece.display()
+#     plt.show()
 
 # ==[3] Create Grid instance to build up solution board & measured board.
 #
 
 theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000, reorder=True,
                                                         pieceConstructor=regular, tauGrid=20))
+
+# theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000,
+#                                                         pieceConstructor=regular, tauGrid=20, grid=(5,3)))
 
 theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
@@ -125,7 +136,7 @@ while 1:
 
     # Since we use the same instance in the simulator and the solver,
     # it will update automatically
-    theSim.display(ID_DISPLAY=True)
+    theSim.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
 
     theSim.fig.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)

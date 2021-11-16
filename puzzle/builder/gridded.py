@@ -39,15 +39,15 @@ from puzzle.builder.board import board
 from puzzle.builder.interlocking import interlocking, paramInter
 from puzzle.utils.dataProcessing import updateLabel
 
-
+from sklearn.cluster import KMeans
 # ===== Helper Elements
 #
 
 @dataclass
 class paramGrid(paramInter):
-    tauGrid: float = float('inf')  # The fixed size of the puzzle piece.
+    tauGrid: float = float('inf')  # The threshold size of the puzzle piece.
     reorder: bool = False
-
+    grid: tuple = (None, None)
 #
 # ====================== puzzle.builder.interlocking ======================
 #
@@ -69,9 +69,9 @@ class gridded(interlocking):
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processGrid(theParams.reorder, theParams.tauGrid)
+        self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid)
 
-    def __processGrid(self, reorder=False, piece_thresh=float('inf')):
+    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster= (None, None)):
         """
         @brief  Process the solution board and determine what pieces are
                 interlocking and the grid ordering. Grid ordering helps to
@@ -81,7 +81,8 @@ class gridded(interlocking):
 
         Args:
             reorder: The flag signaling whether to reorder the piece id according to the location.
-            piece_thresh: The threshold for x,y
+            piece_thresh: The threshold for both x,y.
+            kmeans_cluster: The desired grid numbers for the puzzle.
         """
 
         pLoc = self.pieceLocations()
@@ -93,15 +94,23 @@ class gridded(interlocking):
         # Check the puzzle shape size to determine the thresh here.
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
-        x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
-        x_thresh = min(x_thresh, piece_thresh)
-        x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
-        x_label = updateLabel(x_list, x_label) # from 0
+        if kmeans_cluster[0] is None:
+            x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
+            x_thresh = min(x_thresh, piece_thresh)
+            x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
+            x_label = updateLabel(x_list, x_label) # from 0
+        else:
+            x_kmeans = KMeans(n_clusters=kmeans_cluster[0], random_state=0).fit(x_list)
+            x_label = x_kmeans.labels_
 
-        y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
-        y_thresh = min(y_thresh, piece_thresh)
-        y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
-        y_label = updateLabel(y_list, y_label) # from 0
+        if kmeans_cluster[1] is None:
+            y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
+            y_thresh = min(y_thresh, piece_thresh)
+            y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
+            y_label = updateLabel(y_list, y_label) # from 0
+        else:
+            y_kmeans = KMeans(n_clusters=3, random_state=0).fit(y_list)
+            y_label = y_kmeans.labels_
 
         # Reorder the pieces, so the id will correspond to the grid location
         if reorder:

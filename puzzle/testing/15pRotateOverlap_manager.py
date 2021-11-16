@@ -133,7 +133,7 @@ f, axarr = plt.subplots(1, 3)
 axarr[0].imshow(bPerImage)
 axarr[0].title.set_text('Perceived')
 axarr[1].imshow(bMeasImage)
-axarr[1].title.set_text('Measurement')
+axarr[1].title.set_text('Measured')
 axarr[2].imshow(bSolImage)
 axarr[2].title.set_text('Solution')
 
