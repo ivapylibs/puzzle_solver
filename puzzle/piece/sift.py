@@ -40,7 +40,7 @@ copyreg.pickle(cv2.KeyPoint().__class__, _pickle_keypoints)
 #
 class sift(matchSimilar):
 
-    def __init__(self, tau=5):
+    def __init__(self, tau=5, theThreshMatch = 0.5):
         """
         @brief  Constructor for the puzzle piece sift class.
 
@@ -48,6 +48,7 @@ class sift(matchSimilar):
             tau: The threshold param to determine similarity.
         """
 
+        self.theThreshMatch = theThreshMatch
         super(sift, self).__init__(tau)
 
     @staticmethod
@@ -108,7 +109,7 @@ class sift(matchSimilar):
         kp_A, des_A = self.process(yA)
         kp_B, des_B = self.process(yB)
 
-        matches = calculateMatches(des_A, des_B, 0.5)
+        matches = calculateMatches(des_A, des_B, self.theThreshMatch)
         distance = 100 * (len(matches) / min(len(kp_A), len(kp_B)))
 
         return distance

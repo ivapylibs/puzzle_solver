@@ -37,11 +37,10 @@ from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-
-# ==[1] Read the source image (exploded).
+# ==[1] Read the source image for measurement.
 #
 fsize= 0.8
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard3/sol_cali_mea_002.png')
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_big_hard3/sol_cali_mea_001.png')
 theImageMea = cv2.resize(theImageMea, (0, 0), fx=fsize, fy=fsize)
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
@@ -49,10 +48,13 @@ theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 #
 
 # theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_1', 0)
-theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_4', 1, fsize=fsize)
+theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_big_cali_4', 1, fsize=fsize)
 
-# # Debug only
-# theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
+# Debug only
+theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
+plt.show()
+
+# theCalibrated.pieces[6].display()
 # plt.show()
 
 # # Debug only
@@ -66,6 +68,9 @@ theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_4', 1,
 theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000, reorder=True,
                                                         pieceConstructor=regular, tauGrid=20))
 
+for i in range(len(theGridSol.pieces)):
+    theGridSol.pieces[i].setPlacement(r=(-500,-500),offset=True)
+
 # theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000,
 #                                                         pieceConstructor=regular, tauGrid=20, grid=(5,3)))
 
@@ -78,7 +83,7 @@ theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
 # ==[4] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager = manager(theGridSol, managerParms(matcher=sift(theThreshMatch=0.6)))
 theManager.process(theGridMea)
 
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
@@ -113,8 +118,8 @@ theSim = basic(theSolver.current)
 
 plt.ion()
 
-# saveMe = True
-saveMe = False
+saveMe = True
+# saveMe = False
 
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/realSolverManualCalibrate_step*.png')

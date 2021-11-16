@@ -174,8 +174,9 @@ class manager(fromLayer):
                 @todo Yunzhi: Will update this part. We may need two scoreTables. 
                 Currently, only use the shape feature and add up the distances.
                 """
-                # if idx_x==56 and (idx_y==58 or idx_y==56):
-                #   print('s')
+                # if idx_x==11 and (idx_y==2):
+                #     ret = self.matcher.score(bMea, bSol)
+                #     print('s')
                 if type(ret) is tuple and len(ret) > 0:
                     scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
                     scoreTable_color[idx_x][idx_y] = np.sum(ret[1])

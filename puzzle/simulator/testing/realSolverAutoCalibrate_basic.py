@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-# ============================ realSolver_basic ===========================
+# ============================ realSolverAutoCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver. (real img)
+# @brief    Test script with command from the solver & with automatic calibration process. (real img)
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverAutoCalibrate_basic ===========================
 
 #
-# @file     realSolver_basic.py
+# @file     realSolverAutoCalibrate_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/10/16  [created]
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverAutoCalibrate_basic ===========================
 
 # ==[0] Prep environment
 import glob
@@ -117,7 +117,7 @@ plt.ion()
 saveMe = False
 
 if saveMe:
-    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    filename_list = glob.glob(cpath + f'/data/realSolverAutoCalibrate_step*.png')
     for filename in filename_list:
         os.remove(filename)
 
@@ -140,7 +140,7 @@ while 1:
         print(f'The original measured board')
 
     if saveMe:
-        theSim.fig.savefig(cpath + f'/data/realSolver_step{str(i).zfill(2)}.png')
+        theSim.fig.savefig(cpath + f'/data/realSolverAutoCalibrate_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
 
@@ -155,12 +155,12 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/realSolver.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    with imageio.get_writer(cpath + f'/data/realSolverAutoCalibrate.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/realSolverAutoCalibrate_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)
             writer.append_data(image)
 
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverAutoCalibrate_basic ===========================

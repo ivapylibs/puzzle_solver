@@ -53,9 +53,15 @@ def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
+                               cv2.erode, (np.ones((3, 3), np.uint8),),
+                               cv2.dilate, (np.ones((3, 3), np.uint8),)
                                )
 
     for i in range(1, len(img_path_list)):
+
+        # if i==6:
+        #     verbose=True
+
         if i == 1:
             thePrevImage = cv2.imread(img_path_list[i - 1])
 
@@ -99,6 +105,7 @@ def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
 
         # Step 3: threshold
         theMaskMea = improc.apply(canvas)
+
         if verbose:
             cv2.imshow('theMaskMea', theMaskMea)
             cv2.waitKey()

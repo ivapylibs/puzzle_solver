@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-# ============================ realSolver_basic ===========================
+# ============================ realSolverNoCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver. (real img)
+# @brief    Test script with command from the solver & with no calibration process. (real img)
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverNoCalibrate_basic ===========================
 
 #
-# @file     realSolver_basic.py
+# @file     realSolverNoCalibrate_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/10/16  [created]
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverNoCalibrate_basic ===========================
 
 # ==[0] Prep environment
 import glob
@@ -41,15 +41,12 @@ cpath = fpath.rsplit('/', 1)[0]
 # theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
 # theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
 
-# Case 2
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard2/sol_cali_mea_001.png')
-theImageSol = cv2.resize(theImageSol, (0, 0), fx=0.5, fy=0.5)
-theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard2/sol_cali_mea_003.png')
-theImageMea = cv2.resize(theImageMea, (0, 0), fx=0.5, fy=0.5)
-
-# # Case 3
-# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard3/sol_cali_mea_004.png')
-# theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard3/sol_cali_mea_003.png')
+# # Case 2
+fsize= 0.8
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_big_hard3/sol_cali_mea_004.png')
+theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_big_hard3/sol_cali_mea_003.png')
+theImageMea = cv2.resize(theImageMea, (0, 0), fx=fsize, fy=fsize)
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
@@ -97,7 +94,7 @@ plt.ion()
 saveMe = False
 
 if saveMe:
-    filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    filename_list = glob.glob(cpath + f'/data/realSolverNoCalibrate_step*.png')
     for filename in filename_list:
         os.remove(filename)
 
@@ -120,7 +117,7 @@ while 1:
         print(f'The original measured board')
 
     if saveMe:
-        theSim.fig.savefig(cpath + f'/data/realSolver_step{str(i).zfill(2)}.png')
+        theSim.fig.savefig(cpath + f'/data/realSolverNoCalibrate_step{str(i).zfill(2)}.png')
 
     print(f'Step {i + 1}:')
 
@@ -135,12 +132,12 @@ plt.ioff()
 
 if saveMe:
     # Build GIF
-    with imageio.get_writer(cpath + f'/data/realSolver.gif', mode='I', fps=1) as writer:
-        filename_list = glob.glob(cpath + f'/data/realSolver_step*.png')
+    with imageio.get_writer(cpath + f'/data/realSolverNoCalibrate.gif', mode='I', fps=1) as writer:
+        filename_list = glob.glob(cpath + f'/data/realSolverNoCalibrate_step*.png')
         filename_list.sort()
         for filename in filename_list:
             image = imageio.imread(filename)
             writer.append_data(image)
 
 #
-# ============================ realSolver_basic ===========================
+# ============================ realSolverNoCalibrate_basic ===========================
