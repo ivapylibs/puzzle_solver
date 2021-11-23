@@ -15,10 +15,11 @@
 #
 # ========================= agent01_piece ========================
 
-from copy import deepcopy
 
 # ==[0] Prepare
 # [0.1] environment
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import numpy as np
 

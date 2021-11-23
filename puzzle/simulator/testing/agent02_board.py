@@ -22,6 +22,8 @@
 #
 # ========================= agent02_board ========================
 
+##==[0] Prepare
+# [0.1] environment
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -31,8 +33,6 @@ from puzzle.builder.board import board
 from puzzle.piece.template import template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
-##==[0] Prepare
-# [0.1] environment
 from puzzle.simulator.planner import Planner_Fix
 
 

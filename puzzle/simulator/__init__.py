@@ -1,3 +1,4 @@
+# For human activity
 import puzzle.simulator.action
 import puzzle.simulator.agent
 import puzzle.simulator.basic

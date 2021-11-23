@@ -23,7 +23,7 @@ from puzzle.simulator.action import Actions
 from puzzle.simulator.planner import Planner_Base
 
 
-class Apperance(template):
+class Appearance(template):
     """
     @brief  The Appearance agent class contains the basic appearance information about the agent
             It inherit the puzzle.piece.template class so that it can be treated as a special piece
@@ -40,7 +40,7 @@ class Agent(Actions):
     The Agent class equip the Base with the actions and the planning ability
     """
 
-    def __init__(self, app: Apperance, planner: Planner_Base = None):
+    def __init__(self, app: Appearance, planner: Planner_Base = None):
         self.app = app
         super().__init__(loc=self.app.rLoc)
         self.app.rLoc = self.loc
@@ -116,7 +116,7 @@ class Agent(Actions):
 
     def execute_next(self, meaBoard):
         """
-        This function execture the next cached action
+        This function execute the next cached action
 
         @param[in]  next_action         The next action label
         @param[in]  next_arg            The next action's argument
@@ -131,7 +131,7 @@ class Agent(Actions):
 
     def execute(self, action_label, action_param=None, board=None):
         """
-        Exectute an action given the action label and parameter
+        Execute an action given the action label and parameter
 
         Overwrite the execute function since we need to keep the self.app.rLoc updated
         NOTE:This is necessary only when we are using the puzzle.template as the appearance model

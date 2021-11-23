@@ -14,11 +14,10 @@
 #
 # ============================ lineArrange ===========================
 
-
+# ==[0] Prep environment
 import os
 from copy import deepcopy
 
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
 import numpy as np
 

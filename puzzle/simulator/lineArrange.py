@@ -66,7 +66,7 @@ class lineArrange(basic):
         self.solBoard = solBoard
 
         # the arrangement instance for comparing the current status with the solutions
-        self.progress_checker = arrangement(solBoard=solBoard, theParams=params)
+        self.progress_checker = arrangement(theBoard=solBoard, theParams=params)
 
         # the hand
         self.hand = None
