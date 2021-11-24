@@ -35,15 +35,15 @@ import improcessor.basic as improcessor
 import numpy as np
 
 import puzzle.parser.simple as perceiver
-from puzzle.builder.board import board
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
+from puzzle.builder.board import Board
+from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
 
 
 # ===== Helper Elements
 #
 
 @dataclass
-class paramArrange(paramPuzzle):
+class ParamArrange(ParamPuzzle):
     tauDist: int = 20  # @< The threshold of whether two puzzle pieces are correctly matched.
 
 
@@ -51,9 +51,9 @@ class paramArrange(paramPuzzle):
 # ======================= puzzle.builder.arrangement ======================
 #
 
-class arrangement(board):
+class Arrangement(Board):
 
-    def __init__(self, theBoard=[], theParams=paramArrange):
+    def __init__(self, theBoard=[], theParams=ParamArrange):
         """
         @brief  Constructor for the puzzle.builder.arrangement class.
 
@@ -62,7 +62,7 @@ class arrangement(board):
             theParams: The parameters.
         """
 
-        super(arrangement, self).__init__(theBoard)
+        super(Arrangement, self).__init__(theBoard)
 
         self.params = theParams  # @<A distance threshold for considering a piece
         # to be correctly placed.
@@ -245,15 +245,15 @@ class arrangement(board):
             data = pickle.load(fp)
 
             if hasattr(data, 'board'):
-                theBoard = data.board
+                theBoard = data.Board
             if hasattr(data, 'tauDist'):
-                theParams = paramArrange(tauDist=data.tauDist)
+                theParams = ParamArrange(tauDist=data.tauDist)
 
-        if isinstance(theBoard, board):
+        if isinstance(theBoard, Board):
             if hasattr(theParams, 'tauDist'):
-                thePuzzle = arrangement(theBoard, theParams)
+                thePuzzle = Arrangement(theBoard, theParams)
             else:
-                thePuzzle = arrangement(theBoard)
+                thePuzzle = Arrangement(theBoard)
         else:
             raise TypeError('There is no board instance saved in the file!')
 
@@ -288,7 +288,7 @@ class arrangement(board):
                 M = data.M
 
         if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
-            thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
+            thePuzzle = Arrangement.buildFrom_ImageAndMask(I, M, theParams)
         else:
             raise TypeError('There is no Image or Mask saved in the file!')
 
@@ -320,7 +320,7 @@ class arrangement(board):
             _, M = cv2.threshold(M, 10, 255, cv2.THRESH_BINARY)
 
         if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
-            thePuzzle = arrangement.buildFrom_ImageAndMask(I, M, theParams)
+            thePuzzle = Arrangement.buildFrom_ImageAndMask(I, M, theParams)
         else:
             raise TypeError('There is no Image or Mask saved in the file!')
 
@@ -344,15 +344,15 @@ class arrangement(board):
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
         if hasattr(theParams, 'areaThresholdLower'):
-            pParser = fromLayer(theParams)
+            pParser = FromLayer(theParams)
         else:
-            pParser = fromLayer()
+            pParser = FromLayer()
 
         pParser.process(theImage, theMask)
         if hasattr(theParams, 'tauDist'):
-            thePuzzle = arrangement(pParser.getState(), theParams)
+            thePuzzle = Arrangement(pParser.getState(), theParams)
         else:
-            thePuzzle = arrangement(pParser.getState())
+            thePuzzle = Arrangement(pParser.getState())
 
         return thePuzzle
 
@@ -390,18 +390,18 @@ class arrangement(board):
             theDetector = detector.inImage(theProcessor)
 
         if hasattr(theParams, 'areaThresholdLower'):
-            theLayer = fromLayer(theParams)
+            theLayer = FromLayer(theParams)
         else:
-            theLayer = fromLayer()
+            theLayer = FromLayer()
 
-        pParser = perceiver.simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
+        pParser = perceiver.Simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
 
         pParser.process(theImage)
 
         if hasattr(theParams, 'tauDist'):
-            thePuzzle = arrangement(pParser.board, theParams)
+            thePuzzle = Arrangement(pParser.board, theParams)
         else:
-            thePuzzle = arrangement(pParser.board)
+            thePuzzle = Arrangement(pParser.board)
 
         return thePuzzle
 
@@ -440,18 +440,18 @@ class arrangement(board):
             theDetector = detector.inImage(theProcessor)
 
         if hasattr(theParams, 'areaThresholdLower'):
-            theLayer = fromLayer(theParams)
+            theLayer = FromLayer(theParams)
         else:
-            theLayer = fromLayer()
+            theLayer = FromLayer()
 
-        pParser = perceiver.simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
+        pParser = perceiver.Simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
 
         pParser.process(theImage, theMask)
 
         if hasattr(theParams, 'tauDist'):
-            thePuzzle = arrangement(pParser.board, theParams)
+            thePuzzle = Arrangement(pParser.board, theParams)
         else:
-            thePuzzle = arrangement(pParser.board)
+            thePuzzle = Arrangement(pParser.board)
 
         return thePuzzle
 

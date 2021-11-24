@@ -23,7 +23,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
+from puzzle.builder.board import Board
 from puzzle.simulator.agent import Agent
 
 
@@ -56,7 +56,7 @@ class SimTimeLess():
     @param[in]  param               The parameters
     """
 
-    def __init__(self, init_board: board, sol_board: board, agent: Agent, param: ParamST = ParamST()):
+    def __init__(self, init_board: Board, sol_board: Board, agent: Agent, param: ParamST = ParamST()):
         self.init_board = init_board  # Initial board
         self.sol_board = sol_board  # Solution board
         self.cur_board = init_board  # The current board. At first it will be only the inital board

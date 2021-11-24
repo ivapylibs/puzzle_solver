@@ -23,8 +23,8 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
-from puzzle.parser.fromSketch import fromSketch
+from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
+from puzzle.parser.fromSketch import FromSketch
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -46,13 +46,13 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance.
 #
-theLayer = fromLayer(paramPuzzle(areaThresholdLower=5000))
+theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()

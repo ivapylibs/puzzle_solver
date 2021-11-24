@@ -17,14 +17,12 @@
 # ==[0] Prep environment
 
 import os
+
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
+from puzzle.piece.template import Template
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
-
-from puzzle.piece.template import template
-
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -42,7 +40,7 @@ theMaskSol = preprocess_real_puzzle(theImageSol)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-thePiece = template.buildFromMaskAndImage(theMaskSol, theImageSol)
+thePiece = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
 
 # ==[1.3] Display.
 #

@@ -24,13 +24,13 @@ import imageio
 import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import board
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.piece.regular import regular
-from puzzle.piece.sift import sift
-from puzzle.simulator.basic import basic
-from puzzle.solver.simple import simple
+from puzzle.builder.board import Board
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.piece.regular import Regular
+from puzzle.piece.sift import Sift
+from puzzle.simulator.basic import Basic
+from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 
@@ -39,7 +39,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image for measurement.
 #
-fsize= 0.8
+fsize = 0.8
 theImageMea = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_big_hard3/sol_cali_mea_001.png')
 theImageMea = cv2.resize(theImageMea, (0, 0), fx=fsize, fy=fsize)
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
@@ -65,8 +65,8 @@ plt.show()
 # ==[3] Create Grid instance to build up solution board & measured board.
 #
 
-theGridSol = gridded(theCalibrated, theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                        pieceConstructor=regular, tauGrid=20))
+theGridSol = Gridded(theCalibrated, theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
+                                                        pieceConstructor=Regular, tauGrid=20))
 
 for i in range(len(theGridSol.pieces)):
     theGridSol.pieces[i].setPlacement(r=(-500,-500),offset=True)
@@ -75,15 +75,15 @@ for i in range(len(theGridSol.pieces)):
 #                                                         pieceConstructor=regular, tauGrid=20, grid=(5,3)))
 
 theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
-theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000,
-                                                                pieceConstructor=regular))
+theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000,
+                                                                pieceConstructor=Regular))
 
 
 # ==[4] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift(theThreshMatch=0.6)))
+theManager = Manager(theGridSol, ManagerParms(matcher=Sift(theThreshMatch=0.6)))
 theManager.process(theGridMea)
 
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
@@ -105,13 +105,13 @@ plt.show()
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGridSol, copy.deepcopy(theGridMea))
+theSolver = Simple(theGridSol, copy.deepcopy(theGridMea))
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theSolver.current)
+theSim = Basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #
@@ -132,7 +132,7 @@ i = 0
 # To save calibration process
 j = 0
 
-theCalibrated = board()
+theCalibrated = Board()
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
                            )

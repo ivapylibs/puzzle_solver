@@ -30,7 +30,7 @@ import os
 import cv2
 import improcessor.basic as improcessor
 
-from puzzle.parser.fromSketch import fromSketch
+from puzzle.parser.fromSketch import FromSketch
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -49,7 +49,7 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 
 # ==[3] Apply and visualize.
 #

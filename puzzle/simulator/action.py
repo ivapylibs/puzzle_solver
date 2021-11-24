@@ -17,7 +17,7 @@
 
 import numpy as np
 
-from puzzle.piece.template import template
+from puzzle.piece.template import Template
 
 
 class Actions():
@@ -40,7 +40,7 @@ class Actions():
         if self.cache_piece is not None:
             self.cache_piece.setPlacement(targetLoc)
 
-    def pick(self, piece: template):
+    def pick(self, piece: Template):
         # TODO:verify the piece is close
 
         # pick

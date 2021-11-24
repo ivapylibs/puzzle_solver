@@ -18,14 +18,14 @@
 import cv2
 import numpy as np
 
-from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.regular import regular
+from puzzle.piece.matchDifferent import MatchDifferent
+from puzzle.piece.regular import Regular
 
 
 #
 # ================================ puzzle.piece.edge ================================
 #
-class edge(matchDifferent):
+class Edge(MatchDifferent):
 
     def __init__(self, tau_shape=100, tau_color=400):
         """
@@ -36,7 +36,7 @@ class edge(matchDifferent):
             tau_color: The threshold for the color feature.
         """
 
-        super(edge, self).__init__()
+        super(Edge, self).__init__()
 
         self.tau_shape = tau_shape
         self.tau_color = tau_color
@@ -54,26 +54,26 @@ class edge(matchDifferent):
             Shape feature.
         """
 
-        if not issubclass(type(piece), regular):
+        if not issubclass(type(piece), Regular):
             raise ('The input type is wrong. Need a regular instance.')
 
         shapeFeaList = []
         for i in range(4):
 
             # Check if the variable is an empty list
-            if (isinstance(piece.edge[i].shapeFea, list) and len(piece.edge[i].shapeFea) > 0) \
-                    or piece.edge[i].shapeFea:
-                shapeFeaList.append(piece.edge[i].shapeFea)
+            if (isinstance(piece.Edge[i].shapeFea, list) and len(piece.Edge[i].shapeFea) > 0) \
+                    or piece.Edge[i].shapeFea:
+                shapeFeaList.append(piece.Edge[i].shapeFea)
             else:
 
                 if method == 'type':
-                    piece.edge[i].shapeFea = piece.edge[i].type
-                    shapeFeaList.append(piece.edge[i].type)
+                    piece.Edge[i].shapeFea = piece.Edge[i].type
+                    shapeFeaList.append(piece.Edge[i].type)
                 else:
-                    y, x = np.nonzero(piece.edge[i].mask)
+                    y, x = np.nonzero(piece.Edge[i].mask)
                     coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
-                    piece.edge[i].shapeFea = coords
+                    piece.Edge[i].shapeFea = coords
                     shapeFeaList.append(coords)
 
         shapeFeaList = np.array(shapeFeaList)
@@ -93,19 +93,19 @@ class edge(matchDifferent):
             The resized feature vector.
         """
 
-        if not issubclass(type(piece), regular):
+        if not issubclass(type(piece), Regular):
             raise ('The input type is wrong. Need a regular instance.')
 
         colorFeaResizeList = []
         for i in range(4):
 
-            if len(piece.edge[i].colorFea) > 0:
-                colorFeaResizeList.append(piece.edge[i].colorFea)
+            if len(piece.Edge[i].colorFea) > 0:
+                colorFeaResizeList.append(piece.Edge[i].colorFea)
             else:
-                y, x = np.nonzero(piece.edge[i].mask)
+                y, x = np.nonzero(piece.Edge[i].mask)
 
                 # Extract the valid pts
-                pts = piece.edge[i].image[y, x]
+                pts = piece.Edge[i].image[y, x]
 
                 # Expand dim for further processing
                 colorFeaOri = np.expand_dims(pts, axis=0)
@@ -116,7 +116,7 @@ class edge(matchDifferent):
                 # # @todo Yunzhi: May need to double check the color space
                 # colorFeaResize = cv2.cvtColor(colorFeaResize, cv2.COLOR_RGB2Lab)
 
-                piece.edge[i].colorFea = colorFeaResize
+                piece.Edge[i].colorFea = colorFeaResize
 
                 colorFeaResizeList.append(colorFeaResize)
 
@@ -136,8 +136,8 @@ class edge(matchDifferent):
             The shape & color feature vectors.
         """
 
-        shapeFea = edge.shapeFeaExtract(piece, method=method)
-        colorFea = edge.colorFeaExtract(piece)
+        shapeFea = Edge.shapeFeaExtract(piece, method=method)
+        colorFea = Edge.colorFeaExtract(piece)
 
         return list(zip(shapeFea, colorFea))
 
@@ -185,7 +185,7 @@ class edge(matchDifferent):
         if type(piece_A) != type(piece_B):
             raise TypeError('Input should be of the same type.')
         else:
-            if isinstance(piece_A, regular):
+            if isinstance(piece_A, Regular):
 
                 ret_A = self.process(piece_A, method=method)
                 ret_B = self.process(piece_B, method=method)

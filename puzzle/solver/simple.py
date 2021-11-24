@@ -23,7 +23,7 @@ from copy import deepcopy
 import numpy as np
 from puzzleSolver import PuzzlePieces, PuzzleSolver
 
-from puzzle.solver.base import base
+from puzzle.solver.base import Base
 
 
 # ===== Helper Elements
@@ -34,7 +34,7 @@ from puzzle.solver.base import base
 # ========================== puzzle.solver.simple =========================
 #
 
-class simple(base):
+class Simple(Base):
 
     def __init__(self, theSol, thePuzzle):
         """
@@ -47,7 +47,7 @@ class simple(base):
           thePuzzle: The estimated board.
         """
 
-        super(simple, self).__init__(theSol, thePuzzle)
+        super(Simple, self).__init__(theSol, thePuzzle)
 
         self.match = None  # @< Mapping from current to desired.
         self.rotation_match = None  # @< Mapping from current to desired.

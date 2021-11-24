@@ -25,8 +25,8 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.interlocking import interlocking
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.builder.interlocking import Interlocking
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -34,7 +34,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 @dataclass
 class dataBoard:
-    board: any = None
+    Board: any = None
     tauDist: float = None
 
 
@@ -53,7 +53,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -88,7 +88,7 @@ del theData_save
 # ==[2.1] Test buildFromFile_Puzzle
 #
 
-theInter_1 = interlocking.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
+theInter_1 = Interlocking.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolInterlocking_1 = theInter_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolInterlocking_1)
@@ -97,7 +97,7 @@ axarr[0, 1].title.set_text('Board 1')
 # ==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theInter_2 = interlocking.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
+theInter_2 = Interlocking.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolInterlocking_2 = theInter_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolInterlocking_2)
@@ -106,7 +106,7 @@ axarr[0, 2].title.set_text('Board 2')
 # ==[2.3] Test buildFromFiles_ImageAndMask
 #
 
-theInter_3 = interlocking.buildFromFiles_ImageAndMask(
+theInter_3 = Interlocking.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_solution.png',
     cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
@@ -118,7 +118,7 @@ axarr[1, 0].title.set_text('Board 3')
 # ==[2.4] Test buildFrom_ImageAndMask
 #
 
-theInter_4 = interlocking.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theInter_4 = Interlocking.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolInterlocking_4 = theInter_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolInterlocking_4)
@@ -127,7 +127,7 @@ axarr[1, 1].title.set_text('Board 4')
 # ==[2.5] Test buildFrom_ImageProcessing
 #
 
-theInter_5 = interlocking.buildFrom_ImageProcessing(theImageSol)
+theInter_5 = Interlocking.buildFrom_ImageProcessing(theImageSol)
 
 bsolInterlocking_5 = theInter_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolInterlocking_5)

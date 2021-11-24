@@ -45,7 +45,7 @@ class PieceStatus(Enum):
 
 
 @dataclass
-class puzzleTemplate:
+class PuzzleTemplate:
     size: np.ndarray = np.array([])  # @< Tight bbox size of puzzle piece image.
     rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
     appear: np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
@@ -55,14 +55,15 @@ class puzzleTemplate:
     contour_pts: np.ndarray = np.array([])  # @< Template contour points.
 
     kpFea: tuple = ()  # @< The processed keypoint feature.
-    colorFea: np.ndarray = np.array([]) # @< The processed color feature.
-    shapeFea: np.ndarray = np.array([]) # @< The processed shape feature.
+    colorFea: np.ndarray = np.array([])  # @< The processed color feature.
+    shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
+
 
 #
 # ========================= puzzle.piece.template =========================
 #
 
-class template:
+class Template:
 
     def __init__(self, y=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         """
@@ -305,7 +306,7 @@ class template:
             The puzzle piece instance.
         """
 
-        y = puzzleTemplate()
+        y = PuzzleTemplate()
 
         # Populate dimensions.
         # Updated to OpenCV style
@@ -341,12 +342,12 @@ class template:
         y.image = theImage
 
         if not rLoc:
-            thePiece = template(y)
+            thePiece = Template(y)
         else:
-            thePiece = template(y, rLoc)
+            thePiece = Template(y, rLoc)
 
         # Set up the rotation (with theta, we can correct the rotation)
-        thePiece.theta = -template.getEig(thePiece.y.mask)
+        thePiece.theta = -Template.getEig(thePiece.y.mask)
 
         # Set up the status of the piece
         thePiece.status = pieceStatus
@@ -365,7 +366,7 @@ class template:
         """
 
         # Create a new instance. Without rLoc.
-        thePiece = template(y=deepcopy(self.y), id=deepcopy(self.id))
+        thePiece = Template(y=deepcopy(self.y), id=deepcopy(self.id))
 
         # By default the rotation is around its center (img center)
         # thePiece.y.mask, mask_temp, M, x_pad, y_pad = rotate_im(thePiece.y.mask, theta)
@@ -430,7 +431,7 @@ class template:
             The puzzle piece instance.
         """
 
-        y = puzzleTemplate()
+        y = PuzzleTemplate()
 
         # the tight bbox is just the square itself, so size is just size
         y.size = np.array([size, size])
@@ -456,9 +457,9 @@ class template:
         y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
         if not rLoc:
-            thePiece = template(y)
+            thePiece = Template(y)
         else:
-            thePiece = template(y, rLoc)
+            thePiece = Template(y, rLoc)
 
         return thePiece
 
@@ -474,7 +475,7 @@ class template:
             The puzzle piece instance.
         """
 
-        y = puzzleTemplate()
+        y = PuzzleTemplate()
 
         # the tight bbox is just the square itself, so size is just size
         y.size = np.array([radius, radius]) * 2
@@ -499,9 +500,9 @@ class template:
         y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
         if not rLoc:
-            thePiece = template(y)
+            thePiece = Template(y)
         else:
-            thePiece = template(y, rLoc)
+            thePiece = Template(y, rLoc)
 
         return thePiece
 

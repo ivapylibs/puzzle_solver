@@ -24,8 +24,8 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.builder.arrangement import Arrangement
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -33,7 +33,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 @dataclass
 class dataBoard:
-    board: any = None
+    Board: any = None
     tauDist: float = None
 
 
@@ -52,7 +52,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -64,7 +64,7 @@ plt.show()
 # ==[2] Create an arrangement instance & simulate the pLoc
 #
 
-theArrange = arrangement(theBoardSol)
+theArrange = Arrangement(theBoardSol)
 
 pLoc = {
     0: [30, 200],
@@ -104,7 +104,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[3.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -139,7 +139,7 @@ del theData_save
 # ==[4.1] Test buildFromFile_Puzzle
 #
 
-theArrangement_1 = arrangement.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
+theArrangement_1 = Arrangement.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolArrangement_1 = theArrangement_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolArrangement_1)
@@ -148,7 +148,7 @@ axarr[0, 1].title.set_text('Board 1')
 # ==[4.2] Test buildFromFile_ImageAndMask
 #
 
-theArrangement_2 = arrangement.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
+theArrangement_2 = Arrangement.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolArrangement_2 = theArrangement_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolArrangement_2)
@@ -157,7 +157,7 @@ axarr[0, 2].title.set_text('Board 2')
 # ==[4.3] Test buildFromFiles_ImageAndMask
 #
 
-theArrangement_3 = arrangement.buildFromFiles_ImageAndMask(
+theArrangement_3 = Arrangement.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_solution.png',
     cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
@@ -169,7 +169,7 @@ axarr[1, 0].title.set_text('Board 3')
 # ==[4.4] Test buildFrom_ImageAndMask
 #
 
-theArrangement_4 = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theArrangement_4 = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolArrangement_4 = theArrangement_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolArrangement_4)
@@ -178,7 +178,7 @@ axarr[1, 1].title.set_text('Board 4')
 # ==[4.5] Test buildFrom_ImageProcessing
 #
 
-theArrangement_5 = arrangement.buildFrom_ImageProcessing(theImageSol)
+theArrangement_5 = Arrangement.buildFrom_ImageProcessing(theImageSol)
 
 bsolArrangement_5 = theArrangement_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolArrangement_5)

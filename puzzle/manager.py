@@ -38,10 +38,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.parser.fromLayer import fromLayer
-from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.matchSimilar import matchSimilar
-from puzzle.piece.moments import moments
+from puzzle.parser.fromLayer import FromLayer
+from puzzle.piece.matchDifferent import MatchDifferent
+from puzzle.piece.matchSimilar import MatchSimilar
+from puzzle.piece.moments import Moments
 
 # ===== Helper Elements
 #
@@ -51,16 +51,16 @@ SCORE_SIMILAR = 1
 
 
 @dataclass
-class managerParms:
+class ManagerParms:
     # scoreType: int = SCORE_DIFFERENCE
-    matcher: any = moments(20)
+    matcher: any = Moments(20)
 
 
 #
 # ================================ manager ================================
 #
 
-class manager(fromLayer):
+class Manager(FromLayer):
 
     # @note
     # SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
@@ -86,7 +86,7 @@ class manager(fromLayer):
     # @note
     # Yunzhi: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
-    def __init__(self, solution, theParams=managerParms):
+    def __init__(self, solution, theParams=ManagerParms):
         """
         @brief  Constructor for the puzzle piece manager class.
 
@@ -95,7 +95,7 @@ class manager(fromLayer):
             theParams: Any additional parameters in a structure.
         """
 
-        super(manager, self).__init__()
+        super(Manager, self).__init__()
 
         self.solution = solution  # @< The solution puzzle board.
         self.pAssignments = []  # @< Assignments: meas to sol.
@@ -104,9 +104,9 @@ class manager(fromLayer):
 
         self.matcher = theParams.matcher  # @< Matcher instance
 
-        if isinstance(self.matcher, matchDifferent):
+        if isinstance(self.matcher, MatchDifferent):
             self.scoreType = SCORE_DIFFERENCE  # @< The type of comparator.
-        elif isinstance(self.matcher, matchSimilar):
+        elif isinstance(self.matcher, MatchSimilar):
             self.scoreType = SCORE_SIMILAR  # @< The type of comparator.
         else:
             raise TypeError('The matcher is of wrong input.')

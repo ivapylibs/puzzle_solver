@@ -26,19 +26,19 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.board import board
-from puzzle.manager import manager, managerParms
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.board import Board
+from puzzle.manager import Manager, ManagerParms
 from puzzle.simulator.agent import Agent
-from puzzle.simulator.basic import basic
-from puzzle.solver.simple import simple as solver_simple
+from puzzle.simulator.basic import Basic
+from puzzle.solver.simple import Simple as solver_simple
 
 
 # ===== Class Helper Elements
 #
 
 @dataclass
-class paramLineArrange(paramArrange):
+class paramLineArrange(ParamArrange):
     pass
 
 
@@ -46,7 +46,7 @@ class paramLineArrange(paramArrange):
 # ========================= puzzle.simulator.lineArrange ========================
 #
 
-class lineArrange(basic):
+class lineArrange(Basic):
     """
     The simulation class of an agent finishing a simple line-arrangement puzzle task,
     in which the goal is to arrange all the puzzle pieces into a line.
@@ -58,7 +58,7 @@ class lineArrange(basic):
     @param[in]  params              paramLineArrange. Other parameters
     """
 
-    def __init__(self, initBoard: board, solBoard: board, initHuman: Agent,
+    def __init__(self, initBoard: Board, solBoard: Board, initHuman: Agent,
                  theFig=None, params: paramLineArrange = paramLineArrange()):
         super().__init__(initBoard, theFig=theFig)
 
@@ -66,7 +66,7 @@ class lineArrange(basic):
         self.solBoard = solBoard
 
         # the arrangement instance for comparing the current status with the solutions
-        self.progress_checker = arrangement(theBoard=solBoard, theParams=params)
+        self.progress_checker = Arrangement(theBoard=solBoard, theParams=params)
 
         # the hand
         self.hand = None
@@ -95,7 +95,7 @@ class lineArrange(basic):
         pass
 
     @staticmethod
-    def buildSameX(targetX, initBoard: board, initHuman: Agent, theFig=None,
+    def buildSameX(targetX, initBoard: Board, initHuman: Agent, theFig=None,
                    params: paramLineArrange = paramLineArrange()):
         """
         @brief: Build a lineArrange instance in which the goal is to simply horizontally move 
@@ -111,7 +111,7 @@ class lineArrange(basic):
         return lineArrange(initBoard, solBoard, initHuman)
 
 
-class manager_LA(manager):
+class manager_LA(Manager):
     """
     Develop a simplified manager tailored to the lineArrange task
 
@@ -120,7 +120,7 @@ class manager_LA(manager):
        The reason is all puzzle pieces in this simulator have the same outlook 
     """
 
-    def __init__(self, solution: board, theParms: managerParms = managerParms()):
+    def __init__(self, solution: Board, theParms: ManagerParms = ManagerParms()):
         super().__init__(solution, theParams=theParms)
 
         # self.solution             The solution board
@@ -143,7 +143,7 @@ class manager_LA(manager):
         # store the assignment
         self.pAssignments = pAssign
 
-    def set_pAssignments_board(self, meaBoard: board):
+    def set_pAssignments_board(self, meaBoard: Board):
         """
         This function create an assignment from a measured board,
         which assumes that the measured and the solution are one-to-one corresponded.
@@ -194,7 +194,7 @@ class solver_LA(solver_simple):
         self.puzzle_idx = None
         self.target_loc = None
 
-    def setMeaBoard(self, meaBoard: board):
+    def setMeaBoard(self, meaBoard: Board):
         """
         store the newly measured board.
 

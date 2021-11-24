@@ -21,7 +21,7 @@ import cv2
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -35,7 +35,7 @@ theMask = cv2.imread(cpath + '/../../testing/data/shapes_color_six_binary.png', 
 
 # ==[3] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.measure(theImage, theMask)
 
 theBoard = theLayer.bMeas

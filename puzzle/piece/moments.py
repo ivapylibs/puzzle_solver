@@ -21,14 +21,14 @@ import math
 import cv2
 import numpy as np
 
-from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.template import template
+from puzzle.piece.matchDifferent import MatchDifferent
+from puzzle.piece.template import Template
 
 
 #
 # ================================ puzzle.piece.moments ================================
 #
-class moments(matchDifferent):
+class Moments(MatchDifferent):
 
     def __init__(self, tau=5):
         """
@@ -38,7 +38,7 @@ class moments(matchDifferent):
             tau: The threshold param to determine difference.
         """
 
-        super(moments, self).__init__(tau)
+        super(Moments, self).__init__(tau)
 
     @staticmethod
     def shapeFeaExtract(piece):
@@ -53,7 +53,7 @@ class moments(matchDifferent):
             A list of huMoments value.
         """
 
-        if issubclass(type(piece), template):
+        if issubclass(type(piece), Template):
             if len(piece.y.shapeFea) > 0:
                 return piece.y.shapeFea
         else:
@@ -75,7 +75,7 @@ class moments(matchDifferent):
             The processed feature.
         """
 
-        return moments.shapeFeaExtract(piece)
+        return Moments.shapeFeaExtract(piece)
 
     def score(self, piece_A, piece_B):
         """

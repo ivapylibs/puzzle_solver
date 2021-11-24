@@ -22,7 +22,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.piece.template import template
+from puzzle.piece.template import Template
 
 # ==[1] Create raw puzzle piece data.
 #
@@ -32,7 +32,7 @@ theMask[4:14, 7:12] = True
 theImage = np.zeros((20, 20, 3))
 theImage[4:14, 7:12, :] = np.full((1, 1, 3), [1, 0, 1])
 
-thePiece = template.buildFromMaskAndImage(theMask, theImage)
+thePiece = Template.buildFromMaskAndImage(theMask, theImage)
 
 # ==[2] Test creation
 #
@@ -52,8 +52,8 @@ plt.figure()
 plt.imshow(bigImage)
 
 # ==[4] Test the builder of the basic puzzle piece
-squarePiece = template.buildSquare(20, color=(255, 0, 0), rLoc=(80, 40))
-spherePiece = template.buildSphere(10, color=(0, 255, 0), rLoc=(80, 140))
+squarePiece = Template.buildSquare(20, color=(255, 0, 0), rLoc=(80, 40))
+spherePiece = Template.buildSphere(10, color=(0, 255, 0), rLoc=(80, 140))
 bigImage = np.zeros((200, 200, 3))
 squarePiece.placeInImage(bigImage)
 spherePiece.placeInImage(bigImage)

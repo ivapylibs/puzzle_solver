@@ -21,13 +21,13 @@
 
 # ===== Environment / Dependencies
 #
-from puzzle.piece.matcher import matcher
+from puzzle.piece.matcher import Matcher
 
 
 #
 # ========================= puzzle.piece.matchDifferent =========================
 #
-class matchDifferent(matcher):
+class MatchDifferent(Matcher):
 
     def __init__(self, tau=-float('inf')):
         """
@@ -37,7 +37,7 @@ class matchDifferent(matcher):
             tau: The threshold param to determine difference.
         """
 
-        super(matchDifferent, self).__init__(tau)
+        super(MatchDifferent, self).__init__(tau)
 
     def compare(self, piece_A, piece_B):
         """

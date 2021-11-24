@@ -18,8 +18,8 @@
 
 import numpy as np
 
-from puzzle.manager import manager
-from puzzle.solver.base import base as solver_base
+from puzzle.manager import Manager
+from puzzle.solver.base import Base as solver_base
 
 
 class Planner_Base():
@@ -31,7 +31,7 @@ class Planner_Base():
     @param[in]  solver          The solver instance responsible for plan the execution order
     """
 
-    def __init__(self, solver: solver_base, manager: manager) -> None:
+    def __init__(self, solver: solver_base, manager: Manager) -> None:
         self.solver = solver
         self.manager = manager
 
@@ -96,7 +96,7 @@ class Planner_Fix(Planner_Base):
                                     But needs to be set before planning. Default is None 
     """
 
-    def __init__(self, solver: solver_base, manager: manager, init_loc=None) -> None:
+    def __init__(self, solver: solver_base, manager: Manager, init_loc=None) -> None:
         super().__init__(solver, manager)
         self.init_loc = init_loc
 

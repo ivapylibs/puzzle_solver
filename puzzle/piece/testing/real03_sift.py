@@ -21,9 +21,9 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.board import board
-from puzzle.piece.sift import sift
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.board import Board
+from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -48,20 +48,20 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                theParams=paramArrange(areaThresholdLower=1000))
-theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                theParams=paramArrange(areaThresholdLower=1000))
+theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                                theParams=ParamArrange(areaThresholdLower=1000))
+theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+                                                theParams=ParamArrange(areaThresholdLower=1000))
 
 # ==[2] Create a new board
 #
-theBoard = board()
+theBoard = Board()
 thePiece_A = theGridMea.pieces[0]
 thePiece_B = theGridSol.pieces[0]
 
 # ==[3] Create a sift matcher
 #
-theMatcher = sift()
+theMatcher = Sift()
 
 # ==[4] Display the new board and the comparison result.
 #

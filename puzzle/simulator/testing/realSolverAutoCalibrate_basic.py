@@ -22,13 +22,13 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.piece.regular import regular
-from puzzle.piece.sift import sift
-from puzzle.simulator.basic import basic
-from puzzle.solver.simple import simple
+from puzzle.builder.board import Board
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.piece.regular import Regular
+from puzzle.piece.sift import Sift
+from puzzle.simulator.basic import Basic
+from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import preprocess_real_puzzle, find_nonzero_mask
 
 fpath = os.path.realpath(__file__)
@@ -56,10 +56,10 @@ theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 # ==[2] Create Grid instance to build up solution board & measured board.
 #
 
-theGridSol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                                    pieceConstructor=regular))
-theBoard = board()
+theGridSol_src = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
+                                                                    pieceConstructor=Regular))
+theBoard = Board()
 theRegular_0 = theGridSol_src.pieces[0]
 theRegular_0 = theRegular_0.rotatePiece(theta=theRegular_0.theta)
 theBoard.addPiece(theRegular_0)
@@ -74,11 +74,11 @@ for i in range(1, theGridSol_src.size()):
     # Todo: Adhoc way, will update in the future
     if i == theGridSol_src.gc.shape[1] / theGridSol_src.gc.shape[0]:
         theRegular_0 = theBoard.pieces[0]
-        piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
     else:
-        piece_A_coord = find_nonzero_mask(theRegular_0.edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
 
     x_relative = np.max(piece_B_coord[0, :]) - np.max(piece_A_coord[0, :])
     y_relative = np.max(piece_B_coord[1, :]) - np.max(piece_A_coord[1, :])
@@ -86,27 +86,27 @@ for i in range(1, theGridSol_src.size()):
     theRegular_1.setPlacement([int(-x_relative), int(-y_relative)], offset=True)
     theBoard.addPiece(theRegular_1)
 
-theGridSol = gridded(theBoard)
+theGridSol = Gridded(theBoard)
 
-theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                                pieceConstructor=regular))
+theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
+                                                                pieceConstructor=Regular))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theManager.process(theGridMea)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGridSol, theGridMea)
+theSolver = Simple(theGridSol, theGridMea)
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theSolver.current)
+theSim = Basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #

@@ -26,7 +26,7 @@
 #
 # ========================= puzzle.piece.matcher =========================
 #
-class matcher:
+class Matcher:
 
     def __init__(self, tau=float("NaN")):
         """

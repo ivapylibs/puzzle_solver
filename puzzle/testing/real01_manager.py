@@ -21,9 +21,9 @@ import cv2
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.piece.sift import sift
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -58,16 +58,16 @@ print('Running through test cases. Will take a bit.')
 
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
-theGrid_Sol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=paramGrid(areaThresholdLower=1000, reorder=True))
-theGrid_Mea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                             theParams=paramGrid(areaThresholdLower=1000, reorder=True))
+theGrid_Sol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
+theGrid_Mea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
 
 # ==[3] Create a manager
 #
 # theManager = manager(theGridSol, managerParms(matcher=edge()))
 
-theManager = manager(theGrid_Sol, managerParms(matcher=sift()))
+theManager = Manager(theGrid_Sol, ManagerParms(matcher=Sift()))
 theManager.process(theGrid_Mea)
 
 # ==[4] Display. Should see some ids on the puzzle pieces

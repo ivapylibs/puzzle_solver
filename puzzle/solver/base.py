@@ -27,7 +27,7 @@
 # =========================== puzzle.solver.base ==========================
 #
 
-class base:
+class Base:
 
     def __init__(self, theSol, thePuzzle):
         """

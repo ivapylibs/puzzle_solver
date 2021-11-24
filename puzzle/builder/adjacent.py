@@ -33,15 +33,15 @@ from dataclasses import dataclass
 #
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.board import board
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.board import Board
 
 
 # ===== Helper Elements
 #
 
 @dataclass
-class paramAdj(paramArrange):
+class ParamAdj(ParamArrange):
     tauAdj: float = 35
 
 
@@ -49,18 +49,18 @@ class paramAdj(paramArrange):
 # ======================== puzzle.builder.adjacent ========================
 #
 
-class adjacent(arrangement):
+class Adjacent(Arrangement):
 
     # ============================== adjacent =============================
     #
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, theBoard=[], theParams=paramAdj):
+    def __init__(self, theBoard=[], theParams=ParamAdj):
 
-        super(adjacent, self).__init__(theBoard, theParams)
+        super(Adjacent, self).__init__(theBoard, theParams)
 
-        if isinstance(theBoard, board):
+        if isinstance(theBoard, Board):
             self.adjMat = np.eye(theBoard.size()).astype('bool')
         else:
             raise TypeError('Not initialized properly')
@@ -104,18 +104,18 @@ class adjacent(arrangement):
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
+        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName)
 
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
         if hasattr(data, 'tauAdj'):
-            theParams = paramAdj(tauAdj=data.tauAdj)
+            theParams = ParamAdj(tauAdj=data.tauAdj)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -136,12 +136,12 @@ class adjacent(arrangement):
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParams)
+        aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -163,12 +163,12 @@ class adjacent(arrangement):
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
 
-        aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
+        aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -189,12 +189,12 @@ class adjacent(arrangement):
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
+        aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -217,11 +217,11 @@ class adjacent(arrangement):
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
+        aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 
@@ -245,11 +245,11 @@ class adjacent(arrangement):
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
+        aPuzzle = Arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauAdj'):
-            thePuzzle = adjacent(aPuzzle, theParams)
+            thePuzzle = Adjacent(aPuzzle, theParams)
         else:
-            thePuzzle = adjacent(aPuzzle)
+            thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 

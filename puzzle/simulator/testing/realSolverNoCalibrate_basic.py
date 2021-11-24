@@ -20,16 +20,14 @@ import os
 import cv2
 import imageio
 import matplotlib.pyplot as plt
-import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.piece.regular import regular
-from puzzle.piece.sift import sift
-from puzzle.simulator.basic import basic
-from puzzle.solver.simple import simple
-from puzzle.utils.imageProcessing import preprocess_real_puzzle, find_nonzero_mask
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.piece.regular import Regular
+from puzzle.piece.sift import Sift
+from puzzle.simulator.basic import Basic
+from puzzle.solver.simple import Simple
+from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -59,31 +57,31 @@ theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 # ==[2] Create Grid instance to build up solution board & measured board.
 #
 
-theGridSol_src = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                                    pieceConstructor=regular))
+theGridSol_src = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
+                                                                    pieceConstructor=Regular))
 
 theGridSol = theGridSol_src
 
-theGridMea = gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True,
-                                                                pieceConstructor=regular))
+theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
+                                                                pieceConstructor=Regular))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theManager.process(theGridMea)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGridSol, theGridMea)
+theSolver = Simple(theGridSol, theGridMea)
 
 theSolver.setMatch(theManager.pAssignments, theManager.pAssignments_rotation)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theSolver.current)
+theSim = Basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #

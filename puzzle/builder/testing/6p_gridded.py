@@ -25,8 +25,8 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.gridded import gridded
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.builder.gridded import Gridded
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -34,7 +34,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 @dataclass
 class dataBoard:
-    board: any = None
+    Board: any = None
     tauDist: float = None
 
 
@@ -53,7 +53,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -88,7 +88,7 @@ del theData_save
 # ==[2.1] Test buildFromFile_Puzzle
 #
 
-theGrid_1 = gridded.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
+theGrid_1 = Gridded.buildFromFile_Puzzle(cpath + '/data/board_6p.obj')
 
 bsolGrid_1 = theGrid_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolGrid_1)
@@ -97,7 +97,7 @@ axarr[0, 1].title.set_text('Board 1')
 # ==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theGrid_2 = gridded.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
+theGrid_2 = Gridded.buildFromFile_ImageAndMask(cpath + '/data/image_6p.obj')
 
 bsolGrid_2 = theGrid_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolGrid_2)
@@ -106,7 +106,7 @@ axarr[0, 2].title.set_text('Board 2')
 # ==[2.3] Test buildFromFiles_ImageAndMask
 #
 
-theGrid_3 = gridded.buildFromFiles_ImageAndMask(
+theGrid_3 = Gridded.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_solution.png',
     cpath + '/../../testing/data/shapes_color_six_image_solution.png'
 )
@@ -118,7 +118,7 @@ axarr[1, 0].title.set_text('Board 3')
 # ==[2.4] Test buildFrom_ImageAndMask
 #
 
-theGrid_4 = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theGrid_4 = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolGrid_4 = theGrid_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolGrid_4)
@@ -127,7 +127,7 @@ axarr[1, 1].title.set_text('Board 4')
 # ==[2.5] Test buildFrom_ImageProcessing
 #
 
-theGrid_5 = gridded.buildFrom_ImageProcessing(theImageSol)
+theGrid_5 = Gridded.buildFrom_ImageProcessing(theImageSol)
 
 bsolGrid_5 = theGrid_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolGrid_5)

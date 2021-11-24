@@ -19,9 +19,9 @@ import os
 
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import board
-from puzzle.clusters.byShape import byShape
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.clusters.byShape import ByShape
+from puzzle.piece.template import Template
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -29,12 +29,12 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Create puzzle pieces.
 #
 
-theBoard = board()
+theBoard = Board()
 for i in range(3):
-    squarePiece_A = template.buildSquare(100, color=(255, 0, 0), rLoc=(200, i*150+140))
+    squarePiece_A = Template.buildSquare(100, color=(255, 0, 0), rLoc=(200, i * 150 + 140))
     theBoard.addPiece(squarePiece_A)
 
-    squarePiece_B = template.buildSphere(40, color=(255, 0, 0), rLoc=(600, i*150+140))
+    squarePiece_B = Template.buildSphere(40, color=(255, 0, 0), rLoc=(600, i * 150 + 140))
     theBoard.addPiece(squarePiece_B)
 
 theBoard.display(CONTOUR_DISPLAY=False, ID_DISPLAY=True)
@@ -42,7 +42,7 @@ theBoard.display(CONTOUR_DISPLAY=False, ID_DISPLAY=True)
 # ==[2] Create a cluster instance and process the puzzle board.
 #
 
-theShapeCluster = byShape(theBoard)
+theShapeCluster = ByShape(theBoard)
 theShapeCluster.process()
 
 # ==[3] Display the extracted features.

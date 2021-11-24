@@ -21,13 +21,13 @@
 
 # ===== Environment / Dependencies
 #
-from puzzle.piece.matcher import matcher
+from puzzle.piece.matcher import Matcher
 
 
 #
 # ================================ puzzle.piece.matchSimilar ================================
 #
-class matchSimilar(matcher):
+class MatchSimilar(Matcher):
 
     def __init__(self, tau=float('inf')):
         """
@@ -37,7 +37,7 @@ class matchSimilar(matcher):
             tau: The threshold param to determine similarity.
         """
 
-        super(matchSimilar, self).__init__(tau)
+        super(MatchSimilar, self).__init__(tau)
 
     def compare(self, piece_A, piece_B):
         """

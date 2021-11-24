@@ -23,7 +23,7 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.piece.template import template
+from puzzle.piece.template import Template
 from puzzle.simulator.agent import Agent
 
 
@@ -59,7 +59,7 @@ target_piece_loc = [40, 100]
 pick_color = np.array((0, 255, 0), dtype=np.uint8)
 
 canvas = np.ones((200, 200, 3), dtype=np.uint8) * 255
-piece = template.buildSquare(20, (255, 0, 0), rLoc=init_piece_loc)
+piece = Template.buildSquare(20, (255, 0, 0), rLoc=init_piece_loc)
 agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
 
 # visualize

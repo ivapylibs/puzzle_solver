@@ -22,9 +22,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.piece.regular import regular
+from puzzle.builder.board import Board
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.piece.regular import Regular
 from puzzle.utils.imageProcessing import preprocess_real_puzzle, find_nonzero_mask
 
 fpath = os.path.realpath(__file__)
@@ -44,8 +44,8 @@ theMaskSol_A = preprocess_real_puzzle(theImageSol_A, verbose=False)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGridMea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+theGridMea = Gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                            theParams=ParamGrid(areaThresholdLower=1000, pieceConstructor=Regular,
                                                                 reorder=True))
 # theImage = theGridMea.toImage(COLOR=(0,100,0), ID_DISPLAY=True, CONTOUR_DISPLAY=True)
 # plt.imshow(theImage)
@@ -55,7 +55,7 @@ theGridMea = gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
 # (we assume the relative location has not been changed)
 #
 
-theBoard = board()
+theBoard = Board()
 theRegular_0 = theGridMea.pieces[0]
 theRegular_0 = theRegular_0.rotatePiece(theta=theRegular_0.theta)
 theBoard.addPiece(theRegular_0)
@@ -69,11 +69,11 @@ for i in range(1, theGridMea.size()):
 
     if i == 3:
         theRegular_0 = theBoard.pieces[0]
-        piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
     else:
-        piece_A_coord = find_nonzero_mask(theRegular_0.edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
 
     y_relative = np.max(piece_B_coord[1, :]) - np.max(piece_A_coord[1, :])
     x_relative = np.max(piece_B_coord[0, :]) - np.max(piece_A_coord[0, :])

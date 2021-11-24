@@ -32,16 +32,16 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.builder.adjacent import adjacent, paramAdj
-from puzzle.builder.arrangement import arrangement
-from puzzle.builder.board import board
+from puzzle.builder.adjacent import Adjacent, ParamAdj
+from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.board import Board
 
 
 # ===== Helper Elements
 #
 
 @dataclass
-class paramInter(paramAdj):
+class ParamInter(ParamAdj):
     tauInter: float = 35
 
 
@@ -49,18 +49,18 @@ class paramInter(paramAdj):
 # ====================== puzzle.builder.interlocking ======================
 #
 
-class interlocking(adjacent):
+class Interlocking(Adjacent):
 
     # ============================== adjacent =============================
     #
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, theBoard=[], theParams=paramInter):
+    def __init__(self, theBoard=[], theParams=ParamInter):
 
-        super(interlocking, self).__init__(theBoard, theParams)
+        super(Interlocking, self).__init__(theBoard, theParams)
 
-        if isinstance(theBoard, board):
+        if isinstance(theBoard, Board):
             self.ilMat = np.eye(theBoard.size()).astype('bool')
         else:
             raise TypeError('Not initialized properly')
@@ -124,18 +124,18 @@ class interlocking(adjacent):
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
+        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName)
 
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
         if hasattr(data, 'tauInter'):
-            theParams = paramInter(tauAdj=data.tauInter)
+            theParams = ParamInter(tauAdj=data.tauInter)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -156,12 +156,12 @@ class interlocking(adjacent):
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName)
+        aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -183,12 +183,12 @@ class interlocking(adjacent):
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
 
-        aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
+        aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -209,12 +209,12 @@ class interlocking(adjacent):
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask)
+        aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -237,12 +237,12 @@ class interlocking(adjacent):
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
+        aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
 
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
@@ -266,11 +266,11 @@ class interlocking(adjacent):
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
+        aPuzzle = Arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
         if hasattr(theParams, 'tauInter'):
-            thePuzzle = interlocking(aPuzzle, theParams)
+            thePuzzle = Interlocking(aPuzzle, theParams)
         else:
-            thePuzzle = interlocking(aPuzzle)
+            thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 

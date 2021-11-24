@@ -20,7 +20,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.parser.fromLayer import FromLayer
 
 # ==[1] Create image
 #
@@ -49,7 +49,7 @@ theMask[40:70, 40:70] = True
 
 # ==[3] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.measure(theImage, theMask)
 
 theBoard = theLayer.bMeas

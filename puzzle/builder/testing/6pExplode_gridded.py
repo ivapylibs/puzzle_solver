@@ -21,8 +21,8 @@ import cv2
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.builder.gridded import gridded
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.builder.gridded import Gridded
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -36,7 +36,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -50,7 +50,7 @@ axarr[0].title.set_text('Source Board')
 # ==[2] Create an Grid instance and explode it
 #
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 epImage, _ = theGrid.explodedPuzzle()
 

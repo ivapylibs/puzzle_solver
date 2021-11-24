@@ -22,8 +22,8 @@ import numpy as np
 from skimage.measure import ransac
 from skimage.transform import AffineTransform
 
-from puzzle.piece.matchSimilar import matchSimilar
-from puzzle.piece.template import template
+from puzzle.piece.matchSimilar import MatchSimilar
+from puzzle.piece.template import Template
 from puzzle.utils.dataProcessing import calculateMatches
 
 
@@ -38,9 +38,9 @@ copyreg.pickle(cv2.KeyPoint().__class__, _pickle_keypoints)
 #
 # ================================ puzzle.piece.moments ================================
 #
-class sift(matchSimilar):
+class Sift(MatchSimilar):
 
-    def __init__(self, tau=5, theThreshMatch = 0.5):
+    def __init__(self, tau=5, theThreshMatch=0.5):
         """
         @brief  Constructor for the puzzle piece sift class.
 
@@ -49,7 +49,7 @@ class sift(matchSimilar):
         """
 
         self.theThreshMatch = theThreshMatch
-        super(sift, self).__init__(tau)
+        super(Sift, self).__init__(tau)
 
     @staticmethod
     def kpFeaExtract(piece):
@@ -64,7 +64,7 @@ class sift(matchSimilar):
 
         """
 
-        if issubclass(type(piece), template):
+        if issubclass(type(piece), Template):
             if piece.y.kpFea:
                 return piece.y.kpFea
         else:
@@ -92,7 +92,7 @@ class sift(matchSimilar):
             The processed feature.
         """
 
-        return sift.kpFeaExtract(piece)
+        return Sift.kpFeaExtract(piece)
 
     def score(self, yA, yB):
         """

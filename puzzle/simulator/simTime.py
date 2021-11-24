@@ -24,7 +24,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.builder.board import board
+from puzzle.builder.board import Board
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.simTimeless import SimTimeLess, ParamST
 
@@ -62,7 +62,7 @@ class SimTime(SimTimeLess):
                                     related to the time effect
     """
 
-    def __init__(self, init_board: board, sol_board: board, agent: Agent,
+    def __init__(self, init_board: Board, sol_board: Board, agent: Agent,
                  param: ParamSTL = ParamSTL()):
         super().__init__(init_board, sol_board, agent, param=param)
         # store the parameters

@@ -25,8 +25,8 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.adjacent import adjacent
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.builder.adjacent import Adjacent
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -34,7 +34,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 @dataclass
 class dataBoard:
-    board: any = None
+    Board: any = None
     tauDist: float = None
 
 
@@ -53,7 +53,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -88,7 +88,7 @@ del theData_save
 # ==[2.1] Test buildFromFile_Puzzle
 #
 
-theAdj_1 = adjacent.buildFromFile_Puzzle(cpath + '/data/board_6p_adj.obj')
+theAdj_1 = Adjacent.buildFromFile_Puzzle(cpath + '/data/board_6p_adj.obj')
 
 bsolAdjacent_1 = theAdj_1.toImage(ID_DISPLAY=True)
 axarr[0, 1].imshow(bsolAdjacent_1)
@@ -97,7 +97,7 @@ axarr[0, 1].title.set_text('Board 1')
 # ==[2.2] Test buildFromFile_ImageAndMask
 #
 
-theAdj_2 = adjacent.buildFromFile_ImageAndMask(cpath + '/data/image_6p_adj.obj')
+theAdj_2 = Adjacent.buildFromFile_ImageAndMask(cpath + '/data/image_6p_adj.obj')
 
 bsolAdjacent_2 = theAdj_2.toImage(ID_DISPLAY=True)
 axarr[0, 2].imshow(bsolAdjacent_2)
@@ -106,7 +106,7 @@ axarr[0, 2].title.set_text('Board 2')
 # ==[2.3] Test buildFromFiles_ImageAndMask
 #
 
-theAdj_3 = adjacent.buildFromFiles_ImageAndMask(
+theAdj_3 = Adjacent.buildFromFiles_ImageAndMask(
     cpath + '/../../testing/data/shapes_color_six_image_adjacent.png',
     cpath + '/../../testing/data/shapes_color_six_image_adjacent.png'
 )
@@ -118,7 +118,7 @@ axarr[1, 0].title.set_text('Board 3')
 # ==[2.4] Test buildFrom_ImageAndMask
 #
 
-theAdj_4 = adjacent.buildFrom_ImageAndMask(theImageSol, theMaskSol)
+theAdj_4 = Adjacent.buildFrom_ImageAndMask(theImageSol, theMaskSol)
 
 bsolAdjacent_4 = theAdj_4.toImage(ID_DISPLAY=True)
 axarr[1, 1].imshow(bsolAdjacent_4)
@@ -127,7 +127,7 @@ axarr[1, 1].title.set_text('Board 4')
 # ==[2.5] Test buildFrom_ImageProcessing
 #
 
-theAdj_5 = adjacent.buildFrom_ImageProcessing(theImageSol)
+theAdj_5 = Adjacent.buildFrom_ImageProcessing(theImageSol)
 
 bsolAdjacent_5 = theAdj_5.toImage(ID_DISPLAY=True)
 axarr[1, 2].imshow(bsolAdjacent_5)

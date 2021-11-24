@@ -21,8 +21,8 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.piece.template import Template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import lineArrange
 
@@ -41,9 +41,9 @@ canvas = np.ones((canvas_size, canvas_size, 3), dtype=np.uint8) * 255
 
 # [1.1] initBoard 
 num_pieces = 4
-init_board = board()
+init_board = Board()
 for i in range(num_pieces):
-    piece = template.buildSquare(20, (255, 0, 0), rLoc=(140, int((i + 1) / (num_pieces + 1) * canvas_size)))
+    piece = Template.buildSquare(20, (255, 0, 0), rLoc=(140, int((i + 1) / (num_pieces + 1) * canvas_size)))
     init_board.addPiece(piece)
 
 # ==[2] Create a simulator

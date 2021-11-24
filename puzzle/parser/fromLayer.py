@@ -27,8 +27,8 @@ import cv2
 import numpy as np
 from trackpointer.centroidMulti import centroidMulti
 
-from puzzle.builder.board import board
-from puzzle.piece.template import template, PieceStatus
+from puzzle.builder.board import Board
+from puzzle.piece.template import Template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 
@@ -36,19 +36,20 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 #
 
 @dataclass
-class paramPuzzle:
+class ParamPuzzle:
     areaThresholdLower: float = 20
     areaThresholdUpper: float = float('inf')
-    pieceConstructor: any = template
+    pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.PERCEIVED
+
 
 #
 # ======================== puzzle.parser.fromLayer ========================
 #
 
-class fromLayer(centroidMulti):
+class FromLayer(centroidMulti):
 
-    def __init__(self, theParams=paramPuzzle):
+    def __init__(self, theParams=ParamPuzzle):
         """
         @brief  Constructor for the puzzle piece layer parsing class.
 
@@ -56,9 +57,9 @@ class fromLayer(centroidMulti):
             theParams: The parameters.
         """
 
-        super(fromLayer, self).__init__()
+        super(FromLayer, self).__init__()
 
-        self.bMeas = board()  # @< The measured board.
+        self.bMeas = Board()  # @< The measured board.
 
         self.params = theParams
 
@@ -248,10 +249,9 @@ class fromLayer(centroidMulti):
                     skipflag = True
                     break
 
-
             # Todo: A triky solution to remove all black region
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
-                                             cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
+                                                           cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
                 # cv2.imshow('seg_img', seg_img)
                 # cv2.imshow('I', I)
                 # cv2.waitKey()

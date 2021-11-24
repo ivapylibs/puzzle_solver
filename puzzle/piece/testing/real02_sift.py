@@ -21,9 +21,9 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import board
-from puzzle.piece.sift import sift
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.piece.sift import Sift
+from puzzle.piece.template import Template
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -48,19 +48,19 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-thePiece_A = template.buildFromMaskAndImage(theMaskSol_A, theImageSol_A)
-thePiece_B = template.buildFromMaskAndImage(theMaskSol_B, theImageSol_B)
+thePiece_A = Template.buildFromMaskAndImage(theMaskSol_A, theImageSol_A)
+thePiece_B = Template.buildFromMaskAndImage(theMaskSol_B, theImageSol_B)
 
 # ==[2] Create a new board
 #
-theBoard = board()
+theBoard = Board()
 theBoard.addPiece(thePiece_A)
 theBoard.addPiece(thePiece_B)
 
 # ==[3] Create an edge matcher
 #
 
-theMatcher = sift()
+theMatcher = Sift()
 
 # ==[4] Display the new board and the comparison result.
 #

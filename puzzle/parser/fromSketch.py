@@ -31,10 +31,10 @@ from detector.inImage import inImage
 # ======================== puzzle.parser.fromSketch ========================
 #
 
-class fromSketch(inImage):
+class FromSketch(inImage):
 
     def __init__(self, processor=None):
-        super(fromSketch, self).__init__(processor)
+        super(FromSketch, self).__init__(processor)
 
     def predict(self):
         pass

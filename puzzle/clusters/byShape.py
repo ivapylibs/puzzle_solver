@@ -19,25 +19,25 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 
-from puzzle.builder.board import board
-from puzzle.piece.edge import edge
-from puzzle.piece.moments import moments
+from puzzle.builder.board import Board
+from puzzle.piece.edge import Edge
+from puzzle.piece.moments import Moments
 
 
 # ===== Helper Elements
 #
 
 @dataclass
-class paramShapeCluster:
+class ParamShapeCluster:
     taudist: float = 0.5
 
 
 #
 # ================================ puzzle.clusters.byShape ================================
 #
-class byShape(board):
+class ByShape(Board):
 
-    def __init__(self, thePuzzle, extractor=moments(), theParams=paramShapeCluster):
+    def __init__(self, thePuzzle, extractor=Moments(), theParams=ParamShapeCluster):
         """
         @brief  Constructor for the byShape class.
 
@@ -46,7 +46,7 @@ class byShape(board):
             extractor: A matcher instance.
         """
 
-        super(byShape, self).__init__(thePuzzle)
+        super(ByShape, self).__init__(thePuzzle)
 
         self.feaExtractor = extractor
 
@@ -61,7 +61,7 @@ class byShape(board):
         @ brief Extract shape features from the data.
         """
 
-        if issubclass(type(self.feaExtractor), edge):
+        if issubclass(type(self.feaExtractor), Edge):
             for piece in self.pieces:
                 # Currently, the label is based on the type of the piece edge
                 self.feature.append(self.feaExtractor.shapeFeaExtract(piece, method='type').flatten())

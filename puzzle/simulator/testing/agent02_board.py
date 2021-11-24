@@ -29,8 +29,8 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.piece.template import Template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
 from puzzle.simulator.planner import Planner_Fix
@@ -76,11 +76,11 @@ target_piece_loc = [40, 100]
 pick_color = np.array((0, 255, 0), dtype=np.uint8)
 
 canvas = np.ones((200, 200, 3), dtype=np.uint8) * 255
-init_board = board()
-init_piece = template.buildSquare(20, (255, 0, 0), rLoc=init_piece_loc)
+init_board = Board()
+init_piece = Template.buildSquare(20, (255, 0, 0), rLoc=init_piece_loc)
 init_board.addPiece(init_piece)
-sol_board = board()
-sol_piece = template.buildSquare(20, (255, 0, 0), rLoc=target_piece_loc)
+sol_board = Board()
+sol_piece = Template.buildSquare(20, (255, 0, 0), rLoc=target_piece_loc)
 sol_board.addPiece(sol_piece)
 
 # prepare the human agent 

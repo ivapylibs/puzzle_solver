@@ -23,10 +23,10 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.sift import sift
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.parser.fromSketch import FromSketch
+from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -50,7 +50,7 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
@@ -59,7 +59,7 @@ theMaskSol = theDet.getState().x
 
 print('Running through test cases. Will take a bit.')
 
-theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=paramGrid(areaThresholdLower=5000))
+theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000))
 
 # ==[2.1] Explode it into a new board.
 #
@@ -67,7 +67,7 @@ _, epBoard = theGridSol.explodedPuzzle(dx=400, dy=400)
 
 # ==[2.2] Randomly swap the puzzle pieces.
 #
-theGridMea = gridded(epBoard, paramGrid(reorder=True))
+theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
 _, epBoard = theGridMea.swapPuzzle()
 
@@ -99,13 +99,13 @@ theMaskMea = improc.apply(epImage)
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, reorder=True))
+theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theManager.process(theGridMea)
 
 # ==[4] Display. Should see some ids on the puzzle pieces

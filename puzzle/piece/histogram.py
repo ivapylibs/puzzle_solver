@@ -16,14 +16,14 @@
 #
 import cv2
 
-from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.template import template
+from puzzle.piece.matchDifferent import MatchDifferent
+from puzzle.piece.template import Template
 
 
 #
 # ================================ puzzle.piece.histogram ================================
 #
-class histogram(matchDifferent):
+class Histogram(MatchDifferent):
 
     def __init__(self, tau=0.3):
         """
@@ -33,7 +33,7 @@ class histogram(matchDifferent):
             tau: The threshold param to determine difference.
         """
 
-        super(histogram, self).__init__(tau)
+        super(Histogram, self).__init__(tau)
 
     @staticmethod
     def colorFeaExtract(piece):
@@ -48,7 +48,7 @@ class histogram(matchDifferent):
             The histogram.
         """
 
-        if issubclass(type(piece), template):
+        if issubclass(type(piece), Template):
             if len(piece.y.colorFea) > 0:
                 return piece.y.colorFea
         else:
@@ -77,7 +77,7 @@ class histogram(matchDifferent):
             The processed feature.
         """
 
-        return histogram.colorFeaExtract(piece)
+        return Histogram.colorFeaExtract(piece)
 
     def score(self, piece_A, piece_B):
         """

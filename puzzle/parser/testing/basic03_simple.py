@@ -24,7 +24,7 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 
 import puzzle.parser.simple as perceiver
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -40,11 +40,11 @@ binDet = detector.inImage(improc)
 
 # --[1.2] and the tracker instance.
 
-theLayer = fromLayer()
+theLayer = FromLayer()
 
 # --[1.3] Package up into a perceiver.
 
-boardPer = perceiver.simple(theDetector=binDet, theTracker=theLayer, theParams=None)
+boardPer = perceiver.Simple(theDetector=binDet, theTracker=theLayer, theParams=None)
 
 # ==[2] Create image
 #

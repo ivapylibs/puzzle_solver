@@ -21,8 +21,8 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.manager import manager
-from puzzle.parser.fromLayer import fromLayer
+from puzzle.manager import Manager
+from puzzle.parser.fromLayer import FromLayer
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -36,7 +36,7 @@ _, theMaskSol = cv2.threshold(theMaskSol, 10, 255, cv2.THRESH_BINARY)
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
@@ -47,7 +47,7 @@ theMaskMea = cv2.imread(cpath + '/../testing/data/shapes_color_six_binary.png', 
 
 # ==[3] Create a manager
 #
-theManager = manager(theBoardSol)
+theManager = Manager(theBoardSol)
 
 theManager.process(theImageMea, theMaskMea)
 

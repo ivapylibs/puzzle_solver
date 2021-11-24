@@ -22,9 +22,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement, paramArrange
-from puzzle.builder.board import board
-from puzzle.piece.sift import sift
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.board import Board
+from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -48,10 +48,10 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theGridSol = arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                theParams=paramArrange(areaThresholdLower=1000))
-theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                theParams=paramArrange(areaThresholdLower=1000))
+theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+                                                theParams=ParamArrange(areaThresholdLower=1000))
+theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+                                                theParams=ParamArrange(areaThresholdLower=1000))
 
 # ==[3] Create a sift matcher and display the match
 #
@@ -59,11 +59,11 @@ theGridMea = arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
 print('Should see the match pieces one by one. Some fail to match.')
 
 for i in range(theGridMea.size()):
-    theMatcher = sift()
+    theMatcher = Sift()
 
     ret = theMatcher.compare(theGridMea.pieces[i], theGridSol.pieces[0])
     if ret[0]:
-        theBoard = board()
+        theBoard = Board()
         thePiece_C = theGridMea.pieces[i].rotatePiece(theta=-ret[1])
 
         # Method 1: without knowing thePiece_B's rLoc

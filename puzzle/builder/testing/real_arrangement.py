@@ -21,7 +21,7 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.builder.arrangement import arrangement, paramArrange
+from puzzle.builder.arrangement import Arrangement, ParamArrange
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -45,8 +45,8 @@ theMaskSol = preprocess_real_puzzle(theImageSol, verbose=True)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theArrange = arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=paramArrange(areaThresholdLower=1000))
+theArrange = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                theParams=ParamArrange(areaThresholdLower=1000))
 # ==[1.3] Display.
 #
 theImage = theArrange.toImage(ID_DISPLAY=True, CONTOUR_DISPLAY=True, COLOR=(0,255,0))

@@ -22,8 +22,8 @@ import cv2
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.parser.fromLayer import fromLayer
-from puzzle.simulator.basic import basic
+from puzzle.parser.fromLayer import FromLayer
+from puzzle.simulator.basic import Basic
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -35,13 +35,13 @@ theMaskMea = cv2.imread(cpath + '/../../testing/data/shapes_color_six_binary.png
 
 # ==[1.1] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer()
+theLayer = FromLayer()
 theLayer.process(theImageMea, theMaskMea)
 theBoardMea = theLayer.getState()
 
 # ==[2] Create a simulator
 #
-theSim = basic(theBoardMea)
+theSim = Basic(theBoardMea)
 newPiece = deepcopy(theSim.puzzle.pieces[1])
 
 # ==[3] Display

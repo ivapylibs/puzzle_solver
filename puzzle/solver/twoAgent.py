@@ -22,7 +22,7 @@
 
 import numpy as np
 
-from puzzle.solver.simple import simple
+from puzzle.solver.simple import Simple
 
 
 # ===== Helper Elements
@@ -33,7 +33,7 @@ from puzzle.solver.simple import simple
 # ========================= puzzle.solver.twoAgent ========================
 #
 
-class twoAgent(simple):
+class TwoAgent(Simple):
 
     def __init__(self, theSol, thePuzzle, agent1=None, agent2=None):
         """
@@ -47,13 +47,13 @@ class twoAgent(simple):
             agent2: The agent 2.
         """
 
-        super(twoAgent, self).__init__(theSol, thePuzzle)
+        super(TwoAgent, self).__init__(theSol, thePuzzle)
 
         if agent1 is None:
-            agent1 = simple(theSol, thePuzzle)
+            agent1 = Simple(theSol, thePuzzle)
 
         if agent2 is None:
-            agent2 = simple(theSol, thePuzzle)
+            agent2 = Simple(theSol, thePuzzle)
 
         self.agents = [agent1, agent2]  # Make a list/array.
         self.iMove = 0  # Move index.

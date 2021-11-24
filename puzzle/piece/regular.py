@@ -19,7 +19,7 @@ from enum import Enum
 
 import numpy as np
 
-from puzzle.piece.template import template, PieceStatus
+from puzzle.piece.template import Template, PieceStatus
 from puzzle.utils.sideExtractor import sideExtractor
 
 
@@ -61,7 +61,7 @@ class EdgeDes:
 #
 # ================================ puzzle.piece.regular ================================
 #
-class regular(template):
+class Regular(Template):
 
     def __init__(self, *argv):
         """
@@ -78,7 +78,7 @@ class regular(template):
         status = PieceStatus.UNKNOWN
 
         if len(argv) == 1:
-            if isinstance(argv[0], template):
+            if isinstance(argv[0], Template):
                 y = argv[0].y
                 r = argv[0].rLoc
                 id = argv[0].id
@@ -96,7 +96,7 @@ class regular(template):
         elif len(argv) > 4:
             raise TypeError('Too many parameters!')
 
-        super(regular, self).__init__(y=y, r=r, id=id, theta=theta, status=status)
+        super(Regular, self).__init__(y=y, r=r, id=id, theta=theta, pieceStatus=status)
 
         # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
         self.edge = [EdgeDes() for i in range(4)]
@@ -176,7 +176,7 @@ class regular(template):
 
         # Hacked to disable rotation operation
         thePiece.theta = 0
-        theRegular = regular(thePiece)
+        theRegular = Regular(thePiece)
 
         return theRegular
 
@@ -195,8 +195,8 @@ class regular(template):
             The puzzle piece instance.
         """
 
-        thePiece = template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)
-        theRegular = regular(thePiece)
+        thePiece = Template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)
+        theRegular = Regular(thePiece)
 
         return theRegular
 #

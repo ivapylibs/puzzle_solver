@@ -19,8 +19,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import board
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.piece.template import Template
 
 # ==[1] Create raw puzzle piece data.
 #
@@ -29,7 +29,7 @@ theMask[4:14, 7:12] = True
 theImage = np.zeros((20, 20, 3), dtype='uint8')
 theImage[4:14, 7:12, :] = np.full((1, 1, 3), [200, 0, 200])
 
-thePiece_1 = template.buildFromMaskAndImage(theMask, theImage)
+thePiece_1 = Template.buildFromMaskAndImage(theMask, theImage)
 thePiece_1.setPlacement(np.array([10, 10]))
 
 theMask = np.full((40, 10), False, dtype=bool)
@@ -37,7 +37,7 @@ theMask[5:35, 2:8] = True
 theImage = np.zeros((40, 10, 3), dtype='uint8')
 theImage[5:35, 2:8, :] = np.full((1, 1, 3), [0, 200, 200])
 
-thePiece_2 = template.buildFromMaskAndImage(theMask, theImage)
+thePiece_2 = Template.buildFromMaskAndImage(theMask, theImage)
 thePiece_2.setPlacement(np.array([50, 50]))
 
 # ==[2] Test creation
@@ -47,7 +47,7 @@ thePiece_2.display()
 
 # ==[3] Create a board and add these two pieces to a board.
 #
-theBoard = board()
+theBoard = Board()
 theBoard.addPiece(thePiece_1)
 theBoard.addPiece(thePiece_2)
 

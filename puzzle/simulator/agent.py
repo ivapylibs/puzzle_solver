@@ -17,13 +17,13 @@
 #
 # ========================= puzzle.simulator.agent ========================
 
-from puzzle.builder.board import board
-from puzzle.piece.template import template
+from puzzle.builder.board import Board
+from puzzle.piece.template import Template
 from puzzle.simulator.action import Actions
 from puzzle.simulator.planner import Planner_Base
 
 
-class Appearance(template):
+class Appearance(Template):
     """
     @brief  The Appearance agent class contains the basic appearance information about the agent
             It inherit the puzzle.piece.template class so that it can be treated as a special piece
@@ -70,7 +70,7 @@ class Agent(Actions):
     def setPlanner(self, planner: Planner_Base):
         self.planner = planner
 
-    def process(self, meaBoard: board, execute=True):
+    def process(self, meaBoard: Board, execute=True):
         """
         @brief  Process the current perceived board to produce the next action.
 
@@ -161,10 +161,10 @@ class Agent(Actions):
 
     @staticmethod
     def buildSphereAgent(radius, color, rLoc=None, planner: Planner_Base = None):
-        app_sphere = template.buildSphere(radius, color, rLoc)
+        app_sphere = Template.buildSphere(radius, color, rLoc)
         return Agent(app_sphere, planner)
 
     @staticmethod
     def buildSquareAgent(size, color, rLoc=None, planner: Planner_Base = None):
-        app_Square = template.buildSquare(size, color, rLoc)
+        app_Square = Template.buildSquare(size, color, rLoc)
         return Agent(app_Square, planner)

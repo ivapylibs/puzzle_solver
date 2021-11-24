@@ -16,14 +16,14 @@
 #
 import numpy as np
 
-from puzzle.piece.matchDifferent import matchDifferent
-from puzzle.piece.template import template
+from puzzle.piece.matchDifferent import MatchDifferent
+from puzzle.piece.template import Template
 
 
 #
 # ================================ puzzle.piece.pca ================================
 #
-class pca(matchDifferent):
+class PCA(MatchDifferent):
 
     def __init__(self, tau=-float('inf')):
         """
@@ -33,7 +33,7 @@ class pca(matchDifferent):
             tau: The threshold param to determine difference.
         """
 
-        super(pca, self).__init__(tau)
+        super(PCA, self).__init__(tau)
 
     def process(self, piece):
         """
@@ -46,8 +46,8 @@ class pca(matchDifferent):
             The rotation of the main vector.
         """
 
-        if issubclass(type(piece), template):
-            yfeature = pca.getEig(piece.y.contour)
+        if issubclass(type(piece), Template):
+            yfeature = PCA.getEig(piece.y.contour)
             theta = np.arctan2(yfeature['v1'][1], yfeature['v1'][0])
 
             return theta

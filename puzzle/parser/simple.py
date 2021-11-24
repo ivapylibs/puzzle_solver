@@ -23,15 +23,15 @@
 
 # ===== Environment / Dependencies
 #
-import perceiver.simple as perceiverSimple
+import perceiver.simple as PerceiverSimple
 
-from puzzle.builder.board import board
+from puzzle.builder.board import Board
 
 
 #
 # ========================== puzzle.parser.simple =========================
 #
-class simple(perceiverSimple.simple):
+class Simple(PerceiverSimple.simple):
 
     def __init__(self, theDetector, theTracker, theParams=[]):
         """
@@ -43,8 +43,8 @@ class simple(perceiverSimple.simple):
             theParams: The parameters.
         """
 
-        super(simple, self).__init__(theDetector, theTracker, [], theParams)
-        self.board = board()
+        super(Simple, self).__init__(theDetector, theTracker, [], theParams)
+        self.board = Board()
         self.Mask = []
 
     def measure(self, I, M=None):

@@ -33,37 +33,40 @@ from dataclasses import dataclass
 
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
+from sklearn.cluster import KMeans
 
-from puzzle.builder.arrangement import arrangement
-from puzzle.builder.board import board
-from puzzle.builder.interlocking import interlocking, paramInter
+from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.board import Board
+from puzzle.builder.interlocking import Interlocking, ParamInter
 from puzzle.utils.dataProcessing import updateLabel
 
-from sklearn.cluster import KMeans
+
 # ===== Helper Elements
 #
 
 @dataclass
-class paramGrid(paramInter):
+class ParamGrid(ParamInter):
     tauGrid: float = float('inf')  # The threshold size of the puzzle piece.
     reorder: bool = False
     grid: tuple = (None, None)
+
+
 #
 # ====================== puzzle.builder.interlocking ======================
 #
 
-class gridded(interlocking):
+class Gridded(Interlocking):
 
     # ============================== adjacent =============================
     #
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, theBoard=[], theParams=paramGrid):
+    def __init__(self, theBoard=[], theParams=ParamGrid):
 
-        super(gridded, self).__init__(theBoard, theParams)
+        super(Gridded, self).__init__(theBoard, theParams)
 
-        if isinstance(theBoard, board):
+        if isinstance(theBoard, Board):
             # Store the calibrated grid location of the puzzle piece.
             self.gc = np.zeros((2, theBoard.size()))
         else:
@@ -71,7 +74,7 @@ class gridded(interlocking):
 
         self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid)
 
-    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster= (None, None)):
+    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster=(None, None)):
         """
         @brief  Process the solution board and determine what pieces are
                 interlocking and the grid ordering. Grid ordering helps to
@@ -98,7 +101,7 @@ class gridded(interlocking):
             x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
             x_thresh = min(x_thresh, piece_thresh)
             x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
-            x_label = updateLabel(x_list, x_label) # from 0
+            x_label = updateLabel(x_list, x_label)  # from 0
         else:
             x_kmeans = KMeans(n_clusters=kmeans_cluster[0], random_state=0).fit(x_list)
             x_label = x_kmeans.labels_
@@ -107,7 +110,7 @@ class gridded(interlocking):
             y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
             y_thresh = min(y_thresh, piece_thresh)
             y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
-            y_label = updateLabel(y_list, y_label) # from 0
+            y_label = updateLabel(y_list, y_label)  # from 0
         else:
             y_kmeans = KMeans(n_clusters=3, random_state=0).fit(y_list)
             y_label = y_kmeans.labels_
@@ -243,18 +246,18 @@ class gridded(interlocking):
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_Puzzle(fileName)
+        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName)
 
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
         if theParams is None and hasattr(data, 'tauGrid'):
-            theParams = paramGrid(data.tauGrid)
+            theParams = ParamGrid(data.tauGrid)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 
@@ -275,12 +278,12 @@ class gridded(interlocking):
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
 
-        aPuzzle = arrangement.buildFromFile_ImageAndMask(fileName, theParams)
+        aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 
@@ -302,12 +305,12 @@ class gridded(interlocking):
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
 
-        aPuzzle = arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
+        aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 
@@ -328,12 +331,12 @@ class gridded(interlocking):
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
+        aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 
@@ -356,12 +359,12 @@ class gridded(interlocking):
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
+        aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 
@@ -385,12 +388,12 @@ class gridded(interlocking):
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
+        aPuzzle = Arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
 
         if hasattr(theParams, 'tauGrid'):
-            thePuzzle = gridded(aPuzzle, theParams)
+            thePuzzle = Gridded(aPuzzle, theParams)
         else:
-            thePuzzle = gridded(aPuzzle)
+            thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 

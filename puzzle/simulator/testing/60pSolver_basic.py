@@ -23,13 +23,13 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.manager import manager, managerParms
-from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.regular import regular
-from puzzle.piece.sift import sift
-from puzzle.simulator.basic import basic
-from puzzle.solver.simple import simple
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.manager import Manager, ManagerParms
+from puzzle.parser.fromSketch import FromSketch
+from puzzle.piece.regular import Regular
+from puzzle.piece.sift import Sift
+from puzzle.simulator.basic import Basic
+from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -55,7 +55,7 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
@@ -64,8 +64,8 @@ theMaskSol = theDet.getState().x
 
 print('Running through test cases. Will take a bit.')
 
-theGridSol = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                            theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular))
+theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                            theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular))
 
 epImage, epBoard = theGridSol.explodedPuzzle(dx=100, dy=100)
 
@@ -85,25 +85,25 @@ theMaskMea = improc.apply(epImage)
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000, pieceConstructor=Regular,
                                                                 reorder=True))
 
 # ==[3] Create a manager
 #
 
-theManager = manager(theGridSol, managerParms(matcher=sift()))
+theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theManager.process(theGridMea)
 
 # ==[4] Create simple solver and set up the match
 #
-theSolver = simple(theGridSol, theGridMea)
+theSolver = Simple(theGridSol, theGridMea)
 
 theSolver.setMatch(theManager.pAssignments)
 
 # ==[5] Create a simulator for display
 #
-theSim = basic(theSolver.current)
+theSim = Basic(theSolver.current)
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #

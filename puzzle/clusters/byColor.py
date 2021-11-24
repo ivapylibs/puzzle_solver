@@ -19,24 +19,24 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 
-from puzzle.builder.board import board
-from puzzle.piece.histogram import histogram
+from puzzle.builder.board import Board
+from puzzle.piece.histogram import Histogram
 
 
 # ===== Helper Elements
 #
 
 @dataclass
-class paramColorCluster:
+class ParamColorCluster:
     taudist: float = 0.5
 
 
 #
 # ================================ puzzle.clusters.byColor ================================
 #
-class byColor(board):
+class ByColor(Board):
 
-    def __init__(self, thePuzzle, extractor=histogram(), theParams=paramColorCluster):
+    def __init__(self, thePuzzle, extractor=Histogram(), theParams=ParamColorCluster):
         """
         @brief  Constructor for the byColor class.
 
@@ -46,7 +46,7 @@ class byColor(board):
             theParams: The param for threshold.
         """
 
-        super(byColor, self).__init__(thePuzzle)
+        super(ByColor, self).__init__(thePuzzle)
 
         self.feaExtractor = extractor
 

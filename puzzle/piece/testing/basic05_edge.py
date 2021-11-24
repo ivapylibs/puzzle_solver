@@ -23,12 +23,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import similaritymeasures
 
-from puzzle.builder.board import board
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.parser.fromLayer import fromLayer, paramPuzzle
-from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.edge import edge
-from puzzle.piece.regular import regular
+from puzzle.builder.board import Board
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
+from puzzle.parser.fromSketch import FromSketch
+from puzzle.piece.edge import Edge
+from puzzle.piece.regular import Regular
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -50,13 +50,13 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = fromLayer(paramPuzzle(areaThresholdLower=5000))
+theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
@@ -66,8 +66,8 @@ theBoardSol = theLayer.getState()
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                         theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular,
                                                              reorder=True))
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
@@ -88,8 +88,8 @@ theMaskMea = improc.apply(epImage)
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGridMea = gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=paramGrid(areaThresholdLower=1000, pieceConstructor=regular,
+theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
+                                            theParams=ParamGrid(areaThresholdLower=1000, pieceConstructor=Regular,
                                                                 reorder=True))
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
@@ -100,14 +100,14 @@ theRegular_B = theGridMea.pieces[36]
 
 # ==[2] Create a new board
 #
-theBoard = board()
+theBoard = Board()
 theBoard.addPiece(theRegular_A)
 theBoard.addPiece(theRegular_B)
 
 # ==[3] Create an edge matcher
 #
 
-theMatcher = edge()
+theMatcher = Edge()
 
 # ==[4] Display the new board and the comparison result.
 #

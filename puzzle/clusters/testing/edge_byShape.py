@@ -21,11 +21,11 @@ import cv2
 import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 
-from puzzle.builder.gridded import gridded, paramGrid
-from puzzle.clusters.byShape import byShape
-from puzzle.parser.fromSketch import fromSketch
-from puzzle.piece.edge import edge
-from puzzle.piece.regular import regular
+from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.clusters.byShape import ByShape
+from puzzle.parser.fromSketch import FromSketch
+from puzzle.piece.edge import Edge
+from puzzle.piece.regular import Regular
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -50,18 +50,18 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = fromSketch(improc)
+theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-theGrid = gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=paramGrid(areaThresholdLower=5000, pieceConstructor=regular,
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                         theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular,
                                                              reorder=True))
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
 
-theShapeCluster = byShape(theGrid, extractor=edge())
+theShapeCluster = ByShape(theGrid, extractor=Edge())
 theShapeCluster.process()
 
 # ==[3] Display the extracted features.

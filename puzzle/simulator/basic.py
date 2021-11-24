@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 # ========================= puzzle.simulator.basic ========================
 #
 
-class basic:
+class Basic:
 
     def __init__(self, thePuzzle, theFig=None):
         """

@@ -37,7 +37,7 @@ from scipy.spatial.distance import cdist
 # ============================== puzzle.board =============================
 #
 
-class board:
+class Board:
 
     def __init__(self, *argv):
         """
@@ -52,7 +52,7 @@ class board:
         self.id_count = 0
 
         if len(argv) == 1:
-            if issubclass(type(argv[0]), board):
+            if issubclass(type(argv[0]), Board):
                 self.pieces = argv[0].pieces
                 self.id_count = argv[0].id_count
             elif isinstance(argv[0], np.ndarray):

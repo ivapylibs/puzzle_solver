@@ -21,8 +21,8 @@ import cv2
 import improcessor.basic as improcessor
 import numpy as np
 
-from puzzle.builder.arrangement import arrangement, paramPuzzle
-from puzzle.builder.board import board
+from puzzle.builder.arrangement import Arrangement, ParamPuzzle
+from puzzle.builder.board import Board
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
@@ -49,7 +49,7 @@ def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
     img_path_list = glob.glob(os.path.join(cpath + '/../testing/' + img_folder, '*.png'))
     img_path_list.sort()
 
-    theCalibrated = board()
+    theCalibrated = Board()
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
@@ -109,8 +109,8 @@ def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
         if verbose:
             cv2.imshow('theMaskMea', theMaskMea)
             cv2.waitKey()
-        theBoard_single = arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
-                                                             theParams=paramPuzzle(areaThresholdLower=1000))
+        theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
+                                                             theParams=ParamPuzzle(areaThresholdLower=1000))
 
         theCalibrated.addPiece(theBoard_single.pieces[0])
 
