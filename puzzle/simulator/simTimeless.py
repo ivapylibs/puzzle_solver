@@ -74,11 +74,11 @@ class SimTimeLess():
         @param[in]  vis_pause_time  Pause time for visualization
         @param[in]  **kwargs        The parameter for visualize function. See its API for detail
         """
-        Succ = True
-        while (Succ):
-            Succ = self.simulate_step()
+        SUCCESS = True
+        while (SUCCESS):
+            SUCCESS = self.simulate_step()
             if vis:
-                self.visualize(mode="scene", **kwargs)
+                self.display(mode="scene", **kwargs)
                 plt.pause(0.01)
 
     def simulate_step(self):
@@ -89,7 +89,7 @@ class SimTimeLess():
         succ, action, action_arg = self.agent.process(self.cur_board, execute=True)
         return succ
 
-    def visualize(self, mode="scene", pickColorA=None, title=None, ax=None):
+    def display(self, mode="scene", pickColorA=None, title=None, ax=None):
         """
         Visualization. It offers the following functionality
         1. Visualize the initial board

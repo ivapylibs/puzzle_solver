@@ -22,12 +22,12 @@ from puzzle.piece.template import template
 
 class Actions():
     """
-    The base action classses defines all the atomic actions that an agent can execute.
+    The base action class defines all the atomic actions that an agent can execute.
     """
 
     def __init__(self, loc):
         self.loc = loc
-        self.cache_piece = None
+        self.cache_piece = None  # piece in hand
         self.ACTION_LABELS = {
             "move": self.move,
             "pick": self.pick,
@@ -54,7 +54,7 @@ class Actions():
 
     def execute(self, action_label, action_param=None):
         """
-        Exectute an action given the action label and parameter
+        Execute an action given the action label and parameter
 
         TODO: currently assume all actions only take one parameter. What if some action in the future requires more? How to update the API?
         """

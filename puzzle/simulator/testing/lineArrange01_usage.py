@@ -46,7 +46,7 @@ for i in range(num_pieces):
     piece = template.buildSquare(20, (255, 0, 0), rLoc=(140, int((i + 1) / (num_pieces + 1) * canvas_size)))
     init_board.addPiece(piece)
 
-# ==[2] Create a simulatior
+# ==[2] Create a simulator
 #
 agent = Agent.buildSphereAgent(8, (0, 0, 255), rLoc=init_agent_loc)
 lineArrange_simulator = lineArrange.buildSameX(target_x, init_board, initHuman=agent)

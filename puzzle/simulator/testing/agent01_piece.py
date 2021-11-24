@@ -75,7 +75,7 @@ vis_scene(piece, agent, canvas, title="Reach to the piece", ax=ax)
 plt.pause(1)
 
 # ==[3] pick the piece
-agent.execute("pick", piece)
+# agent.execute("pick", piece) # Will fail as we do not have a board instance
 agent.pick(piece)
 vis_scene(piece, agent, canvas, agent_color=pick_color, title="Pick the piece up", ax=ax)
 plt.pause(1)

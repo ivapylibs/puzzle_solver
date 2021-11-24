@@ -15,7 +15,7 @@
 # @date     2021/08/29
 #
 #
-# TODO: need to build a foo manager (and possibily also a solver) for the lineArrange puzzle in this file
+# TODO: need to build a foo manager (and possibly also a solver) for the lineArrange puzzle in this file
 # 
 # ========================= puzzle.simulator.lineArrange ========================
 
@@ -31,7 +31,7 @@ from puzzle.builder.board import board
 from puzzle.manager import manager, managerParms
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.basic import basic
-from puzzle.solver.base import base as solver_base
+from puzzle.solver.simple import simple as solver_simple
 
 
 # ===== Class Helper Elements
@@ -174,7 +174,7 @@ class manager_LA(manager):
         return
 
 
-class solver_LA(solver_base):
+class solver_LA(solver_simple):
     """
     Develop a simple solver tailored to the lineArrange task
 
@@ -193,14 +193,6 @@ class solver_LA(solver_base):
         self.flag_found = False
         self.puzzle_idx = None
         self.target_loc = None
-
-    def setMatch(self, match):
-        """
-        Set up the match
-
-        @param[in]  match       measure-to-solution match. a list of (2,) array
-        """
-        self.match = match
 
     def setMeaBoard(self, meaBoard: board):
         """
@@ -230,13 +222,13 @@ class solver_LA(solver_base):
         @param[out] puzzle_idx          The next puzzle to be assembled
         @param[out] target_loc          The target location for the selected puzzle
         """
-        # prepare
+        # Prepare
         flag_found = False
         self.clear_results()
 
-        # get started
+        # Get started
         for idx in range(self.current.size()):
-            # fetch the match
+            # Fetch the match
             sol_match_idx = None
             for j in range(len(self.match)):
                 if self.match[j][0] == idx:
@@ -245,17 +237,17 @@ class solver_LA(solver_base):
                 "There is no match in the solution board for the puzzle piece:{}. \
                     Solution and current might not match".format(idx)
 
-            # check whether has already been assembled
+            # Check whether has already been assembled
             if np.all(self.current.pieces[idx].rLoc == self.desired.pieces[sol_match_idx].rLoc):
                 continue
 
-            # if not, then return the next puzzle and its target location
+            # If not, then return the next puzzle and its target location
             self.puzzle_idx = idx
             self.target_loc = self.desired.pieces[sol_match_idx].rLoc
             self.flag_found = True
             return self.flag_found, self.puzzle_idx, self.target_loc
 
-        # if no target found, return None:
+        # If no target found, return None:
         if not flag_found:
             self.puzzle_idx = None
             self.target_loc = None

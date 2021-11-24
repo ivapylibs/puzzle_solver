@@ -36,11 +36,15 @@ class Appearance(template):
 
 
 class Agent(Actions):
-    """
-    The Agent class equip the Base with the actions and the planning ability
-    """
 
     def __init__(self, app: Appearance, planner: Planner_Base = None):
+        """
+        @brief  The Agent class equip the Base with the actions and the planning ability
+
+        Args:
+            app: An appearance instance.
+            planner: A planner instance (like a solver)
+        """
         self.app = app
         super().__init__(loc=self.app.rLoc)
         self.app.rLoc = self.loc
@@ -54,11 +58,12 @@ class Agent(Actions):
 
     def setSolBoard(self, solBoard):
         """
-        Set the solution board for the Agent to refer to during the puzzle solving process
-        It will update the solution board to the planner it used, 
-        which includes both manager and solver
+        @brief  Set the solution board for the Agent to refer to during the puzzle solving process.
+                It will update the solution board to the planner it used,
+                which includes both manager and solver
 
-        @param[in]  solBoard        The solution board
+        Args:
+            solBoard: The solution board
         """
         self.planner.setSolBoard(solBoard)
 
@@ -67,41 +72,43 @@ class Agent(Actions):
 
     def process(self, meaBoard: board, execute=True):
         """
-        Process the current perceived board to produce the next action
+        @brief  Process the current perceived board to produce the next action.
 
-        @param[in]  meaBoard            The measured board
-        @param[in]  execute             bool. Execute an action or not.If not, will only attempt to plan
+        Args:
+            meaBoard: The measured board.
+            execute: Execute an action or not. If not, will only attempt to plan.
 
-        @param[out] succ_flag           Whether future actions are planned and executed
-        @param[out] action              The action label
-        @param[out] action_arg          The action arguments. If it is piece, then this will be its index in the board
+
+        Returns:
+            theSuccessFlag(Whether future actions are planned and executed) & action(The action label) & action_arg(The action arguments. If it is piece, then this will be its index in the board)
         """
+
         assert self.planner is not None, \
             "The planner can not be None, or the agent has no brain! \
                 Please use the setPlanner function to get a planner"
-        succ_flag = False
+        theSuccessFlag = False
 
         # if there are no cached actions, plan new actions
         if len(self.cache_actions) == 0:
             flag, actions, action_args = self.planner.process(meaBoard=meaBoard)
             if not flag:
-                # if the planning is not successful, return False, None, None
-                return succ_flag, None, None
+                # If the planning is not successful, return False, None, None
+                return theSuccessFlag, None, None
             else:
-                # if the planning is successful, update cached actions
-                succ_flag = True
+                # If the planning is successful, update cached actions
+                theSuccessFlag = True
                 self.cache_actions = actions
                 self.cache_action_args = action_args
-        # if there are already planned actions, then planning is successful
+        # If there exists planned actions, then planning is successful
         else:
-            succ_flag = True
+            theSuccessFlag = True
 
-        # execute the next action
+        # Execute the next action
         if execute:
             next_action, next_arg = self.execute_next(meaBoard)
-            return succ_flag, next_action, next_arg
+            return theSuccessFlag, next_action, next_arg
         else:
-            return succ_flag, None, None
+            return theSuccessFlag, None, None
 
     def pop_action(self):
         """
@@ -116,7 +123,7 @@ class Agent(Actions):
 
     def execute_next(self, meaBoard):
         """
-        This function execute the next cached action
+        This function executes the next cached action
 
         @param[in]  next_action         The next action label
         @param[in]  next_arg            The next action's argument
@@ -124,7 +131,7 @@ class Agent(Actions):
         next_action, next_arg = self.pop_action()
         next_arg_return = next_arg  # since next arg might be changed
 
-        # execute the action 
+        # Execute the action
         self.execute(next_action, next_arg, board=meaBoard)
 
         return next_action, next_arg_return

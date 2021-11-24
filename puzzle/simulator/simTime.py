@@ -78,15 +78,15 @@ class SimTime(SimTimeLess):
         Overwrite the simulate_step function
         """
 
-        succ = True  # < Whether the simulation is still successfully running
+        SUCCESS = True  # < Whether the simulation is still successfully running
         flag_finish = False  # < Whether the current cached action has been finished
 
         if self.cache_action is None:
             # if no more stored action, meaning the last action has been executed.
             # Then will let the agent plan again (if has unfinished plans then will simply do nothign)
             # and pop out the new action
-            succ, _, _ = self.agent.process(self.cur_board, execute=False)
-            if succ:
+            SUCCESS, _, _ = self.agent.process(self.cur_board, execute=False)
+            if SUCCESS:
                 self.cache_action, self.cache_arg = self.agent.pop_action()
 
                 # If the next action to executed is static, then start the timer.
@@ -106,7 +106,7 @@ class SimTime(SimTimeLess):
         if flag_finish:
             self.reset_cache()
 
-        return succ
+        return SUCCESS
 
     def _move_step(self, target_loc):
         """

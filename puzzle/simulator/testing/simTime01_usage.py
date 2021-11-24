@@ -64,9 +64,9 @@ simulator = SimTime(init_board, sol_board, agent, param_sim)
 fh, axes = plt.subplots(1, 3, figsize=(15, 5))
 fh.suptitle("The timeless Simulator")
 # plt.pause(7)    # give me time to record the gif
-simulator.visualize(mode="initBoard", title="The initial board", ax=axes[0])
-simulator.visualize(mode="solBoard", title="The solution board", ax=axes[1])
-simulator.visualize(mode="scene", title="The current scene", ax=axes[2])
+simulator.display(mode="initBoard", title="The initial board", ax=axes[0])
+simulator.display(mode="solBoard", title="The solution board", ax=axes[1])
+simulator.display(mode="scene", title="The current scene", ax=axes[2])
 plt.pause(1)
 
 # ==[2] Simulate

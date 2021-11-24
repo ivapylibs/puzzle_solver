@@ -2,7 +2,8 @@
 #
 # @class    puzzle.simulator.planner
 #
-# @brief    The planner for producing the action sequence to solve the puzzle
+# @brief    The planner for producing the action sequence to solve the puzzle.
+# @note     Yunzhi: more like a wrapper of what I did in the test script.
 #
 # ========================= puzzle.simulator.planner ========================
 #
@@ -61,20 +62,20 @@ class Planner_Base():
         # manager process the measured board to establish the association
         self.manager.process(meaBoard)
 
-        # solver use the association to plan which next puzzle to move to where
+        # Solver use the association to plan which next puzzle to move to where
         self.solver.current = meaBoard
         self.solver.setMatch(self.manager.pAssignments)
         flag, puzzle_idx, target_loc = self.solver.takeTurn()
 
-        # if no plan found, probably means the puzzle is solved
+        # If no plan found, probably means the puzzle is solved
         if not flag:
             return flag, None, None
-        # plan a sequence of actions to achieve whatever is the solver_out
+        # Plan a sequence of actions to achieve whatever is the solver_out
         else:
             actions, action_args = self.plan(meaBoard, puzzle_idx, target_loc)
             return flag, actions, action_args
 
-    def plan(self, puzzle_idx, target_loc):
+    def plan(self, meaBoard, puzzle_idx, target_loc):
         raise NotImplementedError("The base class assume no method for action planning.\
              Needs to be overwritten by children classes")
 
@@ -103,7 +104,7 @@ class Planner_Fix(Planner_Base):
         """
         Hard code the sequence of action to move a piece in the board to the target location
 
-        @param[in]  meaboard            The measured board
+        @param[in]  meaBoard            The measured board
         @param[in]  puzzle_idx          The index of the next puzzle piece to assemble in the meaBoard
         @param[in]  target_loc          The target location of the selected puzzle piece
 
@@ -116,19 +117,19 @@ class Planner_Fix(Planner_Base):
         actions = []
         action_args = []
 
-        # move to the piece location
+        # Move to the piece location
         actions.append('move')
         action_args.append(meaBoard.pieces[puzzle_idx].rLoc)
-        # pick
+        # Pick
         actions.append('pick')
         action_args.append(puzzle_idx)
-        # move to the target location
+        # Move to the target location
         actions.append('move')
         action_args.append(target_loc)
-        # place
+        # Place
         actions.append('place')
         action_args.append(None)
-        # move back tot the initial location
+        # Move back tot the initial location
         actions.append('move')
         action_args.append(self.init_loc)
 

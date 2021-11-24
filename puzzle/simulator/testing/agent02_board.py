@@ -39,7 +39,7 @@ from puzzle.simulator.planner import Planner_Fix
 # [0.2 utility function]
 def vis_scene(board, canvas, agent=None, agent_color=None, title=None, ax=None):
     """
-    @param[in]  agent_color         allow overwrite the agent's color, which is temporary and will not be saved after visualization
+    @brief  agent_color allow overwrite the agent's color, which is temporary and will not be saved after visualization.
     """
     if ax is None:
         ax = plt.gca()
@@ -96,7 +96,6 @@ agent.setPlanner(planner)
 fh, axes = plt.subplots(1, 2, figsize=(10, 5))
 fh.suptitle("The puzzle to solve")
 # plt.pause(7)    # give me time to record the gif
-canvs_vis = canvas
 vis_scene(init_board, canvas, title="Initial board", ax=axes[0])
 vis_scene(sol_board, canvas, title="Solution board", ax=axes[1])
 plt.pause(1)
@@ -105,7 +104,7 @@ plt.pause(1)
 
 plt.figure()
 
-succ, _, _ = agent.process(init_board, execute=False)
+SUCCESS, _, _ = agent.process(init_board, execute=False)
 # verify the manager function
 assigns = manager.pAssignments
 assert all([np.all(assign == np.array((idx, idx))) for idx, assign in enumerate(assigns)])
@@ -119,14 +118,14 @@ plt.pause(1)
 # plt.pause(7)    #<- give me time to setup for the gif recording.
 
 
-# ==[3] Agent execute the action until finishing the puzzle
+# ==[3] Agent executes the action until finishing the puzzle
 
-succ = True
-while succ:
+SUCCESS = True
+while SUCCESS:
     # plan and execute
-    succ, action, action_arg = agent.process(init_board, execute=True)
-    if not succ:
-        # if not success, will lead to termination
+    SUCCESS, action, action_arg = agent.process(init_board, execute=True)
+    if not SUCCESS:
+        # if not SUCCESSess, will lead to termination
         continue
 
     # visualize
