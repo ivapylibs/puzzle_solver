@@ -116,15 +116,15 @@ class SimTimeLess():
         ) * 255
 
         if mode == "initBoard":
-            for piece in self.init_board.pieces:
-                piece.placeInImage(canvas)
+            self.init_board.toImage(canvas, BOUNDING_BOX=False)
+
         elif mode == "solBoard":
-            for piece in self.sol_board.pieces:
-                piece.placeInImage(canvas)
+            self.sol_board.toImage(canvas, BOUNDING_BOX=False)
+
         elif mode == "scene":
             # the current board
-            for piece in self.cur_board.pieces:
-                piece.placeInImage(canvas)
+            self.cur_board.toImage(canvas, BOUNDING_BOX=False)
+
             # the agent
             if (pickColorA is not None) and (self.agent.cache_piece is not None):
                 appear_cache = deepcopy(self.agent.app.y.appear)
