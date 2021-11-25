@@ -163,7 +163,7 @@ def white_balance(img):
     return result
 
 
-def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
+def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50), verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
 
@@ -202,8 +202,8 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, verbose=False):
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                # cv2.medianBlur, (5,),
-                               cv2.Canny, (30, 50, None, 3, True,),
-                               # cv2.Canny, (30, 200,),
+                               cv2.Canny, (cannyThresh[0], cannyThresh[1], None, 3, True,),
+                               # cv2.Canny, (40, 200,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
     # Step 1: with threshold

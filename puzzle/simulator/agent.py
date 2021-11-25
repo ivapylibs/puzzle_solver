@@ -47,7 +47,7 @@ class Agent(Actions):
         """
         self.app = app
         super().__init__(loc=self.app.rLoc)
-        self.app.rLoc = self.loc
+        # self.app.rLoc = self.loc
 
         # planner
         self.planner = planner

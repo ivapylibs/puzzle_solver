@@ -95,7 +95,7 @@ class Basic:
         @brief  Perform the plan.
 
         Args:
-            plan: A tuple (piece_id, piece_index, action_type, action)
+            plan: A tuple (piece_id, piece_index, action_type, action_param)
 
         Returns:
             FINISHED(Signal indicating the end of plan)
@@ -112,15 +112,15 @@ class Basic:
                 piece_id = i[0]
                 piece_index = i[1]
                 action_type = i[2]
-                action = i[3]
+                action_param = i[3]
 
                 if action_type == 'rotate':
-                    print(f'Rotate piece {piece_id} by {int(action)} degree')
+                    print(f'Rotate piece {piece_id} by {int(action_param)} degree')
                     self.puzzle.pieces[piece_index] = self.puzzle.pieces[piece_index].rotatePiece(
-                        action)
+                        action_param)
                 elif action_type == 'move':
-                    print(f'Move piece {piece_id} by {action}')
-                    self.puzzle.pieces[piece_index].setPlacement(action, offset=True)
+                    print(f'Move piece {piece_id} by {action_param}')
+                    self.puzzle.pieces[piece_index].setPlacement(action_param, offset=True)
 
         return FINISHED
 

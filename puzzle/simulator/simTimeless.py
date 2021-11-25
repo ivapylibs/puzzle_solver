@@ -86,8 +86,8 @@ class SimTimeLess():
         The simulation step.
         For the timeless simulator, the simulation step will fully execute the agent's next action
         """
-        succ, action, action_arg = self.agent.process(self.cur_board, execute=True)
-        return succ
+        theSuccessFlag, action, action_arg = self.agent.process(self.cur_board, execute=True)
+        return theSuccessFlag
 
     def display(self, mode="scene", pickColorA=None, title=None, ax=None):
         """
