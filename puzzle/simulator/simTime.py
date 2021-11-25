@@ -1,21 +1,23 @@
-# ========================= puzzle.simulator.simTimeless ========================
+# ========================= puzzle.simulator.simTime ========================
 #
-# @class    puzzle.simulator.SimTimeless
+# @class    puzzle.simulator.SimTime
 #
-# @brief    The simulator that simulate the puzzle solving process
-#           without any time effect.
-#           The agent will observe the board and attempt to solve it until finished
+# @brief    The simulator that also simulates the time effect.
+#           Each simulation step will have a fixed time length,
+#           and the speed of the agent movement and the length
+#           of the agent's pause will be simulated.
 #
-# ========================= puzzle.simulator.simTimeless ========================
+# ========================= puzzle.simulator.simTime ========================
 #
-# @file     simTimeless.py
+# @file     simTime.py
 #
-# @author   Yunzhi Lin,              yunzhi.lin@gatech.edu
+# @author   Yiye Chen,               yychen2019@gatech.edu
+#           Yunzhi Lin,              yunzhi.lin@gatech.edu
+# @date     2021/09/10 [created]
+#           2021/11/25 [modified]
 #
-# @date     2021/11/25
 #
-#
-# ========================= puzzle.simulator.simTimeless ========================
+# ========================= puzzle.simulator.simTime ========================
 
 import math
 from copy import deepcopy
@@ -246,3 +248,6 @@ class SimTime(SimTimeLess):
 
             pygame.display.update()
             self.FramePerSec.tick(self.FPS)
+
+#
+# ========================= puzzle.simulator.simTime ========================

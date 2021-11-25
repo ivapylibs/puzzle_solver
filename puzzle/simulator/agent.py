@@ -12,7 +12,6 @@
 #
 # @author   Yiye Chen,               yychen2019@gatech.edu
 #           Yunzhi Lin,              yunzhi.lin@gatech.edu
-#
 # @date     2021/08/29 [created]
 #           2021/11/25 [modified]
 #
@@ -136,3 +135,6 @@ class Agent:
     def buildSquareAgent(size, color, rLoc=None):
         app_Square = Template.buildSquare(size, color, rLoc)
         return Agent(app_Square)
+
+#
+# ========================= puzzle.simulator.agent ========================

@@ -10,9 +10,10 @@
 #
 # @file     simTimeless.py
 #
-# @author   Yunzhi Lin,              yunzhi.lin@gatech.edu
-#
-# @date     2021/11/25
+# @author   Yiye Chen,               yychen2019@gatech.edu
+#           Yunzhi Lin,              yunzhi.lin@gatech.edu
+# @date     2021/09/10 [created]
+#           2021/11/25 [modified]
 #
 #
 # ========================= puzzle.simulator.simTimeless ========================
@@ -135,3 +136,6 @@ class SimTimeLess(Basic):
         self.fig.canvas.mpl_connect('key_press_event', press)
 
         plt.show()
+
+#
+# ========================= puzzle.simulator.simTimeless ========================
