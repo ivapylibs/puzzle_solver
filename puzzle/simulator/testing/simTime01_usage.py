@@ -23,7 +23,7 @@ from puzzle.piece.template import Template
 from puzzle.simulator.agent import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
 from puzzle.simulator.planner import Planner_Fix
-from puzzle.simulator.simTime import SimTime, ParamSTL
+from puzzle.simulator.simTime_yiye import SimTime, ParamSTL
 
 # ==[1] Prepare
 

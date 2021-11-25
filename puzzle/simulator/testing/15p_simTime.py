@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-# ============================ realSolverNoCalibrate_basic ===========================
+# ============================ 15p_simTime ===========================
 #
-# @brief    Test script with command from the solver & with no calibration process. (real img)
+# @brief    The test script for the basic time-aware simulator.
 #
-# ============================ realSolverNoCalibrate_basic ===========================
+# ============================ 15p_simTime ===========================
 
 #
-# @file     realSolverNoCalibrate_basic.py
+# @file     15p_simTime.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/10/16  [created]
+# @date     2021/11/25  [created]
 #
-# ============================ realSolverNoCalibrate_basic ===========================
+# ============================ 15p_simTime ===========================
 
 # ==[0] Prep environment
 import os
@@ -23,7 +23,7 @@ from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.template import Template
 from puzzle.simulator.agent_yunzhi import Agent
-from puzzle.simulator.simTime_yunzhi import SimTime
+from puzzle.simulator.simTime import SimTime
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
@@ -37,7 +37,6 @@ theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
 # theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
@@ -71,46 +70,26 @@ theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
 _, epBoard = theGridMea.swapPuzzle()
 
-# ==[1] Read the source image and template.
+# ==[3] Read the source image to create a hand.
 #
 fsize = 1
 theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
 
-# ==[1.1] Create an improcessor to obtain the mask.
-#
-
 theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
-
 theHand = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
+init_agent_loc = [600, 50]
 
-# ==[1.3] Display.
+theHand.setPlacement(r=init_agent_loc)
+agent = Agent(theHand)
+
+# ==[4] Create a simulator and display.
 #
-theImage = theHand.toImage()
-# plt.imshow(theImage)
-#
-# plt.show()
 
-init_agent_loc = [600, 1050]
-# agent = Agent.buildSphereAgent(100, (0, 0, 255), rLoc=init_agent_loc)
-
-thePiece = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-thePiece.setPlacement(r=init_agent_loc)
-agent = Agent(thePiece)
-
-# prepare the simulator
-# param_sim = ParamST(
-#     canvas_H=2000,
-#     canvas_W=200
-# )
 simulator = SimTime(epBoard, agent)
 
-# plt.ion()
-
 simulator.display()
-# plt.show()
 
-# plt.ioff()
 #
-# ============================ realSolverNoCalibrate_basic ===========================
+# ============================ 15p_simTime ===========================
