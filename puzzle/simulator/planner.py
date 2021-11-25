@@ -3,7 +3,7 @@
 # @class    puzzle.simulator.planner
 #
 # @brief    The planner for producing the action sequence to solve the puzzle.
-# @note     Yunzhi: more like a wrapper of what I did in the test script.
+# @note     Yunzhi: more like a wrapper of solver & manager in the test script.
 #
 # ========================= puzzle.simulator.planner ========================
 #

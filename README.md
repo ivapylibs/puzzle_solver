@@ -37,6 +37,6 @@ Requires the installation of the following python packages:
 - ```scikit-image```
 - ```opencv-python >= 4.0.0.21```
 - ```similaritymeasures```
-
+- ```pygame```
 
 

@@ -7,5 +7,5 @@ setup(name='puzzle',
       author='IVALab',
       packages=['puzzle'],
       install_requires=['numpy', 'scipy', 'matplotlib', 'opencv-python', 'scikit-image', 'scikit-learn',
-                        'similaritymeasures']
+                        'similaritymeasures', 'pygame']
       )
