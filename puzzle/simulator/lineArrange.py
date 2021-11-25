@@ -29,7 +29,7 @@ import numpy as np
 from puzzle.builder.arrangement import Arrangement, ParamArrange
 from puzzle.builder.board import Board
 from puzzle.manager import Manager, ManagerParms
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.agent_yiye import Agent
 from puzzle.simulator.basic import Basic
 from puzzle.solver.simple import Simple as solver_simple
 

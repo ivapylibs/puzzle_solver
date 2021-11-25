@@ -1,17 +1,17 @@
-# ========================= simTimeless01_usage ========================
+# ========================= simTime01_usage ========================
 #
-# @brief    The test script for the basic timeless simulator
+# @brief    The test script for the basic time-aware simulator
 #
-# ========================= simTimeless01_usage ========================
+# ========================= simTime01_usage ========================
 #
-# @file     agent02_board.py
+# @file     simTime01_usage.py
 #
 # @author   Yiye Chen,              yychen2019@gatech.edu
 #
 # @date     2021/09/10
 #
 #
-# ========================= simTimeless01_usage ========================
+# ========================= simTime01_usage ========================
 
 ##==[0] Prepare
 # [0.1] environment
@@ -20,10 +20,10 @@ import numpy as np
 
 from puzzle.builder.board import Board
 from puzzle.piece.template import Template
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.agent_yiye import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
 from puzzle.simulator.planner import Planner_Fix
-from puzzle.simulator.simTimeless_yiye import SimTimeLess, ParamST
+from puzzle.simulator.simTime_yiye import SimTime, ParamSTL
 
 # ==[1] Prepare
 
@@ -51,13 +51,16 @@ planner.setInitLoc(init_agent_loc)
 agent.setPlanner(planner)
 
 # prepare the simulator
-param_sim = ParamST(
+param_sim = ParamSTL(
     canvas_H=200,
-    canvas_W=200
+    canvas_W=200,
+    delta_t=0.01,
+    speed=500,
+    static_duration=0.05
 )
-simulator = SimTimeLess(init_board, sol_board, agent, param_sim)
+simulator = SimTime(init_board, sol_board, agent, param_sim)
 
-# display
+# visualize
 fh, axes = plt.subplots(1, 3, figsize=(15, 5))
 fh.suptitle("The timeless Simulator")
 # plt.pause(7)    # give me time to record the gif

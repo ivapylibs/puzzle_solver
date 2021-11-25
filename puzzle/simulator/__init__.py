@@ -1,6 +1,6 @@
 # For human activity
 import puzzle.simulator.action
-import puzzle.simulator.agent
+import puzzle.simulator.agent_yiye
 import puzzle.simulator.basic
 import puzzle.simulator.lineArrange
 import puzzle.simulator.planner

@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.template import Template
-from puzzle.simulator.agent_yunzhi import Agent
+from puzzle.simulator.agent import Agent
 from puzzle.simulator.simTimeless import SimTimeLess
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle

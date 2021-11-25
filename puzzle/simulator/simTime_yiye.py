@@ -25,7 +25,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from puzzle.builder.board import Board
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.agent_yiye import Agent
 from puzzle.simulator.simTimeless_yiye import SimTimeLess, ParamST
 
 

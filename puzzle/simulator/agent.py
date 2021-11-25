@@ -10,133 +10,97 @@
 #
 # @file     agent.py
 #
-# @author   Yiye Chen,              yychen2019@gatech.edu
+# @author   Yiye Chen,               yychen2019@gatech.edu
+#           Yunzhi Lin,              yunzhi.lin@gatech.edu
 #
-# @date     2021/08/29
-#
+# @date     2021/08/29 [created]
+#           2021/11/25 [modified]
 #
 # ========================= puzzle.simulator.agent ========================
 
-from puzzle.builder.board import Board
+import numpy as np
+
 from puzzle.piece.template import Template
-from puzzle.simulator.action import Actions
-from puzzle.simulator.planner import Planner_Base
 
 
-class Appearance(Template):
-    """
-    @brief  The Appearance agent class contains the basic appearance information about the agent
-            It inherit the puzzle.piece.template class so that it can be treated as a special piece
-    
-    TODO: so far haven't thought of features need to be added to the template. Add if needed
-    """
+class Agent:
 
-    def __init__(self, y=None, r=(0, 0), id=None):
-        super().__init__(y=y, r=r, id=id)
-
-
-class Agent(Actions):
-
-    def __init__(self, app: Appearance, planner: Planner_Base = None):
+    def __init__(self, app: Template):
         """
         @brief  The Agent class equip the Base with the actions and the planning ability
 
         Args:
-            app: An appearance instance.
-            planner: A planner instance (like a solver)
+            app: A Template instance.
         """
         self.app = app
-        super().__init__(loc=self.app.rLoc)
-        # self.app.rLoc = self.loc
 
-        # planner
-        self.planner = planner
+        self.cache_piece = None  # piece in hand
 
-        # the short-term memory of the actions to be executed to accomplish a plan
-        self.cache_actions = []
-        self.cache_action_args = []
+    def move(self, param):
 
-    def setSolBoard(self, solBoard):
-        """
-        @brief  Set the solution board for the Agent to refer to during the puzzle solving process.
-                It will update the solution board to the planner it used,
-                which includes both manager and solver
+        if isinstance(param, tuple):
+            targetLoc = param[0]
+            offset = param[1]
+        elif isinstance(param, list) or isinstance(param, np.ndarray):
+            targetLoc = param
+            offset = False
 
-        Args:
-            solBoard: The solution board
-        """
-        self.planner.setSolBoard(solBoard)
+        self.app.setPlacement(targetLoc, offset=offset)
+        if self.cache_piece is not None:
+            self.cache_piece.setPlacement(targetLoc, offset=offset)
 
-    def setPlanner(self, planner: Planner_Base):
-        self.planner = planner
+    def pieceInHand(self, rLoc):
 
-    def process(self, meaBoard: Board, execute=True):
-        """
-        @brief  Process the current perceived board to produce the next action.
+        theDist = np.linalg.norm(np.array(rLoc) - np.array(self.app.rLoc))
 
-        Args:
-            meaBoard: The measured board.
-            execute: Execute an action or not. If not, will only attempt to plan.
+        return theDist < 80
 
+    def pick(self, puzzle, piece: Template = None):
+        if piece is None:
 
-        Returns:
-            theSuccessFlag(Whether future actions are planned and executed) & action(The action label) & action_arg(The action arguments. If it is piece, then this will be its index in the board)
-        """
+            theDists = {}
+            pLocTrue = puzzle.pieceLocations()
 
-        assert self.planner is not None, \
-            "The planner can not be None, or the agent has no brain! \
-                Please use the setPlanner function to get a planner"
-        theSuccessFlag = False
+            for id in pLocTrue.keys():
+                theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(self.app.rLoc))
 
-        # if there are no cached actions, plan new actions
-        if len(self.cache_actions) == 0:
-            flag, actions, action_args = self.planner.process(meaBoard=meaBoard)
-            if not flag:
-                # If the planning is not successful, return False, None, None
-                return theSuccessFlag, None, None
-            else:
-                # If the planning is successful, update cached actions
-                theSuccessFlag = True
-                self.cache_actions = actions
-                self.cache_action_args = action_args
-        # If there exists planned actions, then planning is successful
+            piece_id = min(theDists, key=theDists.get)
+
+            for i, piece in enumerate(puzzle.pieces):
+                if piece_id == piece.id:
+                    piece_index = i
+                    break
+
+            piece = puzzle.pieces[piece_index]
+
+        if self.pieceInHand(piece.rLoc):
+
+            print('Pick the piece.')
+
+            # Align the rLoc
+            piece.rLoc = self.app.rLoc
+            self.cache_piece = piece
+
+            puzzle.rmPiece(piece.id)
         else:
-            theSuccessFlag = True
+            print('No piece is nearby.')
 
-        # Execute the next action
-        if execute:
-            next_action, next_arg = self.execute_next(meaBoard)
-            return theSuccessFlag, next_action, next_arg
+    def place(self, puzzle):
+
+        if self.cache_piece is not None:
+
+            print('Place the piece.')
+
+            # Todo: Maybe with the original id?
+            puzzle.addPiece(self.cache_piece)
+            self.cache_piece = None
         else:
-            return theSuccessFlag, None, None
+            print('No piece is hand.')
 
-    def pop_action(self):
-        """
-        Pop out the next action and action argument WITHOUT executing them
+    def pause(self):
+        return
 
-        @param[out]  next_action         The next action label
-        @param[out]  next_arg            The next action's argument
-        """
-        next_action = self.cache_actions.pop(0)
-        next_arg = self.cache_action_args.pop(0)
-        return next_action, next_arg
-
-    def execute_next(self, meaBoard):
-        """
-        This function executes the next cached action
-
-        @param[in]  next_action         The next action label
-        @param[in]  next_arg            The next action's argument
-        """
-        next_action, next_arg = self.pop_action()
-        next_arg_return = next_arg  # since next arg might be changed
-
-        # Execute the action
-        self.execute(next_action, next_arg, board=meaBoard)
-
-        return next_action, next_arg_return
-
-    def execute(self, action_label, action_param=None, board=None):
+    def execute(self, puzzle, action_type, action_param=None):
         """
         Execute an action given the action label and parameter
 
@@ -145,26 +109,30 @@ class Agent(Actions):
         """
 
         # if it is pick action, then get the puzzle piece as the real parameter
-        if action_label == "pick":
+        if action_type == "pick":
             # sanity check. Make sure the arg is int (index)
-            assert isinstance(action_param, int) and (board is not None)
-            action_param = board.pieces[action_param]
+            if isinstance(action_param, int):
+                action_param = puzzle.pieces[action_param]
+                self.pick(puzzle, action_param)
+            else:
+                self.pick(puzzle)
 
-        if action_param is None:
-            self.ACTION_LABELS[action_label]()
-        else:
-            self.ACTION_LABELS[action_label](action_param)
-        self.app.rLoc = self.loc
+        elif action_type == "move":
+            self.move(action_param)
+        elif action_type == "place":
+            self.place(puzzle)
+        elif action_type == "pause":
+            self.pause()
 
     def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=True):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
     @staticmethod
-    def buildSphereAgent(radius, color, rLoc=None, planner: Planner_Base = None):
+    def buildSphereAgent(radius, color, rLoc=None):
         app_sphere = Template.buildSphere(radius, color, rLoc)
-        return Agent(app_sphere, planner)
+        return Agent(app_sphere)
 
     @staticmethod
-    def buildSquareAgent(size, color, rLoc=None, planner: Planner_Base = None):
+    def buildSquareAgent(size, color, rLoc=None):
         app_Square = Template.buildSquare(size, color, rLoc)
-        return Agent(app_Square, planner)
+        return Agent(app_Square)

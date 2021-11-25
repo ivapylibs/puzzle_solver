@@ -22,7 +22,7 @@ import improcessor.basic as improcessor
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.template import Template
-from puzzle.simulator.agent_yunzhi import Agent
+from puzzle.simulator.agent import Agent
 from puzzle.simulator.simTime import SimTime
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle

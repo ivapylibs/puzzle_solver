@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from puzzle.piece.template import Template
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.agent_yiye import Agent
 
 
 # [0.2 utility function]

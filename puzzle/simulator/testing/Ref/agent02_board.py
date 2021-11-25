@@ -31,7 +31,7 @@ import numpy as np
 
 from puzzle.builder.board import Board
 from puzzle.piece.template import Template
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.agent_yiye import Agent
 from puzzle.simulator.lineArrange import solver_LA, manager_LA
 from puzzle.simulator.planner import Planner_Fix
 
