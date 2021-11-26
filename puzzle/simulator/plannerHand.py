@@ -66,9 +66,11 @@ class PlannerHand(Planner):
                     # move to the puzzle piece
                     plan_new.append(['move', meaBoard.pieces[piece_index].rLoc])
 
-                    # pick the nearby piece
-                    # Todo: May need to specify the id or index
-                    plan_new.append(['pick', None])
+                    # # pick the nearby piece
+                    # plan_new.append(['pick', None])
+
+                    # pick the target piece
+                    plan_new.append(['pick', piece_index])
 
                     # Rotate the piece in hand
                     plan_new.append(['rotate', action_param])
@@ -88,9 +90,11 @@ class PlannerHand(Planner):
 
                     # Todo: Currently, we assume there is only one piece in hand at one time
                     if hand.cache_piece is None:
-                        # pick the nearby piece
-                        # Todo: May need to specify the id or index
-                        plan_new.append(['pick', None])
+                        # # pick the nearby piece
+                        # plan_new.append(['pick', None])
+
+                        # pick the target piece
+                        plan_new.append(['pick', piece_index])
 
                     # move the piece to the target loc
                     plan_new.append(['move', (action_param, True)])

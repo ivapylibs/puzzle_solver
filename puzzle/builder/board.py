@@ -96,8 +96,10 @@ class Board:
                 rm_index = idx
                 break
 
-        if rm_index:
+        if rm_index is not None:
             del self.pieces[rm_index]
+        else:
+            raise RuntimeError('Cannot find the target')
 
     def clear(self):
         """

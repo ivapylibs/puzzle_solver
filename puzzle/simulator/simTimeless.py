@@ -134,7 +134,7 @@ class SimTimeLess(Basic):
                 if self.planner is None:
                     print('planner has not been set up yet.')
                 else:
-                    plan = self.planner.process(self.puzzle)
+                    plan = self.planner.process(self.puzzle, COMPLETE_PLAN=False)
                     self.takeAction(plan)
 
             elif event.key == 'p':
@@ -152,6 +152,14 @@ class SimTimeLess(Basic):
 
             self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
+        # Debug only
+        class Event:
+            key = None
+
+        event = Event()
+        event.key = 'p'
+        while 1:
+            press(event)
 
         self.fig.canvas.mpl_connect('key_press_event', press)
 

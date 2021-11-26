@@ -55,9 +55,9 @@ class Hand:
 
         return theDist < 80
 
-    def pick(self, puzzle, piece: Template = None):
-        if piece is None:
+    def pick(self, puzzle, piece_index=None):
 
+        if piece_index is None:
             theDists = {}
             pLocTrue = puzzle.pieceLocations()
 
@@ -71,7 +71,7 @@ class Hand:
                     piece_index = i
                     break
 
-            piece = puzzle.pieces[piece_index]
+        piece = puzzle.pieces[piece_index]
 
         if self.pieceInHand(piece.rLoc):
 
@@ -119,11 +119,7 @@ class Hand:
 
         # if it is pick action, then get the puzzle piece as the real parameter
         if action_type == "pick":
-            if isinstance(action_param, int):
-                action_param = puzzle.pieces[action_param]
-                self.pick(puzzle, action_param)
-            else:
-                self.pick(puzzle)
+            self.pick(puzzle, action_param)
         elif action_type == "rotate":
             self.rotate(action_param)
         elif action_type == "move":
