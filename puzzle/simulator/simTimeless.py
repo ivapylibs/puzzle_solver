@@ -60,27 +60,42 @@ class SimTimeLess(Basic):
     @param[in]  param               The parameters
     """
 
-    def __init__(self, thePuzzle, agent, param=ParamSTL()):
+    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theParams=ParamSTL()):
 
-        super(SimTimeLess, self).__init__(thePuzzle)
+        super(SimTimeLess, self).__init__(thePuzzle, thePlanner)
 
-        # self.init_board = init_board  # Initial board
-        # self.sol_board = sol_board  # Solution board
-        # self.cur_board = init_board  # The current board. At first it will be only the inital board
-        self.agent = agent  # The agent
-        self.param = param
+        self.hand = theHand
+        self.param = theParams
 
         self.canvas = np.zeros(
             (self.param.canvas_H, self.param.canvas_W, 3),
             dtype=np.uint8
         )
 
-        # cached action, argument, and time
-        self.cache_action = None  # The next action to execute
-        self.cache_arg = None  # The next action argument
+        # Todo: Currently, the planner is with the simulator. Not sure if we should go with the hand.
+        self.plannerHand = thePlannerHand
 
-        # let the agent be aware of the solution board
-        # self.agent.setSolBoard(sol_board)
+        # cached action, argument, and time
+        self.cache_action = []  # The next action to execute
+        # self.cache_arg = None  # The next action argument
+
+        self.im = None
+
+    def simulate_step(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+
+        if len(self.cache_action) > 0:
+            action = self.cache_action.pop(0)
+            self.hand.execute(self.puzzle, action[0], action[1])
+
+        cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+                                          BOUNDING_BOX=False)
+
+        theImage = deepcopy(cache_image)
+        self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+        plt.pause(0.001)
+
+        self.im.set_data(theImage)
+        self.fig.canvas.draw()
 
     def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
         """
@@ -95,43 +110,48 @@ class SimTimeLess(Basic):
             self.fig = plt.figure()
 
         theImage = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
-        self.agent.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-        im = plt.imshow(theImage)
+        self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+        self.im = plt.imshow(theImage)
 
         def press(event):
             print('press', event.key)
             sys.stdout.flush()
 
             if event.key == 'up':
-                self.cache_action = "move"
-                self.cache_arg = np.array([0, -self.param.displacement]) + self.agent.app.rLoc
+                self.cache_action.append(["move", np.array([0, -self.param.displacement]) + self.hand.app.rLoc])
             elif event.key == 'left':
-                self.cache_action = "move"
-                self.cache_arg = np.array([-self.param.displacement, 0]) + self.agent.app.rLoc
+                self.cache_action.append(["move", np.array([-self.param.displacement, 0]) + self.hand.app.rLoc])
             elif event.key == 'down':
-                self.cache_action = "move"
-                self.cache_arg = np.array([0, self.param.displacement]) + self.agent.app.rLoc
+                self.cache_action.append(["move", np.array([0, self.param.displacement]) + self.hand.app.rLoc])
             elif event.key == 'right':
-                self.cache_action = "move"
-                self.cache_arg = np.array([self.param.displacement, 0]) + self.agent.app.rLoc
+                self.cache_action.append(["move", np.array([self.param.displacement, 0]) + self.hand.app.rLoc])
             elif event.key == 'z':
-                self.cache_action = "pick"
-                self.cache_arg = None
+                self.cache_action.append(["pick", None])
             elif event.key == 'c':
-                self.cache_action = "place"
-                self.cache_arg = None
+                self.cache_action.append(["place", None])
+            elif event.key == 'o':
+                # Let the robot plays
+                if self.planner is None:
+                    print('planner has not been set up yet.')
+                else:
+                    plan = self.planner.process(self.puzzle)
+                    self.takeAction(plan)
 
-            self.agent.execute(self.puzzle, self.cache_action, self.cache_arg)
+            elif event.key == 'p':
+                # Let the hand plays
+                if self.plannerHand is None:
+                    print('plannerHand has not been set up yet.')
+                else:
+                    plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=False)
+                    # print(plan)
+                    for action in plan:
+                        if action is None:
+                            break
+                        self.cache_action.append(action)
+                        self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-            cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                              BOUNDING_BOX=False)
+            self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-            theImage = deepcopy(cache_image)
-            self.agent.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-            plt.pause(0.001)
-
-            im.set_data(theImage)
-            self.fig.canvas.draw()
 
         self.fig.canvas.mpl_connect('key_press_event', press)
 

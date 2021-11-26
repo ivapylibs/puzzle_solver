@@ -1,28 +1,28 @@
-# ========================= puzzle.simulator.agent ========================
+# ========================= puzzle.simulator.hand ========================
 #
-# @class    puzzle.simulator.agent
+# @class    puzzle.simulator.hand
 #
 # @brief    The agent simulates a subject to solve the puzzle task.
 #           It takes the perceived board and the solution board,
 #           and plan the next step
 #
-# ========================= puzzle.simulator.agent ========================
+# ========================= puzzle.simulator.hand ========================
 #
-# @file     agent.py
+# @file     hand.py
 #
 # @author   Yiye Chen,               yychen2019@gatech.edu
 #           Yunzhi Lin,              yunzhi.lin@gatech.edu
 # @date     2021/08/29 [created]
 #           2021/11/25 [modified]
 #
-# ========================= puzzle.simulator.agent ========================
+# ========================= puzzle.simulator.hand ========================
 
 import numpy as np
 
 from puzzle.piece.template import Template
 
 
-class Agent:
+class Hand:
 
     def __init__(self, app: Template):
         """
@@ -45,6 +45,7 @@ class Agent:
             offset = False
 
         self.app.setPlacement(targetLoc, offset=offset)
+
         if self.cache_piece is not None:
             self.cache_piece.setPlacement(targetLoc, offset=offset)
 
@@ -96,8 +97,17 @@ class Agent:
         else:
             print('No piece is hand.')
 
+    # Todo: To be implemented
     def pause(self):
         return
+
+    def rotate(self, action_param):
+
+        if self.cache_piece is None:
+            raise RuntimeError('There is no piece in hand')
+
+        self.cache_piece = self.cache_piece.rotatePiece(
+            action_param)
 
     def execute(self, puzzle, action_type, action_param=None):
         """
@@ -109,13 +119,13 @@ class Agent:
 
         # if it is pick action, then get the puzzle piece as the real parameter
         if action_type == "pick":
-            # sanity check. Make sure the arg is int (index)
             if isinstance(action_param, int):
                 action_param = puzzle.pieces[action_param]
                 self.pick(puzzle, action_param)
             else:
                 self.pick(puzzle)
-
+        elif action_type == "rotate":
+            self.rotate(action_param)
         elif action_type == "move":
             self.move(action_param)
         elif action_type == "place":
@@ -129,12 +139,12 @@ class Agent:
     @staticmethod
     def buildSphereAgent(radius, color, rLoc=None):
         app_sphere = Template.buildSphere(radius, color, rLoc)
-        return Agent(app_sphere)
+        return Hand(app_sphere)
 
     @staticmethod
     def buildSquareAgent(size, color, rLoc=None):
         app_Square = Template.buildSquare(size, color, rLoc)
-        return Agent(app_Square)
+        return Hand(app_Square)
 
 #
-# ========================= puzzle.simulator.agent ========================
+# ========================= puzzle.simulator.hand ========================
