@@ -126,7 +126,7 @@ class Simple(Base):
             else:
                 # Reset self.plan
                 self.plan = None
-                plan = None
+                plan = [None]
 
         return plan
 
@@ -153,6 +153,7 @@ class Simple(Base):
 
             for idx, angle in enumerate(self.rotation_match):
                 if not np.isnan(angle):
+
                     current_corrected.pieces[idx] = current_corrected.pieces[idx].rotatePiece(angle)
 
             pLoc_cur = current_corrected.pieceLocations()
@@ -163,7 +164,11 @@ class Simple(Base):
         # Rearrange the piece according to the match in the solution board
         pLoc_sol = {}
         for i in self.match:
-            pLoc_sol[i[1]] = pLoc_cur[i[0]]
+            # i represents index
+
+            # Solution board will have a constant id and index pair while measured board may not
+            # self.current.pieces[i[0]].id != i[0]
+            pLoc_sol[i[1]] = pLoc_cur[self.current.pieces[i[0]].id]
 
         # Obtain the correction plan for all the matched pieces
         # with id
@@ -177,7 +182,6 @@ class Simple(Base):
 
             if self.rotation_match is None or np.isnan(self.rotation_match).all():
                 # print('All the matched puzzle pieces have been in position. No move.')
-                # return best_id_mea, True
 
                 plan.append(None)
                 return plan
@@ -211,13 +215,15 @@ class Simple(Base):
                     continue
                 else:
                     # With rotation option
-                    if np.isnan(self.rotation_match[index]):
+                    if np.isnan(self.rotation_match[index]) or abs(self.rotation_match[index]) < 0.5:
                         continue
 
             # Get the corresponding id
             best_id_mea = self.current.pieces[best_index_mea].id
 
-            if self.rotation_match is not None and not np.isnan(self.rotation_match[index]):
+            # Valid rotation
+            if self.rotation_match is not None and not np.isnan(self.rotation_match[index]) and abs(
+                    self.rotation_match[index]) > 0.5:
                 # # Display the plan
                 # print(f'Rotate piece {best_id_mea} by {int(self.rotation_match[index])} degree')
 

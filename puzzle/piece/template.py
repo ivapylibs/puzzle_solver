@@ -415,6 +415,9 @@ class Template:
         # Set up the new rotation
         thePiece.theta = self.theta + theta
 
+        # Reset kpFea while colorFea & shapeFea is associated to the corrected case
+        thePiece.y.kpFea = ()
+
         return thePiece
 
     @staticmethod

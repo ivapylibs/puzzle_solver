@@ -328,6 +328,10 @@ class Manager(FromLayer):
         Returns:
 
         """
+
+        # Reset
+        self.pAssignments = []
+        self.pAssignments_rotation = []
         self.measure(*argv)
 
 #
