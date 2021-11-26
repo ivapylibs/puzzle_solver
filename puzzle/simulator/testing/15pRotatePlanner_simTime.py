@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-# ============================ 15pRotatePlanner_simTimeless ===========================
+# ============================ 15pRotatePlanner_simTime ===========================
 #
-# @brief    Test script with command from the planner & simTimeless simulator. (15p img)
+# @brief    Test script with command from the planner & simTime simulator. (15p img)
 #
-# ============================ 15pRotatePlanner_simTimeless ===========================
+# ============================ 15pRotatePlanner_simTime ===========================
 
 #
-# @file     15pRotatePlanner_simTimeless.py
+# @file     15pRotatePlanner_simTime.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/11/25  [created]
+# @date     2021/11/26  [created]
 #
-# ============================ 15pRotatePlanner_simTimeless ===========================
+# ============================ 15pRotatePlanner_simTime ===========================
 
 # ==[0] Prep environment
 import os
@@ -28,7 +28,7 @@ from puzzle.piece.template import Template
 from puzzle.simulator.hand import Hand
 from puzzle.simulator.planner import Planner
 from puzzle.simulator.plannerHand import PlannerHand
-from puzzle.simulator.simTimeless import SimTimeLess
+from puzzle.simulator.simTime import SimTime
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
@@ -132,8 +132,8 @@ theHand = Hand(theHandApperance)
 
 # ==[5] Create a simulator and display.
 #
-theSim = SimTimeLess(theSolver.current, theHand, thePlanner, thePlannerHand)
+theSim = SimTime(theSolver.current, theHand, thePlanner, thePlannerHand)
 theSim.display()
 
 #
-# ============================ 15pRotatePlanner_simTimeless ===========================
+# ============================ 15pRotatePlanner_simTime ===========================
