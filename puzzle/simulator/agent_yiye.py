@@ -20,7 +20,7 @@
 from puzzle.builder.board import Board
 from puzzle.piece.template import Template
 from puzzle.simulator.action import Actions
-from puzzle.simulator.planner import Planner_Base
+from puzzle.simulator.planner_yiye import Planner_Base
 
 
 class Appearance(Template):

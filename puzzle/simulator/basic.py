@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 class Basic:
 
-    def __init__(self, thePuzzle, theFig=None):
+    def __init__(self, thePuzzle, thePlanner=None, theFig=None):
         """
         @brief  Constructor for the class. Requires a puzzle board.
 
@@ -41,7 +41,9 @@ class Basic:
         """
 
         self.puzzle = thePuzzle
-        self.layers = list(range(self.puzzle.size()))
+        self.planner = thePlanner
+
+        # self.layers = list(range(self.puzzle.size()))
 
         self.fig = theFig
 
@@ -103,16 +105,16 @@ class Basic:
 
         FINISHED = False
 
-        for i in plan:
-            if i is None:
+        for action in plan:
+            if action is None:
                 print('All the matched puzzle pieces have been in position. No move.')
                 FINISHED = True
             else:
 
-                piece_id = i[0]
-                piece_index = i[1]
-                action_type = i[2]
-                action_param = i[3]
+                piece_id = action[0]
+                piece_index = action[1]
+                action_type = action[2]
+                action_param = action[3]
 
                 if action_type == 'rotate':
                     print(f'Rotate piece {piece_id} by {int(action_param)} degree')

@@ -18,12 +18,11 @@ import os
 
 import cv2
 import improcessor.basic as improcessor
-import matplotlib.pyplot as plt
 
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.template import Template
-from puzzle.simulator.agent import Agent
+from puzzle.simulator.hand import Hand
 from puzzle.simulator.simTimeless import SimTimeLess
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
@@ -79,19 +78,18 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
 
 theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
-theHand = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
+theHandApperance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
 init_agent_loc = [600, 50]
 
-theHand.setPlacement(r=init_agent_loc)
-agent = Agent(theHand)
+theHandApperance.setPlacement(r=init_agent_loc)
+theHand = Hand(theHandApperance)
 
 # ==[4] Create a simulator and display.
 #
 
-simulator = SimTimeLess(epBoard, agent)
+simulator = SimTimeLess(epBoard, theHand)
 
 simulator.display()
-plt.show()
 
 #
 # ============================ 15p_simTimeless ===========================
