@@ -151,7 +151,33 @@ class SimTime(SimTimeLess):
         self.cache_action = []
         self.timer = self.param.static_duration
 
-    def simulate_step(self):
+    def simulate_step(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+
+        cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+                                          BOUNDING_BOX=False)
+
+        while 1:
+            finish_flag = self.simulate_step_small()
+
+            if finish_flag is True:
+                cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+                                                  BOUNDING_BOX=False)
+
+            theImage = deepcopy(cache_image)
+            self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+
+            theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
+            background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
+
+            self.DISPLAYSURF.blit(background, (0, 0))
+
+            pygame.display.update()
+            self.FramePerSec.tick(self.FPS)
+
+            if finish_flag is True:
+                break
+
+    def simulate_step_small(self):
         """
         Overwrite the simulate_step function
         """
@@ -203,6 +229,8 @@ class SimTime(SimTimeLess):
             elif key == pygame.K_c:
                 self.cache_action.append(["place", None])
             elif key == pygame.K_o:
+                print('The robot executes a move.')
+
                 # Let the robot plays
                 if self.planner is None:
                     print('planner has not been set up yet.')
@@ -210,6 +238,8 @@ class SimTime(SimTimeLess):
                     plan = self.planner.process(self.puzzle, COMPLETE_PLAN=False)
                     self.takeAction(plan)
             elif key == pygame.K_p:
+                print('The hand executes a move.')
+
                 # Let the hand plays
                 if self.plannerHand is None:
                     print('plannerHand has not been set up yet.')
@@ -221,61 +251,12 @@ class SimTime(SimTimeLess):
                             break
                         self.cache_action.append(action)
 
-                        # self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-
-                        cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                                          BOUNDING_BOX=False)
-
-                        while 1:
-
-                            finish_flag = self.simulate_step()
-
-                            if finish_flag is True:
-                                cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                                                  BOUNDING_BOX=False)
-
-                            theImage = deepcopy(cache_image)
-                            self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-
-                            theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
-                            background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
-
-                            self.DISPLAYSURF.blit(background, (0, 0))
-
-                            pygame.display.update()
-                            self.FramePerSec.tick(self.FPS)
-
-                            if finish_flag is True:
-                                break
-
+                        self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
             else:
                 return
 
-            cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                              BOUNDING_BOX=False)
-
-            while 1:
-
-                finish_flag = self.simulate_step()
-
-                if finish_flag is True:
-                    cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                                      BOUNDING_BOX=False)
-
-                theImage = deepcopy(cache_image)
-                self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-
-                theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
-                background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
-
-                self.DISPLAYSURF.blit(background, (0, 0))
-
-                pygame.display.update()
-                self.FramePerSec.tick(self.FPS)
-
-                if finish_flag is True:
-                    break
+            self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
         if not self.fig:
             self.fig = plt.figure()

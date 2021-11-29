@@ -131,6 +131,8 @@ class SimTimeLess(Basic):
                 self.cache_action.append(["place", None])
             elif event.key == 'o':
                 # Let the robot plays
+                print('The robot executes a move')
+
                 if self.planner is None:
                     print('planner has not been set up yet.')
                 else:
@@ -138,6 +140,7 @@ class SimTimeLess(Basic):
                     self.takeAction(plan)
 
             elif event.key == 'p':
+                print('The hand executes a move')
                 # Let the hand plays
                 if self.plannerHand is None:
                     print('plannerHand has not been set up yet.')
