@@ -20,6 +20,7 @@
 # ========================= puzzle.simulator.simTime ========================
 
 import math
+import sys
 from copy import deepcopy
 from dataclasses import dataclass
 
@@ -151,30 +152,35 @@ class SimTime(SimTimeLess):
         self.cache_action = []
         self.timer = self.param.static_duration
 
-    def simulate_step(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+    def simulate_step(self, robot_only=False, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
 
         cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
 
         while 1:
+
+            # Only related to the hand movement
             finish_flag = self.simulate_step_small()
 
-            if finish_flag is True:
-                cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
-                                                  BOUNDING_BOX=False)
+            if finish_flag is not None or robot_only:
+                if finish_flag is True or robot_only:
+                    cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+                                                      BOUNDING_BOX=False)
 
-            theImage = deepcopy(cache_image)
-            self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                theImage = deepcopy(cache_image)
+                self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-            theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
-            background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
+                theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
+                background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
 
-            self.DISPLAYSURF.blit(background, (0, 0))
+                self.DISPLAYSURF.blit(background, (0, 0))
 
-            pygame.display.update()
-            self.FramePerSec.tick(self.FPS)
+                pygame.display.update()
+                self.FramePerSec.tick(self.FPS)
 
-            if finish_flag is True:
+                if finish_flag is True or robot_only:
+                    break
+            else:
                 break
 
     def simulate_step_small(self):
@@ -196,7 +202,7 @@ class SimTime(SimTimeLess):
             else:
                 flag_finish = self._pause_step(action)
         else:
-            return True
+            return None
 
         # if the cached action is finished, reset the cache and the timer
         if flag_finish:  # < Whether the current cached action has been finished
@@ -214,21 +220,21 @@ class SimTime(SimTimeLess):
             CONTOUR_DISPLAY: Flag indicating CONTOUR_DISPLAY or not.
         """
 
-        def press(key):
+        def press_handle(key):
 
-            if key == pygame.K_UP:
+            if key[pygame.K_UP]:
                 self.cache_action.append(["move", np.array([0, -self.param.displacement]) + self.hand.app.rLoc])
-            elif key == pygame.K_LEFT:
+            elif key[pygame.K_LEFT]:
                 self.cache_action.append(["move", np.array([-self.param.displacement, 0]) + self.hand.app.rLoc])
-            elif key == pygame.K_DOWN:
+            elif key[pygame.K_DOWN]:
                 self.cache_action.append(["move", np.array([0, self.param.displacement]) + self.hand.app.rLoc])
-            elif key == pygame.K_RIGHT:
+            elif key[pygame.K_RIGHT]:
                 self.cache_action.append(["move", np.array([self.param.displacement, 0]) + self.hand.app.rLoc])
-            elif key == pygame.K_z:
+            elif key[pygame.K_z]:
                 self.cache_action.append(["pick", None])
-            elif key == pygame.K_c:
+            elif key[pygame.K_c]:
                 self.cache_action.append(["place", None])
-            elif key == pygame.K_o:
+            elif key[pygame.K_o]:
                 print('The robot executes a move.')
 
                 # Let the robot plays
@@ -237,7 +243,9 @@ class SimTime(SimTimeLess):
                 else:
                     plan = self.planner.process(self.puzzle, COMPLETE_PLAN=False)
                     self.takeAction(plan)
-            elif key == pygame.K_p:
+
+                    self.simulate_step(robot_only=True, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+            elif key[pygame.K_p]:
                 print('The hand executes a move.')
 
                 # Let the hand plays
@@ -280,11 +288,13 @@ class SimTime(SimTimeLess):
         # Game Loop
         while True:
 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
             pressed_keys = pygame.key.get_pressed()
-            events = pygame.event.get()
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    press(event.key)
+            press_handle(pressed_keys)
 
             pygame.display.update()
             self.FramePerSec.tick(self.FPS)

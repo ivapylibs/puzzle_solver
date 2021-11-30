@@ -113,7 +113,7 @@ class SimTimeLess(Basic):
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
         self.im = plt.imshow(theImage)
 
-        def press(event):
+        def press_handle(event):
             print('press', event.key)
             sys.stdout.flush()
 
@@ -164,7 +164,7 @@ class SimTimeLess(Basic):
         # while 1:
         #     press(event)
 
-        self.fig.canvas.mpl_connect('key_press_event', press)
+        self.fig.canvas.mpl_connect('key_press_event', press_handle)
 
         plt.show()
 
