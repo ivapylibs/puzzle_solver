@@ -153,7 +153,7 @@ while 1:
     print(f'Step {i + 1}:')
 
     # Re-plan for every iteration
-    plan = thePlanner.process(meaBoard=theSim.puzzle, COMPLETE_PLAN=False)
+    plan = thePlanner.process(theSim.puzzle, COMPLETE_PLAN=True)
 
     FINISHED = theSim.takeAction(plan)
 

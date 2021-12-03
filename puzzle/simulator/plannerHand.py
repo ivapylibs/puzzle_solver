@@ -39,7 +39,7 @@ class PlannerHand(Planner):
         @brief  Draft the action plan given the measured board.
 
         Args:
-            meaBoard: The measured board.
+            input: A measured board or an RGB image.
             hand: The hand instance.
             COMPLETE_PLAN: Whether to plan the whole sequence.
 
