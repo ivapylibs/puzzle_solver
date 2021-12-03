@@ -302,8 +302,8 @@ class Board:
 
         return pLocs
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0), ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True,
-                BOUNDING_BOX=True):
+    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
+                ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
@@ -392,7 +392,7 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
-    def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True):
+    def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Display the puzzle board as an image.
 
@@ -411,7 +411,7 @@ class Board:
         else:
             fh = plt.figure()
 
-        theImage = self.toImage(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+        theImage = self.toImage(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,BOUNDING_BOX=BOUNDING_BOX)
 
         plt.imshow(theImage)
 

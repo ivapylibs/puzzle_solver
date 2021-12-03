@@ -34,7 +34,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 @dataclass
 class dataBoard:
-    Board: any = None
+    board: any = None
     tauDist: float = None
 
 

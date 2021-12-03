@@ -245,7 +245,7 @@ class Arrangement(Board):
             data = pickle.load(fp)
 
             if hasattr(data, 'board'):
-                theBoard = data.Board
+                theBoard = data.board
             if hasattr(data, 'tauDist'):
                 theParams = ParamArrange(tauDist=data.tauDist)
 

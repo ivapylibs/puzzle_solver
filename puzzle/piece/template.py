@@ -80,7 +80,7 @@ class Template:
         self.rLoc = np.array(r)  # The default location is the top left corner
         self.id = id
         self.status = pieceStatus
-        self.theta = theta  # Should be set up later by the alignment function
+        self.theta = theta  # Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright
 
     def size(self):
         """
