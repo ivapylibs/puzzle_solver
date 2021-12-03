@@ -66,22 +66,23 @@ class Adjacent(Arrangement):
             raise TypeError('Not initialized properly')
 
         # Todo: May have problems if the pieces are not good
-        self.__processAdjacency()
+        self.processAdjacency()
 
-    # ========================== processAdjacency =========================
-    #
-    # @brief  Process the solution board and determine what pieces are
-    #         adjacent or "close enough." It will determine the adjacency
-    #         matrix.
-    #
-    # Assumes that adjacent matrix has been instantiated and what is
-    # needed is to populate its values with the correct ones.
-    #
-    def __processAdjacency(self):
+    def processAdjacency(self):
+        """
+        @brief  Process the solution board and determine what pieces are
+                adjacent or "close enough." It will determine the adjacency
+                matrix.
+
+        Assumes that adjacent matrix has been instantiated and what is
+        needed is to populate its values with the correct ones.
+        """
+
+        # Reset
+        self.adjMat[:,:] = False
 
         for ii in range(self.size()):
             for jj in range(ii + 1, self.size()):
-
                 if self.testAdjacent(ii, jj, self.params.tauAdj):
                     self.adjMat[ii, jj] = True
                     self.adjMat[jj, ii] = True

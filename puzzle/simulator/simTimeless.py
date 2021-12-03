@@ -138,7 +138,7 @@ class SimTimeLess(Basic):
                 if self.planner is None:
                     print('planner has not been set up yet.')
                 else:
-                    plan = self.planner.process(self.puzzle, COMPLETE_PLAN=False)
+                    plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
                     self.takeAction(plan)
 
             elif event.key == 'p':
@@ -147,7 +147,7 @@ class SimTimeLess(Basic):
                 if self.plannerHand is None:
                     print('plannerHand has not been set up yet.')
                 else:
-                    plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=False)
+                    plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     # print(plan)
                     for action in plan:
                         if action is None:

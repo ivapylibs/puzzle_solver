@@ -22,7 +22,8 @@ import improcessor.basic as improcessor
 import cv2
 import numpy as np
 
-from puzzle.builder.arrangement import Arrangement, ParamArrange
+# from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import ParamGrid
 from puzzle.builder.board import Board
 
@@ -48,7 +49,7 @@ class Planner:
         # cv2.imshow('debug', theMaskMea)
         # cv2.waitKey()
 
-        meaBoard = Arrangement.buildFrom_ImageAndMask(img, theMaskMea,
+        meaBoard = Interlocking.buildFrom_ImageAndMask(img, theMaskMea,
                                                     theParams=self.param)
 
         return meaBoard
@@ -63,8 +64,21 @@ class Planner:
 
         self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
+
+        # plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN)
+
+
+
+        # Get the index of the pieces with the occlusion and skip them
+        meaBoard.processAdjacency()
+        occlusionList = []
+        for index in range(meaBoard.adjMat.shape[0]):
+            if sum(meaBoard.adjMat[index,:])>1:
+                occlusionList.append(index)
+        print(occlusionList)
+
         # Plan is for the measured piece
-        plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN)
+        plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)
 
         return plan
 

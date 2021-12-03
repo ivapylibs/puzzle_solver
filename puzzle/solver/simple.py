@@ -84,7 +84,7 @@ class Simple(Base):
             # while our rotation function is with clockwise order
             self.rotation_match = -np.array(rotation_match)
 
-    def takeTurn(self, thePlan=None, defaultPlan='order', STEP_WISE=True, COMPLETE_PLAN=False):
+    def takeTurn(self, thePlan=None, defaultPlan='order', occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False):
         """
         @brief  Create a plan.
 
@@ -105,7 +105,7 @@ class Simple(Base):
         if self.plan is None:
             if thePlan is None:
                 if defaultPlan == 'order':
-                    plan = self.planOrdered(STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
+                    plan = self.planOrdered(occlusionList=occlusionList, STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
                 elif defaultPlan == 'new':
                     plan = self.planNew()
                 else:
@@ -130,6 +130,7 @@ class Simple(Base):
         if self.plan is not None:
             # Pop out the first action
             if len(self.plan) > 0:
+
                 plan = [self.plan[0]]
                 self.plan.pop(0)
                 if STEP_WISE == False and len(self.plan) > 0:
@@ -142,7 +143,7 @@ class Simple(Base):
 
         return plan
 
-    def planOrdered(self, STEP_WISE=True, COMPLETE_PLAN=False):
+    def planOrdered(self, occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False):
         """
         @brief  Plan is to solve puzzle pieces in order (col-wise).
 
@@ -219,6 +220,10 @@ class Simple(Base):
 
             # Find the corresponding index in the match, also for best_index_cur
             index = np.where(self.match[:, 1] == best_index_sol)[0][0]
+
+            # Skip pieces with occlusion
+            if index in occlusionList:
+                continue
 
             # Obtain the corresponding index in the measured board
             best_index_mea = self.match[:, 0][index]

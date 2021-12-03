@@ -47,6 +47,8 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
+np.random.seed(100)
+
 # ==[1.1] Create an improcessor to obtain the mask.
 #
 

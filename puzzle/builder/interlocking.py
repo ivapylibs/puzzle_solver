@@ -65,7 +65,7 @@ class Interlocking(Adjacent):
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processInterlocking()
+        self.processInterlocking()
 
     # ======================== processInterlocking ========================
     #
@@ -77,7 +77,7 @@ class Interlocking(Adjacent):
     # are weird puzzles that can be thought of with a mix of adjacent and
     # interlocking.
     #
-    def __processInterlocking(self):
+    def processInterlocking(self):
 
         # @todo Yunzhi: Wait for further development
 
