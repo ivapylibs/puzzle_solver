@@ -41,6 +41,9 @@ class Base:
         self.desired = theSol  # @< Desired/solution puzzle board.
         self.current = thePuzzle  # @< Actual puzzle board.
 
+    def setCurrBoard(self, theBoard):
+        self.current = theBoard
+
     def takeTurn(self, thePlan=None):
         """
         @brief  Perform a single puzzle solving action, which move a piece

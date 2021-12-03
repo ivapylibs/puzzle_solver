@@ -52,37 +52,13 @@ SCORE_SIMILAR = 1
 
 @dataclass
 class ManagerParms:
-    # scoreType: int = SCORE_DIFFERENCE
     matcher: any = Moments(20)
-
 
 #
 # ================================ manager ================================
 #
 
 class Manager(FromLayer):
-
-    # @note
-    # SHOULD MOST LIKELY BE SOME FORM OF TRACKPOINTER. INTERFACE SHOULD
-    # MATCH. WHAT SHOULD THE SUPERCLASS BE? IT MIGHT BE THAT CREATING A NEW
-    # TRACKPOINTER CLASS WITH SOME LIMITED FUNCTIONALITY IS IN ORDER.
-    # LIKE ONE CALLED multiRegions or regionsMulti or something like that.
-    # IT TAKES IN AN IMAGE (POSSIBLY ALREADY BINARIZED) AND RECOVERS THE
-    # DISTINCT REGIONS ASSOCIATED TO IT.
-
-    # 2021/07/28
-    #
-    # ELSEWHERE I HAD NOTED IT SHOULD BE A PERCEIVER AND POSSIBLE EVEN A
-    # SUB-CLASS OF PUZZLE.PARSER.SIMPLE.  I TAKE THAT BACK. IT SHOULD BE A
-    # TRACKPOINTER FOR NOW. WHETHER IT IS DERIVED FROM CENTROIDMULTI IS
-    # ANOTHER STORY. DOESN'T HURT RIGHT NOW. LATER ON MIGHT REQUIRE A
-    # CHANGE.
-    #
-
-    # 2021/07/29
-    # WILL END UP A SUB-CLASS OF PUZZLE.PARSER.FROMLAYER DOING REPLACEMENT
-    # NOW.
-
     # @note
     # Yunzhi: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
@@ -100,9 +76,10 @@ class Manager(FromLayer):
         self.solution = solution  # @< The solution puzzle board.
         self.pAssignments = []  # @< Assignments: meas to sol.
         self.pAssignments_rotation = []  # @< Assignments: meas to sol. The rotation angles (degree).
-        # self.bAssigned = []                   # @< Puzzle board of assigned pieces.
 
         self.matcher = theParams.matcher  # @< Matcher instance
+
+        self.skipList = [] # @< Be set up by the simulator
 
         if isinstance(self.matcher, MatchDifferent):
             self.scoreType = SCORE_DIFFERENCE  # @< The type of comparator.
@@ -111,19 +88,14 @@ class Manager(FromLayer):
         else:
             raise TypeError('The matcher is of wrong input.')
 
-    # ============================== predict ==============================
-    #
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-
     def measure(self, *argv):
         """
+        @brief Get the match based on the input.
 
         Args:
-            I:          RGB image.
-            M:          Mask image.
-            board:      The measured board.
-
-        Returns:
+            I: RGB image.
+            M: Mask image.
+            board: The measured board.
 
         """
 
@@ -169,11 +141,22 @@ class Manager(FromLayer):
         scoreTable_edge_color = np.zeros((self.bMeas.size(), self.solution.size(), 4))
         for idx_x, bMea in enumerate(self.bMeas.pieces):
             for idx_y, bSol in enumerate(self.solution.pieces):
+
+                # @todo Currently, it does not support two scoreTables.
+                if idx_y in self.skipList:
+                    if self.scoreType == SCORE_DIFFERENCE:
+                        scoreTable_shape[idx_x][idx_y] = 1e18
+                    else:
+                        scoreTable_shape[idx_x][idx_y] = -100
+                    continue
+
                 ret = self.matcher.score(bMea, bSol)
                 """
                 @todo Yunzhi: Will update this part. We may need two scoreTables. 
                 Currently, only use the shape feature and add up the distances.
                 """
+
+                # Debug only
                 # if idx_x==11 and (idx_y==2):
                 #     ret = self.matcher.score(bMea, bSol)
                 #     print('s')
@@ -224,7 +207,9 @@ class Manager(FromLayer):
             matched_indices = np.array(matched_indices).reshape(-1, 2)
 
         else:
-            # @todo Yunzhi: Currently, it is hard-coded for edge feature
+            # @note Yunzhi: Currently, it is hard-coded for edge feature
+            # It cannot work very well especially in real scenario.
+
             # Shape + Color feature
 
             def getKeepList(score_list, diff_thresh=150):
@@ -308,18 +293,10 @@ class Manager(FromLayer):
 
         return matched_indices
 
-    # ============================== correct ==============================
-    #
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-
-    # =============================== adapt ===============================
-    #
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-
     def process(self, *argv):
         """
         @brief  Run the tracking pipeline for image measurement or directly work
-                on a measured board. Assume two modes: 1. I & M 2. the measured board.
+                on a measured board. Assume two modes: 1. I & M or 2. A measured board.
         Args:
             I:   RGB image.
             M:   Mask image.
@@ -332,6 +309,7 @@ class Manager(FromLayer):
         # Reset
         self.pAssignments = []
         self.pAssignments_rotation = []
+
         self.measure(*argv)
 
 #

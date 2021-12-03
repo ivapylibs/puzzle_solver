@@ -17,33 +17,75 @@
 #
 # ========================= puzzle.simulator.planner ========================
 
+
+import improcessor.basic as improcessor
+import cv2
+import numpy as np
+
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.gridded import ParamGrid
+from puzzle.builder.board import Board
+
 class Planner:
-    def __init__(self, solver, manager):
+    def __init__(self, solver, manager, theParams=ParamGrid):
         self.solver = solver
         self.manager = manager
+        self.param = theParams
 
-    def setSolBoard(self, solBoard):
-        self.solver.desired = solBoard
-        self.manager.solution = solBoard
+    def measure(self, img):
 
-    def process(self, meaBoard, COMPLETE_PLAN=True):
+        # Debug only
+        # cv2.imshow('debug', cv2.cvtColor(img,cv2.COLOR_RGB2BGR))
+        # cv2.waitKey()
+
+        improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
+                                   improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
+                                   cv2.dilate, (np.ones((3, 3), np.uint8),)
+                                   )
+        theMaskMea = improc.apply(img)
+
+        # Debug only
+        # cv2.imshow('debug', theMaskMea)
+        # cv2.waitKey()
+
+        meaBoard = Arrangement.buildFrom_ImageAndMask(img, theMaskMea,
+                                                    theParams=self.param)
+
+        return meaBoard
+
+    def adapt(self, meaBoard, COMPLETE_PLAN=True):
+
+        # manager process the measured board to establish the association
+        self.manager.process(meaBoard)
+
+        # Solver use the association to plan which next puzzle to move to where
+        self.solver.setCurrBoard(meaBoard)
+
+        self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
+
+        # Plan is for the measured piece
+        plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN)
+
+        return plan
+
+
+    def process(self, input, COMPLETE_PLAN=True):
         """
         @brief  Draft the action plan given the measured board.
 
         Args:
-            meaBoard: The measured board.
+            input: A measured board or RGB image.
             COMPLETE_PLAN: Whether to plan the whole sequence.
 
         Returns:
             plan(The action plan for the simulator to perform)
         """
 
-        # manager process the measured board to establish the association
-        self.manager.process(meaBoard)
+        if issubclass(type(input),Board):
+            meaBoard = input
+        else:
+            meaBoard = self.measure(input)
 
-        # Solver use the association to plan which next puzzle to move to where
-        self.solver.current = meaBoard
-        self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
-        plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN)
+        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN)
 
         return plan

@@ -19,6 +19,7 @@
 # ========================= puzzle.simulator.plannerHand ========================
 
 from puzzle.simulator.planner import Planner
+from puzzle.builder.board import Board
 
 
 class PlannerHand(Planner):
@@ -33,7 +34,7 @@ class PlannerHand(Planner):
         """
         super(PlannerHand, self).__init__(solver, manager)
 
-    def process(self, meaBoard, hand, COMPLETE_PLAN=True):
+    def process(self, input, hand, COMPLETE_PLAN=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -46,7 +47,13 @@ class PlannerHand(Planner):
             plan_new(The updated plan for hand)
         """
 
-        plan = super(PlannerHand, self).process(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN)
+        if issubclass(type(input), Board):
+            meaBoard = input
+        else:
+            # Remove the hand area
+            meaBoard = self.measure(input)
+
+        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN)
 
         # Interpretations for hand, more like ants moving
         plan_new = []

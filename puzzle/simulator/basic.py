@@ -19,8 +19,8 @@
 
 # ===== Dependencies / Packages
 #
+import numpy as np
 import matplotlib.pyplot as plt
-
 
 # ===== Class Helper Elements
 #
@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 class Basic:
 
-    def __init__(self, thePuzzle, thePlanner=None, theFig=None):
+    def __init__(self, thePuzzle, thePlanner=None, theFig=None, shareFlag=True):
         """
         @brief  Constructor for the class. Requires a puzzle board.
 
@@ -54,6 +54,40 @@ class Basic:
         #       towards not caring since it is not part of the simulation but
         #       rather part of the interpretation of the puzzle board.
         #
+
+        # The setting for the displayed board. If True, we assume the planner will share
+        # the same board instance with the simulator. Otherwise, they will be different.
+        # Accordingly, the takeAction operation has to be translated first.
+        self.shareFlag = shareFlag
+
+        if shareFlag == False:
+            self.planner.manager.process(thePuzzle)
+            self.matchInit = self.planner.manager.pAssignments
+
+    def progress(self, theBoard):
+        """
+        @brief Check the status of the progress. (Return the ratio of the completed puzzle pieces)
+
+        @note
+        It is still a simplified function which assumes if a puzzle shares the
+        same id occupies the same place, then it is completed.
+        It is not always true. Need further check.
+
+        Args:
+            theBoard: A puzzle board in 1-1 ordered correspondence with the solution.
+
+        Returns:
+            thePercentage: The progress.
+        """
+
+        pLocs = theBoard.pieceLocations()
+        inPlace = self.piecesInPlace(pLocs)
+
+        val_list = [val for _, val in inPlace.items()]
+
+        thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(inPlace))
+
+        return thePercentage
 
     def addPiece(self, piece):
         """
@@ -111,8 +145,25 @@ class Basic:
                 FINISHED = True
             else:
 
-                piece_id = action[0]
+                piece_id = action[0] # just for display
                 piece_index = action[1]
+
+                # Translation based on the current match and self.matchInit
+                if self.shareFlag == False:
+
+                    # Todo: Need double check if we can always find a match here
+                    for match in self.planner.manager.pAssignments:
+                        if match[0] == piece_index:
+                            piece_index_sol = match[1]
+                            for match2 in self.matchInit:
+                                if match2[1] == piece_index_sol:
+                                    piece_id = self.puzzle.pieces[match2[0]].id
+                                    piece_index = match2[0]
+                                    break
+                            break
+                else:
+                    piece_index_sol = piece_index
+
                 action_type = action[2]
                 action_param = action[3]
 
@@ -123,6 +174,8 @@ class Basic:
                 elif action_type == 'move':
                     print(f'Move piece {piece_id} by {action_param}')
                     self.puzzle.pieces[piece_index].setPlacement(action_param, offset=True)
+
+                    self.planner.manager.skipList.append(piece_index_sol)
 
         return FINISHED
 
@@ -138,7 +191,7 @@ class Basic:
             if self.puzzle.pieces[ii].id in pVecs.keys():
                 self.puzzle.pieces[ii].setPlacement(pVecs[self.puzzle.pieces[ii].id], offset=True)
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
@@ -158,7 +211,7 @@ class Basic:
 
         return theImage
 
-    def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+    def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Displays the current puzzle board.
 
@@ -169,7 +222,7 @@ class Basic:
         if not self.fig:
             self.fig = plt.figure()
 
-        self.puzzle.display(fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+        self.puzzle.display(fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
 
 #
 # ========================= puzzle.simulator.basic ========================

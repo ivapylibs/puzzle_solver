@@ -314,10 +314,10 @@ class Board:
             COLOR: The background color.
             ID_COLOR: The ID color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
-            BOUNDING_BOX: The flag indicating outputting a bounding box area or not.
+            BOUNDING_BOX: The flag indicating outputting a bounding box area or not (with the original (0,0)).
 
         Returns:
-            The rendered image.
+            theImage: The rendered image.
         """
 
         if theImage is not None:
