@@ -175,7 +175,8 @@ class Basic:
                     print(f'Move piece {piece_id} by {action_param}')
                     self.puzzle.pieces[piece_index].setPlacement(action_param, offset=True)
 
-                    self.planner.manager.skipList.append(piece_index_sol)
+                    # Just for debug, not valid for most cases
+                    # self.planner.manager.skipList.append(piece_index_sol)
 
         return FINISHED
 
