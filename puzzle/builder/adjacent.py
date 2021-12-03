@@ -79,7 +79,7 @@ class Adjacent(Arrangement):
         """
 
         # Reset
-        self.adjMat[:,:] = False
+        self.adjMat[:,:] = np.eye(self.size()).astype('bool')
 
         for ii in range(self.size()):
             for jj in range(ii + 1, self.size()):
