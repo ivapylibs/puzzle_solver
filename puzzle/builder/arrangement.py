@@ -204,26 +204,6 @@ class Arrangement(Board):
 
         return theScores
 
-    # ============================== progress =============================
-    #
-    # @brief Check the status of the progress.
-    #        (Return the ratio of the completed puzzle pieces)
-    #
-    # @param[in]  theBoard    A puzzle board in 1-1 ordered correspondence
-    #                         with solution.
-    #
-    # @param[out] thePercentage The progress.
-    #
-    def progress(self, theBoard):
-        pLocs = theBoard.pieceLocations()
-        inPlace = self.piecesInPlace(pLocs)
-
-        val_list = [val for _, val in inPlace.items()]
-
-        thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(inPlace))
-
-        return thePercentage
-
     # ======================== buildFromFile_Puzzle =======================
     #
     # @brief      Load a saved arrangement calibration/solution puzzle board.

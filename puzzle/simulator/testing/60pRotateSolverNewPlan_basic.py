@@ -138,8 +138,8 @@ theSim = Basic(theSolver.current)
 
 plt.ion()
 
-saveMe = True
-# saveMe = False
+# saveMe = True
+saveMe = False
 
 if saveMe:
     filename_list = glob.glob(cpath + f'/data/60pRotateSolverNewPlan_step*.png')

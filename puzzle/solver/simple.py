@@ -56,6 +56,18 @@ class Simple(Base):
         # [(piece_id, piece_index, action_type, action), ...]
         self.plan = None
 
+    def setCurrBoard(self, theBoard):
+        """
+        @brief Set up the current board.
+
+        Args:
+            theBoard (Board): A board instance.
+        """
+        self.current = theBoard
+
+        # Since the current board is updated, the original plan is useless
+        self.plan = None
+
     def setMatch(self, match, rotation_match=None):
         """
         @brief  Set up the match.
@@ -83,7 +95,7 @@ class Simple(Base):
             COMPLETE_PLAN: Create a complete plan or just a single step action.
 
         Returns:
-            plan(Processed plan list)
+            plan: Processed plan list.
         """
 
         # Mandatory check on STEP_WISE. Only rotation exists, the option is valid
@@ -140,7 +152,7 @@ class Simple(Base):
             COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
 
         Returns:
-            plan(The plan list)
+            plan: The plan list.
         """
 
         # The plan list
@@ -180,7 +192,10 @@ class Simple(Base):
 
         if all(value == True for value in theScores.values()):
 
-            if self.rotation_match is None or np.isnan(self.rotation_match).all():
+            # if rotation_match not available or all of them have been corrected or all of them have a tiny error
+            if self.rotation_match is None \
+                    or np.isnan(self.rotation_match).all() \
+                    or (abs(self.rotation_match) < 0.5).all():
                 # print('All the matched puzzle pieces have been in position. No move.')
 
                 plan.append(None)
@@ -271,7 +286,7 @@ class Simple(Base):
             COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
 
         Returns:
-            plan(The plan list)
+            plan: The plan list.
         """
 
         # The plan list

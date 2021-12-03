@@ -72,13 +72,15 @@ class SimTimeLess(Basic):
             dtype=np.uint8
         )
 
-        # Todo: Currently, the planner is with the simulator. Not sure if we should go with the hand.
+        # Todo: Currently, the planner is with the simulator.
+        #       Not sure if we should go with the hand.
+
         self.plannerHand = thePlannerHand
 
         # cached action, argument, and time
         self.cache_action = []  # The next action to execute
-        # self.cache_arg = None  # The next action argument
 
+        # For display
         self.im = None
 
     def simulate_step(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
