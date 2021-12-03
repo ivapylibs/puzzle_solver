@@ -79,7 +79,7 @@ class Planner:
 
         # Plan is for the measured piece
         plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)
-
+        # print(plan)
         return plan
 
 
