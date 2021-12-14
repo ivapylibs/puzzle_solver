@@ -20,10 +20,20 @@
 # ===== Dependencies / Packages
 #
 import numpy as np
+from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
 # ===== Class Helper Elements
 #
+
+@dataclass
+class ParamBasic:
+    """
+    @param canvas_H             The height of the whole scene
+    @param canvas_W             The width of the whole scene
+    """
+    canvas_H: int = 2500  # <- The height of the scene
+    canvas_W: int = 3500  # <- The width of the scene
 
 #
 # ========================= puzzle.simulator.basic ========================
@@ -31,7 +41,7 @@ import matplotlib.pyplot as plt
 
 class Basic:
 
-    def __init__(self, thePuzzle, thePlanner=None, theFig=None, shareFlag=True):
+    def __init__(self, thePuzzle, thePlanner=None, theFig=None, shareFlag=True, theParams=ParamBasic):
         """
         @brief  Constructor for the class. Requires a puzzle board.
 
@@ -43,7 +53,12 @@ class Basic:
         self.puzzle = thePuzzle
         self.planner = thePlanner
 
-        # self.layers = list(range(self.puzzle.size()))
+        self.param = theParams
+
+        self.canvas = np.zeros(
+            (self.param.canvas_H, self.param.canvas_W, 3),
+            dtype=np.uint8
+        )
 
         self.fig = theFig
 
@@ -140,19 +155,23 @@ class Basic:
             piece_index: Index of the piece in the simulator's board.
         """
 
-        # Todo: Need double check if we can always find a match here
-        for match in pAssignments:
-            if match[0] == piece_index:
-                piece_index_sol = match[1]
-                for match2 in self.matchInit:
-                    if match2[1] == piece_index_sol:
-                        # Get the result in the simulator's board
-                        piece_id = self.puzzle.pieces[match2[0]].id
-                        piece_index = match2[0]
-                        break
-                break
+        if piece_index is not None:
+            # Todo: Need double check if we can always find a match here
+            for match in pAssignments:
+                if match[0] == piece_index:
+                    piece_index_sol = match[1]
+                    for match2 in self.matchInit:
+                        if match2[1] == piece_index_sol:
+                            # Get the result in the simulator's board
+                            piece_id = self.puzzle.pieces[match2[0]].id
+                            piece_index = match2[0]
+                            break
+                    break
 
-        return piece_id, piece_index
+            return piece_id, piece_index
+        else:
+            return None, None
+
 
     def takeAction(self, plan):
         """
@@ -242,7 +261,7 @@ class Basic:
 
         return theImage
 
-    def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def display(self, theImage=None, ID_DISPLAY=True, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Displays the current puzzle board.
 
@@ -253,7 +272,10 @@ class Basic:
         if not self.fig:
             self.fig = plt.figure()
 
-        self.puzzle.display(fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
+        if theImage is None:
+            self.puzzle.display(theImage=np.zeros_like(self.canvas), fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
+        else:
+            self.puzzle.display(theImage=theImage, fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
 
 #
 # ========================= puzzle.simulator.basic ========================

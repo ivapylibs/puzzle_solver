@@ -128,7 +128,7 @@ theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
 
 theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
 theHandApperance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-init_agent_loc = [600, 50]
+init_agent_loc = [600, 1700]
 
 theHandApperance.setPlacement(r=init_agent_loc)
 theHand = Hand(theHandApperance)

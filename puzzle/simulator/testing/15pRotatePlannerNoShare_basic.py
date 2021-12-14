@@ -85,7 +85,7 @@ gt_rotation = []
 for i in range(epBoard.size()):
     gt_rotation.append(np.random.randint(0, 70))
     epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
-    epBoard.pieces[i].setPlacement(r=[2000, 100], offset=True)
+    # epBoard.pieces[i].setPlacement(r=[2000, 100], offset=True)
 
 epImage = epBoard.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
 

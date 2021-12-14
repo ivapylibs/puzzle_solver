@@ -21,23 +21,15 @@
 import sys
 from copy import deepcopy
 from dataclasses import dataclass
-
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.simulator.basic import Basic
+from puzzle.simulator.basic import Basic, ParamBasic
 
-
-# from puzzle.simulator.agent import Agent
 
 @dataclass
-class ParamSTL:
-    """
-    @param canvas_H             The height of the whole scene
-    @param canvas_W             The width of the whole scene
-    """
-    canvas_H: int = 2500  # <- The height of the scene
-    canvas_W: int = 3500  # <- The width of the scene
+class ParamSTL(ParamBasic):
+
     displacement: int = 100  # <- The unit movement of the agent
 
 
@@ -61,7 +53,7 @@ class SimTimeLess(Basic):
     """
 
     def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig = None, shareFlag = True, theParams=ParamSTL()):
-        super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig, shareFlag=shareFlag)
+        super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig, shareFlag=shareFlag, theParams=theParams)
 
         self.hand = theHand
         self.param = theParams

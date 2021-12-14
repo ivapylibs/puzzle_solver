@@ -140,6 +140,7 @@ class SimTime(SimTimeLess):
         if abs(self.timer - self.param.static_duration) < 1e-04:
             if self.shareFlag == False and action[0] == "pick":
                 _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
+                action[1] = piece_index
                 self.hand.execute(self.puzzle, action[0], piece_index)
             else:
                 self.hand.execute(self.puzzle, action[0], action[1])

@@ -392,7 +392,7 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
-    def display(self, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def display(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Display the puzzle board as an image.
 
@@ -411,7 +411,7 @@ class Board:
         else:
             fh = plt.figure()
 
-        theImage = self.toImage(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,BOUNDING_BOX=BOUNDING_BOX)
+        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,BOUNDING_BOX=BOUNDING_BOX)
 
         plt.imshow(theImage)
 
