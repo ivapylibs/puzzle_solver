@@ -60,6 +60,7 @@ class Basic:
         # Accordingly, the takeAction operation has to be translated first.
         self.shareFlag = shareFlag
 
+        # We only need the matched index
         if shareFlag == False:
             self.planner.manager.process(thePuzzle)
             self.matchInit = self.planner.manager.pAssignments

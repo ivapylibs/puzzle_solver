@@ -75,7 +75,7 @@ class Planner:
         for index in range(meaBoard.adjMat.shape[0]):
             if sum(meaBoard.adjMat[index,:])>1:
                 occlusionList.append(index)
-        print(occlusionList)
+        print('Occlusion:',occlusionList)
 
         # Plan is for the measured piece
         plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)
