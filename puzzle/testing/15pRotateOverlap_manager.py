@@ -17,11 +17,11 @@
 
 # ==[0] Prep environment
 import os
-
 import cv2
-import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
+
+import improcessor.basic as improcessor
 
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.manager import Manager, ManagerParms

@@ -64,11 +64,9 @@ class Planner:
 
         self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
-
-        # plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN)
-
-
-
+        # Right now, can only work when puzzle board is not re-processed.
+        # Otherwise, the connected ones may be removed. Same effect.
+        #
         # Get the index of the pieces with the occlusion and skip them
         meaBoard.processAdjacency()
         occlusionList = []

@@ -17,7 +17,6 @@
 
 # ==[0] Prep environment
 import os
-
 import cv2
 import matplotlib.pyplot as plt
 

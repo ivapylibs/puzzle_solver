@@ -15,14 +15,13 @@
 #
 # ============================= real01_manager =============================
 
-import os
 
-import cv2
 # ==[0] Prep environment
+import os
+import cv2
 import matplotlib.pyplot as plt
 
 from puzzle.builder.arrangement import Arrangement, ParamArrange
-
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
