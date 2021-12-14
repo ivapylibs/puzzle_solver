@@ -21,7 +21,8 @@ import cv2
 # ==[0] Prep environment
 import matplotlib.pyplot as plt
 
-from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.builder.arrangement import Arrangement, ParamArrange
+
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
@@ -33,8 +34,8 @@ cpath = fpath.rsplit('/', 1)[0]
 #
 
 # # Case 1:
-theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black/Exploded_mea_0.png')
-theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
+# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black/Exploded_mea_0.png')
+# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
 
 # Case 2
 # theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_hard3/sol_cali_mea_004.png')
@@ -43,6 +44,23 @@ theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black/ExplodedWithRot
 # Case 3
 # theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black/Exploded_mea_0.png')
 # theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
+
+# # Case 4 (2 out of 18 missed)
+# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible/impossible_mea_000.png')
+# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible/impossible_mea_001.png')
+
+# # Case 5 (2 out of 18 missed)
+# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_000.png')
+# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_001.png')
+
+# # Case 6 (7 out of 36 missed)
+# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_006.png')
+# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_005.png')
+
+# Case 7 (11 out of 34 missed)
+theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_000.png')
+theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_001.png')
+
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
@@ -58,10 +76,10 @@ print('Running through test cases. Will take a bit.')
 
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
-theGrid_Sol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
-theGrid_Mea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
+theGrid_Sol = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                             theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
+theGrid_Mea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                             theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
 
 # ==[3] Create a manager
 #
@@ -86,14 +104,7 @@ axarr[1].title.set_text('Solution')
 print('The first index refers to the measured board while the second one refers to the solution board.')
 print(theManager.pAssignments)
 
-num_failure = 0
-for pair in theManager.pAssignments:
-    if pair[0] != pair[1]:
-        num_failure = num_failure + 1
-
-# Add the unmatched pairs
-num_failure = num_failure + theManager.bMeas.size() - len(theManager.pAssignments)
-print('Num. of failure cases:', num_failure)
+print('Num. of matched cases:', len(theManager.pAssignments))
 
 plt.show()
 #
