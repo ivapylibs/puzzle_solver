@@ -127,6 +127,33 @@ class Basic:
             if self.puzzle.pieces[ii].id in pLocs.keys():
                 self.puzzle.pieces[ii].setPlacement(pLocs[self.puzzle.pieces[ii].id])
 
+    def translateAction(self, pAssignments, piece_index):
+        """
+        @brief Translation based on the current match and self.matchInit
+
+        Args:
+            pAssignments: The planner's match.
+            piece_index: Index of the piece in the planner's board.
+
+        Returns:
+            piece_id: ID of the piece.
+            piece_index: Index of the piece in the simulator's board.
+        """
+
+        # Todo: Need double check if we can always find a match here
+        for match in pAssignments:
+            if match[0] == piece_index:
+                piece_index_sol = match[1]
+                for match2 in self.matchInit:
+                    if match2[1] == piece_index_sol:
+                        # Get the result in the simulator's board
+                        piece_id = self.puzzle.pieces[match2[0]].id
+                        piece_index = match2[0]
+                        break
+                break
+
+        return piece_id, piece_index
+
     def takeAction(self, plan):
         """
         @brief  Perform the plan.
@@ -152,16 +179,18 @@ class Basic:
                 # Translation based on the current match and self.matchInit
                 if self.shareFlag == False:
 
-                    # Todo: Need double check if we can always find a match here
-                    for match in self.planner.manager.pAssignments:
-                        if match[0] == piece_index:
-                            piece_index_sol = match[1]
-                            for match2 in self.matchInit:
-                                if match2[1] == piece_index_sol:
-                                    piece_id = self.puzzle.pieces[match2[0]].id
-                                    piece_index = match2[0]
-                                    break
-                            break
+                    piece_id, piece_index = self.translateAction(self.planner.manager.pAssignments, piece_index)
+                    #
+                    # # Todo: Need double check if we can always find a match here
+                    # for match in self.planner.manager.pAssignments:
+                    #     if match[0] == piece_index:
+                    #         piece_index_sol = match[1]
+                    #         for match2 in self.matchInit:
+                    #             if match2[1] == piece_index_sol:
+                    #                 piece_id = self.puzzle.pieces[match2[0]].id
+                    #                 piece_index = match2[0]
+                    #                 break
+                    #         break
                 else:
                     piece_index_sol = piece_index
 

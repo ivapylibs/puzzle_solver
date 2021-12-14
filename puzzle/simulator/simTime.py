@@ -65,10 +65,11 @@ class SimTime(SimTimeLess):
     @param[in]  param               The parameters
     """
 
-    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theParams=ParamST()):
+    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig=None, shareFlag=True,
+                     theParams=ParamST()):
 
         super(SimTime, self).__init__(thePuzzle, theHand, thePlanner=thePlanner, thePlannerHand=thePlannerHand,
-                                      theParams=theParams)
+                                      theFig=theFig, shareFlag=shareFlag, theParams=theParams)
 
         self.timer = self.param.static_duration  # The timer
 
@@ -131,11 +132,18 @@ class SimTime(SimTimeLess):
         return flag_finish
 
     def _pause_step(self, action):
+
+        # Have to be pick or place for now
         assert action[0] != "move"
 
         # If have not been executed, then execute first before pause there
         if abs(self.timer - self.param.static_duration) < 1e-04:
-            self.hand.execute(self.puzzle, action[0], action[1])
+            if self.shareFlag == False and action[0] == "pick":
+                _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
+                self.hand.execute(self.puzzle, action[0], piece_index)
+            else:
+                self.hand.execute(self.puzzle, action[0], action[1])
+
 
         # Continue to run the timer
         self.timer -= self.param.delta_t
@@ -170,11 +178,10 @@ class SimTime(SimTimeLess):
                 theImage = deepcopy(cache_image)
                 self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
+                # pygame APIs to update the figure
                 theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
                 background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
-
                 self.DISPLAYSURF.blit(background, (0, 0))
-
                 pygame.display.update()
                 self.FramePerSec.tick(self.FPS)
 
@@ -241,7 +248,14 @@ class SimTime(SimTimeLess):
                 if self.planner is None:
                     print('planner has not been set up yet.')
                 else:
-                    plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
+                    if self.shareFlag == True:
+                        # Complete plan is only meaningful when the puzzle board is not changed
+                        plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
+                    else:
+                        plan = self.planner.process(
+                            self.toImage(ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False),
+                            COMPLETE_PLAN=False)
+
                     self.takeAction(plan)
 
                     self.simulate_step(robot_only=True, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
@@ -252,7 +266,11 @@ class SimTime(SimTimeLess):
                 if self.plannerHand is None:
                     print('plannerHand has not been set up yet.')
                 else:
-                    plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
+                    if self.shareFlag == True:
+                        plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
+                    else:
+                        plan = self.plannerHand.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+
                     # print(plan)
                     for action in plan:
                         if action is None:

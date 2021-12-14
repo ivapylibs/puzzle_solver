@@ -49,6 +49,8 @@ class Hand:
         if self.cache_piece is not None:
             self.cache_piece.setPlacement(targetLoc, offset=offset)
 
+        return True
+
     def pieceInHand(self, rLoc):
 
         theDist = np.linalg.norm(np.array(rLoc) - np.array(self.app.rLoc))
@@ -82,8 +84,16 @@ class Hand:
             self.cache_piece = piece
 
             puzzle.rmPiece(piece.id)
+
+            # The operation will be going on the simulator board,
+            # so we have to record the index change if needed.
+
+            return True
+
         else:
             print('No piece is nearby.')
+
+            return False
 
     def place(self, puzzle):
 
@@ -94,12 +104,16 @@ class Hand:
             # Todo: Maybe with the original id?
             puzzle.addPiece(self.cache_piece)
             self.cache_piece = None
+
+            return True
         else:
             print('No piece is hand.')
 
+            return False
+
     # Todo: To be implemented
     def pause(self):
-        return
+        return True
 
     def rotate(self, action_param):
 
@@ -108,6 +122,8 @@ class Hand:
 
         self.cache_piece = self.cache_piece.rotatePiece(
             action_param)
+
+        return True
 
     def execute(self, puzzle, action_type, action_param=None):
         """
@@ -119,15 +135,15 @@ class Hand:
 
         # if it is pick action, then get the puzzle piece as the real parameter
         if action_type == "pick":
-            self.pick(puzzle, action_param)
+            return self.pick(puzzle, action_param)
         elif action_type == "rotate":
-            self.rotate(action_param)
+            return self.rotate(action_param)
         elif action_type == "move":
-            self.move(action_param)
+            return self.move(action_param)
         elif action_type == "place":
-            self.place(puzzle)
+            return self.place(puzzle)
         elif action_type == "pause":
-            self.pause()
+            return self.pause()
 
     def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=True):
         self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)

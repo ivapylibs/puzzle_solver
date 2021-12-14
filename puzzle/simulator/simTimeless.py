@@ -60,9 +60,8 @@ class SimTimeLess(Basic):
     @param[in]  param               The parameters
     """
 
-    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theParams=ParamSTL()):
-
-        super(SimTimeLess, self).__init__(thePuzzle, thePlanner)
+    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig = None, shareFlag = True, theParams=ParamSTL()):
+        super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig, shareFlag=shareFlag)
 
         self.hand = theHand
         self.param = theParams
@@ -87,7 +86,28 @@ class SimTimeLess(Basic):
 
         if len(self.cache_action) > 0:
             action = self.cache_action.pop(0)
-            self.hand.execute(self.puzzle, action[0], action[1])
+
+            if self.shareFlag == False:
+
+                # FixMe: Need to fix the index change bug
+                if action[0] == "pick":
+                    _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
+                    action[1] = piece_index
+
+
+                opFlag = self.hand.execute(self.puzzle, action[0], action[1])
+
+                # if action[0] == "pick" and opFlag == True:
+                #     # Record the index to be changed
+                #     self.changeIndex = action[1]
+                #
+                # if action[0] == "place" and opFlag == True:
+                #     # Update self.matchInit
+                #     for match in self.matchInit:
+                #         if match[0]
+            else:
+                self.hand.execute(self.puzzle, action[0], action[1])
+            # self.hand.execute(self.puzzle, action[0], action[1])
 
         cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
@@ -138,7 +158,12 @@ class SimTimeLess(Basic):
                 if self.planner is None:
                     print('planner has not been set up yet.')
                 else:
-                    plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
+                    if self.shareFlag == True:
+                        # Complete plan is only meaningful when the puzzle board is not changed
+                        plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
+                    else:
+                        plan = self.planner.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), COMPLETE_PLAN=False)
+
                     self.takeAction(plan)
 
             elif event.key == 'p':
@@ -147,7 +172,11 @@ class SimTimeLess(Basic):
                 if self.plannerHand is None:
                     print('plannerHand has not been set up yet.')
                 else:
-                    plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
+                    if self.shareFlag == True:
+                        plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
+                    else:
+                        plan = self.plannerHand.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+
                     # print(plan)
                     for action in plan:
                         if action is None:
