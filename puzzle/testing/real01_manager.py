@@ -52,13 +52,13 @@ cpath = fpath.rsplit('/', 1)[0]
 # theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_000.png')
 # theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_001.png')
 
-# # Case 6 (7 out of 36 missed)
-# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_006.png')
-# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_005.png')
+# Case 6 (7 out of 36 missed)
+theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_006.png')
+theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_noLight/impossible_noLight_mea_005.png')
 
-# Case 7 (11 out of 34 missed)
-theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_000.png')
-theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_001.png')
+# # Case 7 (11 out of 34 missed)
+# theImageSol = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_000.png')
+# theImageMea = cv2.imread(cpath + '/data/puzzle_real_sample_black_impossible_light/impossible_light_mea_001.png')
 
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
@@ -93,15 +93,18 @@ theManager.process(theGrid_Mea)
 bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
 bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
 
-f, axarr = plt.subplots(1, 2)
+f, axarr = plt.subplots(2, 1)
 axarr[0].imshow(bMeasImage)
-axarr[0].title.set_text('Measurement')
+axarr[0].title.set_text('Measurement_1')
 axarr[1].imshow(bSolImage)
-axarr[1].title.set_text('Solution')
+axarr[1].title.set_text('Measurement_2')
 
 # Show assignment
 print('The first index refers to the measured board while the second one refers to the solution board.')
 print(theManager.pAssignments)
+
+text = 'Match:' + str(theManager.pAssignments)
+plt.gcf().text(0.1, 0.05, text, fontsize=8, wrap=True)
 
 print('Num. of matched cases:', len(theManager.pAssignments))
 
