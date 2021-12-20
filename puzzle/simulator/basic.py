@@ -75,10 +75,12 @@ class Basic:
         # Accordingly, the takeAction operation has to be translated first.
         self.shareFlag = shareFlag
 
-        # We only need the matched index
+        # We only need the matched index.
+        # It is only used for simulation cases so current matching should always be perfect.
+        #
         if shareFlag == False:
-            self.planner.manager.process(thePuzzle)
-            self.matchInit = self.planner.manager.pAssignments
+            self.planner.manager.process(self.puzzle)
+            self.matchSimulator = self.planner.manager.pAssignments
 
     def progress(self, theBoard):
         """
@@ -97,7 +99,10 @@ class Basic:
         """
 
         pLocs = theBoard.pieceLocations()
-        inPlace = self.piecesInPlace(pLocs)
+
+        # Todo: Not sure if we need to save a solution board in the simulator or not?
+        # Currently, we use the one saved in the manager
+        inPlace = self.planner.manager.solution.piecesInPlace(pLocs)
 
         val_list = [val for _, val in inPlace.items()]
 
@@ -144,7 +149,7 @@ class Basic:
 
     def translateAction(self, pAssignments, piece_index):
         """
-        @brief Translation based on the current match and self.matchInit
+        @brief Translation based on the current match and self.matchSimulator
 
         Args:
             pAssignments: The planner's match.
@@ -160,7 +165,7 @@ class Basic:
             for match in pAssignments:
                 if match[0] == piece_index:
                     piece_index_sol = match[1]
-                    for match2 in self.matchInit:
+                    for match2 in self.matchSimulator:
                         if match2[1] == piece_index_sol:
                             # Get the result in the simulator's board
                             piece_id = self.puzzle.pieces[match2[0]].id
@@ -195,7 +200,7 @@ class Basic:
                 piece_id = action[0] # just for display
                 piece_index = action[1]
 
-                # Translation based on the current match and self.matchInit
+                # Translation based on the current match and self.matchSimulator
                 if self.shareFlag == False:
 
                     piece_id, piece_index = self.translateAction(self.planner.manager.pAssignments, piece_index)
@@ -204,7 +209,7 @@ class Basic:
                     # for match in self.planner.manager.pAssignments:
                     #     if match[0] == piece_index:
                     #         piece_index_sol = match[1]
-                    #         for match2 in self.matchInit:
+                    #         for match2 in self.matchSimulator:
                     #             if match2[1] == piece_index_sol:
                     #                 piece_id = self.puzzle.pieces[match2[0]].id
                     #                 piece_index = match2[0]

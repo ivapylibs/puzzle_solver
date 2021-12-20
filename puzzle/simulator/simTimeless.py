@@ -29,7 +29,6 @@ from puzzle.simulator.basic import Basic, ParamBasic
 
 @dataclass
 class ParamSTL(ParamBasic):
-
     displacement: int = 100  # <- The unit movement of the agent
 
 
@@ -52,8 +51,10 @@ class SimTimeLess(Basic):
     @param[in]  param               The parameters
     """
 
-    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig = None, shareFlag = True, theParams=ParamSTL()):
-        super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig, shareFlag=shareFlag, theParams=theParams)
+    def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig=None, shareFlag=True,
+                 theParams=ParamSTL()):
+        super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig,
+                                          shareFlag=shareFlag, theParams=theParams)
 
         self.hand = theHand
         self.param = theParams
@@ -68,7 +69,9 @@ class SimTimeLess(Basic):
 
         self.plannerHand = thePlannerHand
 
-        # cached action, argument, and time
+        # cached action, only for hand
+        # [action type, argument]
+        # e.g., "pick", None
         self.cache_action = []  # The next action to execute
 
         # For display
@@ -81,25 +84,31 @@ class SimTimeLess(Basic):
 
             if self.shareFlag == False:
 
-                # FixMe: Need to fix the index change bug
                 if action[0] == "pick":
                     _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
                     action[1] = piece_index
 
-
                 opFlag = self.hand.execute(self.puzzle, action[0], action[1])
+
+                # Todo: Maybe too slow
+                # Only if the operation is performed successfully
+                if action[0] == "place" and opFlag == True:
+                    # Update self.matchSimulator
+                    self.planner.manager.process(self.puzzle)
+                    self.matchSimulator = self.planner.manager.pAssignments
+
+                # opFlag = self.hand.execute(self.puzzle, action[0], action[1])
 
                 # if action[0] == "pick" and opFlag == True:
                 #     # Record the index to be changed
                 #     self.changeIndex = action[1]
                 #
                 # if action[0] == "place" and opFlag == True:
-                #     # Update self.matchInit
-                #     for match in self.matchInit:
+                #     # Update self.matchSimulator
+                #     for match in self.matchSimulator:
                 #         if match[0]
             else:
                 self.hand.execute(self.puzzle, action[0], action[1])
-            # self.hand.execute(self.puzzle, action[0], action[1])
 
         cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
@@ -154,8 +163,11 @@ class SimTimeLess(Basic):
                         # Complete plan is only meaningful when the puzzle board is not changed
                         plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
                     else:
-                        plan = self.planner.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), COMPLETE_PLAN=False)
+                        plan = self.planner.process(
+                            self.toImage(ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False),
+                            COMPLETE_PLAN=False)
 
+                    # Directly implement the change
                     self.takeAction(plan)
 
             elif event.key == 'p':
@@ -167,7 +179,9 @@ class SimTimeLess(Basic):
                     if self.shareFlag == True:
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
-                        plan = self.plannerHand.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+                        plan = self.plannerHand.process(
+                            self.toImage(ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
+                            COMPLETE_PLAN=False)
 
                     # print(plan)
                     for action in plan:

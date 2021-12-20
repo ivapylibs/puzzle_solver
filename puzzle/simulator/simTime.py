@@ -88,16 +88,14 @@ class SimTime(SimTimeLess):
             target_loc: The target location of the "move"
 
         Returns:
-            flag_finish(Indicator of whether the target location has been reached)
+            finishFlag(Indicator of whether the target location has been reached)
         """
 
         # offset has been adjusted in advance
         if isinstance(param, tuple):
             targetLoc = param[0]
-            # offset = param[1]
         elif isinstance(param, list) or isinstance(param, np.ndarray):
             targetLoc = param
-            # offset = False
 
         delta_x = targetLoc[0] - self.hand.app.rLoc[0]
         delta_y = targetLoc[1] - self.hand.app.rLoc[1]
@@ -111,39 +109,41 @@ class SimTime(SimTimeLess):
             y_step = delta_y * (self.param.delta_t * self.param.speed) / distance
             step_loc[0] = self.hand.app.rLoc[0] + x_step
             step_loc[1] = self.hand.app.rLoc[1] + y_step
-            flag_finish = False
+            finishFlag = False
         else:
             step_loc[0] = targetLoc[0]
             step_loc[1] = targetLoc[1]
-            flag_finish = True
+            finishFlag = True
 
         # Todo: May update the bounds later. Could be slightly off.
         if step_loc[0] < 0 or step_loc[1] < 0 \
                 or step_loc[0] + self.hand.app.size()[0] >= self.canvas.shape[1] \
                 or step_loc[1] + self.hand.app.size()[1] >= self.canvas.shape[0]:
             print('Out of the bounds!')
-            flag_finish = True
+            finishFlag = True
         else:
             # Execute
-            self.hand.execute(self.puzzle, "move", step_loc)
+            opFlag = self.hand.execute(self.puzzle, "move", step_loc)
 
         # self.hand.execute(self.puzzle, "move", step_loc)
 
-        return flag_finish
+        return finishFlag, False
 
     def _pause_step(self, action):
 
         # Have to be pick or place for now
         assert action[0] != "move"
 
+        opFlag = False
+
         # If have not been executed, then execute first before pause there
         if abs(self.timer - self.param.static_duration) < 1e-04:
             if self.shareFlag == False and action[0] == "pick":
                 _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
                 action[1] = piece_index
-                self.hand.execute(self.puzzle, action[0], piece_index)
+                opFlag = self.hand.execute(self.puzzle, action[0], piece_index)
             else:
-                self.hand.execute(self.puzzle, action[0], action[1])
+                opFlag = self.hand.execute(self.puzzle, action[0], action[1])
 
 
         # Continue to run the timer
@@ -151,11 +151,11 @@ class SimTime(SimTimeLess):
 
         # If timer is below zero, then it is up!
         if self.timer < 0:
-            flag_finish = True
+            finishFlag = True
         else:
-            flag_finish = False
+            finishFlag = False
 
-        return flag_finish
+        return finishFlag, opFlag
 
     def reset_cache(self):
         self.cache_action = []
@@ -206,18 +206,25 @@ class SimTime(SimTimeLess):
                     self.cache_action[0][1] = action[1][0] + self.hand.app.rLoc
                     action = self.cache_action[0]
 
-                flag_finish = self._move_step(action[1])
+                finishFlag, opFlag = self._move_step(action[1])
             else:
-                flag_finish = self._pause_step(action)
+                finishFlag, opFlag = self._pause_step(action)
         else:
             return None
 
-        # if the cached action is finished, reset the cache and the timer
-        if flag_finish:  # < Whether the current cached action has been finished
+        # If the cached action is finished, reset the cache and the timer
+        if finishFlag:  # < Whether the current cached action has been finished
             self.cache_action.pop(0)
             self.reset_cache()
 
-        return flag_finish
+        # finishFlag is only about the animation, opFlag is about the implementation
+        if action[0] == "place" and opFlag == True:
+            # Update self.matchSimulator
+            self.planner.manager.process(self.puzzle)
+            self.matchSimulator = self.planner.manager.pAssignments
+
+
+        return finishFlag
 
     def display(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
         """

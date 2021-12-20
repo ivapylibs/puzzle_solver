@@ -74,6 +74,7 @@ class Manager(FromLayer):
         super(Manager, self).__init__()
 
         self.solution = solution  # @< The solution puzzle board.
+
         self.pAssignments = []  # @< Assignments: meas to sol.
         self.pAssignments_rotation = []  # @< Assignments: meas to sol. The rotation angles (degree).
 

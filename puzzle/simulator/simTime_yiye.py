@@ -79,7 +79,7 @@ class SimTime(SimTimeLess):
         """
 
         SUCCESS = True  # < Whether the simulation is still successfully running
-        flag_finish = False  # < Whether the current cached action has been finished
+        finishFlag = False  # < Whether the current cached action has been finished
 
         if self.cache_action is None:
             # if no more stored action, meaning the last action has been executed.
@@ -97,13 +97,13 @@ class SimTime(SimTimeLess):
 
         elif self.cache_action == "move":
             # The move action
-            flag_finish = self._move_step(self.cache_arg)
+            finishFlag = self._move_step(self.cache_arg)
         else:
             # The static actions
-            flag_finish = self._pause_step()
+            finishFlag = self._pause_step()
 
         # if the cached action is finished, reset the cache and the timer
-        if flag_finish:
+        if finishFlag:
             self.reset_cache()
 
         return SUCCESS
@@ -115,7 +115,7 @@ class SimTime(SimTimeLess):
 
         @param[in]  target_loc          The target location of the "move"
 
-        @param[out] flag_finish        Binary. Indicator of whether the target location
+        @param[out] finishFlag        Binary. Indicator of whether the target location
                                         has been reached
         """
         # distance
@@ -130,16 +130,16 @@ class SimTime(SimTimeLess):
             y_step = delta_y * (self.param.delta_t * self.param.speed) / distance
             step_loc[0] = self.agent.loc[0] + x_step
             step_loc[1] = self.agent.loc[1] + y_step
-            flag_finish = False
+            finishFlag = False
         else:
             step_loc[0] = target_loc[0]
             step_loc[1] = target_loc[1]
-            flag_finish = True
+            finishFlag = True
 
         # execute
         self.agent.execute("move", step_loc)
 
-        return flag_finish
+        return finishFlag
 
     def _pause_step(self):
         assert self.cache_action != "move"
@@ -153,11 +153,11 @@ class SimTime(SimTimeLess):
 
         # if timer is below zero, then it is up!
         if self.timer <= 0:
-            flag_finish = True
+            finishFlag = True
         else:
-            flag_finish = False
+            finishFlag = False
 
-        return flag_finish
+        return finishFlag
 
     def reset_cache(self):
         self.cache_arg = None
