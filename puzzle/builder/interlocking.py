@@ -124,7 +124,7 @@ class Interlocking(Adjacent):
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
 
-        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName)
+        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName,theParams)
 
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
@@ -156,7 +156,7 @@ class Interlocking(Adjacent):
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
 
-        aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName)
+        aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
         if hasattr(theParams, 'tauInter'):
             thePuzzle = Interlocking(aPuzzle, theParams)
@@ -183,7 +183,7 @@ class Interlocking(Adjacent):
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
 
-        aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile)
+        aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
         if hasattr(theParams, 'tauInter'):
             thePuzzle = Interlocking(aPuzzle, theParams)
@@ -209,7 +209,7 @@ class Interlocking(Adjacent):
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
 
-        aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask)
+        aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
         if hasattr(theParams, 'tauInter'):
             thePuzzle = Interlocking(aPuzzle, theParams)
@@ -237,7 +237,7 @@ class Interlocking(Adjacent):
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
 
-        aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector)
+        aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
 
         if hasattr(theParams, 'tauInter'):
             thePuzzle = Interlocking(aPuzzle, theParams)

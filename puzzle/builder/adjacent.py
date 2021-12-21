@@ -105,7 +105,7 @@ class Adjacent(Arrangement):
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
 
-        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName)
+        aPuzzle = Arrangement.buildFromFile_Puzzle(fileName, theParams)
 
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
