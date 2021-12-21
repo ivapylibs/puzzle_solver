@@ -19,6 +19,7 @@ import os
 
 import cv2
 import improcessor.basic as improcessor
+import matplotlib.pyplot as plt
 import numpy as np
 
 from puzzle.builder.gridded import Gridded, ParamGrid

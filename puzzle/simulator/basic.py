@@ -29,12 +29,9 @@ from dataclasses import dataclass
 
 @dataclass
 class ParamBasic:
-    """
-    @param canvas_H             The height of the whole scene
-    @param canvas_W             The width of the whole scene
-    """
-    canvas_H: int = 2500  # <- The height of the scene
-    canvas_W: int = 3500  # <- The width of the scene
+
+    canvas_H: int = 2500  # <- The height of the scene.
+    canvas_W: int = 3500  # <- The width of the scene.
 
 #
 # ========================= puzzle.simulator.basic ========================
