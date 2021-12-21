@@ -28,7 +28,7 @@ from puzzle.piece.histogram import Histogram
 
 @dataclass
 class ParamColorCluster:
-    taudist: float = 0.5
+    tauDist: float = 0.5
 
 
 #
@@ -66,7 +66,7 @@ class ByColor(Board):
         self.feature = np.array(self.feature)
 
         # From 0
-        yhat = hcluster.fclusterdata(self.feature, self.params.taudist, criterion="distance") - 1
+        yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1
 
         # # Define the model
         # model = sklearn.cluster.MeanShift()

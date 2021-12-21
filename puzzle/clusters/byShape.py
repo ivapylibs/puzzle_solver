@@ -29,7 +29,7 @@ from puzzle.piece.moments import Moments
 
 @dataclass
 class ParamShapeCluster:
-    taudist: float = 0.5
+    tauDist: float = 0.5
 
 
 #
@@ -73,7 +73,7 @@ class ByShape(Board):
                 self.feature.append(self.feaExtractor.shapeFeaExtract(piece).flatten())
             self.feature = np.array(self.feature)
 
-            yhat = hcluster.fclusterdata(self.feature, self.params.taudist, criterion="distance") - 1
+            yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1
             self.feaLabel = yhat
 
 #
