@@ -54,6 +54,7 @@ class PuzzleTemplate:
     contour: np.ndarray = np.array([], dtype='uint8')  # @< Template binary contour image.
     contour_pts: np.ndarray = np.array([])  # @< Template contour points.
 
+    # Feature related
     kpFea: tuple = ()  # @< The processed keypoint feature.
     colorFea: np.ndarray = np.array([])  # @< The processed color feature.
     shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
@@ -76,11 +77,11 @@ class Template:
             theta: The puzzle piece aligned angle.
         """
 
-        self.y = y
-        self.rLoc = np.array(r)  # The default location is the top left corner
-        self.id = id
+        self.y = y # @< A PuzzleTemplate instance.
+        self.rLoc = np.array(r)  # @< The default location is the top left corner.
+        self.id = id    # @< Mainly for display and user operation.
         self.status = pieceStatus
-        self.theta = theta  # Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright
+        self.theta = theta  # @< Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright.
 
     def size(self):
         """
@@ -195,7 +196,7 @@ class Template:
 
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
         """
-        @brief  Insert the puzzle piece into the image at the given location.
+        @brief  Insert the puzzle piece into the image in the original location.
 
         Args:
             theImage: The source image to put puzzle piece into.

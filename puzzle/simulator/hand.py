@@ -33,7 +33,7 @@ class Hand:
         """
         self.app = app
 
-        self.cache_piece = None  # piece in hand
+        self.cache_piece = None  # A piece instance in hand
 
     def move(self, param):
 
@@ -58,7 +58,17 @@ class Hand:
         return theDist < 80
 
     def pick(self, puzzle, piece_index=None):
+        """
+        @brief Pick up a puzzle piece (can be specified).
 
+        Args:
+            puzzle: A puzzle instance.
+            piece_index: The index of the puzzle.
+
+        Returns:
+            Whether have successfully performed the operation.
+
+        """
         if piece_index is None:
             theDists = {}
             pLocTrue = puzzle.pieceLocations()
@@ -96,7 +106,15 @@ class Hand:
             return False
 
     def place(self, puzzle):
+        """
+        @brief Place a puzzle piece to where the hand is.
 
+        Args:
+            puzzle: A puzzle board.
+
+        Returns:
+            Whether have successfully performed the operation.
+        """
         if self.cache_piece is not None:
 
             print('Place the piece.')
