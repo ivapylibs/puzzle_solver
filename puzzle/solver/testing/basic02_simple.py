@@ -90,7 +90,7 @@ saveMe = False
 if saveMe:
     f.savefig(cpath + f'/data/theBoard.png')
 
-FINISHED = False
+finishFlag = False
 i = 0
 
 while 1:
@@ -101,7 +101,7 @@ while 1:
     fh.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)
 
-    if FINISHED:
+    if finishFlag:
         break
     if i == 0:
         # Display the original one at the very beginning
@@ -116,7 +116,7 @@ while 1:
 
     if plan[0] is None:
         print('All the matched puzzle pieces have been in position. No move.')
-        FINISHED = True
+        finishFlag = True
     else:
 
         piece_id = plan[0][0]

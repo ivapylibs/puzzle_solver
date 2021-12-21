@@ -141,7 +141,7 @@ if saveMe:
     for filename in filename_list:
         os.remove(filename)
 
-FINISHED = False
+finishFlag = False
 
 # To demonstrate assembly process
 i = 0
@@ -161,7 +161,7 @@ while 1:
 
     thePrevImage = theSim.toImage(theImage=np.zeros_like(epImage).astype('uint8'), CONTOUR_DISPLAY=False,
                                   BOUNDING_BOX=False)
-    if FINISHED:
+    if finishFlag:
         break
     if i == 0:
         # Display the original one at the very beginning
@@ -171,7 +171,7 @@ while 1:
 
     plan = theSolver.takeTurn(defaultPlan='order', STEP_WISE=False)
 
-    FINISHED = theSim.takeAction(plan)
+    finishFlag = theSim.takeAction(plan)
 
     theCurImage = theSim.toImage(theImage=np.zeros_like(epImage).astype('uint8'), CONTOUR_DISPLAY=False,
                                  BOUNDING_BOX=False)
@@ -186,7 +186,7 @@ while 1:
     canvas = np.ones_like(theCurImage, np.uint8)
     canvas[imask] = theCurImage[imask]
 
-    if FINISHED is False:
+    if finishFlag is False:
 
         theMaskMea = improc.apply(canvas)
         theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,

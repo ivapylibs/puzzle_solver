@@ -4,7 +4,7 @@
 #
 # @brief    The simulator that simulate the puzzle solving process
 #           without any time effect.
-#           The agent will observe the board and attempt to solve it until finished
+#           The agent will observe the board and attempt to solve it until finishFlag
 #
 # ========================= puzzle.simulator.simTimeless ========================
 #

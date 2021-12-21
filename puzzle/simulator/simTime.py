@@ -163,7 +163,7 @@ class SimTime(SimTimeLess):
 
     def simulate_step(self, robot_only=False, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
 
-        cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+        cache_image = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
 
         while 1:
@@ -173,7 +173,7 @@ class SimTime(SimTimeLess):
 
             if finish_flag is not None or robot_only:
                 if finish_flag is True or robot_only:
-                    cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+                    cache_image = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                                       BOUNDING_BOX=False)
 
                 theImage = deepcopy(cache_image)
@@ -212,8 +212,8 @@ class SimTime(SimTimeLess):
         else:
             return None
 
-        # If the cached action is finished, reset the cache and the timer
-        if finishFlag:  # < Whether the current cached action has been finished
+        # If the cached action is finishFlag, reset the cache and the timer
+        if finishFlag:  # < Whether the current cached action has been finishFlag
             self.cache_action.pop(0)
             self.reset_cache()
 
@@ -277,7 +277,7 @@ class SimTime(SimTimeLess):
                     if self.shareFlag == True:
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
-                        plan = self.plannerHand.process(self.toImage(ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+                        plan = self.plannerHand.process(self.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
 
                     # print(plan)
                     for action in plan:
@@ -295,7 +295,7 @@ class SimTime(SimTimeLess):
         if not self.fig:
             self.fig = plt.figure()
 
-        theImage = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
+        theImage = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
         theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)

@@ -118,7 +118,7 @@ if saveMe:
     for filename in filename_list:
         os.remove(filename)
 
-FINISHED = False
+finishFlag = False
 i = 0
 
 while 1:
@@ -130,7 +130,7 @@ while 1:
     theSim.fig.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)
 
-    if FINISHED:
+    if finishFlag:
         break
     if i == 0:
         # Display the original one at the very beginning
@@ -143,7 +143,7 @@ while 1:
 
     plan = theSolver.takeTurn(defaultPlan='order')
 
-    FINISHED = theSim.takeAction(plan)
+    finishFlag = theSim.takeAction(plan)
 
     i = i + 1
 

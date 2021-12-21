@@ -20,8 +20,9 @@
 # ===== Dependencies / Packages
 #
 import numpy as np
-from dataclasses import dataclass
 import matplotlib.pyplot as plt
+import cv2
+from dataclasses import dataclass
 
 # ===== Class Helper Elements
 #
@@ -186,15 +187,15 @@ class Basic:
             plan: A tuple (piece_id, piece_index, action_type, action_param)
 
         Returns:
-            FINISHED(Signal indicating the end of plan)
+            finishFlag: Signal indicating the end of plan.
         """
 
-        FINISHED = False
+        finishFlag = False
 
         for action in plan:
             if action is None:
                 print('All the matched puzzle pieces have been in position. No move.')
-                FINISHED = True
+                finishFlag = True
             else:
 
                 piece_id = action[0] # just for display
@@ -232,7 +233,7 @@ class Basic:
                     # Just for debug, not valid for most cases
                     # self.planner.manager.skipList.append(piece_index_sol)
 
-        return FINISHED
+        return finishFlag
 
     def dragPieces(self, pVecs):
         """
@@ -246,23 +247,27 @@ class Basic:
             if self.puzzle.pieces[ii].id in pVecs.keys():
                 self.puzzle.pieces[ii].setPlacement(pVecs[self.puzzle.pieces[ii].id], offset=True)
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def toImage(self, theImage=None, theMask=None, ID_DISPLAY=False, COLOR=(0, 0, 0), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
         Args:
             theImage: The image to insert pieces into. (optional)
-            ID_DISPLAY:  Flag indicating ID_DISPLAY or not.
+            theMask: The binary mask to remove hand/or other instances. (optional)
+            ID_DISPLAY: The flag indicating ID_DISPLAY or not.
             COLOR: The color of the background.
-            CONTOUR_DISPLAY:  Flag indicating CONTOUR_DISPLAY or not.
-            BOUNDING_BOX: Flag indicating display with a limited bouding box region or not.
+            CONTOUR_DISPLAY: The flag indicating CONTOUR_DISPLAY or not.
+            BOUNDING_BOX: The flag indicating display with a limited bouding box region or not.
 
         Returns:
-            theImage(the output image)
+            theImage: The output image.
         """
 
         theImage = self.puzzle.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, COLOR=COLOR,
                                        CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
+
+        if theMask is not None:
+            theImage = cv2.bitwise_and(theImage, theImage, mask=theMask)
 
         return theImage
 
@@ -271,7 +276,11 @@ class Basic:
         @brief  Displays the current puzzle board.
 
         Args:
-            ID_DISPLAY: Flag indicating ID_DISPLAY or not.
+            theImage: The image to insert pieces into. (optional)
+            ID_DISPLAY: The flag indicating ID_DISPLAY or not.
+            CONTOUR_DISPLAY: The flag indicating CONTOUR_DISPLAY or not.
+            BOUNDING_BOX: The flag indicating display with a limited bouding box region or not.
+
         """
 
         if not self.fig:

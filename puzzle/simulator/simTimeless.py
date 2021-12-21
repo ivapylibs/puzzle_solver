@@ -4,7 +4,7 @@
 #
 # @brief    The simulator that simulate the puzzle solving process
 #           without any time effect.
-#           The agent will observe the board and attempt to solve it until finished
+#           The agent will observe the board and attempt to solve it until finishFlag
 #
 # ========================= puzzle.simulator.simTimeless ========================
 #
@@ -110,7 +110,7 @@ class SimTimeLess(Basic):
             else:
                 self.hand.execute(self.puzzle, action[0], action[1])
 
-        cache_image = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
+        cache_image = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
 
         theImage = deepcopy(cache_image)
@@ -132,7 +132,7 @@ class SimTimeLess(Basic):
         if not self.fig:
             self.fig = plt.figure()
 
-        theImage = self.puzzle.toImage(np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
+        theImage = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
         self.im = plt.imshow(theImage)
 
@@ -164,7 +164,7 @@ class SimTimeLess(Basic):
                         plan = self.planner.process(self.puzzle, COMPLETE_PLAN=True)
                     else:
                         plan = self.planner.process(
-                            self.toImage(ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False),
+                            self.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False),
                             COMPLETE_PLAN=False)
 
                     # Directly implement the change
@@ -180,7 +180,7 @@ class SimTimeLess(Basic):
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
                         plan = self.plannerHand.process(
-                            self.toImage(ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
+                            self.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
                             COMPLETE_PLAN=False)
 
                     # print(plan)

@@ -79,11 +79,11 @@ class SimTime(SimTimeLess):
         """
 
         SUCCESS = True  # < Whether the simulation is still successfully running
-        finishFlag = False  # < Whether the current cached action has been finished
+        finishFlag = False  # < Whether the current cached action has been finishFlag
 
         if self.cache_action is None:
             # if no more stored action, meaning the last action has been executed.
-            # Then will let the agent plan again (if has unfinished plans then will simply do nothign)
+            # Then will let the agent plan again (if has unfinishFlag plans then will simply do nothign)
             # and pop out the new action
             SUCCESS, _, _ = self.agent.process(self.cur_board, execute=False)
             if SUCCESS:
@@ -102,7 +102,7 @@ class SimTime(SimTimeLess):
             # The static actions
             finishFlag = self._pause_step()
 
-        # if the cached action is finished, reset the cache and the timer
+        # if the cached action is finishFlag, reset the cache and the timer
         if finishFlag:
             self.reset_cache()
 
