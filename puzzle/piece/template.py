@@ -93,32 +93,6 @@ class Template:
 
         return self.y.size
 
-    def setMeasurement(self, thePiece):
-        """
-        @brief  Pass along to the instance a measurement of the puzzle piece.
-
-        Args:
-            thePiece: A measurement of the puzzle piece.
-        """
-
-        self.y = thePiece.y
-        self.rLoc = thePiece.rLoc
-
-    def setSource(self, y, r=None):
-        """
-        @brief  Pass along the source data describing the puzzle piece.
-
-        Args:
-            y: Puzzle piece template.
-            r: The puzzle piece location in the whole image.
-
-        """
-
-        self.y = y
-
-        if r:
-            self.r = r
-
     @staticmethod
     def getEig(img):
         """
@@ -193,6 +167,14 @@ class Template:
                 self.rLoc = np.array(self.rLoc + r)
             else:
                 self.rLoc = np.array(r)
+
+    def getMask(self, theMask, offset=[0, 0]):
+
+        rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+
+        theMask[rcoords[1], rcoords[0]] = 1
+
+        return theMask
 
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
         """
@@ -323,8 +305,7 @@ class Template:
         y.contour = np.zeros_like(y.mask).astype('uint8')
         cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-        # @note
-        # Yunzhi: For debug
+        # Debug only
         # hull = cv2.convexHull(cnts[0][0])
         # aa = np.zeros_like(y.mask).astype('uint8')
         # cv2.drawContours(aa, hull, -1, (255, 255, 255), thickness=10)
@@ -332,13 +313,14 @@ class Template:
         # cv2.waitKey()
 
         y.rcoords = list(np.nonzero(theMask))  # 2 (row,col) x N
+
         # Updated to OpenCV style -> (x,y)
         y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]  # 2 (x;y) x N
         y.rcoords = np.array(y.rcoords)
 
         y.appear = theImage[y.rcoords[1], y.rcoords[0], :]
+
         # Store template image.
-        # @note
         # For now, not concerned about bad image data outside of mask.
         y.image = theImage
 

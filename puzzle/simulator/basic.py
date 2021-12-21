@@ -267,7 +267,7 @@ class Basic:
                                        CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)
 
         if theMask is not None:
-            theImage = cv2.bitwise_and(theImage, theImage, mask=theMask)
+            theImage = cv2.bitwise_and(theImage, theImage, mask=theMask.astype('uint8'))
 
         return theImage
 

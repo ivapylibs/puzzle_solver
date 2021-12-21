@@ -20,10 +20,11 @@
 
 from puzzle.simulator.planner import Planner
 from puzzle.builder.board import Board
+from puzzle.builder.gridded import ParamGrid
 
 
 class PlannerHand(Planner):
-    def __init__(self, solver, manager):
+    def __init__(self, solver, manager, theParams=ParamGrid):
         """
         @brief  Define the general planner planning process.
 
@@ -32,7 +33,7 @@ class PlannerHand(Planner):
             manager: The manager instance responsible for determining the
                     association between the measured board and the solution board
         """
-        super(PlannerHand, self).__init__(solver, manager)
+        super(PlannerHand, self).__init__(solver, manager, theParams=theParams)
 
     def process(self, input, hand, COMPLETE_PLAN=True):
         """

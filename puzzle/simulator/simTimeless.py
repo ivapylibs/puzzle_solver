@@ -31,6 +31,7 @@ from puzzle.simulator.basic import Basic, ParamBasic
 class ParamSTL(ParamBasic):
     displacement: int = 100  # <- The unit movement of the agent
 
+    HAND_OCCLUSION: bool = True # <- The flag of enabling hand occlusion or not.
 
 class SimTimeLess(Basic):
     """
@@ -179,8 +180,20 @@ class SimTimeLess(Basic):
                     if self.shareFlag == True:
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
+
+                        # Enable hand occlusion
+                        if self.param.HAND_OCCLUSION == True:
+                            # Get the hand mask
+                            theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
+                            theMask = self.hand.app.getMask(theMask)
+
+                            # Invert to work on the other region
+                            theMask = np.invert(theMask)
+                        else:
+                            theMask = None
+
                         plan = self.plannerHand.process(
-                            self.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
+                            self.toImage(theImage=np.zeros_like(self.canvas), theMask=theMask, ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
                             COMPLETE_PLAN=False)
 
                     # print(plan)

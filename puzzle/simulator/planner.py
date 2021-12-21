@@ -51,7 +51,10 @@ class Planner:
 
         meaBoard = Interlocking.buildFrom_ImageAndMask(img, theMaskMea,
                                                     theParams=self.param)
-
+        # # Debug only
+        # meaBoard.pieces[10].display()
+        # import matplotlib.pyplot as plt
+        # plt.plot()
         return meaBoard
 
     def adapt(self, meaBoard, COMPLETE_PLAN=True):

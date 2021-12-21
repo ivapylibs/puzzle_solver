@@ -106,17 +106,17 @@ theMaskMea = improc.apply(epImage)
 # cv2.waitKey()
 
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
+                                            theParams=ParamGrid(areaThresholdLower=20000,reorder=True))
 
 # ==[3] Create a manager & simple solver and integrate them into planner
 #
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
-thePlanner = Planner(theSolver, theManager)
+thePlanner = Planner(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
 
 # Todo: May need another instance
-thePlannerHand = PlannerHand(theSolver, theManager)
+thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
 
 # ==[4] Read the source image to create a hand.
 #
@@ -127,7 +127,8 @@ theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
 
 theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
 theHandApperance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-init_agent_loc = [600, 50]
+# init_agent_loc = [600, 1200]
+init_agent_loc = [50, 50]
 
 theHandApperance.setPlacement(r=init_agent_loc)
 theHand = Hand(theHandApperance)

@@ -277,7 +277,20 @@ class SimTime(SimTimeLess):
                     if self.shareFlag == True:
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
-                        plan = self.plannerHand.process(self.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+
+                        # Enable hand occlusion
+                        if self.param.HAND_OCCLUSION == True:
+                            # Get the hand mask
+                            theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
+                            theMask = self.hand.app.getMask(theMask)
+
+                            # Invert to work on the other region
+                            theMask = np.invert(theMask)
+                        else:
+                            theMask = None
+
+                        plan = self.plannerHand.process(self.toImage(theImage=np.zeros_like(self.canvas), theMask=theMask,
+                                                                     ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
 
                     # print(plan)
                     for action in plan:

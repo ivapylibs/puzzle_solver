@@ -114,10 +114,10 @@ theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
-thePlanner = Planner(theSolver, theManager)
+thePlanner = Planner(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
 
 # Todo: May need another instance
-thePlannerHand = PlannerHand(theSolver, theManager)
+thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
 
 # ==[4] Read the source image to create a hand.
 #

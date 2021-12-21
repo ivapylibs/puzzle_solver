@@ -39,6 +39,7 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 class ParamPuzzle:
     areaThresholdLower: float = 20
     areaThresholdUpper: float = float('inf')
+    lengthThresholdLower: float = 1000
     pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.PERCEIVED
 
@@ -176,12 +177,12 @@ class FromLayer(centroidMulti):
             else:
 
                 # findContours may return a discontinuous contour which cannot compute contourArea correctly
-                if cv2.arcLength(c, True) > 1000:
+                if cv2.arcLength(c, True) > self.params.lengthThresholdLower:
 
                     temp_mask = np.zeros_like(mask).astype('uint8')
                     cv2.drawContours(temp_mask, [c], -1, (255, 255, 255), 2)
                     _, temp_mask = cv2.threshold(temp_mask, 10, 255, cv2.THRESH_BINARY)
-                    #
+                    # Debug only
                     # debug_mask = copy.deepcopy(temp_mask)
                     # debug_mask = cv2.resize(debug_mask, (int(debug_mask.shape[1] / 2), int(debug_mask.shape[0] / 2)),
                     #                         interpolation=cv2.INTER_AREA)
@@ -189,6 +190,10 @@ class FromLayer(centroidMulti):
                     # cv2.waitKey()
                     desired_cnts_new = self.findCorrectedContours(temp_mask)
                     for c in desired_cnts_new:
+                        if area > self.params.areaThresholdUpper:
+                            continue
+                        elif area > self.params.areaThresholdLower:
+                            desired_cnts.append(c)
                         desired_cnts.append(c)
 
         return desired_cnts
@@ -249,7 +254,7 @@ class FromLayer(centroidMulti):
                     skipflag = True
                     break
 
-            # Todo: A triky solution to remove all black region
+            # Todo: A tricky solution to remove all black region, which is for our real scene
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
                                                            cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
                 # cv2.imshow('seg_img', seg_img)
@@ -258,6 +263,7 @@ class FromLayer(centroidMulti):
                 continue
 
             if not skipflag:
+                # Add theMask, theImage, rLoc, the region
                 regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
 
         return regions
