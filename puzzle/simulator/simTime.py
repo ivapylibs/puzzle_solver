@@ -34,18 +34,11 @@ from puzzle.simulator.simTimeless import SimTimeLess, ParamSTL
 
 @dataclass
 class ParamST(ParamSTL):
-    """
-    @param  canvas_H            The height of the whole scene
-    @param  canvas_W            The width of the whole scene
-    ------------------ Below are related to time ---------------------
-    @param  delta_t             Unit: s(econd). The time length for a simulation step.
-    @param  speed               Unit: pixel/s. The speed of the agent movement
-    @param  static_duration     Unit: s(econd). The duration of the static actions
-    """
-    delta_t: float = 0.1
-    speed: float = 100
-    static_duration: float = 0.1
 
+    delta_t: float = 0.1  # <- Unit: s. The time length for a simulation step.
+    speed: float = 100  # <- Unit: pixel/s. The speed of the agent movement.
+    static_duration: float = 0.1    # <- Unit: s. The duration of the static actions.
+    FPS: int = 60   # <- Flash rate for the simulator.
 
 class SimTime(SimTimeLess):
     """
@@ -74,7 +67,7 @@ class SimTime(SimTimeLess):
         self.timer = self.param.static_duration  # The timer
 
         # Setting up FPS
-        self.FPS = 60
+        self.FPS = self.param.FPS
         self.FramePerSec = pygame.time.Clock()
 
         # To save the display window

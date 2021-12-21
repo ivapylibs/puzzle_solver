@@ -29,8 +29,7 @@ from puzzle.simulator.basic import Basic, ParamBasic
 
 @dataclass
 class ParamSTL(ParamBasic):
-    displacement: int = 100  # <- The unit movement of the agent
-
+    displacement: int = 100  # <- The unit movement of the agent.
     HAND_OCCLUSION: bool = True # <- The flag of enabling hand occlusion or not.
 
 class SimTimeLess(Basic):
