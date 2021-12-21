@@ -163,6 +163,45 @@ def white_balance(img):
     return result
 
 
+def extract_region(img, verbose=False):
+    """
+    @brief Extract the regions from user's self-defined template image.
+
+    Args:
+        img: The input image
+        verbose: The flag of whether to debug.
+
+    Returns:
+
+    """
+    # Manually add a black bounding box on the edges,
+    # otherwise, the region connected to the border will be removed
+    img_black_border = np.zeros_like(img, 'uint8')
+    border_with = 5
+    img_black_border[border_with:-border_with, border_with:-border_with, :] = \
+        img[border_with:-border_with, border_with:-border_with, :]
+
+    theMask = cv2.cvtColor(img_black_border, cv2.COLOR_BGR2GRAY)
+    if verbose:
+        cv2.imshow('theMask', theMask)
+        cv2.waitKey()
+
+    # connectedComponents assumption
+    num_labels, labels = cv2.connectedComponents(theMask)
+
+    regions = []  # The mask region list.
+    for i in range(1, num_labels):
+        im_pre_connected = cv2.bitwise_and(theMask, theMask,
+                                           mask=np.where(labels == i, 1, 0).astype('uint8'))
+
+        regions.append((im_pre_connected/255).astype('uint8'))
+        if verbose:
+            cv2.imshow('im_pre_connected', im_pre_connected)
+            cv2.waitKey()
+
+
+    return regions
+
 def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50), verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
@@ -171,12 +210,14 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
         img: RGB image input.
         mask: Mask image input.
         areaThresh: The lower threshold of the area.
+        cannyThresh: The threshold for canny.
+        verbose: The flag of whether to debug.
 
     Returns:
-        The mask region list.
+        seg_img_combined: The mask region list.
     """
 
-    # Manually add a bounding box on the edges,
+    # Manually add a black bounding box on the edges,
     # otherwise, the region connected to the border will be removed
     img_black_border = np.zeros_like(img, 'uint8')
     img_black_border[2:-2,2:-2,:] = img[2:-2,2:-2,:]
@@ -203,7 +244,6 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                # cv2.medianBlur, (5,),
                                cv2.Canny, (cannyThresh[0], cannyThresh[1], None, 3, True,),
-                               # cv2.Canny, (40, 200,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
     # Step 1: with threshold
@@ -213,14 +253,13 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
         cv2.imshow('im_pre_canny+thresh', im_pre_canny)
         cv2.waitKey()
 
-    # # Cannot use connectedComponents assumption
+    # connectedComponents assumption
     num_labels, labels = cv2.connectedComponents(mask)
-
-    # desired_cnts = findCorrectedContours(mask)
 
     regions = []  # The mask region list.
     for i in range(1, num_labels):
 
+        # Debug only
         # if i == 1:
         #     verbose = True
         # else:
@@ -293,8 +332,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
             cv2.waitKey()
 
         # Step 4: Floodfill
-
-        # Copy the thresholded image.
+        # Copy the threshold image.
         im_floodfill = im_processed.copy()
 
         # Mask used to flood filling.
@@ -308,7 +346,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
         # Invert floodfilled image
         im_floodfill_inv = cv2.bitwise_not(im_floodfill)
 
-        # Step3: Combine the two images to get the foreground.
+        # Step 5: Combine the two images to get the foreground.
         im_floodfill = im_processed | im_floodfill_inv
 
         if verbose:

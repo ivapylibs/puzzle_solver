@@ -66,7 +66,7 @@ theMaskSol = theDet.getState().x
 
 print('Running through test cases. Will take a bit.')
 
-theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000))
+theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000,reorder=True))
 
 # ==[2.1] Create a new Grid instance from the images
 #

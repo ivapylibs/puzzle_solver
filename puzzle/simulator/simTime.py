@@ -22,23 +22,26 @@
 import math
 import sys
 from copy import deepcopy
-from dataclasses import dataclass
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame
+from dataclasses import dataclass
+from collections import defaultdict
 
 from puzzle.simulator.simTimeless import SimTimeLess, ParamSTL
+from puzzle.utils.imageProcessing import extract_region, find_nonzero_mask
 
 
 @dataclass
 class ParamST(ParamSTL):
-
     delta_t: float = 0.1  # <- Unit: s. The time length for a simulation step.
     speed: float = 100  # <- Unit: pixel/s. The speed of the agent movement.
-    static_duration: float = 0.1    # <- Unit: s. The duration of the static actions.
-    FPS: int = 60   # <- Flash rate for the simulator.
+    static_duration: float = 0.1  # <- Unit: s. The duration of the static actions.
+    FPS: int = 60  # <- Flash rate for the simulator.
+
+    fx: float = 0.5  # <- The scale of display.
+    fy: float = 0.5  # <- The scale of display.
 
 class SimTime(SimTimeLess):
     """
@@ -59,7 +62,7 @@ class SimTime(SimTimeLess):
     """
 
     def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig=None, shareFlag=True,
-                     theParams=ParamST()):
+                 theParams=ParamST()):
 
         super(SimTime, self).__init__(thePuzzle, theHand, thePlanner=thePlanner, thePlannerHand=thePlannerHand,
                                       theFig=theFig, shareFlag=shareFlag, theParams=theParams)
@@ -71,7 +74,12 @@ class SimTime(SimTimeLess):
         self.FramePerSec = pygame.time.Clock()
 
         # To save the display window
-        self.DISPLAYSURF = None
+        self.pygameFig = None
+
+        # To save the regions for cluster
+        self.cluster_region_list = []
+
+        self.cluster_piece_dict = dict()
 
     def _move_step(self, param):
         """
@@ -138,7 +146,6 @@ class SimTime(SimTimeLess):
             else:
                 opFlag = self.hand.execute(self.puzzle, action[0], action[1])
 
-
         # Continue to run the timer
         self.timer -= self.param.delta_t
 
@@ -173,9 +180,9 @@ class SimTime(SimTimeLess):
                 self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
                 # pygame APIs to update the figure
-                theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
+                theImage_demo = cv2.resize(theImage, (0, 0), fx=self.param.fx, fy=self.param.fy)
                 background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
-                self.DISPLAYSURF.blit(background, (0, 0))
+                self.pygameFig.blit(background, (0, 0))
                 pygame.display.update()
                 self.FramePerSec.tick(self.FPS)
 
@@ -215,7 +222,6 @@ class SimTime(SimTimeLess):
             # Update self.matchSimulator
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
-
 
         return finishFlag
 
@@ -282,8 +288,10 @@ class SimTime(SimTimeLess):
                         else:
                             theMask = None
 
-                        plan = self.plannerHand.process(self.toImage(theImage=np.zeros_like(self.canvas), theMask=theMask,
-                                                                     ID_DISPLAY=False,CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand, COMPLETE_PLAN=False)
+                        plan = self.plannerHand.process(
+                            self.toImage(theImage=np.zeros_like(self.canvas), theMask=theMask,
+                                         ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
+                            COMPLETE_PLAN=False)
 
                     # print(plan)
                     for action in plan:
@@ -298,24 +306,106 @@ class SimTime(SimTimeLess):
 
             self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-        if not self.fig:
-            self.fig = plt.figure()
+        # Initialization
+        pygame.init()
+        drawing = False
+        mouse_position = (0, 0)
+        WHITE = (255,255,255)
+        BLACK = (0, 0, 0)
+        last_pos = None
+
+        # Create a black screen
+        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.param.fx),
+                                                    int(self.canvas.shape[0]*self.param.fy)))
+        self.pygameFig.fill(BLACK)
+        pygame.display.set_caption("Puzzle Solver")
+
+        # Display solution board
+        theImage = self.planner.manager.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
+        background = pygame.surfarray.make_surface(np.moveaxis(theImage, 0, 1))
+        self.pygameFig = pygame.display.set_mode((int(theImage.shape[1]), int(theImage.shape[0])))
+        self.pygameFig.blit(background, (0, 0))
+
+        # With white background
+        theMask = np.ones_like(theImage,'uint8')*255
+
+        # Calibration
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEMOTION:
+                    if (drawing):
+                        mouse_position = pygame.mouse.get_pos()
+                        if last_pos is not None:
+                            # For display
+                            pygame.draw.line(self.pygameFig, WHITE, last_pos, mouse_position, 10)
+
+                            # # For calibration
+                            cv2.line(theMask, last_pos, mouse_position, BLACK, 5)
+                        last_pos = mouse_position
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    mouse_position = (0, 0)
+                    drawing = False
+                    last_pos = None
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    drawing = True
+
+            pressed_keys = pygame.key.get_pressed()
+
+            if pressed_keys[pygame.K_f]:
+                try:
+                    self.cluster_region_list = extract_region(theMask)
+
+                    self.cluster_piece_dict = defaultdict(list)
+
+                    print('Segmentation successful.')
+                    print(f'{len(self.cluster_region_list)} regions in total.')
+
+                    break
+                except:
+                    print('Segmentation not successful. Please try again.')
+
+            pygame.display.update()
+
+        if len(self.cluster_region_list)>0:
+
+            for piece in self.planner.manager.solution.pieces:
+
+                # Mask with 0 and 1
+                mask_piece = np.zeros((theMask.shape[:2]),'uint8')
+                mask_piece = piece.getMask(mask_piece)
+
+                # Count the number of pixels
+                mask_piece_count = np.count_nonzero(mask_piece == 1)
+
+                for idx, cluster_region in enumerate(self.cluster_region_list):
+                    mask_combine = mask_piece + cluster_region
+
+                    mask_combine_count = np.count_nonzero(mask_combine == 2)
+
+                    # Calculate the ratio
+                    ratio = mask_combine_count/mask_piece_count
+
+                    if ratio > 0.5:
+                        self.cluster_piece_dict[idx].append(piece.id)
+                        break
+
+            print(self.cluster_piece_dict)
+
+
+
 
         theImage = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-        theImage_demo = cv2.resize(theImage, (0, 0), fx=0.5, fy=0.5)
+        theImage_demo = cv2.resize(theImage, (0, 0), fx=self.param.fx, fy=self.param.fy)
         background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
+        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.param.fx),
+                                                    int(self.canvas.shape[0]*self.param.fy)))
 
-        # Initializing
-        pygame.init()
-
-        # Create a white screen
-        BLACK = (0, 0, 0)
-        self.DISPLAYSURF = pygame.display.set_mode((theImage_demo.shape[1], theImage_demo.shape[0]))
-        self.DISPLAYSURF.fill(BLACK)
-        pygame.display.set_caption("Puzzle Solver")
-        self.DISPLAYSURF.blit(background, (0, 0))
+        self.pygameFig.blit(background, (0, 0))
 
         # Game Loop
         while True:
