@@ -12,12 +12,10 @@
 #
 # ====================== puzzle.utils.dataProcessing ======================
 
-
-import types
-
-import cv2
 # ===== Environment / Dependencies
 #
+import types
+import cv2
 import numpy as np
 
 

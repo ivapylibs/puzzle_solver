@@ -31,7 +31,7 @@ from collections import defaultdict
 
 from puzzle.simulator.simTimeless import SimTimeLess, ParamSTL
 from puzzle.utils.imageProcessing import extract_region, find_nonzero_mask
-
+from puzzle.utils.pygameProcessing import multiLineSurface
 
 @dataclass
 class ParamST(ParamSTL):
@@ -40,8 +40,8 @@ class ParamST(ParamSTL):
     static_duration: float = 0.1  # <- Unit: s. The duration of the static actions.
     FPS: int = 60  # <- Flash rate for the simulator.
 
-    fx: float = 0.5  # <- The scale of display.
-    fy: float = 0.5  # <- The scale of display.
+    fx: float = 0.5  # <- The x scale of display.
+    fy: float = 0.5  # <- The y scale of display.
 
 class SimTime(SimTimeLess):
     """
@@ -319,6 +319,46 @@ class SimTime(SimTimeLess):
                                                     int(self.canvas.shape[0]*self.param.fy)))
         self.pygameFig.fill(BLACK)
         pygame.display.set_caption("Puzzle Solver")
+
+        font = pygame.font.SysFont('chalkduster.ttf', 72)
+        rect = pygame.Rect((0, 0), (int(self.canvas.shape[1]*self.param.fx),
+                                                    int(self.canvas.shape[0]*self.param.fy)))
+
+        insFig = multiLineSurface('Welcome to the Puzzle Solver!\n\n'
+                                  'Key board instruction:\n'
+                                  '- Up: Move the hand up\n'
+                                  '- Down: Move the hand down\n'
+                                  '- Left: Move the hand left\n'
+                                  '- Right: Move the hand right\n'
+                                  '- z: Pick the puzzle piece\n'
+                                  '- c: Place the puzzle piece if there is one in the hand\n'
+                                  '- o: Run the puzzle solver for the robot\n'
+                                  '- p: Run the puzzle solver for the hand\n\n'
+                                  'Use you mouse to segment the solution board for a calibration!\n\n'
+                                  'Press any key to continue!',
+                         font, rect, WHITE,BLACK)
+        self.pygameFig.blit(insFig, (0, 0))
+        #
+        # font1 = pygame.font.SysFont('chalkduster.ttf', 72)
+        # img1 = font1.render('Welcome to the Puzzle Solver!', True, WHITE)
+        # img2 = font1.render('Instruction:', True, WHITE)
+
+
+        # self.pygameFig.blit(img1, (20, 50))
+        # self.pygameFig.blit(img2, (20, 72+50))
+
+        pygame.display.update()
+
+        # Instruction
+        insFlag = True
+        while insFlag:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    insFlag = False
+                    break
 
         # Display solution board
         theImage = self.planner.manager.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
