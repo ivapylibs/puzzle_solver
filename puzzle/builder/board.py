@@ -74,7 +74,7 @@ class Board:
         elif len(argv) > 2:
             raise TypeError('Too many inputs.')
 
-    def addPiece(self, piece):
+    def addPiece(self, piece, ORIGINAL_ID=False):
         """
         @brief  Add puzzle piece instance to the board.
 
@@ -82,10 +82,12 @@ class Board:
             piece: A puzzle piece instance.
 
         """
-
-        piece.id = self.id_count
-        self.pieces[self.id_count] = piece
-        self.id_count += 1
+        if ORIGINAL_ID:
+            self.pieces[piece.id] = piece
+        else:
+            piece.id = self.id_count
+            self.pieces[self.id_count] = piece
+            self.id_count += 1
 
     def rmPiece(self, id):
         """

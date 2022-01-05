@@ -63,14 +63,6 @@ class Basic:
 
         self.fig = theFig
 
-        #
-        # @todo Should it also have the calibrated solution to know when the
-        #       puzzle has been solved? Or should it simply not care about this
-        #       part and it should be for another class instance. Leaning
-        #       towards not caring since it is not part of the simulation but
-        #       rather part of the interpretation of the puzzle board.
-        #
-
         # The setting for the displayed board. If True, we assume the planner will share
         # the same board instance with the simulator. Otherwise, they will be different.
         # Accordingly, the takeAction operation has to be translated first.
@@ -155,8 +147,7 @@ class Basic:
             piece_id: Index of the piece in the planner's board.
 
         Returns:
-            piece_id: ID of the piece.
-            piece_index: Index of the piece in the simulator's board.
+            piece_id: Updated ID of the piece.
         """
 
         if piece_id is not None:
