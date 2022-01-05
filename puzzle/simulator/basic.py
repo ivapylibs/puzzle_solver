@@ -146,35 +146,35 @@ class Basic:
             if self.puzzle.pieces[ii].id in pLocs.keys():
                 self.puzzle.pieces[ii].setPlacement(pLocs[self.puzzle.pieces[ii].id])
 
-    def translateAction(self, pAssignments, piece_index):
+    def translateAction(self, pAssignments, piece_id):
         """
         @brief Translation based on the current match and self.matchSimulator
 
         Args:
             pAssignments: The planner's match.
-            piece_index: Index of the piece in the planner's board.
+            piece_id: Index of the piece in the planner's board.
 
         Returns:
             piece_id: ID of the piece.
             piece_index: Index of the piece in the simulator's board.
         """
 
-        if piece_index is not None:
+        if piece_id is not None:
             # Todo: Need double check if we can always find a match here
             for match in pAssignments.items():
-                if match[0] == piece_index:
+                if match[0] == piece_id:
                     piece_index_sol = match[1]
                     for match2 in self.matchSimulator.items():
                         if match2[1] == piece_index_sol:
                             # Get the result in the simulator's board
-                            piece_id = self.puzzle.pieces[match2[0]].id
-                            piece_index = match2[0]
+                            # piece_id = self.puzzle.pieces[match2[0]].id
+                            piece_id = match2[0]
                             break
                     break
 
-            return piece_id, piece_index
+            return piece_id
         else:
-            return None, None
+            return None
 
 
     def takeAction(self, plan):
@@ -197,39 +197,23 @@ class Basic:
             else:
 
                 piece_id = action[0] # just for display
-                piece_index = action[1]
 
                 # Translation based on the current match and self.matchSimulator
                 if self.shareFlag == False:
 
-                    piece_id, piece_index = self.translateAction(self.planner.manager.pAssignments, piece_index)
-                    #
-                    # # Todo: Need double check if we can always find a match here
-                    # for match in self.planner.manager.pAssignments:
-                    #     if match[0] == piece_index:
-                    #         piece_index_sol = match[1]
-                    #         for match2 in self.matchSimulator:
-                    #             if match2[1] == piece_index_sol:
-                    #                 piece_id = self.puzzle.pieces[match2[0]].id
-                    #                 piece_index = match2[0]
-                    #                 break
-                    #         break
-                else:
-                    piece_index_sol = piece_index
+                    piece_id = self.translateAction(self.planner.manager.pAssignments, piece_id)
 
                 action_type = action[2]
                 action_param = action[3]
 
                 if action_type == 'rotate':
                     print(f'Rotate piece {piece_id} by {int(action_param)} degree')
-                    self.puzzle.pieces[piece_index] = self.puzzle.pieces[piece_index].rotatePiece(
+                    self.puzzle.pieces[piece_id] = self.puzzle.pieces[piece_id].rotatePiece(
                         action_param)
                 elif action_type == 'move':
                     print(f'Move piece {piece_id} by {action_param}')
-                    self.puzzle.pieces[piece_index].setPlacement(action_param, offset=True)
+                    self.puzzle.pieces[piece_id].setPlacement(action_param, offset=True)
 
-                    # Just for debug, not valid for most cases
-                    # self.planner.manager.skipList.append(piece_index_sol)
 
         return finishFlag
 

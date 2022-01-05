@@ -92,6 +92,8 @@ class SimTime(SimTimeLess):
             finishFlag(Indicator of whether the target location has been reached)
         """
 
+        opParam = (False, None)
+
         # offset has been adjusted in advance
         if isinstance(param, tuple):
             targetLoc = param[0]
@@ -124,27 +126,27 @@ class SimTime(SimTimeLess):
             finishFlag = True
         else:
             # Execute
-            opFlag = self.hand.execute(self.puzzle, "move", step_loc)
+            opParam = self.hand.execute(self.puzzle, "move", step_loc)
 
         # self.hand.execute(self.puzzle, "move", step_loc)
 
-        return finishFlag, False
+        return finishFlag, opParam
 
     def _pause_step(self, action):
 
         # Have to be pick or place for now
         assert action[0] != "move"
 
-        opFlag = False
+        opParam = (False, None)
 
         # If have not been executed, then execute first before pause there
         if abs(self.timer - self.param.static_duration) < 1e-04:
             if self.shareFlag == False and action[0] == "pick":
-                _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
-                action[1] = piece_index
-                opFlag = self.hand.execute(self.puzzle, action[0], piece_index)
+                piece_id = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
+                action[1] = piece_id
+                opParam = self.hand.execute(self.puzzle, action[0], piece_id)
             else:
-                opFlag = self.hand.execute(self.puzzle, action[0], action[1])
+                opParam = self.hand.execute(self.puzzle, action[0], action[1])
 
         # Continue to run the timer
         self.timer -= self.param.delta_t
@@ -155,7 +157,7 @@ class SimTime(SimTimeLess):
         else:
             finishFlag = False
 
-        return finishFlag, opFlag
+        return finishFlag, opParam
 
     def reset_cache(self):
         self.cache_action = []
@@ -324,9 +326,9 @@ class SimTime(SimTimeLess):
                     self.cache_action[0][1] = action[1][0] + self.hand.app.rLoc
                     action = self.cache_action[0]
 
-                finishFlag, opFlag = self._move_step(action[1])
+                finishFlag, opParam = self._move_step(action[1])
             else:
-                finishFlag, opFlag = self._pause_step(action)
+                finishFlag, opParam = self._pause_step(action)
         else:
             return None
 
@@ -336,11 +338,17 @@ class SimTime(SimTimeLess):
             self.reset_cache()
 
         # Todo: Maybe too slow, have to be updated later
-        # finishFlag is only about the animation, opFlag is about the implementation
-        if action[0] == "place" and opFlag == True:
+        # finishFlag is only about the animation, opParam is about the implementation
+        if action[0] == "place" and opParam[0] == True:
             # Update self.matchSimulator
-            self.planner.manager.process(self.puzzle)
-            self.matchSimulator = self.planner.manager.pAssignments
+
+            # Remove the old association
+            temp = self.matchSimulator[opParam[1]]
+            del self.matchSimulator[opParam[1]]
+
+            # Add the new one
+            # Todo: Note that here we assume the placed puzzle has a new id
+            self.matchSimulator[self.puzzle.id_count - 1] = temp
 
         return finishFlag
 

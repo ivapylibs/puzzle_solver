@@ -85,28 +85,23 @@ class SimTimeLess(Basic):
             if self.shareFlag == False:
 
                 if action[0] == "pick":
-                    _, piece_index = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
-                    action[1] = piece_index
+                    piece_id = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
+                    action[1] = piece_id
 
-                opFlag = self.hand.execute(self.puzzle, action[0], action[1])
+                opParam = self.hand.execute(self.puzzle, action[0], action[1])
 
-                # Todo: Maybe too slow, have to be updated later
                 # Only if the operation is performed successfully
-                if action[0] == "place" and opFlag == True:
+                if action[0] == "place" and opParam[0] == True:
                     # Update self.matchSimulator
-                    self.planner.manager.process(self.puzzle)
-                    self.matchSimulator = self.planner.manager.pAssignments
 
-                # opFlag = self.hand.execute(self.puzzle, action[0], action[1])
+                    # Remove the old association
+                    temp = self.matchSimulator[opParam[1]]
+                    del self.matchSimulator[opParam[1]]
 
-                # if action[0] == "pick" and opFlag == True:
-                #     # Record the index to be changed
-                #     self.changeIndex = action[1]
-                #
-                # if action[0] == "place" and opFlag == True:
-                #     # Update self.matchSimulator
-                #     for match in self.matchSimulator:
-                #         if match[0]
+                    # Add the new one
+                    # Todo: Note that here we assume the placed puzzle has a new id
+                    self.matchSimulator[self.puzzle.id_count-1] = temp
+
             else:
                 self.hand.execute(self.puzzle, action[0], action[1])
 

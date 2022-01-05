@@ -49,7 +49,7 @@ class Hand:
         if self.cache_piece is not None:
             self.cache_piece.setPlacement(targetLoc, offset=offset)
 
-        return True
+        return (True, None)
 
     def pieceInHand(self, rLoc):
 
@@ -63,7 +63,7 @@ class Hand:
 
         Args:
             puzzle: A puzzle instance.
-            piece_index: The index of the puzzle.
+            piece_id: The index of the puzzle.
 
         Returns:
             Whether have successfully performed the operation.
@@ -78,11 +78,6 @@ class Hand:
 
             piece_id = min(theDists, key=theDists.get)
 
-            # for i, piece in enumerate(puzzle.pieces):
-            #     if piece_id == piece.id:
-            #         piece_index = i
-            #         break
-
         piece = puzzle.pieces[piece_id]
 
         if self.pieceInHand(piece.rLoc):
@@ -93,17 +88,14 @@ class Hand:
             piece.rLoc = self.app.rLoc
             self.cache_piece = piece
 
-            puzzle.rmPiece(piece.id)
+            puzzle.rmPiece(piece_id)
 
-            # The operation will be going on the simulator board,
-            # so we have to record the index change if needed.
-
-            return True
+            return (True, None)
 
         else:
             print('No piece is nearby.')
 
-            return False
+            return (False, None)
 
     def place(self, puzzle):
         """
@@ -119,19 +111,21 @@ class Hand:
 
             print('Place the piece.')
 
+            old_id = self.cache_piece.id
+
             # Todo: Maybe with the original id?
             puzzle.addPiece(self.cache_piece)
             self.cache_piece = None
 
-            return True
+            return (True, old_id)
         else:
             print('No piece is hand.')
 
-            return False
+            return (False, None)
 
     # Todo: To be implemented
     def pause(self):
-        return True
+        return (True, None)
 
     def rotate(self, action_param):
 
@@ -141,7 +135,7 @@ class Hand:
         self.cache_piece = self.cache_piece.rotatePiece(
             action_param)
 
-        return True
+        return (True, None)
 
     def execute(self, puzzle, action_type, action_param=None):
         """

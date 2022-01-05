@@ -64,7 +64,7 @@ class PlannerHand(Planner):
                 plan_new.append(action)
             else:
                 piece_id = action[0]
-                piece_index = action[1]
+                # piece_index = action[1]
                 action_type = action[2]
                 action_param = action[3]
 
@@ -72,13 +72,13 @@ class PlannerHand(Planner):
                 if action_type == 'rotate':
 
                     # move to the puzzle piece
-                    plan_new.append(['move', meaBoard.pieces[piece_index].rLoc])
+                    plan_new.append(['move', meaBoard.pieces[piece_id].rLoc])
 
                     # # pick the nearby piece
                     # plan_new.append(['pick', None])
 
                     # pick the target piece
-                    plan_new.append(['pick', piece_index])
+                    plan_new.append(['pick', piece_id])
 
                     # Rotate the piece in hand
                     plan_new.append(['rotate', action_param])
@@ -94,7 +94,7 @@ class PlannerHand(Planner):
                 elif action_type == 'move':
 
                     # move to the puzzle piece
-                    plan_new.append(['move', meaBoard.pieces[piece_index].rLoc])
+                    plan_new.append(['move', meaBoard.pieces[piece_id].rLoc])
 
                     # Todo: Currently, we assume there is only one piece in hand at one time
                     if hand.cache_piece is None:
@@ -102,7 +102,7 @@ class PlannerHand(Planner):
                         # plan_new.append(['pick', None])
 
                         # pick the target piece
-                        plan_new.append(['pick', piece_index])
+                        plan_new.append(['pick', piece_id])
 
                     # move the piece to the target loc
                     plan_new.append(['move', (action_param, True)])

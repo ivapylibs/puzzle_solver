@@ -76,17 +76,16 @@ class Board:
 
     def addPiece(self, piece):
         """
-        @brief      Add puzzle piece instance to the board.
+        @brief  Add puzzle piece instance to the board.
 
         Args:
-          piece: A puzzle piece instance.
+            piece: A puzzle piece instance.
 
         """
 
         piece.id = self.id_count
         self.pieces[self.id_count] = piece
         self.id_count += 1
-        # self.pieces.append(piece)
 
     def rmPiece(self, id):
         """
@@ -98,7 +97,7 @@ class Board:
         """
 
         rm_id = None
-        for key in self.pieces:
+        for key in self.pieces.keys():
             if key == id:
                 rm_id = id
                 break
