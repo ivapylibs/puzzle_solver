@@ -28,13 +28,14 @@ from puzzle.builder.gridded import ParamGrid
 from puzzle.builder.board import Board
 from puzzle.piece.template import PieceStatus
 
+
 class Planner:
     def __init__(self, solver, manager, theParams=ParamGrid):
         self.solver = solver
         self.manager = manager
         self.param = theParams
 
-        self.record = {'meaBoard':None, 'match':[]}
+        self.record = {'meaBoard': None, 'match': {}}
 
     def measure(self, img):
 
@@ -53,7 +54,7 @@ class Planner:
         # cv2.waitKey()
 
         meaBoard = Interlocking.buildFrom_ImageAndMask(img, theMaskMea,
-                                                    theParams=self.param)
+                                                       theParams=self.param)
         # # Debug only
         # meaBoard.pieces[10].display()
         # import matplotlib.pyplot as plt
@@ -65,32 +66,44 @@ class Planner:
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
 
-        # record_board_temp = Board()
-        # record_match_temp = []
-        #
-        # # For tracking
-        # for record_match in self.record['match']:
-        #     findFlag = False
-        #     for match in self.manager.pAssignments:
-        #         if record_match[1]==match[1]:
-        #             # 1) If some pieces are available on both boards, those pieces will have an updated status.
-        #             record_board_temp.addPiece = pieces[record_match[0]] = meaBoard.pieces[match[0]]
-        #
-        #             findFlag = True
-        #             break
-        #
-        #     if findFlag == False:
-        #         # 2) If some pieces are only available on the record board, their status will be marked as unknown.
-        #         # If their status has been unknown for a while. They will be deleted from the record board.
-        #         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.UNKNOWN
-        #
-        #
-        #
-        # print(self.manager.pAssignments)
-        # print(self.record['match'])
-        #
-        # self.record['meaBoard'] = meaBoard
-        # self.record['match'] = self.manager.pAssignments
+        record_board_temp = Board()
+        record_match_temp = {}
+
+        # For tracking
+        for record_match in self.record['match'].items():
+            findFlag = False
+            for match in self.manager.pAssignments.items():
+                if record_match[1] == match[1]:
+                    # 1) If some pieces are available on both boards, those pieces will have an updated status.
+                    record_board_temp.addPiece(meaBoard.pieces[match[0]])
+                    record_match_temp[record_board_temp.id_count-1] = match[1]
+                    findFlag = True
+                    break
+
+            if findFlag == False:
+                # 2) If some pieces are only available on the record board, their status will be marked as unknown.
+                # If their status has been unknown for a while. They will be deleted from the record board.
+                record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
+                record_match_temp[record_board_temp.id_count-1] = record_match[1]
+
+        for new_match in self.manager.pAssignments.items():
+            findFlag = False
+            for match in record_match_temp.items():
+                if new_match[1] == match[1]:
+                    findFlag = True
+                    break
+
+            if findFlag == False:
+                # 3) If some pieces are only available on the new board, they will be added to the record board.
+                record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
+                record_match_temp[record_board_temp.id_count-1] = new_match[1]
+
+        self.record['meaBoard'] = record_board_temp
+        self.record['match'] = record_match_temp
+
+        print(self.manager.pAssignments)
+        print(self.record['match'])
+
 
         # Solver plans for the measured board
         self.solver.setCurrBoard(meaBoard)
@@ -105,17 +118,16 @@ class Planner:
         occlusionList = []
         pieceKeysList = list(meaBoard.pieces.keys())
         for index in range(meaBoard.adjMat.shape[0]):
-            if sum(meaBoard.adjMat[index,:])>1:
+            if sum(meaBoard.adjMat[index, :]) > 1:
                 # occlusionList.append(index)
                 occlusionList.append(pieceKeysList[index])
 
-        print('Occlusion:',occlusionList)
+        print('Occlusion:', occlusionList)
 
         # Plan is for the measured piece
         plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)
         # print(plan)
         return plan
-
 
     def process(self, input, COMPLETE_PLAN=True):
         """
@@ -131,7 +143,7 @@ class Planner:
             plan: The action plan for the simulator to perform
         """
 
-        if issubclass(type(input),Board):
+        if issubclass(type(input), Board):
             meaBoard = input
         else:
             meaBoard = self.measure(input)

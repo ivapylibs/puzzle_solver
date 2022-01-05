@@ -251,12 +251,6 @@ class Simple(Base):
                     if np.isnan(self.rotation_match[best_id_mea]) or abs(self.rotation_match[best_id_mea]) < 0.5:
                         continue
 
-            # Get the corresponding id
-            try:
-                best_id_mea = self.current.pieces[best_id_mea].id
-            except:
-                print('s')
-
             # Valid rotation
             if self.rotation_match is not None and not np.isnan(self.rotation_match[best_id_mea]) and abs(
                     self.rotation_match[best_id_mea]) > 0.5:
