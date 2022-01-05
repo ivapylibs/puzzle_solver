@@ -48,11 +48,14 @@ class Basic:
             theFig: The figure handle to use (optional).
         """
 
-        self.puzzle = thePuzzle
+
+        self.puzzle = thePuzzle  # <- The display board.
+
         self.planner = thePlanner
 
         self.param = theParams
 
+        # Save background info
         self.canvas = np.zeros(
             (self.param.canvas_H, self.param.canvas_W, 3),
             dtype=np.uint8

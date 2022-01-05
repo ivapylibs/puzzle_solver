@@ -90,7 +90,7 @@ class SimTimeLess(Basic):
 
                 opFlag = self.hand.execute(self.puzzle, action[0], action[1])
 
-                # Todo: Maybe too slow
+                # Todo: Maybe too slow, have to be updated later
                 # Only if the operation is performed successfully
                 if action[0] == "place" and opFlag == True:
                     # Update self.matchSimulator
