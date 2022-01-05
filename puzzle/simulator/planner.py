@@ -101,8 +101,9 @@ class Planner:
         self.record['meaBoard'] = record_board_temp
         self.record['match'] = record_match_temp
 
-        print(self.manager.pAssignments)
-        print(self.record['match'])
+        # Debug only
+        print('Match in the new measured board:', self.manager.pAssignments)
+        print('Match in the tracking record:', self.record['match'])
 
 
         # Solver plans for the measured board
