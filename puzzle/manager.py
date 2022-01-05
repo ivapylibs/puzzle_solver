@@ -75,8 +75,8 @@ class Manager(FromLayer):
 
         self.solution = solution  # @< The solution puzzle board.
 
-        self.pAssignments = []  # @< Assignments: meas to sol.
-        self.pAssignments_rotation = []  # @< Assignments: meas to sol. The rotation angles (degree).
+        self.pAssignments = {}  # @< Assignments: meas to sol.
+        self.pAssignments_rotation = {}  # @< Assignments: meas to sol. The rotation angles (degree).
 
         self.matcher = theParams.matcher  # @< Matcher instance
 
@@ -113,20 +113,20 @@ class Manager(FromLayer):
         self.matchPieces()
 
         # Generate a new board for association, filtered by the matcher threshold
-        pFilteredAssignments = []
-        for assignment in self.pAssignments:
+        pFilteredAssignments = {}
+        for assignment in self.pAssignments.items():
             ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
             if ret:
 
                 # Some matchers calculate the rotation as well
                 # from mea to sol (counter-clockwise)
                 if isinstance(ret, tuple):
-                    self.pAssignments_rotation.append(ret[1])
+                    self.pAssignments_rotation[assignment[0]]=ret[1]
                 else:
-                    self.pAssignments_rotation.append(
-                        self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta)
+                    self.pAssignments_rotation[assignment[0]] = \
+                        self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
 
-                pFilteredAssignments.append(assignment)
+                pFilteredAssignments[assignment[0]] = assignment[1]
 
         # pAssignments refers to the index but not the id of the puzzle piece
         self.pAssignments = pFilteredAssignments
@@ -140,8 +140,8 @@ class Manager(FromLayer):
         scoreTable_shape = np.zeros((self.bMeas.size(), self.solution.size()))
         scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
         scoreTable_edge_color = np.zeros((self.bMeas.size(), self.solution.size(), 4))
-        for idx_x, bMea in enumerate(self.bMeas.pieces):
-            for idx_y, bSol in enumerate(self.solution.pieces):
+        for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
+            for idx_y, SolPiece in enumerate(self.solution.pieces):
 
                 # @todo Currently, it does not support two scoreTables.
                 if idx_y in self.skipList:
@@ -151,7 +151,7 @@ class Manager(FromLayer):
                         scoreTable_shape[idx_x][idx_y] = -100
                     continue
 
-                ret = self.matcher.score(bMea, bSol)
+                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
                 """
                 @todo Yunzhi: Will update this part. We may need two scoreTables. 
                 Currently, only use the shape feature and add up the distances.
@@ -159,7 +159,7 @@ class Manager(FromLayer):
 
                 # Debug only
                 # if idx_x==11 and (idx_y==2):
-                #     ret = self.matcher.score(bMea, bSol)
+                #     ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
                 #     print('s')
                 if type(ret) is tuple and len(ret) > 0:
                     scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
@@ -182,30 +182,45 @@ class Manager(FromLayer):
             scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
 
         Returns:
-            The matched pairs. N x 2
+            matched_id: The matched pair dict.
         """
+
+        pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
+        pieceKeysList_solution = list(self.solution.pieces.keys())
+
         # Single feature
         if np.count_nonzero(scoreTable_color) == 0:
             # @note Yunzhi: Only focus on the difference in the scoreTable_shape
-            matched_indices = []
+            # matched_indices = []
+
+            matched_id = {}
+
             if scoreTable_shape.shape[1] == 0:
-                return np.array(matched_indices).reshape(-1, 2)
+                # return np.array(matched_indices).reshape(-1, 2)
+
+                return matched_id
             for i in range(scoreTable_shape.shape[0]):
                 if self.scoreType == SCORE_DIFFERENCE:
                     j = scoreTable_shape[i].argmin()
                     # @todo Yunzhi: The threshold needs to be decided by the feature method
                     if scoreTable_shape[i][j] < 1e16:
                         scoreTable_shape[:, j] = 1e18
-                        matched_indices.append([i, j])
+
+
+                        matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
+
+                        # matched_indices.append([i, j])
                 else:
                     j = scoreTable_shape[i].argmax()
                     # @todo Yunzhi: The threshold needs to be decided by the feature method
                     if scoreTable_shape[i][j] > 2:
                         scoreTable_shape[:, j] = -100
-                        matched_indices.append([i, j])
+
+                        matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
+                        # matched_indices.append([i, j])
 
             # matched_indices refers to the index but not the id of the puzzle piece
-            matched_indices = np.array(matched_indices).reshape(-1, 2)
+            # matched_indices = np.array(matched_indices).reshape(-1, 2)
 
         else:
             # @note Yunzhi: Currently, it is hard-coded for edge feature
@@ -234,9 +249,11 @@ class Manager(FromLayer):
 
                 return keep
 
-            matched_indices = []
+            matched_id = {}
+            # matched_indices = []
             if scoreTable_shape.shape[1] == 0:
-                return np.array(matched_indices).reshape(-1, 2)
+                # return np.array(matched_indices).reshape(-1, 2)
+                return matched_id
             for i in range(scoreTable_shape.shape[0]):
                 # j = scoreTable_shape[i].argmin()
 
@@ -287,12 +304,14 @@ class Manager(FromLayer):
 
                 if scoreTable_shape[i][j] < 1e16:
                     scoreTable_shape[:, j] = 1e18
-                    matched_indices.append([i, j])
+                    # matched_indices.append([i, j])
+                    matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
 
             # matched_indices refers to the index but not the id of the puzzle piece
-            matched_indices = np.array(matched_indices).reshape(-1, 2)
+            # matched_indices = np.array(matched_indices).reshape(-1, 2)
 
-        return matched_indices
+        # return matched_indices
+        return matched_id
 
     def process(self, *argv):
         """
@@ -308,8 +327,8 @@ class Manager(FromLayer):
         """
 
         # Reset
-        self.pAssignments = []
-        self.pAssignments_rotation = []
+        self.pAssignments = {}
+        self.pAssignments_rotation = {}
 
         self.measure(*argv)
 

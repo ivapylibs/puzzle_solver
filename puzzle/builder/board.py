@@ -48,7 +48,12 @@ class Board:
             *argv: The input params
 
         """
-        self.pieces = []  # @< The puzzle pieces.
+
+        # Note that Python 3.7+ has preserved the order of the element in the dict
+        # No need to use OrderedDict
+        # https://stackoverflow.com/a/40007169
+        self.pieces = {}  # @< The puzzle pieces.
+
         self.id_count = 0
 
         if len(argv) == 1:
@@ -79,34 +84,49 @@ class Board:
         """
 
         piece.id = self.id_count
+        self.pieces[self.id_count] = piece
         self.id_count += 1
-        self.pieces.append(piece)
+        # self.pieces.append(piece)
 
     def rmPiece(self, id):
         """
         @brief      Remove puzzle piece instance from the board
 
         Args:
-            id: The puzzle piece id
+            id: The puzzle piece id (for display)
 
         """
-        rm_index = None
-        for idx, piece in enumerate(self.pieces):
-            if piece.id == id:
-                rm_index = idx
+
+        rm_id = None
+        for key in self.pieces:
+            if key == id:
+                rm_id = id
                 break
 
-        if rm_index is not None:
-            del self.pieces[rm_index]
+        if rm_id is not None:
+            del self.pieces[rm_id]
         else:
             raise RuntimeError('Cannot find the target')
+
+        # rm_index = None
+        # for idx, piece in enumerate(self.pieces):
+        #     if piece.id == id:
+        #         rm_index = idx
+        #         break
+        #
+        # if rm_index is not None:
+        #     del self.pieces[rm_index]
+        # else:
+        #     raise RuntimeError('Cannot find the target')
 
     def clear(self):
         """
         @brief  Clear all the puzzle pieces from the board.
 
         """
-        self.pieces = []
+        # self.pieces = []
+
+        self.pieces = {}
         self.id_count = 0
 
     # def getSubset(self, subset):
@@ -143,13 +163,13 @@ class Board:
     #
     #     return theBoard
 
-    def testAdjacent(self, index_A, index_B, tauAdj):
+    def testAdjacent(self, id_A, id_B, tauAdj):
         """
         @brief  Check if two puzzle pieces are adjacent or not
 
         Args:
-            index_A: The index of the puzzle piece A.
-            index_B: The index of the puzzle piece B.
+            id_A: The id of the puzzle piece A.
+            id_B: The id of the puzzle piece B.
             tauAdj: The threshold of the distance.
 
         Returns:
@@ -213,8 +233,8 @@ class Board:
 
             return pts
 
-        pts_A = self.pieces[index_A].rLoc + obtain_sub_pts(self.pieces[index_A])
-        pts_B = self.pieces[index_B].rLoc + obtain_sub_pts(self.pieces[index_B])
+        pts_A = self.pieces[id_A].rLoc + obtain_sub_pts(self.pieces[id_A])
+        pts_B = self.pieces[id_B].rLoc + obtain_sub_pts(self.pieces[id_B])
 
         dists = cdist(pts_A, pts_B, 'euclidean')
 
@@ -266,9 +286,10 @@ class Board:
             bbox = np.array([[float('inf'), float('inf')], [0, 0]])
 
             # piece is a puzzleTemplate instance, see template.py for details.
-            for piece in self.pieces:
-                # top left coordinate
+            for key in self.pieces:
+                piece = self.pieces[key]
 
+                # top left coordinate
                 tl = piece.rLoc
 
                 # bottom right coordinate
@@ -284,7 +305,7 @@ class Board:
         @brief      Returns list/array of puzzle piece locations.
 
         Returns:
-            A dict of puzzle piece id & location.
+            pLocs: A dict of puzzle piece id & location.
         """
 
         # @note
@@ -297,7 +318,8 @@ class Board:
         # pLocs = np.array(pLocs).reshape(-1,2).T
 
         pLocs = {}
-        for piece in self.pieces:
+        for key in self.pieces:
+            piece = self.pieces[key]
             pLocs[piece.id] = piece.rLoc
 
         return pLocs
@@ -325,7 +347,9 @@ class Board:
             lengths = self.extents().astype('int')
             bbox = self.boundingBox().astype('int')
             if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
-                for piece in self.pieces:
+                for key in self.pieces:
+
+                    piece = self.pieces[key]
 
                     if BOUNDING_BOX:
                         piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
@@ -361,7 +385,10 @@ class Board:
             else:
                 theImage = np.full((bbox[1, 1], bbox[1, 0], 3), COLOR, dtype='uint8')
 
-            for piece in self.pieces:
+            for key in self.pieces:
+
+                piece = self.pieces[key]
+
                 if BOUNDING_BOX:
                     piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
                 else:

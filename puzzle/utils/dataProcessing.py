@@ -33,7 +33,7 @@ def updateLabel(x_list, x_label):
         x_label: The original label.
 
     Returns:
-        The updated label.
+        x_label_updated: The updated label.
     """
 
     x_mean = []
@@ -68,7 +68,7 @@ class copyAttributes(object):
             target: The target class instance.
 
         Returns:
-            The updated target class instance.
+            target: The updated target class instance.
         """
 
         for attr, value in self.source.__dict__.items():
@@ -91,7 +91,7 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
         des2: The descriptor.
 
     Returns:
-        The final matches.
+        topResults: The final matches.
     """
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)

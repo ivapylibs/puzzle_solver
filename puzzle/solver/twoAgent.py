@@ -67,7 +67,7 @@ class TwoAgent(Simple):
         """
 
         for agent in self.agents:
-            agent.match = np.array(match)
+            agent.match = match
 
     # ============================== takeTurn =============================
     #

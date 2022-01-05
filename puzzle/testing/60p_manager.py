@@ -111,7 +111,7 @@ print('The first index refers to the measured board while the second one refers 
 print(theManager.pAssignments)
 
 num_failure = 0
-for pair in theManager.pAssignments:
+for pair in theManager.pAssignments.items():
     if pair[0] != pair[1]:
         num_failure = num_failure + 1
 

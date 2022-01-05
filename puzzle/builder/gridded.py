@@ -68,6 +68,8 @@ class Gridded(Interlocking):
 
         if isinstance(theBoard, Board):
             # Store the calibrated grid location of the puzzle piece.
+            # e.g., [x; y]
+            # We do not have to worry about the index or id here since they are the same in the solution board.
             self.gc = np.zeros((2, theBoard.size()))
         else:
             raise TypeError('Not initialized properly')
@@ -80,7 +82,7 @@ class Gridded(Interlocking):
                 interlocking and the grid ordering. Grid ordering helps to
                 determine adjacency.
 
-        @note   If the pieces are close to each other, this function may fail when thge location of a piece is not computed properly.
+        @note   If the pieces are close to each other, this function may fail when the location of a piece is not computed properly.
 
         Args:
             reorder: The flag signaling whether to reorder the piece id according to the location.
@@ -98,7 +100,7 @@ class Gridded(Interlocking):
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
         if kmeans_cluster[0] is None:
-            x_thresh = np.mean([piece.y.size[0] for piece in self.pieces]) / 2
+            x_thresh = np.mean([self.pieces[key].y.size[0] for key in self.pieces]) / 2
             x_thresh = min(x_thresh, piece_thresh)
             x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
             x_label = updateLabel(x_list, x_label)  # from 0
@@ -107,7 +109,7 @@ class Gridded(Interlocking):
             x_label = x_kmeans.labels_
 
         if kmeans_cluster[1] is None:
-            y_thresh = np.mean([piece.y.size[1] for piece in self.pieces]) / 2
+            y_thresh = np.mean([self.pieces[key].y.size[1] for key in self.pieces]) / 2
             y_thresh = min(y_thresh, piece_thresh)
             y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
             y_label = updateLabel(y_list, y_label)  # from 0
@@ -118,6 +120,8 @@ class Gridded(Interlocking):
         # Reorder the pieces, so the id will correspond to the grid location
         if reorder:
             pieces_src = deepcopy(self.pieces)
+            pieceKeysList = list(self.pieces.keys())
+
             num = 0
 
             # Save the changes, {new:old}
@@ -127,8 +131,8 @@ class Gridded(Interlocking):
                 for ii in range(max(x_label) + 1):
                     for idx, pts in enumerate(zip(x_label, y_label)):
                         if pts[0] == ii and pts[1] == jj:
-                            self.pieces[num] = pieces_src[idx]
-                            dict_conversion[num] = idx
+                            self.pieces[num] = pieces_src[pieceKeysList[idx]]
+                            dict_conversion[num] = pieceKeysList[idx]
                             self.pieces[num].id = num
                             self.gc[:, num] = ii, jj
                             num = num + 1
@@ -147,7 +151,7 @@ class Gridded(Interlocking):
             for ii in range(self.size()):
                 # The order is in line with the one saving in self.pieces
 
-                # @todo Yunzhi: Eventually, this has to be upgraded to a dict?
+                # Todo: Eventually, this has to be upgraded to a dict?
                 self.gc[:, ii] = x_label[ii], y_label[ii]
 
     # OTHER CODE / MEMBER FUNCTIONS
@@ -162,12 +166,15 @@ class Gridded(Interlocking):
 
         # @note We do not care about id in this function.
         epBoard = deepcopy(self)
+
+        pieceKeysList = list(epBoard.pieces.keys())
+
         for i in range(num):
             target_list = np.random.randint(0, epBoard.size(), 2)
 
-            temp = epBoard.pieces[target_list[0]].rLoc
-            epBoard.pieces[target_list[0]].rLoc = epBoard.pieces[target_list[1]].rLoc
-            epBoard.pieces[target_list[1]].rLoc = temp
+            temp = epBoard.pieces[pieceKeysList[target_list[0]]].rLoc
+            epBoard.pieces[pieceKeysList[target_list[0]]].rLoc = epBoard.pieces[pieceKeysList[target_list[1]]].rLoc
+            epBoard.pieces[pieceKeysList[target_list[1]]].rLoc = temp
 
         epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
@@ -215,7 +222,8 @@ class Gridded(Interlocking):
 
         # Work on the epBoard
         epBoard = deepcopy(self)
-        for idx, piece in enumerate(epBoard.pieces):
+        for idx, key in enumerate(epBoard.pieces):
+            piece = epBoard.pieces[key]
             r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:, idx].flatten()
             r_new = r_new.astype('int')
             piece.placeInImageAt(epImage, rc=r_new)

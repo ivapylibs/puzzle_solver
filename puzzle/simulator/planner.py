@@ -26,12 +26,15 @@ import numpy as np
 from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import ParamGrid
 from puzzle.builder.board import Board
+from puzzle.piece.template import PieceStatus
 
 class Planner:
     def __init__(self, solver, manager, theParams=ParamGrid):
         self.solver = solver
         self.manager = manager
         self.param = theParams
+
+        self.record = {'meaBoard':None, 'match':[]}
 
     def measure(self, img):
 
@@ -59,23 +62,53 @@ class Planner:
 
     def adapt(self, meaBoard, COMPLETE_PLAN=True):
 
-        # manager process the measured board to establish the association
+        # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
 
-        # Solver use the association to plan which next puzzle to move to where
-        self.solver.setCurrBoard(meaBoard)
+        # record_board_temp = Board()
+        # record_match_temp = []
+        #
+        # # For tracking
+        # for record_match in self.record['match']:
+        #     findFlag = False
+        #     for match in self.manager.pAssignments:
+        #         if record_match[1]==match[1]:
+        #             # 1) If some pieces are available on both boards, those pieces will have an updated status.
+        #             record_board_temp.addPiece = pieces[record_match[0]] = meaBoard.pieces[match[0]]
+        #
+        #             findFlag = True
+        #             break
+        #
+        #     if findFlag == False:
+        #         # 2) If some pieces are only available on the record board, their status will be marked as unknown.
+        #         # If their status has been unknown for a while. They will be deleted from the record board.
+        #         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.UNKNOWN
+        #
+        #
+        #
+        # print(self.manager.pAssignments)
+        # print(self.record['match'])
+        #
+        # self.record['meaBoard'] = meaBoard
+        # self.record['match'] = self.manager.pAssignments
 
+        # Solver plans for the measured board
+        self.solver.setCurrBoard(meaBoard)
         self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
         # Right now, can only work when puzzle board is not re-processed.
-        # Otherwise, the connected ones may be removed. Same effect.
-        #
+        # Otherwise, the connected ones will not be considered in the list.
+        # As a result, same effect.
+
         # Get the index of the pieces with the occlusion and skip them
         meaBoard.processAdjacency()
         occlusionList = []
+        pieceKeysList = list(meaBoard.pieces.keys())
         for index in range(meaBoard.adjMat.shape[0]):
             if sum(meaBoard.adjMat[index,:])>1:
-                occlusionList.append(index)
+                # occlusionList.append(index)
+                occlusionList.append(pieceKeysList[index])
+
         print('Occlusion:',occlusionList)
 
         # Plan is for the measured piece
@@ -88,12 +121,14 @@ class Planner:
         """
         @brief  Draft the action plan given the measured board.
 
+        @note In principle, the process is not triggered by key but should be called every processing time
+
         Args:
             input: A measured board or RGB image.
             COMPLETE_PLAN: Whether to plan the whole sequence.
 
         Returns:
-            plan(The action plan for the simulator to perform)
+            plan: The action plan for the simulator to perform
         """
 
         if issubclass(type(input),Board):

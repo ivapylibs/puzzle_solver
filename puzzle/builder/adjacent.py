@@ -61,6 +61,8 @@ class Adjacent(Arrangement):
         super(Adjacent, self).__init__(theBoard, theParams)
 
         if isinstance(theBoard, Board):
+            # Note that the Mat's index may not be the same as id in the piece dict.
+            # Have to be translated for further use.
             self.adjMat = np.eye(theBoard.size()).astype('bool')
         else:
             raise TypeError('Not initialized properly')
@@ -74,18 +76,27 @@ class Adjacent(Arrangement):
                 adjacent or "close enough." It will determine the adjacency
                 matrix.
 
-        Assumes that adjacent matrix has been instantiated and what is
+        Assume that adjacent matrix has been instantiated and what is
         needed is to populate its values with the correct ones.
         """
 
         # Reset
         self.adjMat[:,:] = np.eye(self.size()).astype('bool')
 
+
+        pieceKeysList = list(self.pieces.keys())
+
         for ii in range(self.size()):
             for jj in range(ii + 1, self.size()):
-                if self.testAdjacent(ii, jj, self.params.tauAdj):
+                if self.testAdjacent(pieceKeysList[ii], pieceKeysList[jj], self.params.tauAdj):
                     self.adjMat[ii, jj] = True
                     self.adjMat[jj, ii] = True
+
+        # for ii in range(self.size()):
+        #     for jj in range(ii + 1, self.size()):
+        #         if self.testAdjacent(ii, jj, self.params.tauAdj):
+        #             self.adjMat[ii, jj] = True
+        #             self.adjMat[jj, ii] = True
 
     # OTHER CODE / MEMBER FUNCTIONS
 

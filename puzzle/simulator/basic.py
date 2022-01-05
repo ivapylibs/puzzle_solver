@@ -141,8 +141,6 @@ class Basic:
         Args:
             pLocs: A dict of puzzle pieces ids and their locations.
 
-        Returns:
-
         """
         for ii in range(self.puzzle.size()):
             if self.puzzle.pieces[ii].id in pLocs.keys():
@@ -163,10 +161,10 @@ class Basic:
 
         if piece_index is not None:
             # Todo: Need double check if we can always find a match here
-            for match in pAssignments:
+            for match in pAssignments.items():
                 if match[0] == piece_index:
                     piece_index_sol = match[1]
-                    for match2 in self.matchSimulator:
+                    for match2 in self.matchSimulator.items():
                         if match2[1] == piece_index_sol:
                             # Get the result in the simulator's board
                             piece_id = self.puzzle.pieces[match2[0]].id

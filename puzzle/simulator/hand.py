@@ -57,7 +57,7 @@ class Hand:
 
         return theDist < 80
 
-    def pick(self, puzzle, piece_index=None):
+    def pick(self, puzzle, piece_id=None):
         """
         @brief Pick up a puzzle piece (can be specified).
 
@@ -69,7 +69,7 @@ class Hand:
             Whether have successfully performed the operation.
 
         """
-        if piece_index is None:
+        if piece_id is None:
             theDists = {}
             pLocTrue = puzzle.pieceLocations()
 
@@ -78,12 +78,12 @@ class Hand:
 
             piece_id = min(theDists, key=theDists.get)
 
-            for i, piece in enumerate(puzzle.pieces):
-                if piece_id == piece.id:
-                    piece_index = i
-                    break
+            # for i, piece in enumerate(puzzle.pieces):
+            #     if piece_id == piece.id:
+            #         piece_index = i
+            #         break
 
-        piece = puzzle.pieces[piece_index]
+        piece = puzzle.pieces[piece_id]
 
         if self.pieceInHand(piece.rLoc):
 

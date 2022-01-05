@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-# ============================ basic06_histogram ===========================
+# ============================ basic07_histogram ===========================
 #
 # @brief    Test script for the most basic functionality of histogram features
 #           for puzzle pieces. (60p img)
 #
-# ============================ basic06_histogram ===========================
+# ============================ basic07_histogram ===========================
 
 #
-# @file     basic06_histogram.py
+# @file     basic07_histogram.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/09/29  [created]
 #
-# ============================ basic06_histogram ===========================
+# ============================ basic07_histogram ===========================
 
 # ==[0] Prep environment
 import os
@@ -118,4 +118,4 @@ theBoard.display()
 plt.show()
 
 #
-# ============================ basic06_histogram ===========================
+# ============================ basic07_histogram ===========================

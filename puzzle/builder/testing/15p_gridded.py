@@ -16,16 +16,16 @@
 # ============================ 15p_gridded ===========================
 
 
+
+# ==[0] Prep environment
 import os
 import pickle
 from dataclasses import dataclass
-
 import cv2
-import improcessor.basic as improcessor
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
 import numpy as np
 
+import improcessor.basic as improcessor
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
 from puzzle.parser.fromSketch import FromSketch
@@ -86,23 +86,21 @@ axarr[0, 0].title.set_text('Source solution board')
 
 # ==[1.4] Save theBoardSol
 #
-if not os.path.exists(cpath + '/data/board_15p.obj'):
-    theData_save = dataBoard(theBoardSol)
+theData_save = dataBoard(theBoardSol)
 
-    with open(cpath + '/data/board_15p.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/board_15p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[1.5] Save theImageSol & theMaskSol
 #
-if not os.path.exists(cpath + '/data/image_15p.obj'):
-    theData_save = dataImage(theImageSol, theMaskSol)
+theData_save = dataImage(theImageSol, theMaskSol)
 
-    with open(cpath + '/data/image_15p.obj', 'wb') as fp:
-        pickle.dump(theData_save, fp)
+with open(cpath + '/data/image_15p.obj', 'wb') as fp:
+    pickle.dump(theData_save, fp)
 
-    del theData_save
+del theData_save
 
 # ==[2] Create an Grid instance
 #

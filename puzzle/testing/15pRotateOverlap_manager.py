@@ -76,9 +76,9 @@ _, epBoard = theGridMea.swapPuzzle()
 #
 
 gt_rotation = []
-for i in range(epBoard.size()):
+for key in epBoard.pieces:
     gt_rotation.append(np.random.randint(0, 70))
-    epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
+    epBoard.pieces[key] = epBoard.pieces[key].rotatePiece(gt_rotation[-1])
 
 for i in range(epBoard.size()):
     epBoard.pieces[i].setPlacement(r=[np.random.randint(-100, 100), np.random.randint(-100, 100)], offset=True)

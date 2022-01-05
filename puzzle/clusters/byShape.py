@@ -62,14 +62,16 @@ class ByShape(Board):
         """
 
         if issubclass(type(self.feaExtractor), Edge):
-            for piece in self.pieces:
+            for key in self.pieces:
+                piece = self.pieces[key]
                 # Currently, the label is based on the type of the piece edge
                 self.feature.append(self.feaExtractor.shapeFeaExtract(piece, method='type').flatten())
                 num = np.count_nonzero(self.feature[-1] == 3)
                 self.feaLabel.append(num)
         else:
 
-            for piece in self.pieces:
+            for key in self.pieces:
+                piece = self.pieces[key]
                 self.feature.append(self.feaExtractor.shapeFeaExtract(piece).flatten())
             self.feature = np.array(self.feature)
 

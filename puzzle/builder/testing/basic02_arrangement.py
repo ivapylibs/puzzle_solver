@@ -91,10 +91,6 @@ print('The score of the estimated board:', theArrange.scoreBoard(theBoardSol))
 #
 print('The checklist of each puzzle piece given the location:', theArrange.piecesInPlace(pLoc))
 
-# ==[2.5] Test progress. Should see 100%.
-#
-print('The current progress:', theArrange.progress(theBoardSol))
-
 # ==[3] Create image & mask for solution
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/shapes_color_six_image_solution.png')

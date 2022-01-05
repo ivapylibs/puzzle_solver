@@ -37,7 +37,7 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
 #
-
+print('Press any key to proceed.')
 theMaskSol = preprocess_real_puzzle(theImageSol, verbose=True)
 # cv2.imshow('debug',theMaskSol)
 # cv2.waitKey()

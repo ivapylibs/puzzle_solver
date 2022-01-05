@@ -61,7 +61,8 @@ class ByColor(Board):
         @ brief Extract color features from the data.
         """
 
-        for piece in self.pieces:
+        for key in self.pieces:
+            piece = self.pieces[key]
             self.feature.append(self.feaExtractor.colorFeaExtract(piece).flatten())
         self.feature = np.array(self.feature)
 

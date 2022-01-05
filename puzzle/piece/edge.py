@@ -61,19 +61,19 @@ class Edge(MatchDifferent):
         for i in range(4):
 
             # Check if the variable is an empty list
-            if (isinstance(piece.Edge[i].shapeFea, list) and len(piece.Edge[i].shapeFea) > 0) \
-                    or piece.Edge[i].shapeFea:
-                shapeFeaList.append(piece.Edge[i].shapeFea)
+            if (isinstance(piece.edge[i].shapeFea, list) and len(piece.edge[i].shapeFea) > 0) \
+                    or piece.edge[i].shapeFea:
+                shapeFeaList.append(piece.edge[i].shapeFea)
             else:
 
                 if method == 'type':
-                    piece.Edge[i].shapeFea = piece.Edge[i].type
-                    shapeFeaList.append(piece.Edge[i].type)
+                    piece.edge[i].shapeFea = piece.edge[i].type
+                    shapeFeaList.append(piece.edge[i].type)
                 else:
-                    y, x = np.nonzero(piece.Edge[i].mask)
+                    y, x = np.nonzero(piece.edge[i].mask)
                     coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
-                    piece.Edge[i].shapeFea = coords
+                    piece.edge[i].shapeFea = coords
                     shapeFeaList.append(coords)
 
         shapeFeaList = np.array(shapeFeaList)
@@ -99,13 +99,13 @@ class Edge(MatchDifferent):
         colorFeaResizeList = []
         for i in range(4):
 
-            if len(piece.Edge[i].colorFea) > 0:
-                colorFeaResizeList.append(piece.Edge[i].colorFea)
+            if len(piece.edge[i].colorFea) > 0:
+                colorFeaResizeList.append(piece.edge[i].colorFea)
             else:
-                y, x = np.nonzero(piece.Edge[i].mask)
+                y, x = np.nonzero(piece.edge[i].mask)
 
                 # Extract the valid pts
-                pts = piece.Edge[i].image[y, x]
+                pts = piece.edge[i].image[y, x]
 
                 # Expand dim for further processing
                 colorFeaOri = np.expand_dims(pts, axis=0)
@@ -116,7 +116,7 @@ class Edge(MatchDifferent):
                 # # @todo Yunzhi: May need to double check the color space
                 # colorFeaResize = cv2.cvtColor(colorFeaResize, cv2.COLOR_RGB2Lab)
 
-                piece.Edge[i].colorFea = colorFeaResize
+                piece.edge[i].colorFea = colorFeaResize
 
                 colorFeaResizeList.append(colorFeaResize)
 

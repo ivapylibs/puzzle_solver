@@ -75,9 +75,9 @@ _, epBoard = theGridMea.swapPuzzle()
 #
 
 gt_rotation = []
-for i in range(epBoard.size()):
+for key in epBoard.pieces:
     gt_rotation.append(np.random.randint(0, 70))
-    epBoard.pieces[i] = epBoard.pieces[i].rotatePiece(gt_rotation[-1])
+    epBoard.pieces[key] = epBoard.pieces[key].rotatePiece(gt_rotation[-1])
 
 epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 # plt.imshow(epImage)
@@ -127,7 +127,7 @@ print(theManager.pAssignments)
 
 print('The computed rotation angles(degree):')
 print('Note that the order of angles do not correspond to the pieces')
-print(np.sort(np.array(theManager.pAssignments_rotation).astype('int')))
+print(np.sort(np.array(list(theManager.pAssignments_rotation.values())).astype('int')))
 print('The gt rotation angles(degree):')
 print(np.sort(np.array(gt_rotation).astype('int')))
 

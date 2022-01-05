@@ -79,11 +79,11 @@ for i in range(1, theGridSol_src.size()):
     # Todo: Adhoc way, will update in the future
     if i == theGridSol_src.gc.shape[1] / theGridSol_src.gc.shape[0]:
         theRegular_0 = theBoard.pieces[0]
-        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.edge[3].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.edge[2].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
     else:
-        piece_A_coord = find_nonzero_mask(theRegular_0.Edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
-        piece_B_coord = find_nonzero_mask(theRegular_1.Edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
+        piece_A_coord = find_nonzero_mask(theRegular_0.edge[1].mask) + np.array(theRegular_0.rLoc).reshape(-1, 1)
+        piece_B_coord = find_nonzero_mask(theRegular_1.edge[0].mask) + np.array(theRegular_1.rLoc).reshape(-1, 1)
 
     x_relative = np.max(piece_B_coord[0, :]) - np.max(piece_A_coord[0, :])
     y_relative = np.max(piece_B_coord[1, :]) - np.max(piece_A_coord[1, :])
