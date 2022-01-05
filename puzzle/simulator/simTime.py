@@ -191,6 +191,124 @@ class SimTime(SimTimeLess):
             else:
                 break
 
+    def instruction(self):
+
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+
+        # Instruction
+        font = pygame.font.SysFont('chalkduster.ttf', 72)
+        rect = pygame.Rect((0, 0), (int(self.canvas.shape[1] * self.param.fx),
+                                    int(self.canvas.shape[0] * self.param.fy)))
+
+        insFig = multiLineSurface('Welcome to the Puzzle Solver!\n\n'
+                                  'Key board instruction:\n'
+                                  '- Up: Move the hand up\n'
+                                  '- Down: Move the hand down\n'
+                                  '- Left: Move the hand left\n'
+                                  '- Right: Move the hand right\n'
+                                  '- z: Pick the puzzle piece\n'
+                                  '- c: Place the puzzle piece if there is one in the hand\n'
+                                  '- o: Run the puzzle solver for the robot\n'
+                                  '- p: Run the puzzle solver for the hand\n\n'
+                                  'Use you mouse to segment the solution board for a calibration!\n\n'
+                                  'Press any key to continue!',
+                                  font, rect, WHITE, BLACK)
+        self.pygameFig.blit(insFig, (0, 0))
+        pygame.display.update()
+
+        insFlag = True
+        while insFlag:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    insFlag = False
+                    break
+
+    def calibrate(self, ID_DISPLAY=True):
+
+        drawing = False
+        mouse_position = (0, 0)
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        last_pos = None
+
+        # Display solution board
+        theImage = self.planner.manager.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
+        background = pygame.surfarray.make_surface(np.moveaxis(theImage, 0, 1))
+        self.pygameFig = pygame.display.set_mode((int(theImage.shape[1]), int(theImage.shape[0])))
+        self.pygameFig.blit(background, (0, 0))
+
+        # With white background
+        theMask = np.ones_like(theImage, 'uint8') * 255
+
+        # Calibration
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEMOTION:
+                    if (drawing):
+                        mouse_position = pygame.mouse.get_pos()
+                        if last_pos is not None:
+                            # For display
+                            pygame.draw.line(self.pygameFig, WHITE, last_pos, mouse_position, 10)
+
+                            # # For calibration
+                            cv2.line(theMask, last_pos, mouse_position, BLACK, 5)
+                        last_pos = mouse_position
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    mouse_position = (0, 0)
+                    drawing = False
+                    last_pos = None
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    drawing = True
+
+            pressed_keys = pygame.key.get_pressed()
+
+            if pressed_keys[pygame.K_f]:
+                try:
+                    self.cluster_region_list = extract_region(theMask)
+
+                    self.cluster_piece_dict = defaultdict(list)
+
+                    print('Segmentation successful.')
+                    print(f'{len(self.cluster_region_list)} regions in total.')
+
+                    break
+                except:
+                    print('Segmentation not successful. Please try again.')
+
+            pygame.display.update()
+
+        if len(self.cluster_region_list) > 0:
+
+            for piece in self.planner.manager.solution.pieces:
+
+                # Mask with 0 and 1
+                mask_piece = np.zeros((theMask.shape[:2]), 'uint8')
+                mask_piece = piece.getMask(mask_piece)
+
+                # Count the number of pixels
+                mask_piece_count = np.count_nonzero(mask_piece == 1)
+
+                for idx, cluster_region in enumerate(self.cluster_region_list):
+                    mask_combine = mask_piece + cluster_region
+
+                    mask_combine_count = np.count_nonzero(mask_combine == 2)
+
+                    # Calculate the ratio
+                    ratio = mask_combine_count / mask_piece_count
+
+                    if ratio > 0.5:
+                        self.cluster_piece_dict[idx].append(piece.id)
+                        break
+
+            print(self.cluster_piece_dict)
+
     def simulate_step_small(self):
         """
         Overwrite the simulate_step function
@@ -217,6 +335,7 @@ class SimTime(SimTimeLess):
             self.cache_action.pop(0)
             self.reset_cache()
 
+        # Todo: Maybe too slow, have to be updated later
         # finishFlag is only about the animation, opFlag is about the implementation
         if action[0] == "place" and opFlag == True:
             # Update self.matchSimulator
@@ -306,137 +425,25 @@ class SimTime(SimTimeLess):
 
             self.simulate_step(ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-        # Initialization
+        # Step 0: Initialization
         pygame.init()
-        drawing = False
-        mouse_position = (0, 0)
+
         WHITE = (255,255,255)
         BLACK = (0, 0, 0)
-        last_pos = None
 
-        # Create a black screen
+        # with a black screen
         self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.param.fx),
                                                     int(self.canvas.shape[0]*self.param.fy)))
         self.pygameFig.fill(BLACK)
         pygame.display.set_caption("Puzzle Solver")
 
-        font = pygame.font.SysFont('chalkduster.ttf', 72)
-        rect = pygame.Rect((0, 0), (int(self.canvas.shape[1]*self.param.fx),
-                                                    int(self.canvas.shape[0]*self.param.fy)))
+        # Step 1: Instruction screen
+        self.instruction()
 
-        insFig = multiLineSurface('Welcome to the Puzzle Solver!\n\n'
-                                  'Key board instruction:\n'
-                                  '- Up: Move the hand up\n'
-                                  '- Down: Move the hand down\n'
-                                  '- Left: Move the hand left\n'
-                                  '- Right: Move the hand right\n'
-                                  '- z: Pick the puzzle piece\n'
-                                  '- c: Place the puzzle piece if there is one in the hand\n'
-                                  '- o: Run the puzzle solver for the robot\n'
-                                  '- p: Run the puzzle solver for the hand\n\n'
-                                  'Use you mouse to segment the solution board for a calibration!\n\n'
-                                  'Press any key to continue!',
-                         font, rect, WHITE,BLACK)
-        self.pygameFig.blit(insFig, (0, 0))
-        #
-        # font1 = pygame.font.SysFont('chalkduster.ttf', 72)
-        # img1 = font1.render('Welcome to the Puzzle Solver!', True, WHITE)
-        # img2 = font1.render('Instruction:', True, WHITE)
+        # # Step 2: Calibration process
+        # self.calibrate(ID_DISPLAY=ID_DISPLAY)
 
-
-        # self.pygameFig.blit(img1, (20, 50))
-        # self.pygameFig.blit(img2, (20, 72+50))
-
-        pygame.display.update()
-
-        # Instruction
-        insFlag = True
-        while insFlag:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    insFlag = False
-                    break
-
-        # Display solution board
-        theImage = self.planner.manager.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
-        background = pygame.surfarray.make_surface(np.moveaxis(theImage, 0, 1))
-        self.pygameFig = pygame.display.set_mode((int(theImage.shape[1]), int(theImage.shape[0])))
-        self.pygameFig.blit(background, (0, 0))
-
-        # With white background
-        theMask = np.ones_like(theImage,'uint8')*255
-
-        # Calibration
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.MOUSEMOTION:
-                    if (drawing):
-                        mouse_position = pygame.mouse.get_pos()
-                        if last_pos is not None:
-                            # For display
-                            pygame.draw.line(self.pygameFig, WHITE, last_pos, mouse_position, 10)
-
-                            # # For calibration
-                            cv2.line(theMask, last_pos, mouse_position, BLACK, 5)
-                        last_pos = mouse_position
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    mouse_position = (0, 0)
-                    drawing = False
-                    last_pos = None
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    drawing = True
-
-            pressed_keys = pygame.key.get_pressed()
-
-            if pressed_keys[pygame.K_f]:
-                try:
-                    self.cluster_region_list = extract_region(theMask)
-
-                    self.cluster_piece_dict = defaultdict(list)
-
-                    print('Segmentation successful.')
-                    print(f'{len(self.cluster_region_list)} regions in total.')
-
-                    break
-                except:
-                    print('Segmentation not successful. Please try again.')
-
-            pygame.display.update()
-
-        if len(self.cluster_region_list)>0:
-
-            for piece in self.planner.manager.solution.pieces:
-
-                # Mask with 0 and 1
-                mask_piece = np.zeros((theMask.shape[:2]),'uint8')
-                mask_piece = piece.getMask(mask_piece)
-
-                # Count the number of pixels
-                mask_piece_count = np.count_nonzero(mask_piece == 1)
-
-                for idx, cluster_region in enumerate(self.cluster_region_list):
-                    mask_combine = mask_piece + cluster_region
-
-                    mask_combine_count = np.count_nonzero(mask_combine == 2)
-
-                    # Calculate the ratio
-                    ratio = mask_combine_count/mask_piece_count
-
-                    if ratio > 0.5:
-                        self.cluster_piece_dict[idx].append(piece.id)
-                        break
-
-            print(self.cluster_piece_dict)
-
-
-
-
+        # Step 3: Game screen
         theImage = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
