@@ -126,12 +126,12 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
 
 theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
-theHandApperance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
+theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
 # init_agent_loc = [600, 1200]
 init_agent_loc = [50, 50]
 
-theHandApperance.setPlacement(r=init_agent_loc)
-theHand = Hand(theHandApperance)
+theHandAppearance.setPlacement(r=init_agent_loc)
+theHand = Hand(theHandAppearance)
 
 # ==[5] Create a simulator and display.
 #
