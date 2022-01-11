@@ -119,9 +119,10 @@ class SimTime(SimTimeLess):
             finishFlag = True
 
         # Todo: May update the bounds later. Could be slightly off.
-        if step_loc[0] < 0 or step_loc[1] < 0 \
-                or step_loc[0] + self.hand.app.size()[0] >= self.canvas.shape[1] \
-                or step_loc[1] + self.hand.app.size()[1] >= self.canvas.shape[0]:
+        # if step_loc[0] < 0 or step_loc[1] < 0 \
+        #         or step_loc[0] + self.hand.app.size()[0] >= self.canvas.shape[1] \
+        #         or step_loc[1] + self.hand.app.size()[1] >= self.canvas.shape[0]:
+        if step_loc[1] < 0:
             print('Out of the bounds!')
             finishFlag = True
         else:
@@ -203,7 +204,7 @@ class SimTime(SimTimeLess):
         rect = pygame.Rect((0, 0), (int(self.canvas.shape[1] * self.param.fx),
                                     int(self.canvas.shape[0] * self.param.fy)))
 
-        insFig = multiLineSurface('Welcome to the Puzzle Solver!\n\n'
+        insFig = multiLineSurface('Welcome to the Puzzle Solver.\n\n'
                                   'Key board instruction:\n'
                                   '- Up: Move the hand up\n'
                                   '- Down: Move the hand down\n'
@@ -213,8 +214,8 @@ class SimTime(SimTimeLess):
                                   '- c: Place the puzzle piece if there is one in the hand\n'
                                   '- o: Run the puzzle solver for the robot\n'
                                   '- p: Run the puzzle solver for the hand\n\n'
-                                  'Use you mouse to segment the solution board for a calibration!\n\n'
-                                  'Press any key to continue!',
+                                  'Use you mouse to segment the solution board for a calibration.\n\n'
+                                  'Press any key to continue.',
                                   font, rect, WHITE, BLACK)
         self.pygameFig.blit(insFig, (0, 0))
         pygame.display.update()
@@ -409,6 +410,11 @@ class SimTime(SimTimeLess):
                             # Get the hand mask
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
                             theMask = self.hand.app.getMask(theMask)
+
+                            # Get the arm mask
+                            if self.hand.arm_region is not None:
+                                theMask[self.hand.arm_region[0][1]:self.hand.arm_region[1][1], \
+                                self.hand.arm_region[0][0]:self.hand.arm_region[1][0]] =1
 
                             # Invert to work on the other region
                             theMask = np.invert(theMask)

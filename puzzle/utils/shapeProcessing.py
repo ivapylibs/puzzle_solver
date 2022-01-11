@@ -2,7 +2,7 @@
 #
 # @brief    Some shape processing functions.
 #
-# ====================== puzzle.utils.dataProcessing ======================
+# ====================== puzzle.utils.shapeProcessing ======================
 #
 # @file     shapeProcessing.py
 #
@@ -27,7 +27,7 @@ def bb_intersection_over_union(boxA, boxB):
         boxB: A list representing a bounding box.
 
     Returns:
-        The intersection over union value.
+        iou: The intersection over union value.
     """
 
     # Determine the (x, y)-coordinates of the intersection rectangle

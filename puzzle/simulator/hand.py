@@ -18,13 +18,15 @@
 # ========================= puzzle.simulator.hand ========================
 
 import numpy as np
+import cv2
 
 from puzzle.piece.template import Template
 
+# ========================= puzzle.simulator.hand ========================
 
 class Hand:
 
-    def __init__(self, app: Template):
+    def __init__(self, app, arm_image=None, arm_mask=None):
         """
         @brief  The Agent class equip the Base with the actions and the planning ability
 
@@ -32,8 +34,10 @@ class Hand:
             app: A Template instance.
         """
         self.app = app
-
-        self.cache_piece = None  # A piece instance in hand
+        self.arm_image = arm_image # @< The image for the arm part
+        self.arm_mask = arm_mask  # @< The mask for the arm part
+        self.arm_region = None
+        self.cache_piece = None  # @< A piece instance in hand
 
     def move(self, param):
 
@@ -157,8 +161,164 @@ class Hand:
         elif action_type == "pause":
             return self.pause()
 
-    def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=True):
-        self.app.placeInImage(img, offset, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+    def placeInImage(self, img, offset=[0, 0], CONTOUR_DISPLAY=False):
+        """
+        @brief  Insert the hand into the image in the original location.
+
+        Args:
+            img: The source image to put puzzle piece into.
+            offset: The offset list.
+        """
+
+        # Note that tl & br are for hand not arm
+
+        # Top left corner
+        tl = np.array(offset) + self.app.rLoc
+
+        # Bottom right corner
+        br = np.array([self.app.y.image.shape[1] + tl[0], self.app.y.image.shape[0] + tl[1]])
+
+        # Todo: We assume the hand cannot pass the top border
+
+        # The enlarged (x,y)
+        enlarge = [0, 0]
+        if br[1] > img.shape[0]:
+            enlarge[1] = br[1] - img.shape[0]
+        elif tl[1] < 0:
+            enlarge[1] = tl[1]
+
+        # The hand has a small width so it can not cover the whole image width
+        if br[0] > img.shape[1]:
+            enlarge[0] = br[0] - img.shape[1]
+        elif tl[0] < 0:
+            enlarge[0] = tl[0]
+
+
+        img_enlarged = np.zeros((img.shape[0] + abs(enlarge[1]), img.shape[1] + abs(enlarge[0]), 3),
+                                     dtype='uint8')
+
+        rcoords = np.array(offset).reshape(-1, 1) + self.app.rLoc.reshape(-1, 1) + self.app.y.rcoords
+
+        if enlarge[0] >= 0 and enlarge[1] >= 0:
+            # Bottom right region
+
+            img_enlarged[:img.shape[0], :img.shape[1], :] = img
+            img_enlarged[rcoords[1], rcoords[0], :] = self.app.y.appear
+
+            if self.arm_image is not None and self.arm_image is not None and img_enlarged.shape[0] > br[1]:
+                set_height = img_enlarged.shape[0] - br[1]
+
+                self.arm_image = cv2.resize(self.arm_image,(self.arm_image.shape[1],set_height))
+                self.arm_mask = cv2.resize(self.arm_mask,(self.arm_mask.shape[1], set_height))
+
+                # Todo: The images are not perfectly aligned, have to be manually adjusted
+                left = int(br[0] / 2 + tl[0] / 2 - self.arm_image.shape[1] / 2)-11
+                img_enlarged[br[1]:img_enlarged.shape[0],left:left+self.arm_image.shape[1],:] = self.arm_image
+
+                # Todo: Need double-check
+                # tl, br
+                self.arm_region = [ (min(left, img.shape[1]), min(br[1], img.shape[0])),(min(left+self.arm_image.shape[1], img.shape[1]), img.shape[0])]
+
+            img[:, :, :] = img_enlarged[:img.shape[0], :img.shape[1], :]
+
+        elif enlarge[0] < 0 and enlarge[1] >= 0:
+            # Bottom left region
+
+            img_enlarged[:img.shape[0], abs(enlarge[0]):img.shape[1] + abs(enlarge[0]), :] = img
+            img_enlarged[rcoords[1], rcoords[0] + abs(enlarge[0]), :] = self.app.y.appear
+
+            if self.arm_image is not None and self.arm_image is not None and img_enlarged.shape[0] > br[1]:
+                set_height = img_enlarged.shape[0] - br[1]
+
+                self.arm_image = cv2.resize(self.arm_image, (self.arm_image.shape[1], set_height))
+                self.arm_mask = cv2.resize(self.arm_mask, (self.arm_mask.shape[1], set_height))
+
+                # Todo: The images are not perfectly aligned, have to be manually adjusted
+                left = int(br[0] / 2 + tl[0] / 2 - self.arm_image.shape[1] / 2) - 11 + abs(enlarge[0])
+                img_enlarged[br[1]:img_enlarged.shape[0], left:left + self.arm_image.shape[1], :] = self.arm_image
+
+                # Todo: Need double-check
+                # tl, br
+                self.arm_region = [max(left-abs(enlarge[1]),0), min(br[1],img.shape[0])]
+
+            # cv2.imshow('debug',img_enlarged)
+            # cv2.waitKey()
+
+            img[:, :, :] = img_enlarged[:img.shape[0],
+                                abs(enlarge[0]):img.shape[1] + abs(enlarge[0]), :]
+
+        elif enlarge[0] >= 0 and enlarge[1] < 0:
+            # Top right region
+
+            img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]), :img.shape[1], :] = img
+            img_enlarged[rcoords[1], rcoords[0], :] = self.app.y.appear
+            # Add arm image if it is needed
+            if self.arm_image is not None and self.arm_image is not None and img_enlarged.shape[0] > br[1]:
+                set_height = img_enlarged.shape[0] - br[1]
+
+                self.arm_image = cv2.resize(self.arm_image, (self.arm_image.shape[1], set_height))
+                self.arm_mask = cv2.resize(self.arm_mask, (self.arm_mask.shape[1], set_height))
+
+                # Todo: The images are not perfectly aligned, have to be manually adjusted
+                left = int(br[0] / 2 + tl[0] / 2 - self.arm_image.shape[1] / 2) - 11
+                img_enlarged[br[1]:img_enlarged.shape[0], left:left + self.arm_image.shape[1], :] = self.arm_image
+
+                # Todo: Need double-check
+                # tl, br
+                self.arm_region = [max(left-abs(enlarge[1]),0), max(left-abs(enlarge[1]),0)]
+
+            img[:, :, :] = img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]),
+                                :img.shape[1], :]
+        else:
+            # top left region
+
+            img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]),
+            abs(enlarge[0]):img.shape[1] + abs(enlarge[0]), :] = img
+            img_enlarged[rcoords[1], rcoords[0], :] = self.app.y.appear
+            # Add arm image if it is needed
+            if self.arm_image is not None and self.arm_image is not None and img_enlarged.shape[0] > br[1]:
+                set_height = img_enlarged.shape[0] - br[1]
+
+                self.arm_image = cv2.resize(self.arm_image, (self.arm_image.shape[1], set_height))
+                self.arm_mask = cv2.resize(self.arm_mask, (self.arm_mask.shape[1], set_height))
+
+                # Todo: The images are not perfectly aligned, have to be manually adjusted
+                left = int(br[0] / 2 + tl[0] / 2 - self.arm_image.shape[1] / 2) - 11
+                img_enlarged[br[1]:img_enlarged.shape[0], left:left + self.arm_image.shape[1], :] = self.arm_image
+
+                # Todo: Need double-check
+                # tl, br
+                self.arm_region = [max(left - abs(enlarge[1]), 0), max(left - abs(enlarge[1]), 0)]
+
+            img[:, :, :] = img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]),
+                                abs(enlarge[0]):img.shape[1] + abs(enlarge[0]), :]
+
+
+
+        # # 0. pixel check too slow
+        # rcoords = np.array(offset).reshape(-1, 1) + self.app.rLoc.reshape(-1, 1) + self.app.y.rcoords
+        # aa = np.where(rcoords[0] < img.shape[1])[0]
+        # bb = np.where(rcoords[0] >= 0)[0]
+        # cc = np.where(rcoords[1] < img.shape[0])[0]
+        # dd = np.where(rcoords[1] >= 0)[0]
+        # index_filtered = list(set(aa) & set(bb) & set(cc) & set(dd))
+        # rcoords = rcoords[:, index_filtered]
+        # img[rcoords[1], rcoords[0], :] = self.app.y.appear[index_filtered,:]
+
+        # # 1. blending too slow
+        # img2 = np.zeros_like(img)
+        # alpha = np.zeros(img.shape)
+        #
+        # alpha[tl[1]:br[1],tl[0]:br[0],:] = np.tile(self.app.y.mask[:br[1]-tl[1],:br[0]-tl[0]][:, :, None], [1, 1, 3])
+        #
+        # alpha = alpha.astype(float)/255
+        #
+        # img2[tl[1]:br[1],tl[0]:br[0]] = self.app.y.image[:br[1]-tl[1],:br[0]-tl[0]]
+        #
+        # outImage = alpha * img2.astype(float) + (1.0 - alpha)* img.astype(float)
+        # outImage = outImage.astype('uint8')
+        # img[:,:,:] = outImage[:,:,:]
+
 
     @staticmethod
     def buildSphereAgent(radius, color, rLoc=None):

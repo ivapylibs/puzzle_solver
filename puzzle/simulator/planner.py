@@ -102,6 +102,7 @@ class Planner:
         self.record['match'] = record_match_temp
 
         # Debug only
+        # Current id to solution id
         print('Match in the new measured board:', self.manager.pAssignments)
         print('Match in the tracking record:', self.record['match'])
 
@@ -123,7 +124,7 @@ class Planner:
                 # occlusionList.append(index)
                 occlusionList.append(pieceKeysList[index])
 
-        print('Occlusion:', occlusionList)
+        # print('Occlusion:', occlusionList)
 
         # Plan is for the measured piece
         plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)

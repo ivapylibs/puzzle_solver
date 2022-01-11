@@ -171,8 +171,16 @@ class Template:
     def getMask(self, theMask, offset=[0, 0]):
 
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+        # theMask[rcoords[1], rcoords[0]] = 1
 
-        theMask[rcoords[1], rcoords[0]] = 1
+        # Have to deal with the out of bounds situation
+        # Todo: Maybe too slow
+        x_max = np.max(rcoords[0])+1
+        y_max = np.max(rcoords[1])+1
+
+        theMask_enlarged = np.zeros((max(y_max,theMask.shape[0]),max(x_max,theMask.shape[1])),dtype='uint8')
+        theMask_enlarged[rcoords[1], rcoords[0]] = 1
+        theMask[:,:]=theMask_enlarged[:theMask.shape[0],:theMask.shape[1]]
 
         return theMask
 
@@ -187,10 +195,11 @@ class Template:
         """
 
         # Remap coordinates from own image sprite coordinates to bigger
-        # image coordinates.
+        # image coordinates. 2*N
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
 
         # Dump color/appearance information into the image (It will override the original image).
+        # If rcoords is outside the image, they will not be displayed
         theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
         # May have to re-draw the contour for better visualization

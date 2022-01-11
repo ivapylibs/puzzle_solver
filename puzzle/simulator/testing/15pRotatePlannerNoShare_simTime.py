@@ -16,7 +16,6 @@
 
 # ==[0] Prep environment
 import os
-
 import cv2
 import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
@@ -34,6 +33,7 @@ from puzzle.simulator.simTime import SimTime
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
+from puzzle.utils.simProcessing import setHand
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -122,17 +122,29 @@ thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamGrid(areaThre
 
 # ==[4] Read the source image to create a hand.
 #
-fsize = 1
-theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
-theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+# fsize = 1
+# theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
+# theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
+# theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+# theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(10, 400))
 
-theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
-theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-init_agent_loc = [600, 1700]
+# fsize = 3
+# theImageSol = cv2.imread(cpath + '/../../testing/data/hand_arm.png', cv2.IMREAD_UNCHANGED)
+# theMaskSol = theImageSol[:,:,-1]
+# theImageSol = cv2.cvtColor(theImageSol[:,:,:3], cv2.COLOR_BGR2RGB)
+# theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+# theMaskSol = cv2.resize(theMaskSol, (0, 0), fx=fsize, fy=fsize)
+#
+# # cv2.imshow('demo', theMaskSol)
+# # cv2.waitKey()
+# theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
+# init_agent_loc = [600, 1700]
+#
+# theHandAppearance.setPlacement(r=init_agent_loc)
+# theHand = Hand(theHandAppearance)
 
-theHandAppearance.setPlacement(r=init_agent_loc)
-theHand = Hand(theHandAppearance)
+theHand = setHand(init_agent_loc = [600, 1700])
+
 
 # ==[5] Create a simulator and display.
 #
