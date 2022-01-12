@@ -418,6 +418,12 @@ class SimTime(SimTimeLess):
 
                             # Invert to work on the other region
                             theMask = np.invert(theMask)
+
+                            # # Debug only
+                            # mask_debug = (theMask.astype('float')*255).astype('uint8')
+                            # mask_debug = cv2.resize(mask_debug,(0,0), fx=0.5,fy=0.5)
+                            # cv2.imshow('debug', mask_debug)
+                            # cv2.waitKey()
                         else:
                             theMask = None
 

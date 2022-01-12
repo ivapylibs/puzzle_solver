@@ -171,16 +171,45 @@ class Template:
     def getMask(self, theMask, offset=[0, 0]):
 
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
-        # theMask[rcoords[1], rcoords[0]] = 1
 
         # Have to deal with the out of bounds situation
-        # Todo: Maybe too slow
-        x_max = np.max(rcoords[0])+1
-        y_max = np.max(rcoords[1])+1
+        # Since hand is small, there is no chance that it will exceed the left bound or right bound at the same time
+        x_max = np.max(rcoords[0])
+        y_max = np.max(rcoords[1])
+        x_min = np.min(rcoords[0])
+        y_min = np.min(rcoords[1])
 
-        theMask_enlarged = np.zeros((max(y_max,theMask.shape[0]),max(x_max,theMask.shape[1])),dtype='uint8')
-        theMask_enlarged[rcoords[1], rcoords[0]] = 1
-        theMask[:,:]=theMask_enlarged[:theMask.shape[0],:theMask.shape[1]]
+        enlarge = [0,0]
+        if x_min<0:
+            enlarge[0] = x_min
+        elif x_max>theMask.shape[1]:
+            enlarge[0] = x_max+1-theMask.shape[1]
+
+        if y_min<0:
+            enlarge[1] = y_min
+        elif y_max>theMask.shape[0]:
+            enlarge[1] = y_max+1-theMask.shape[0]
+
+        theMask_enlarged = np.zeros((theMask.shape[0]+abs(enlarge[1]), theMask.shape[1]+abs(enlarge[0])), dtype='uint8')
+
+        if enlarge[0]<0 and enlarge[1]<0:
+            theMask_enlarged[rcoords[1]+abs(enlarge[1]), rcoords[0]+abs(enlarge[0])] =1
+            theMask[:, :] = theMask_enlarged[abs(enlarge[1]):theMask.shape[0]+abs(enlarge[1]), \
+                            abs(enlarge[0]):theMask.shape[1]+abs(enlarge[0])]
+
+        elif enlarge[0]>0 and enlarge[1]<0:
+            theMask_enlarged[rcoords[1]+abs(enlarge[1]), rcoords[0]] =1
+            theMask[:, :] = theMask_enlarged[abs(enlarge[1]):theMask.shape[0]+abs(enlarge[1]), \
+                            :theMask.shape[1]]
+
+        elif enlarge[0]<0 and enlarge[1]>0:
+            theMask_enlarged[rcoords[1], rcoords[0]+abs(enlarge[0])] =1
+            theMask[:, :] = theMask_enlarged[:theMask.shape[0], \
+                            abs(enlarge[0]):theMask.shape[1]+abs(enlarge[0])]
+
+        else:
+            theMask_enlarged[rcoords[1], rcoords[0]] = 1
+            theMask[:, :] = theMask_enlarged[:theMask.shape[0], :theMask.shape[1]]
 
         return theMask
 

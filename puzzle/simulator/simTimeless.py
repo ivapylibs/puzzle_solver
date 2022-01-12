@@ -181,6 +181,11 @@ class SimTimeLess(Basic):
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
                             theMask = self.hand.app.getMask(theMask)
 
+                            # Get the arm mask
+                            if self.hand.arm_region is not None:
+                                theMask[self.hand.arm_region[0][1]:self.hand.arm_region[1][1], \
+                                self.hand.arm_region[0][0]:self.hand.arm_region[1][0]] = 1
+
                             # Invert to work on the other region
                             theMask = np.invert(theMask)
                         else:
