@@ -239,7 +239,7 @@ class Hand:
 
                 # Todo: Need double-check
                 # tl, br
-                self.arm_region = [max(left-abs(enlarge[1]),0), min(br[1],img.shape[0])]
+                self.arm_region = [(max(left-abs(enlarge[0]),0), min(br[1],img.shape[0])), (max(left+self.arm_image.shape[1]-abs(enlarge[0]), 0), img.shape[0])]
 
             # cv2.imshow('debug',img_enlarged)
             # cv2.waitKey()
@@ -265,7 +265,7 @@ class Hand:
 
                 # Todo: Need double-check
                 # tl, br
-                self.arm_region = [max(left-abs(enlarge[1]),0), max(left-abs(enlarge[1]),0)]
+                self.arm_region = [ (min(left, img.shape[1]), min(br[1]-abs(enlarge[1]), 0)),(min(left+self.arm_image.shape[1]-abs(enlarge[0]), 0), img.shape[0])]
 
             img[:, :, :] = img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]),
                                 :img.shape[1], :]
@@ -288,7 +288,7 @@ class Hand:
 
                 # Todo: Need double-check
                 # tl, br
-                self.arm_region = [max(left - abs(enlarge[1]), 0), max(left - abs(enlarge[1]), 0)]
+                self.arm_region = [ (min(left-abs(enlarge[0]), 0), min(br[1]-abs(enlarge[1]), 0)),(min(left+self.arm_image.shape[1], img.shape[1]), img.shape[0])]
 
             img[:, :, :] = img_enlarged[abs(enlarge[1]):img.shape[0] + abs(enlarge[1]),
                                 abs(enlarge[0]):img.shape[1] + abs(enlarge[0]), :]
