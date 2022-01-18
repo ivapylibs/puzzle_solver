@@ -22,18 +22,18 @@ ROTATION_ENABLED = True
 # ==[0] Prep environment
 import glob
 import os
-
 import cv2
 import imageio
-import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
+
+import improcessor.basic as improcessor
 
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.manager import Manager, ManagerParms
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.sift import Sift
-from puzzle.simulator.basic import Basic
+from puzzle.simulator.basic import Basic, ParamBasic
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 
@@ -82,7 +82,7 @@ theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
 _, epBoard = theGridMea.swapPuzzle()
 
-# ==[2.2] Put pieces at the right side of the image
+# ==[2.2] Put measured pieces at the right side of the image
 #
 for i in range(epBoard.size()):
     epBoard.pieces[i].setPlacement(r=np.array([2000, 0]), offset=True)
@@ -97,6 +97,8 @@ if ROTATION_ENABLED:
         epBoard.pieces[key] = epBoard.pieces[key].rotatePiece(gt_rotation[-1])
 
 epImage = epBoard.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
+# cv2.imshow('debug', epImage)
+# cv2.waitKey()
 
 # ==[2.4] Create a new Grid instance from the images
 #
@@ -131,7 +133,7 @@ else:
 
 # ==[5] Create a simulator for display
 #
-theSim = Basic(theSolver.current)
+theSim = Basic(theSolver.current, theParams=ParamBasic(2000,5000))
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #
@@ -153,7 +155,7 @@ while 1:
 
     # Since we use the same instance in the simulator and the solver,
     # it will update automatically.
-    theSim.display(ID_DISPLAY=True)
+    theSim.display(ID_DISPLAY=True, BOUNDING_BOX=False)
 
     theSim.fig.suptitle(f'Step {i}', fontsize=20)
     plt.pause(1)

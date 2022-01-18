@@ -109,17 +109,6 @@ class Board:
         else:
             raise RuntimeError('Cannot find the target')
 
-        # rm_index = None
-        # for idx, piece in enumerate(self.pieces):
-        #     if piece.id == id:
-        #         rm_index = idx
-        #         break
-        #
-        # if rm_index is not None:
-        #     del self.pieces[rm_index]
-        # else:
-        #     raise RuntimeError('Cannot find the target')
-
     def clear(self):
         """
         @brief  Clear all the puzzle pieces from the board.
@@ -174,7 +163,7 @@ class Board:
             tauAdj: The threshold of the distance.
 
         Returns:
-            The flag indicating whether two puzzle pieces are adjacent or not.
+            theFlag: The flag indicating whether two puzzle pieces are adjacent or not.
         """
 
         # Based on the nearest points on the contours
@@ -248,7 +237,7 @@ class Board:
         @brief  Return the number of pieces on the board.
 
         Returns:
-            The number of pieces on the board.
+            nPieces: The number of pieces on the board.
         """
 
         nPieces = len(self.pieces)
@@ -261,7 +250,7 @@ class Board:
                 bounding box extents of the board.
 
         Returns:
-            The bounding box side lengths. [x,y]
+            lengths: The bounding box side lengths. [x,y]
         """
 
         # [[min x, min y], [max x, max y]]
@@ -277,7 +266,7 @@ class Board:
                 bounding box of the board.
 
         Returns:
-            The bounding box coordinates. [[min x, min y], [max x, max y]]
+            bbox: The bounding box coordinates. [[min x, min y], [max x, max y]]
         """
 
         if self.size() == 0:
@@ -309,15 +298,6 @@ class Board:
             pLocs: A dict of puzzle piece id & location.
         """
 
-        # @note
-        # Previously, return a list/array of puzzle piece locations.
-        # pLocs = []
-        # for piece in self.pieces:
-        #   pLocs.append(piece.rLoc)
-        #
-        # # from N x 2 to 2 x N
-        # pLocs = np.array(pLocs).reshape(-1,2).T
-
         pLocs = {}
         for key in self.pieces:
             piece = self.pieces[key]
@@ -337,7 +317,8 @@ class Board:
             COLOR: The background color.
             ID_COLOR: The ID color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
-            BOUNDING_BOX: The flag indicating outputting a bounding box area or not (with the original (0,0)).
+            BOUNDING_BOX: The flag indicating outputting a bounding box area (with the updated (0,0)) or not (with the original (0,0)).
+                          Only make sense when there is no given image.
 
         Returns:
             theImage: The rendered image.
@@ -352,10 +333,7 @@ class Board:
 
                     piece = self.pieces[key]
 
-                    if BOUNDING_BOX:
-                        piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
-                    else:
-                        piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                    piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
@@ -364,12 +342,8 @@ class Board:
 
                         y, x = np.nonzero(piece.y.mask)
 
-                        if BOUNDING_BOX:
-                            pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
-                                   int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
-                        else:
-                            pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
-                                   int(piece.rLoc[1] + np.mean(y)) + char_size[1])
+                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
+                               int(piece.rLoc[1] + np.mean(y)) + char_size[1])
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                         cv2.putText(theImage, str(piece.id), pos, font,
@@ -382,8 +356,10 @@ class Board:
             bbox = self.boundingBox().astype('int')
 
             if BOUNDING_BOX:
+                # Just the exact bounding box size
                 theImage = np.full((lengths[1], lengths[0], 3), COLOR, dtype='uint8')
             else:
+                # The original (0,0) and outermost point size
                 theImage = np.full((bbox[1, 1], bbox[1, 0], 3), COLOR, dtype='uint8')
 
             for key in self.pieces:
@@ -430,7 +406,7 @@ class Board:
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
 
         Returns:
-            The figure handle.
+            fh: The figure handle.
         """
 
         if fh:

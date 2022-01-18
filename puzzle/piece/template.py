@@ -173,7 +173,7 @@ class Template:
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
 
         # Have to deal with the out of bounds situation
-        # Since hand is small, there is no chance that it will exceed the left bound or right bound at the same time
+        # Since the hand is small, there is no chance that it will exceed the left bound and the right bound at the same time
         x_max = np.max(rcoords[0])
         y_max = np.max(rcoords[1])
         x_min = np.min(rcoords[0])

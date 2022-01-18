@@ -252,12 +252,12 @@ class Basic:
             theImage: The image to insert pieces into. (optional)
             ID_DISPLAY: The flag indicating ID_DISPLAY or not.
             CONTOUR_DISPLAY: The flag indicating CONTOUR_DISPLAY or not.
-            BOUNDING_BOX: The flag indicating display with a limited bouding box region or not.
+            BOUNDING_BOX: The flag indicating display with a limited bounding box region or not.
 
         """
 
         if not self.fig:
-            self.fig = plt.figure()
+            self.fig = plt.figure(figsize=(24, 18), dpi=80)
 
         if theImage is None:
             self.puzzle.display(theImage=np.zeros_like(self.canvas), fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)

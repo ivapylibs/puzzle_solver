@@ -121,7 +121,6 @@ class Planner:
         pieceKeysList = list(meaBoard.pieces.keys())
         for index in range(meaBoard.adjMat.shape[0]):
             if sum(meaBoard.adjMat[index, :]) > 1:
-                # occlusionList.append(index)
                 occlusionList.append(pieceKeysList[index])
 
         # print('Occlusion:', occlusionList)
