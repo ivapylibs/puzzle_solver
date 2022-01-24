@@ -247,12 +247,16 @@ class FromLayer(centroidMulti):
             # Get ROI, OpenCV style
             x, y, w, h = cv2.boundingRect(c)
 
-            # Double check if ROI has a large IoU with the previous ones
-            skipflag = False
-            for region in regions:
-                if bb_intersection_over_union(region[3], [x, y, x + w, y + h]) > 0.5:
-                    skipflag = True
-                    break
+            # The area checking only count the actual area but we may have some cases where segmentation is scattered
+            if w*h > self.params.areaThresholdUpper:
+                skipflag = True
+            else:
+                # Double check if ROI has a large IoU with the previous ones
+                skipflag = False
+                for region in regions:
+                    if bb_intersection_over_union(region[3], [x, y, x + w, y + h]) > 0.5:
+                        skipflag = True
+                        break
 
             # Todo: A tricky solution to remove all black region, which is for our real scene
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),

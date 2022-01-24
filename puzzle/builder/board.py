@@ -327,7 +327,7 @@ class Board:
         if theImage is not None:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
             lengths = self.extents().astype('int')
-            bbox = self.boundingBox().astype('int')
+            # bbox = self.boundingBox().astype('int')
             if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
                 for key in self.pieces:
 

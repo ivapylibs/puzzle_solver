@@ -33,6 +33,9 @@ class ParamBasic:
     canvas_H: int = 2500  # <- The height of the scene.
     canvas_W: int = 3500  # <- The width of the scene.
 
+    fig_H: int = 15
+    fig_W: int = 20
+
 #
 # ========================= puzzle.simulator.basic ========================
 #
@@ -126,9 +129,6 @@ class Basic:
     def setPieces(self, pLocs):
         """
         @brief  Sets the positions of pieces.
-        @note
-        Yunzhi: Since we use a dict to manage the pLocs input, it does not matter
-        if pLocs have less pieces or not. So we can combine several functions together.
 
         Args:
             pLocs: A dict of puzzle pieces ids and their locations.
@@ -187,7 +187,7 @@ class Basic:
                 finishFlag = True
             else:
 
-                piece_id = action[0] # just for display
+                piece_id = action[0]
 
                 # Translation based on the current match and self.matchSimulator
                 if self.shareFlag == False:
@@ -230,7 +230,7 @@ class Basic:
             ID_DISPLAY: The flag indicating ID_DISPLAY or not.
             COLOR: The color of the background.
             CONTOUR_DISPLAY: The flag indicating CONTOUR_DISPLAY or not.
-            BOUNDING_BOX: The flag indicating display with a limited bouding box region or not.
+            BOUNDING_BOX: The flag indicating display with a limited bounding box region or not.
 
         Returns:
             theImage: The output image.
@@ -257,7 +257,7 @@ class Basic:
         """
 
         if not self.fig:
-            self.fig = plt.figure(figsize=(24, 18), dpi=80)
+            self.fig = plt.figure(figsize=(self.param.fig_W, self.param.fig_H), dpi=80)
 
         if theImage is None:
             self.puzzle.display(theImage=np.zeros_like(self.canvas), fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)

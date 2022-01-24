@@ -108,7 +108,10 @@ class Simple(Base):
         if self.rotation_match is None:
             STEP_WISE = True
 
-        if self.plan is None:
+        # FixMe: If we implement all the actions directly, but not from self.plan, then there will be a bug
+
+        # if self.plan is None:
+        if 1:
             if thePlan is None:
                 if defaultPlan == 'order':
                     plan = self.planOrdered(occlusionList=occlusionList, STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
@@ -133,20 +136,20 @@ class Simple(Base):
                     else:
                         raise RuntimeError('Cannot find this id!')
 
-        # If we have to re-process the image every time, then the saved plan does not make much sense
-        if SAVED_PLAN and self.plan is not None:
-            # Pop out the first action
-            if len(self.plan) > 0:
-
-                plan = [self.plan[0]]
-                self.plan.pop(0)
-                if STEP_WISE == False and len(self.plan) > 0:
-                    plan.append(self.plan[0])
-                    self.plan.pop(0)
-            else:
-                # Reset self.plan
-                self.plan = None
-                plan = [None]
+        # # If we have to re-process the image every time, then the saved plan does not make much sense
+        # if SAVED_PLAN and self.plan is not None:
+        #     # Pop out the first action
+        #     if len(self.plan) > 0:
+        #
+        #         plan = [self.plan[0]]
+        #         self.plan.pop(0)
+        #         if STEP_WISE == False and len(self.plan) > 0:
+        #             plan.append(self.plan[0])
+        #             self.plan.pop(0)
+        #     else:
+        #         # Reset self.plan
+        #         self.plan = None
+        #         plan = [None]
         return plan
 
     def planOrdered(self, occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False):
@@ -251,11 +254,11 @@ class Simple(Base):
 
                 self.rotation_match[best_id_mea] = np.nan
 
-                if STEP_WISE == False:
-                    # # Display the plan
-                    # print(f'Move piece {best_id_mea} by {theCorrect[best_id_mea]}')
-
-                    plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_id_sol]))
+                # if STEP_WISE == False:
+                #     # # Display the plan
+                #     # print(f'Move piece {best_id_mea} by {theCorrect[best_id_mea]}')
+                #
+                #     plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_id_sol]))
 
                 if COMPLETE_PLAN == False:
                     break
@@ -268,7 +271,6 @@ class Simple(Base):
             if COMPLETE_PLAN == False:
                 break
 
-        # return best_id_mea,  False
         return plan
 
     def planNew(self):
