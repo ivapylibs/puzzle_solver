@@ -112,10 +112,6 @@ class Simple(Base):
         if self.rotation_match is None:
             STEP_WISE = True
 
-        # Mandatory check on STEP_WISE. If we want the COMPLETE_PLAN, the option does not make sense.
-        if COMPLETE_PLAN == True:
-            STEP_WISE = False
-
         if SAVED_PLAN is False:
             self.plan = None
 

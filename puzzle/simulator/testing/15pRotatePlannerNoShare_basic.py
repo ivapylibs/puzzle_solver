@@ -113,7 +113,7 @@ theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
-thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000,areaThresholdUpper=60000))
+thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000))
 
 # ==[4] Create a simulator for display
 #

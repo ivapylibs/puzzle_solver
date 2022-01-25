@@ -110,7 +110,7 @@ theMaskMea = improc.apply(epImage)
 # cv2.waitKey()
 
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=55000))
+                                            theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=80000))
 
 # Debug only
 # epImage=theGridMea.toImage(ID_DISPLAY=True,CONTOUR_DISPLAY=True,COLOR=(0,255,0))

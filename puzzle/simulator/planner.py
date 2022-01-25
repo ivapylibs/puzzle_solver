@@ -61,7 +61,7 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, COMPLETE_PLAN=True):
+    def adapt(self, meaBoard, COMPLETE_PLAN=True, SAVED_PLAN=True):
 
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
@@ -126,11 +126,11 @@ class Planner:
         # print('Occlusion:', occlusionList)
 
         # Plan is for the measured piece
-        plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN)
+        plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
         # print(plan)
         return plan
 
-    def process(self, input, COMPLETE_PLAN=True):
+    def process(self, input, COMPLETE_PLAN=True, SAVED_PLAN=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -149,6 +149,6 @@ class Planner:
         else:
             meaBoard = self.measure(input)
 
-        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN)
+        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
 
         return plan
