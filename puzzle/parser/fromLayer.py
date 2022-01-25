@@ -249,16 +249,16 @@ class FromLayer(centroidMulti):
 
             # The area checking only count the actual area but we may have some cases where segmentation is scattered
             if w*h > self.params.areaThresholdUpper:
-                skipflag = True
+                skipFlag = True
             else:
                 # Double check if ROI has a large IoU with the previous ones
-                skipflag = False
+                skipFlag = False
                 for region in regions:
                     if bb_intersection_over_union(region[3], [x, y, x + w, y + h]) > 0.5:
-                        skipflag = True
+                        skipFlag = True
                         break
 
-            # Todo: A tricky solution to remove all black region, which is for our real scene
+            # Todo: A tricky solution to skip regions of all black, which is for our real scene
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
                                                            cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
                 # cv2.imshow('seg_img', seg_img)
@@ -266,7 +266,7 @@ class FromLayer(centroidMulti):
                 # cv2.waitKey()
                 continue
 
-            if not skipflag:
+            if not skipFlag:
                 # Add theMask, theImage, rLoc, the region
                 regions.append((seg_img[y:y + h, x:x + w], I[y:y + h, x:x + w, :], [x, y], [x, y, x + w, y + h]))
 

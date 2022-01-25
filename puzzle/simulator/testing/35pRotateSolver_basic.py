@@ -43,8 +43,9 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template.
 #
 # theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
-# theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
-theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
+theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/map.jpg')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
@@ -101,7 +102,7 @@ if ROTATION_ENABLED:
         epBoard.pieces[key] = epBoard.pieces[key].rotatePiece(gt_rotation[-1])
 
 epImage = epBoard.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
-# cv2.imshow('debug', epImage)
+# cv2.imshow('debug', cv2.resize(epImage,(0,0),fx=0.3,fy=0.3))
 # cv2.waitKey()
 
 # ==[2.4] Create a new Grid instance from the images
@@ -116,15 +117,20 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.dilate, (np.ones((3, 3), np.uint8),)
                            )
 theMaskMea = improc.apply(epImage)
+# cv2.imshow('debug', cv2.resize(theMaskMea,(0,0),fx=0.3,fy=0.3))
+# cv2.waitKey()
 
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
+print('Extracted pieces:', theGridMea.size())
 
 # ==[3] Create a manager
 #
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theManager.process(theGridMea)
+
+print('Sift match:', theManager.pAssignments)
 
 # ==[4] Create simple solver and set up the match
 #
@@ -137,7 +143,7 @@ else:
 
 # ==[5] Create a simulator for display
 #
-theSim = Basic(theSolver.current, theParams=ParamBasic(7000,8000))
+theSim = Basic(theSolver.current, theSolver.desired, theParams=ParamBasic(3000,6000))
 
 # ==[6] Start the solver to take turns, execute the plan, and display the updated board.
 #
@@ -175,12 +181,17 @@ while 1:
 
     print(f'Step {i + 1}:')
 
+    # One Step
     plan = theSolver.takeTurn(defaultPlan='order', STEP_WISE=False, COMPLETE_PLAN=True)
+
+    # Step by step
+    # plan = theSolver.takeTurn(defaultPlan='order', STEP_WISE=True, COMPLETE_PLAN=False)
 
     finishFlag = theSim.takeAction(plan)
 
     i = i + 1
 
+print('Progress:', theSim.progress())
 
 plt.ioff()
 plt.show()

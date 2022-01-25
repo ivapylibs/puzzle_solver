@@ -88,7 +88,8 @@ class Simple(Base):
 
             # self.rotation_match = -np.array(rotation_match)
 
-    def takeTurn(self, thePlan=None, defaultPlan='order', occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False, SAVED_PLAN=False):
+    def takeTurn(self, thePlan=None, defaultPlan='order', occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False,
+                 SAVED_PLAN=True):
         """
         @brief  Create a plan.
 
@@ -98,58 +99,69 @@ class Simple(Base):
             occlusionList: Skip the pieces in the occlusionList.
             STEP_WISE: Perform STEP_WISE(rotation & movement together) action or not.
             COMPLETE_PLAN: Create a complete plan or just a single step action.
-            SAVED_PLAN: Use the saved plan or not
+            SAVED_PLAN: Use the saved plan (self.plan) or not
 
         Returns:
             plan: Processed plan list.
         """
 
-        # Mandatory check on STEP_WISE. Only rotation exists, the option is valid
+        if SAVED_PLAN == True:
+            COMPLETE_PLAN = True
+
+        # Mandatory check on STEP_WISE. Only if rotation does not exist, the option is valid.
         if self.rotation_match is None:
             STEP_WISE = True
 
+        # Mandatory check on STEP_WISE. If we want the COMPLETE_PLAN, the option does not make sense.
+        if COMPLETE_PLAN == True:
+            STEP_WISE = False
+
+        if SAVED_PLAN is False:
+            self.plan = None
+
         # FixMe: If we implement all the actions directly, but not from self.plan, then there will be a bug
 
-        # if self.plan is None:
-        if 1:
+        if self.plan is None:
             if thePlan is None:
                 if defaultPlan == 'order':
-                    plan = self.planOrdered(occlusionList=occlusionList, STEP_WISE=STEP_WISE, COMPLETE_PLAN=COMPLETE_PLAN)
+                    plan = self.planOrdered(occlusionList=occlusionList, STEP_WISE=STEP_WISE,
+                                            COMPLETE_PLAN=COMPLETE_PLAN)
                 elif defaultPlan == 'new':
                     plan = self.planNew()
                 else:
                     raise RuntimeError('No default plan has been correctly initialized.')
 
-                if COMPLETE_PLAN == True:
+                if SAVED_PLAN == True:
                     # Save the complete plan and keep executing it
                     self.plan = plan
+                elif COMPLETE_PLAN == True:
+                    plan.append(None)
+
             else:
                 piece_id = thePlan[0]
                 action_type = thePlan[1]
                 action = thePlan[2]
 
-                for i, piece in enumerate(self.current.pieces):
-                    if piece_id == piece.id:
-                        piece_index = i
-                        plan = [(piece_id, piece_index, action_type, action)]
+                for key in self.current.pieces:
+                    if piece_id ==key:
+                        plan = [(piece_id, piece_id, action_type, action)]
                         break
                     else:
                         raise RuntimeError('Cannot find this id!')
 
-        # # If we have to re-process the image every time, then the saved plan does not make much sense
-        # if SAVED_PLAN and self.plan is not None:
-        #     # Pop out the first action
-        #     if len(self.plan) > 0:
-        #
-        #         plan = [self.plan[0]]
-        #         self.plan.pop(0)
-        #         if STEP_WISE == False and len(self.plan) > 0:
-        #             plan.append(self.plan[0])
-        #             self.plan.pop(0)
-        #     else:
-        #         # Reset self.plan
-        #         self.plan = None
-        #         plan = [None]
+        # If we have to re-process the image every time, then the saved plan does not make much sense
+        if SAVED_PLAN and self.plan is not None:
+            # Pop out the first action
+            if len(self.plan) > 0:
+                plan = [self.plan[0]]
+                self.plan.pop(0)
+                if STEP_WISE == False and len(self.plan) > 0:
+                    plan.append(self.plan[0])
+                    self.plan.pop(0)
+            else:
+                # Reset self.plan
+                self.plan = None
+                plan = [None]
         return plan
 
     def planOrdered(self, occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False):
@@ -175,7 +187,6 @@ class Simple(Base):
 
             for key, angle in self.rotation_match.items():
                 if not np.isnan(angle):
-
                     current_corrected.pieces[key] = current_corrected.pieces[key].rotatePiece(angle)
 
             pLoc_cur = current_corrected.pieceLocations()
@@ -185,9 +196,9 @@ class Simple(Base):
 
         # Rearrange the piece according to the match in the solution board
         pLoc_sol = {}
-        for i in self.match.items():
+        for match in self.match.items():
             # i represents id
-            pLoc_sol[i[1]] = pLoc_cur[self.current.pieces[i[0]].id]
+            pLoc_sol[match[1]] = pLoc_cur[self.current.pieces[match[0]].id]
 
         # Obtain the correction plan for all the matched pieces
         # with id
@@ -208,7 +219,6 @@ class Simple(Base):
                 plan.append(None)
                 return plan
 
-
         x_max, y_max = np.max(self.desired.gc, axis=1)
 
         for i, j in itertools.product(range(int(x_max + 1)), range(int(y_max + 1))):
@@ -224,11 +234,9 @@ class Simple(Base):
                 # print(f'No assignment found')
                 continue
 
-            # Todo: May need a check
-            for key, value in self.match.items():
-                if value == best_id_sol:
-                    best_id_mea = key
-
+            for match in self.match.items():
+                if match[1] == best_id_sol:
+                    best_id_mea = match[0]
 
             # Skip pieces with occlusion
             if best_id_mea in occlusionList:
@@ -244,6 +252,8 @@ class Simple(Base):
                     if np.isnan(self.rotation_match[best_id_mea]) or abs(self.rotation_match[best_id_mea]) < 0.5:
                         continue
 
+            skipFlag = False
+
             # Valid rotation
             if self.rotation_match is not None and not np.isnan(self.rotation_match[best_id_mea]) and abs(
                     self.rotation_match[best_id_mea]) > 0.5:
@@ -254,11 +264,12 @@ class Simple(Base):
 
                 self.rotation_match[best_id_mea] = np.nan
 
-                # if STEP_WISE == False:
-                #     # # Display the plan
-                #     # print(f'Move piece {best_id_mea} by {theCorrect[best_id_mea]}')
-                #
-                #     plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_id_sol]))
+                if STEP_WISE == False:
+                    # # Display the plan
+                    # print(f'Move piece {best_id_mea} by {theCorrect[best_id_mea]}')
+
+                    plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_id_sol]))
+                    skipFlag = True
 
                 if COMPLETE_PLAN == False:
                     break
@@ -266,7 +277,11 @@ class Simple(Base):
             # # Display the plan
             # print(f'Move piece {best_id_mea} by {theCorrect[best_id_sol]}')
 
-            plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_index_sol]))
+            # In some rare cases, we have to skip re-append move action
+            if skipFlag == True:
+                continue
+
+            plan.append((best_id_mea, best_id_mea, 'move', theCorrect[best_id_sol]))
 
             if COMPLETE_PLAN == False:
                 break
@@ -275,12 +290,7 @@ class Simple(Base):
 
     def planNew(self):
         """
-        @brief Not ready yet
-
-        Args:
-            STEP_WISE: If disabled, we will put the puzzle piece's rotation & location
-                        in a single step.
-            COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
+        @brief Implement Dr. Adan Vela's algorithm
 
         Returns:
             plan: The plan list.
@@ -305,8 +315,8 @@ class Simple(Base):
 
         # Rearrange the piece according to the match in the solution board
         pLoc_sol = {}
-        for i in self.match.items():
-            pLoc_sol[i[1]] = pLoc_cur[self.current.pieces[i[0]].id]
+        for match in self.match.items():
+            pLoc_sol[match[1]] = pLoc_cur[self.current.pieces[match[0]].id]
 
         theCorrect = self.desired.corrections(pLoc_sol)
 

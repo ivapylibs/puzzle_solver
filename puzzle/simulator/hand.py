@@ -82,7 +82,10 @@ class Hand:
 
             piece_id = min(theDists, key=theDists.get)
 
-        piece = puzzle.pieces[piece_id]
+        try:
+            piece = puzzle.pieces[piece_id]
+        except:
+            print('s')
 
         if self.pieceInHand(piece.rLoc):
 

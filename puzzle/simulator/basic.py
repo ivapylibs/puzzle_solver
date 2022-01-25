@@ -42,7 +42,7 @@ class ParamBasic:
 
 class Basic:
 
-    def __init__(self, thePuzzle, thePlanner=None, theFig=None, shareFlag=True, theParams=ParamBasic):
+    def __init__(self, thePuzzle, theSolution=None, thePlanner=None, theFig=None, shareFlag=True, theParams=ParamBasic):
         """
         @brief  Constructor for the class. Requires a puzzle board.
 
@@ -53,6 +53,7 @@ class Basic:
 
 
         self.puzzle = thePuzzle  # <- The display board.
+        self.solution = theSolution
 
         self.planner = thePlanner
 
@@ -78,7 +79,7 @@ class Basic:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
 
-    def progress(self, theBoard):
+    def progress(self):
         """
         @brief Check the status of the progress. (Return the ratio of the completed puzzle pieces)
 
@@ -87,18 +88,13 @@ class Basic:
         same id occupies the same place, then it is completed.
         It is not always true. Need further check.
 
-        Args:
-            theBoard: A puzzle board in 1-1 ordered correspondence with the solution.
-
         Returns:
             thePercentage: The progress.
         """
 
-        pLocs = theBoard.pieceLocations()
+        pLocs = self.puzzle.pieceLocations()
 
-        # Todo: Not sure if we need to save a solution board in the simulator or not?
-        # Currently, we use the one saved in the manager
-        inPlace = self.planner.manager.solution.piecesInPlace(pLocs)
+        inPlace = self.solution.piecesInPlace(pLocs)
 
         val_list = [val for _, val in inPlace.items()]
 
@@ -241,6 +237,9 @@ class Basic:
 
         if theMask is not None:
             theImage = cv2.bitwise_and(theImage, theImage, mask=theMask.astype('uint8'))
+
+        # cv2.imshow('debug',cv2.resize(theImage,(0,0),fx=0.3,fy=0.3))
+        # cv2.waitKey()
 
         return theImage
 

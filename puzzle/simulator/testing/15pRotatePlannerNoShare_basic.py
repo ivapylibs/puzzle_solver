@@ -87,7 +87,7 @@ for key in epBoard.pieces:
     epBoard.pieces[key] = epBoard.pieces[key].rotatePiece(gt_rotation[-1])
     # epBoard.pieces[key].setPlacement(r=[2000, 100], offset=True)
 
-epImage = epBoard.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
+epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
 # ==[2.4] Create a new Grid instance from the images
 #

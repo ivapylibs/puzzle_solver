@@ -310,6 +310,12 @@ class Board:
         """
         @brief  Uses puzzle piece locations to create an image for
                 visualizing them.  If given an image, then will place in it.
+                Recommended to provide theImage & BOUNDING_BOX option off.
+                Currently, we have four cases:
+                - Image provided & BOUNDING_BOX off -> An exact region is visible
+                - Image provided & BOUNDING_BOX on -> The visible region will be adjusted. Should have the same size image output.
+                - Image not provided & BOUNDING_BOX off -> May have some trouble if some region is out of the bounds (e.g., -2) then they will be shown on the other boundary.
+                - Image not provided & BOUNDING_BOX on -> A bounding box region is visible.
 
         Args:
             theImage: The image to insert pieces into.
@@ -318,7 +324,6 @@ class Board:
             ID_COLOR: The ID color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
             BOUNDING_BOX: The flag indicating outputting a bounding box area (with the updated (0,0)) or not (with the original (0,0)).
-                          Only make sense when there is no given image.
 
         Returns:
             theImage: The rendered image.
@@ -327,13 +332,23 @@ class Board:
         if theImage is not None:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
             lengths = self.extents().astype('int')
-            # bbox = self.boundingBox().astype('int')
+            bbox = self.boundingBox().astype('int')
+
+            enlarge = [0,0]
+            if bbox[0][0]<0:
+                enlarge[0]=bbox[0][0]
+            if bbox[0][1]<0:
+                enlarge[1]=bbox[0][1]
+
+            theImage_enlarged = np.zeros((theImage.shape[0]+abs(enlarge[0]),theImage.shape[1]+abs(enlarge[1]),3),dtype='uint8')
+
+            # Have to deal with cases where pieces are out of bounds
             if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
                 for key in self.pieces:
 
                     piece = self.pieces[key]
 
-                    piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                    piece.placeInImage(theImage_enlarged, offset=(abs(enlarge[0]),abs(enlarge[1])), CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
@@ -342,12 +357,15 @@ class Board:
 
                         y, x = np.nonzero(piece.y.mask)
 
-                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
-                               int(piece.rLoc[1] + np.mean(y)) + char_size[1])
+                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0]+abs(enlarge[0]),
+                               int(piece.rLoc[1] + np.mean(y)) + char_size[1]+abs(enlarge[1]))
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
-                        cv2.putText(theImage, str(piece.id), pos, font,
+                        cv2.putText(theImage_enlarged, str(piece.id), pos, font,
                                     font_scale, ID_COLOR, 2, cv2.LINE_AA)
+
+                theImage=theImage_enlarged[abs(enlarge[0]):abs(enlarge[0])+theImage.shape[0],abs(enlarge[1]):abs(enlarge[1])+theImage.shape[1],:]
+
             else:
                 raise RuntimeError('The image is too small. Please try again.')
         else:

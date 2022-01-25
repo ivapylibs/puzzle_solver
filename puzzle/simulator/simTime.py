@@ -239,7 +239,7 @@ class SimTime(SimTimeLess):
         last_pos = None
 
         # Display solution board
-        theImage = self.planner.manager.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
+        theImage = self.solution.toImage(ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         background = pygame.surfarray.make_surface(np.moveaxis(theImage, 0, 1))
         self.pygameFig = pygame.display.set_mode((int(theImage.shape[1]), int(theImage.shape[0])))
         self.pygameFig.blit(background, (0, 0))
@@ -289,7 +289,7 @@ class SimTime(SimTimeLess):
 
         if len(self.cluster_region_list) > 0:
 
-            for piece in self.planner.manager.solution.pieces:
+            for piece in self.solution.pieces:
 
                 # Mask with 0 and 1
                 mask_piece = np.zeros((theMask.shape[:2]), 'uint8')
