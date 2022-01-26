@@ -184,7 +184,7 @@ class Arrangement(Board):
 
         return theScore
 
-    def piecesInPlace(self, pLoc):
+    def piecesInPlace(self, pLoc, tauDist=None):
         """
         @brief  Return boolean array indicating whether the piece is
                 correctly in place or not.
@@ -198,9 +198,12 @@ class Arrangement(Board):
 
         errDists = self.distances(pLoc)
 
+        if tauDist is None:
+            tauDist = self.params.tauDist
+
         theScores = {}
         for id, errDist in errDists.items():
-            theScores[id] = errDist < self.params.tauDist
+            theScores[id] = errDist < tauDist
 
         return theScores
 

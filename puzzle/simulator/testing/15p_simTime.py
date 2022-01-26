@@ -68,7 +68,7 @@ _, epBoard = theGridSol.explodedPuzzle(dx=400, dy=400)
 #
 theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
-_, epBoard = theGridMea.swapPuzzle()
+_, epBoard, _ = theGridMea.swapPuzzle()
 
 # ==[3] Read the source image to create a hand.
 #

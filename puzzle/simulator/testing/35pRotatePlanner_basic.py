@@ -9,7 +9,7 @@
 # @file     35pRotatePlanner_basic.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2022/1/17  [created]
+# @date     2022/1/26  [created]
 #
 # ============================ 35pRotatePlanner_basic ===========================
 
@@ -38,18 +38,19 @@ from puzzle.simulator.planner import Planner
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
+np.random.seed(100)
 # ==[1] Read the source image and template.
 #
-# theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
+theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/church.jpg')
 # theImageSol = cv2.imread(cpath + '/../../testing/data/cocacola.jpg')
 # theImageSol = cv2.imread(cpath + '/../../testing/data/map.jpg')
 
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_35p.png')
 # theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 
-theGridMea, theGridSol = create_synthetic_puzzle(theImageSol=theImageSol, theMaskSol_src=theMaskSol_src,
-                                                 ROTATION_ENABLED=ROTATION_ENABLED)
+theGridMea, theGridSol, gt_pAssignments = create_synthetic_puzzle(theImageSol=theImageSol, theMaskSol_src=theMaskSol_src,
+                                                 ROTATION_ENABLED=ROTATION_ENABLED,verbose=False)
 
 # ==[3] Create a manager & simple solver and integrate them into a planner
 #
@@ -57,8 +58,6 @@ theGridMea, theGridSol = create_synthetic_puzzle(theImageSol=theImageSol, theMas
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
 thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000))
-
-print('Sift match:', thePlanner.manager.pAssignments)
 
 # ==[4] Create a simulator for display
 #
@@ -101,16 +100,21 @@ while 1:
     print(f'Step {i + 1}:')
 
     # One Step
-    # plan = thePlanner.process(theSim.puzzle, COMPLETE_PLAN=True, SAVED_PLAN=False)
+    plan = thePlanner.process(theSim.puzzle, COMPLETE_PLAN=True, SAVED_PLAN=False)
 
     # Step by step
-    plan =  thePlanner.process(theSim.puzzle, COMPLETE_PLAN=False)
+    # plan = thePlanner.process(theSim.puzzle, COMPLETE_PLAN=False)
 
     finishFlag = theSim.takeAction(plan)
 
     i = i + 1
 
-print('Progress:', theSim.progress())
+# # Only make sense when all the pieces have been extracted
+# gt_pAssignments
+# thePlanner.manager.pAssignments
+
+# Call the progress to compare rLoc
+print('Progress:', theSim.progress(gt_pAssignments))
 
 plt.ioff()
 plt.show()

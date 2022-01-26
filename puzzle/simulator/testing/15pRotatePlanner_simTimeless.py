@@ -77,7 +77,7 @@ _, epBoard = theGridSol.explodedPuzzle(dx=400, dy=400)
 #
 theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
-_, epBoard = theGridMea.swapPuzzle()
+_, epBoard, _ = theGridMea.swapPuzzle()
 
 # ==[2.3] Randomly rotate the puzzle pieces.
 #

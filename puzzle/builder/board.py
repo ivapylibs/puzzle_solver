@@ -28,6 +28,7 @@
 #
 
 import cv2
+from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -82,11 +83,15 @@ class Board:
             piece: A puzzle piece instance.
 
         """
+
+        # Do not directly modify piece
+        piece_copy = deepcopy(piece)
+
         if ORIGINAL_ID:
-            self.pieces[piece.id] = piece
+            self.pieces[piece_copy.id] = piece_copy
         else:
-            piece.id = self.id_count
-            self.pieces[self.id_count] = piece
+            piece_copy.id = self.id_count
+            self.pieces[self.id_count] = piece_copy
             self.id_count += 1
 
     def rmPiece(self, id):

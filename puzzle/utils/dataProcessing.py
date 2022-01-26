@@ -119,5 +119,23 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
                 topResults.append(match1)
     return topResults
 
+
+def checkKey(dict1, dict2, value):
+    """
+    @brief Check the key & value pairs between two dicts given a query value.
+
+    Args:
+        dict1: Query dict 1.
+        dict2:  Query dict 2.
+        value:  Query value.
+
+    Returns:
+        Whether the keys found are the same.
+    """
+
+    key1 = list(dict1.keys())[list(dict1.values()).index(value)]
+    key2 = list(dict2.keys())[list(dict2.values()).index(value)]
+
+    return key1 == key2
 #
 # ====================== puzzle.utils.dataProcessing ======================

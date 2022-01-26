@@ -277,7 +277,7 @@ class Template:
         @brief  Return the puzzle piece image (cropped).
 
         Returns:
-            The puzzle piece image (cropped).
+            theImage: The puzzle piece image (cropped).
         """
 
         theImage = np.zeros_like(self.y.image)

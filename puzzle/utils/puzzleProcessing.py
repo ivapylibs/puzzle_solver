@@ -154,7 +154,7 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     print('Running through test cases. Will take a bit.')
 
     theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                                theParams=ParamGrid(areaThresholdLower=4000, areaThresholdUpper=200000))
+                                                theParams=ParamGrid(areaThresholdLower=4000, areaThresholdUpper=200000,reorder=True))
     if verbose:
         cv2.imshow('theGridSol', theGridSol.toImage(ID_DISPLAY=True))
         cv2.waitKey()
@@ -163,9 +163,7 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     _, epBoard = theGridSol.explodedPuzzle(dx=explodeDis[0], dy=explodeDis[1])
 
     # Randomly swap the puzzle pieces.
-    theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
-
-    _, epBoard = theGridMea.swapPuzzle()
+    _, epBoard, gt_pAssignments = epBoard.swapPuzzle()
 
     # Put measured pieces at the right side of the image
     for i in range(epBoard.size()):
@@ -199,6 +197,6 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
                                                 theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
     print('Extracted pieces:', theGridMea.size())
 
-    return theGridMea, theGridSol
+    return theGridMea, theGridSol, gt_pAssignments
 #
 # ====================== puzzle.utils.puzzleProcessing ======================

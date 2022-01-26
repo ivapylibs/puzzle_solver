@@ -80,7 +80,7 @@ _, epBoard = theGridSol.explodedPuzzle(dx=125, dy=125)
 #
 theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
-_, epBoard = theGridMea.swapPuzzle()
+_, epBoard, _ = theGridMea.swapPuzzle()
 
 # ==[2.2] Put measured pieces at the right side of the image
 #

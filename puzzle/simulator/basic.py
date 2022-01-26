@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import cv2
 from dataclasses import dataclass
 
+from puzzle.utils.dataProcessing import checkKey
 # ===== Class Helper Elements
 #
 
@@ -79,12 +80,12 @@ class Basic:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
 
-    def progress(self):
+    def progress(self, gt_pAssignments):
         """
         @brief Check the status of the progress. (Return the ratio of the completed puzzle pieces)
 
         @note
-        It is still a simplified function which assumes if a puzzle shares the
+        It is still a simplified function which assumes a puzzle shares the
         same id occupies the same place, then it is completed.
         It is not always true. Need further check.
 
@@ -92,13 +93,31 @@ class Basic:
             thePercentage: The progress.
         """
 
+        # We should check the current display board
         pLocs = self.puzzle.pieceLocations()
 
-        inPlace = self.solution.piecesInPlace(pLocs)
+        # Match may be incomplete
+        pLocs_sol = {}
+        for match in self.planner.manager.pAssignments.items():
+            pLocs_sol[match[1]] = pLocs[match[0]]
 
-        val_list = [val for _, val in inPlace.items()]
+        # Todo: We may add a solution board to the simulator
+        inPlace = self.planner.manager.solution.piecesInPlace(pLocs_sol, tauDist=3)
 
-        thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(inPlace))
+        # val_list = [val for _, val in inPlace.items()]
+        # thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(self.puzzle.pieces))
+
+        # Check if match is correct.
+        # Todo: Only make sense when all the pieces are extracted
+        val_list = []
+        for key in inPlace:
+            if checkKey(self.planner.manager.pAssignments, gt_pAssignments, key):
+                val_list.append(key)
+
+        # # Debug only
+        # print(val_list)
+
+        thePercentage = '{:.1%}'.format(len(val_list) / len(self.puzzle.pieces))
 
         return thePercentage
 
