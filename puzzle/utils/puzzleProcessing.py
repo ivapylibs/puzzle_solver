@@ -26,7 +26,8 @@ from puzzle.builder.board import Board
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
-from puzzle.utils.imageProcessing import cropImage
+from puzzle.utils.imageProcessing import cropImage, preprocess_synthetic_puzzle
+
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -151,8 +152,6 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     theMaskSol = theDet.getState().x
 
     # Create a Grid instance and explode it into a new board
-    print('Running through test cases. Will take a bit.')
-
     theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
                                                 theParams=ParamGrid(areaThresholdLower=4000, areaThresholdUpper=200000,reorder=True))
     if verbose:
@@ -183,12 +182,15 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
 
     # Create a new Grid instance from the images
 
-    # Todo: Need updates, from color may have some problems
-    improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                               improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                               cv2.dilate, (np.ones((3, 3), np.uint8),)
-                               )
-    theMaskMea = improc.apply(epImage)
+    # # Todo: Need updates, from color may have some problems (some have holes)
+    # improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+    #                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
+    #                            cv2.dilate, (np.ones((3, 3), np.uint8),)
+    #                            )
+    # theMaskMea = improc.apply(epImage)
+
+    theMaskMea = preprocess_synthetic_puzzle(epImage, verbose=False)
+
     if verbose:
         cv2.imshow('processedMask', cv2.resize(theMaskMea,(0,0),fx=0.3,fy=0.3))
         cv2.waitKey()

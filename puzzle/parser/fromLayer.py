@@ -25,6 +25,8 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
+from copy import deepcopy
+
 from trackpointer.centroidMulti import centroidMulti
 
 from puzzle.builder.board import Board
