@@ -108,7 +108,7 @@ class FromLayer(centroidMulti):
         if len(self.bMeas.pieces) == 0:
             self.haveMeas = False
         else:
-            # @todo Yunzhi: Eventually, tpt should be updated with a dict or class instance
+            # Todo: Eventually, tpt should be updated with a dict or class instance
             self.tpt = []
             for id, loc in self.bMeas.pieceLocations().items():
                 self.tpt.append(loc)
@@ -121,10 +121,10 @@ class FromLayer(centroidMulti):
         @brief Find the right contours given a binary mask image.
 
         Args:
-          mask: The input binary mask image.
+            mask: The input binary mask image.
 
         Returns:
-          Contour list.
+            desired_cnts: Contour list.
         """
 
         # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
@@ -210,7 +210,7 @@ class FromLayer(centroidMulti):
             M:  Mask image.
 
         Returns:
-            regions(A list of regions (mask, segmented image, location in the source image))
+            regions: A list of regions (mask, segmented image, location in the source image).
         """
         # Convert mask to an image
         mask = M.astype('uint8')
@@ -263,6 +263,7 @@ class FromLayer(centroidMulti):
             # Todo: A tricky solution to skip regions of all black, which is for our real scene
             if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
                                                            cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
+                # Debug only
                 # cv2.imshow('seg_img', seg_img)
                 # cv2.imshow('I', I)
                 # cv2.waitKey()
@@ -279,10 +280,10 @@ class FromLayer(centroidMulti):
         @brief  Convert the region information into puzzle pieces.
 
         Args:
-            regions:    A list of region pairs (mask, segmented image, location in the source image).
+            regions: A list of region pairs (mask, segmented image, location in the source image).
 
         Returns:
-            pieces(A list of puzzle pieces instances.)
+            pieces: A list of puzzle pieces instances.
         """
         pieces = []
         for region in regions:
@@ -311,9 +312,6 @@ class FromLayer(centroidMulti):
         Args:
             I: RGB image.
             M: Mask image.
-
-        Returns:
-
         """
         self.measure(I, M)
 

@@ -876,7 +876,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
     inout = compute_inout(class_image, line_params, (xb, yb), params['inout_distance_threshold'])
     out_dict['inout'] = inout
 
-    # @todo Yunzhi: Currently, we do not need this part
+    # Todo: Currently, we do not need this part
     # side_images = create_side_images(class_image, inout, corners)
     # out_dict['side_images'] = side_images
 

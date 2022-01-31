@@ -47,7 +47,7 @@ def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
         verbose: Whether to debug
 
     Returns:
-        theCalibrated(A board of calibrated pieces)
+        theCalibrated: A board of calibrated pieces
     """
 
     img_path_list = glob.glob(os.path.join(cpath + '/../testing/' + img_folder, '*.png'))
@@ -179,15 +179,6 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     if verbose:
         cv2.imshow('movedPuzzle', cv2.resize(epImage,(0,0),fx=0.3,fy=0.3))
         cv2.waitKey()
-
-    # Create a new Grid instance from the images
-
-    # # Todo: Need updates, from color may have some problems (some have holes)
-    # improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-    #                            improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-    #                            cv2.dilate, (np.ones((3, 3), np.uint8),)
-    #                            )
-    # theMaskMea = improc.apply(epImage)
 
     theMaskMea = preprocess_synthetic_puzzle(epImage, verbose=False)
 

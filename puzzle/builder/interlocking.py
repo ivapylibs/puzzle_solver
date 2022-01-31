@@ -79,7 +79,7 @@ class Interlocking(Adjacent):
     #
     def processInterlocking(self):
 
-        # @todo Yunzhi: Wait for further development
+        # Todo: Wait for further development
 
         self.ilMat = self.adjMat
 

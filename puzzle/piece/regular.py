@@ -36,7 +36,7 @@ class EdgeType(Enum):
     FLAT = 3
 
 
-# @todo Yunzhi: May need to upgrade to other forms when we have rotations
+# Todo: May need to upgrade to other forms when we have rotations
 class EdgeDirection(Enum):
     """
     @brief EdgeDirection used to keep track of the direction of edges

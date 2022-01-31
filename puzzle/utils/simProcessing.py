@@ -38,7 +38,6 @@ def setHand(init_agent_loc, fsize=1):
     """
 
     fsize = 3
-    aa = cpath
     theImageHand = cv2.imread(cpath + '/../testing/data/hand.png', cv2.IMREAD_UNCHANGED)
     theMaskHand = theImageHand[:, :, -1]
     theImageHand = cv2.cvtColor(theImageHand[:, :, :3], cv2.COLOR_BGR2RGB)

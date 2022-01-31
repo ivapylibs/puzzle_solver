@@ -244,7 +244,7 @@ class Gridded(Interlocking):
         # epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
         """
-        @todo Yunzhi: Currently, it is just explode but without changing the order.
+        Todo: Currently, it is just explode but without changing the order.
         Otherwise, gc has to be updated too.
         """
 

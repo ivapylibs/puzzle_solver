@@ -113,7 +113,7 @@ class Edge(MatchDifferent):
                 # Resize to a unit length
                 colorFeaResize = cv2.resize(colorFeaOri, (feaLength, 1)).flatten()
 
-                # # @todo Yunzhi: May need to double check the color space
+                # # Todo: May need to double check the color space
                 # colorFeaResize = cv2.cvtColor(colorFeaResize, cv2.COLOR_RGB2Lab)
 
                 piece.edge[i].colorFea = colorFeaResize

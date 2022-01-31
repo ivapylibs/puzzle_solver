@@ -24,6 +24,8 @@ git clone git@github.com:ivapylibs/improcessor.git
 pip3 install -e improcessor/
 git clone git@github.com:ivapylibs/Lie.git
 pip3 install -e Lie/
+git clone git@github.com:ADCLab/puzzleSolvers.git
+pip3 install -e puzzleSolvers/
 ```
 
 ## Dependencies

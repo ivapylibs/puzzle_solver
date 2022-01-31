@@ -60,7 +60,7 @@ class TwoAgent(Simple):
 
     def setMatch(self, match):
         """
-        @brief  Set up the match
+        @brief  Set up the match.
 
         Args:
             match: The match between the id in the measured board and the solution board.
@@ -82,7 +82,7 @@ class TwoAgent(Simple):
             defaultPlan: The default plan strategy.
 
         Returns:
-            plan (The action plan)
+            plan: The action plan.
         """
 
         print(f'It is agent {self.iMove}\'s turn:')

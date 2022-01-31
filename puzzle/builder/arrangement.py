@@ -93,7 +93,7 @@ class Arrangement(Board):
         for id in pLoc:
             theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
 
-        # @todo Yunzhi: We may not need this check?
+        # Todo: We may not need this check?
         # if len(pLocTrue) == len(pLoc):
         #   for id in pLoc:
         #     theVects[id] = np.array(pLocTrue[id]) - np.array(pLoc[id])
@@ -122,7 +122,7 @@ class Arrangement(Board):
         for id in pLoc:
             theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
 
-        # @todo Yunzhi: We may not need this check?
+        # Todo: We may not need this check?
         # if len(pLocTrue) == len(pLoc):
         #   for id in pLoc:
         #     theDists[id] = np.linalg.norm(np.array(pLocTrue[id]) - np.array(pLoc[id]))
