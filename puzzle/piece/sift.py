@@ -70,6 +70,8 @@ class Sift(MatchSimilar):
         else:
             raise ('The input type is wrong. Need a template instance.')
 
+        # https://stackoverflow.com/questions/60065707/cant-use-sift-in-python-opencv-v4-20
+        # # For opencv-python
         sift_builder = cv2.SIFT_create()
 
         # Focus on the puzzle piece image with mask

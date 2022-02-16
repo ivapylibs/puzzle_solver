@@ -6,6 +6,6 @@ setup(name='puzzle',
       url="https://github.com/ivapylibs/puzzle_solver",
       author='IVALab',
       packages=['puzzle'],
-      install_requires=['numpy', 'scipy', 'matplotlib', 'opencv-python', 'scikit-image', 'scikit-learn',
+      install_requires=['numpy', 'scipy', 'matplotlib', 'opencv-contrib-python', 'scikit-image', 'scikit-learn',
                         'similaritymeasures', 'pygame']
       )

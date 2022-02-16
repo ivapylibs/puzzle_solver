@@ -37,8 +37,7 @@ Requires the installation of the following python packages:
 - ```scipy```
 - ```scikit-learn```
 - ```scikit-image```
-- ```opencv-python >= 4.0.0.21```
+- ```opencv-contrib-python```
 - ```similaritymeasures```
 - ```pygame```
-
 
