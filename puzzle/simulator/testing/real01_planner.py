@@ -47,14 +47,14 @@ theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
 theManager = Manager(copy.deepcopy(theGridSol), ManagerParms(matcher=Sift()))
 bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
 
-f, axarr = plt.subplots(2, 1)
+f, axarr = plt.subplots(3, 1)
 plt.ion()
-for i in range(1,13):
+for i in range(1,40):
 
     print(f'Frame {i}')
 
     time_start = time.time()
-    theImageMea = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_new2/test_yunzhi_mea_{str(i).zfill(3)}.png')
+    theImageMea = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_new3/test_yunzhi_mea_{str(i).zfill(3)}.png')
     theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
     # ==[3] Create an improcessor to obtain the mask.
@@ -90,13 +90,17 @@ for i in range(1,13):
         #
 
         bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
+
+        bTrackImage = thePlanner.record['meaBoard'].toImage(ID_DISPLAY=True)
     except:
         raise RuntimeError(f'Problem with {i}')
 
     axarr[0].imshow(bMeasImage)
     axarr[0].title.set_text(f'Measured board {i}')
-    axarr[1].imshow(bSolImage)
-    axarr[1].title.set_text('Solution board')
+    axarr[1].imshow(bTrackImage)
+    axarr[1].title.set_text('Tracking board')
+    axarr[2].imshow(bSolImage)
+    axarr[2].title.set_text('Solution board')
     plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
 
     # w = plt.waitforbuttonpress()
