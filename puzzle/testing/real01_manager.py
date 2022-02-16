@@ -69,23 +69,23 @@ theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
 theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 
-# ==[2] Create a Grid instance.
+# ==[2] Create aa arrangement instance.
 #
 print('Running through test cases. Will take a bit.')
 
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
-theGrid_Sol = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                             theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
-theGrid_Mea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                             theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
+theArrange_Sol = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                    theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
+theArrange_Mea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                                    theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
 
 # ==[3] Create a manager
 #
 # theManager = manager(theGridSol, managerParms(matcher=edge()))
 
-theManager = Manager(theGrid_Sol, ManagerParms(matcher=Sift()))
-theManager.process(theGrid_Mea)
+theManager = Manager(theArrange_Sol, ManagerParms(matcher=Sift()))
+theManager.process(theArrange_Mea)
 
 # ==[4] Display. Should see some ids on the puzzle pieces
 # while the ids in the assignment board refer to the ids in the solution board.

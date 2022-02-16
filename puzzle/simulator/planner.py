@@ -35,6 +35,7 @@ class Planner:
         self.manager = manager
         self.param = theParams
 
+        # match: id to sol_id
         self.record = {'meaBoard': None, 'match': {}}
 
     def measure(self, img):
@@ -61,7 +62,7 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, COMPLETE_PLAN=True, SAVED_PLAN=True):
+    def adapt(self, meaBoard, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
 
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
@@ -82,7 +83,7 @@ class Planner:
 
             if findFlag == False:
                 # 2) If some pieces are only available on the record board, their status will be marked as unknown.
-                # If their status has been unknown for a while. They will be deleted from the record board.
+                # Todo: If their status has been unknown for a while. They will be deleted from the record board.
                 record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                 record_match_temp[record_board_temp.id_count-1] = record_match[1]
 
@@ -103,34 +104,39 @@ class Planner:
 
         # # Debug only
         # # Current id to solution id
-        # print('Match in the new measured board:', self.manager.pAssignments)
-        # print('Match in the tracking record:', self.record['match'])
+        print('Match in the new measured board:', self.manager.pAssignments)
+
+        # Note that the printed tracking id is not the one used in meaBoard
+        print('Match in the tracking record:', self.record['match'])
 
 
-        # Solver plans for the measured board
-        self.solver.setCurrBoard(meaBoard)
-        self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
+        if RUN_SOLVER:
+            # Solver plans for the measured board
+            self.solver.setCurrBoard(meaBoard)
+            self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
-        # Right now, can only work when puzzle board is not re-processed.
-        # Otherwise, the connected ones will not be considered in the list.
-        # As a result, same effect.
+            # Right now, can only work when puzzle board is not re-processed.
+            # Otherwise, the connected ones will not be considered in the list.
+            # As a result, same effect.
 
-        # Get the index of the pieces with the occlusion and skip them
-        meaBoard.processAdjacency()
-        occlusionList = []
-        pieceKeysList = list(meaBoard.pieces.keys())
-        for index in range(meaBoard.adjMat.shape[0]):
-            if sum(meaBoard.adjMat[index, :]) > 1:
-                occlusionList.append(pieceKeysList[index])
+            # Get the index of the pieces with the occlusion and skip them
+            meaBoard.processAdjacency()
+            occlusionList = []
+            pieceKeysList = list(meaBoard.pieces.keys())
+            for index in range(meaBoard.adjMat.shape[0]):
+                if sum(meaBoard.adjMat[index, :]) > 1:
+                    occlusionList.append(pieceKeysList[index])
 
-        # print('Occlusion:', occlusionList)
+            # print('Occlusion:', occlusionList)
 
-        # Plan is for the measured piece
-        plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
-        # print(plan)
-        return plan
+            # Plan is for the measured piece
+            plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
+            # print(plan)
+            return plan
+        else:
+            return None
 
-    def process(self, input, COMPLETE_PLAN=True, SAVED_PLAN=True):
+    def process(self, input, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -149,6 +155,7 @@ class Planner:
         else:
             meaBoard = self.measure(input)
 
-        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
+        # We have the option to not plan anything
+        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan
