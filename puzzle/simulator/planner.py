@@ -82,8 +82,9 @@ class Planner:
                     break
 
             if findFlag == False:
-                # 2) If some pieces are only available on the record board, their status will be marked as unknown.
-                # Todo: If their status has been unknown for a while. They will be deleted from the record board.
+                # 2) If some pieces are only available on the record board, their status will be marked as TRACKED.
+                # Todo: If their status has been TRACKED for a while. They will be deleted from the record board.
+                self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
                 record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                 record_match_temp[record_board_temp.id_count-1] = record_match[1]
 
@@ -103,12 +104,12 @@ class Planner:
         self.record['match'] = record_match_temp
 
         # # Debug only
-        # # Current id to solution id
+        # Current id to solution id
         print('Match in the new measured board:', self.manager.pAssignments)
-
         # Note that the printed tracking id is not the one used in meaBoard
         print('Match in the tracking record:', self.record['match'])
-
+        for match in self.record['match'].items():
+            print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         if RUN_SOLVER:
             # Solver plans for the measured board
