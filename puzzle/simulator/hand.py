@@ -3,7 +3,7 @@
 # @class    puzzle.simulator.hand
 #
 # @brief    The agent simulates a subject to solve the puzzle task.
-#           It takes the perceived board and the solution board,
+#           It takes the measured board and the solution board,
 #           and plan the next step
 #
 # ========================= puzzle.simulator.hand ========================

@@ -39,8 +39,8 @@ class PieceStatus(Enum):
     """
 
     UNKNOWN = 0
-    PERCEIVED = 1
-    MEASURED = 2
+    MEASURED = 1
+    TRACKED = 2
     INHAND = 3
 
 
@@ -75,12 +75,13 @@ class Template:
             r: The puzzle piece location in the whole image.
             id: The puzzle piece id in the measured board. Be set up by the board.
             theta: The puzzle piece aligned angle.
+            pieceStatus: The status of the puzzle pieces, including UNKNOWN, MEASURED, TRACKED, and INHAND.
         """
 
         self.y = y # @< A PuzzleTemplate instance.
         self.rLoc = np.array(r)  # @< The default location is the top left corner.
         self.id = id    # @< Mainly for display and user operation.
-        self.status = pieceStatus
+        self.status = pieceStatus  # @< To save the status of the puzzle pieces, for tracking purpose.
         self.theta = theta  # @< Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright.
 
     def size(self):
@@ -104,7 +105,7 @@ class Template:
             img: A contour image.
 
         Returns:
-            The aligned angle (degree).
+            theta: The aligned angle (degree).
 
         """
 
@@ -169,6 +170,15 @@ class Template:
                 self.rLoc = np.array(r)
 
     def getMask(self, theMask, offset=[0, 0]):
+        """
+        @brief Get an updated mask of the target
+        Args:
+            theMask: The original mask of the target.
+            offset: The movement.
+
+        Returns:
+            theMask: The updated mask of the target.
+        """
 
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
 
@@ -313,7 +323,7 @@ class Template:
         return fh
 
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.PERCEIVED):
+    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.

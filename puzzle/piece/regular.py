@@ -181,7 +181,7 @@ class Regular(Template):
         return theRegular
 
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.PERCEIVED):
+    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.

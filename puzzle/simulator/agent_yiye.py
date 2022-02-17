@@ -3,7 +3,7 @@
 # @class    puzzle.simulator.agent
 #
 # @brief    The agent simulates a subject to solve the puzzle task.
-#           It takes the perceived board and the solution board,
+#           It takes the measured board and the solution board,
 #           and plan the next step
 #
 # ========================= puzzle.simulator.agent ========================
@@ -72,7 +72,7 @@ class Agent(Actions):
 
     def process(self, meaBoard: Board, execute=True):
         """
-        @brief  Process the current perceived board to produce the next action.
+        @brief  Process the current measured board to produce the next action.
 
         Args:
             meaBoard: The measured board.

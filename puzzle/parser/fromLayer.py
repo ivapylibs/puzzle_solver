@@ -43,7 +43,7 @@ class ParamPuzzle:
     areaThresholdUpper: float = float('inf')
     lengthThresholdLower: float = 1000
     pieceConstructor: any = Template
-    pieceStatus: int = PieceStatus.PERCEIVED
+    pieceStatus: int = PieceStatus.MEASURED
 
 
 #
