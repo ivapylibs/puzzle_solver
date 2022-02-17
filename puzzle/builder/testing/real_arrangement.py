@@ -33,14 +33,15 @@ cpath = fpath.rsplit('/', 1)[0]
 # theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hard/MeaBoard_5.png')
 # theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/Exploded_mea_0.png')
 # theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_paper/test_yunzhi_mea_000.png')
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_paper/test_yunzhi_mea_008.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_paper/test_yunzhi_mea_008.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hand_robot/test_yunzhi_mea_006.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
 #
 print('Press any key to proceed.')
-theMaskSol = preprocess_real_puzzle(theImageSol, verbose=True)
+theMaskSol = preprocess_real_puzzle(theImageSol, verbose=False)
 # cv2.imshow('debug',theMaskSol)
 # cv2.waitKey()
 

@@ -37,7 +37,8 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template to build up the solution board.
 #
 
-VIDEO_DIR = 'puzzle_real_sample_black_paper'
+# VIDEO_DIR = 'puzzle_real_sample_black_paper'
+VIDEO_DIR = 'puzzle_real_sample_black_hand'
 # VIDEO_DIR = 'puzzle_real_sample_black_hand_robot'
 
 theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_mea_000.png')
