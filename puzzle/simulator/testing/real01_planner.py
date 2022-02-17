@@ -36,7 +36,9 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template to build up the solution board.
 #
 
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_new/test_yunzhi_mea_000.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_paper/test_yunzhi_mea_000.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black_hand_robot/test_yunzhi_mea_000.png')
+
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
 theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
@@ -49,12 +51,15 @@ bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
 
 f, axarr = plt.subplots(3, 1)
 plt.ion()
-for i in range(1,40):
+for i in range(1,37):
 
     print(f'Frame {i}')
 
     time_start = time.time()
-    theImageMea = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_new3/test_yunzhi_mea_{str(i).zfill(3)}.png')
+    # theImageMea = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_paper/test_yunzhi_mea_{str(i).zfill(3)}.png')
+    theImageMea = cv2.imread(cpath + f'/../../testing/data/puzzle_real_sample_black_hand_robot/test_yunzhi_mea_{str(i).zfill(3)}.png')
+
+
     theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 
     # ==[3] Create an improcessor to obtain the mask.
