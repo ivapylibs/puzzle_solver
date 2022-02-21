@@ -37,8 +37,8 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template to build up the solution board.
 #
 
-# VIDEO_DIR = 'puzzle_real_sample_black_paper'
-VIDEO_DIR = 'puzzle_real_sample_black_hand'
+VIDEO_DIR = 'puzzle_real_sample_black_paper'
+# VIDEO_DIR = 'puzzle_real_sample_black_hand'
 # VIDEO_DIR = 'puzzle_real_sample_black_hand_robot'
 
 theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_mea_000.png')
@@ -46,7 +46,7 @@ theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_m
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
 theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                            theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
+                                            theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=13000, grid=(3,3)))
 
 #  ==[2] Create a manager
 
@@ -79,7 +79,7 @@ for i in range(1,len(file_list)):
     # ==[4] Create an arrangement instance.
     #
     theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                                theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=13000))
+                                                theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=13000, grid=(3,3) ))
 
     # ==[5] Manager processing
     #
@@ -117,7 +117,7 @@ for i in range(1,len(file_list)):
     # Debug only
     # plt.waitforbuttonpress()
 
-    plt.pause(1)
+    plt.pause(0.01)
 
 plt.ioff()
 plt.show()

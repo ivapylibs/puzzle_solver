@@ -157,27 +157,29 @@ class Sift(MatchSimilar):
 
         # Note: model.translation is not 100% consistent with what we what. Use pieceLocation instead.
 
-        # Robustly estimate affine transform model with RANSAC
-        if len(src) > 3:
-            model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
-                                           residual_threshold=2, max_trials=100)
-            outliers = inliers == False
+        return distance > self.tau, np.rad2deg(model.rotation), model.params
 
-            # # Debug only
-            # fig, ax = plt.subplots(nrows=1, ncols=1)
-            # inlier_idxs = np.nonzero(inliers)[0]
-            # src2 = np.array([[i[1]-piece_A.rLoc[1], i[0]-piece_A.rLoc[0]] for i in src])
-            # dst2 = np.array([[i[1]-piece_B.rLoc[1], i[0]-piece_B.rLoc[0]] for i in dst])
-            #
-            # # Follow row, col order in plot_matches
-            # plot_matches(ax, piece_A.y.image, piece_B.y.image, src2, dst2,
-            #              np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
-            #
-            # plt.show()
-
-            return distance > self.tau, np.rad2deg(model_robust.rotation), model_robust.params
-        else:
-            return distance > self.tau, np.rad2deg(model.rotation), model.params
+        ## Robustly estimate affine transform model with RANSAC. However, too slow
+        # if len(src) > 3:
+        #     model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
+        #                                    residual_threshold=2, max_trials=100)
+        #     outliers = inliers == False
+        #
+        #     # # Debug only
+        #     # fig, ax = plt.subplots(nrows=1, ncols=1)
+        #     # inlier_idxs = np.nonzero(inliers)[0]
+        #     # src2 = np.array([[i[1]-piece_A.rLoc[1], i[0]-piece_A.rLoc[0]] for i in src])
+        #     # dst2 = np.array([[i[1]-piece_B.rLoc[1], i[0]-piece_B.rLoc[0]] for i in dst])
+        #     #
+        #     # # Follow row, col order in plot_matches
+        #     # plot_matches(ax, piece_A.y.image, piece_B.y.image, src2, dst2,
+        #     #              np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
+        #     #
+        #     # plt.show()
+        #
+        #     return distance > self.tau, np.rad2deg(model_robust.rotation), model_robust.params
+        # else:
+        #     return distance > self.tau, np.rad2deg(model.rotation), model.params
 
 #
 # ================================ puzzle.piece.sift ================================
