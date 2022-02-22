@@ -295,7 +295,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
             # Get ROI, OpenCV style
             x, y, w, h = cv2.boundingRect(c)
 
-            # Double check if ROI has a large IoU with the previous ones
+            # Double check if ROI has a large IoU with the previous ones, then discard it
             skipFlag = False
             for region in regions_single:
                 if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:
@@ -455,7 +455,7 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20
             # Get ROI, OpenCV style
             x, y, w, h = cv2.boundingRect(c)
 
-            # Double check if ROI has a large IoU with the previous ones
+            # Double check if ROI has a large IoU with the previous ones, then discard it
             skipFlag = False
             for region in regions_single:
                 if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:

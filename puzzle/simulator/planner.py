@@ -108,8 +108,8 @@ class Planner:
         print('Match in the new measured board:', self.manager.pAssignments)
         # Note that the printed tracking id is not the one used in meaBoard
         print('Match in the tracking record:', self.record['match'])
-        for match in self.record['match'].items():
-            print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
+        # for match in self.record['match'].items():
+        #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         if RUN_SOLVER:
             # Solver plans for the measured board

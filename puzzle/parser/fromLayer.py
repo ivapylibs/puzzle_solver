@@ -253,7 +253,7 @@ class FromLayer(centroidMulti):
             if w*h > self.params.areaThresholdUpper:
                 skipFlag = True
             else:
-                # Double check if ROI has a large IoU with the previous ones
+                # Double check if ROI has a large IoU with the previous ones, then discard it
                 skipFlag = False
                 for region in regions:
                     if bb_intersection_over_union(region[3], [x, y, x + w, y + h]) > 0.5:

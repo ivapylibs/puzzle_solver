@@ -37,28 +37,32 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template to build up the solution board.
 #
 
-VIDEO_DIR = 'puzzle_real_sample_black_paper'
+# VIDEO_DIR = 'puzzle_real_sample_black_paper'
 # VIDEO_DIR = 'puzzle_real_sample_black_hand'
+VIDEO_DIR = 'puzzle_real_sample_black_hand_2'
 # VIDEO_DIR = 'puzzle_real_sample_black_hand_robot'
 
 theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_mea_000.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
-theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                            theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=13000, grid=(3,3)))
 
-#  ==[2] Create a manager
+theArrangeSol = Arrangement.buildFrom_ImageAndMask(theImageSol, theMaskSol,
+                                                   theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000))
 
-theManager = Manager(copy.deepcopy(theGridSol), ManagerParms(matcher=Sift()))
+#  ==[2] Create a manager & an empty planner
+
+theManager = Manager(copy.deepcopy(theArrangeSol), ManagerParms(matcher=Sift()))
 bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
+
+thePlanner = None
 
 f, axarr = plt.subplots(3, 1)
 plt.ion()
 
 file_list = glob.glob(cpath + f'/../../testing/data/{VIDEO_DIR}/*.png')
 
-for i in range(1,len(file_list)):
+for i in range(0,len(file_list)):
 
     print(f'Frame {i}')
 
@@ -72,26 +76,26 @@ for i in range(1,len(file_list)):
     #
     theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
 
-    # Debug only
+    # # Debug only
     # cv2.imshow('debug', theMaskMea)
     # cv2.waitKey()
 
     # ==[4] Create an arrangement instance.
     #
-    theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
-                                                theParams=ParamGrid(areaThresholdLower=1000, areaThresholdUpper=13000, grid=(3,3) ))
+
+    theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,
+                                                       theParams=ParamArrange(areaThresholdLower=1000, areaThresholdUpper=13000 ))
 
     # ==[5] Manager processing
     #
     try:
-        theManager.process(theGridMea)
+        theManager.process(theArrangeMea)
 
-        # Todo: Currently, only work on the first frame, may update later
-        if i==1:
-            theSolver = Simple(theGridSol, theGridMea)
-            thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000))
+        if thePlanner is None:
+            theSolver = Simple(theArrangeSol, theArrangeMea)
+            thePlanner = Planner(theSolver, theManager, ParamArrange(areaThresholdLower=1000))
 
-        plan = thePlanner.process(theGridMea, COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+        plan = thePlanner.process(theArrangeMea, COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
         time_end = np.round(time.time() - time_start, 2)
         print(f'Time usage: {time_end}s')
@@ -104,7 +108,8 @@ for i in range(1,len(file_list)):
 
         bTrackImage = thePlanner.record['meaBoard'].toImage(ID_DISPLAY=True)
     except:
-        raise RuntimeError(f'Problem with {i}')
+        print(f'Problem with {i}')
+        # plt.waitforbuttonpress()
 
     axarr[0].imshow(bMeasImage)
     axarr[0].title.set_text(f'Measured board {i}')
@@ -114,7 +119,7 @@ for i in range(1,len(file_list)):
     axarr[2].title.set_text('Solution board')
     plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
 
-    # Debug only
+    # # Debug only
     # plt.waitforbuttonpress()
 
     plt.pause(0.01)
