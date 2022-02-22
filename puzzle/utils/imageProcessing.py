@@ -296,12 +296,12 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
             x, y, w, h = cv2.boundingRect(c)
 
             # Double check if ROI has a large IoU with the previous ones
-            skipflag = False
+            skipFlag = False
             for region in regions_single:
                 if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:
-                    skipflag = True
+                    skipFlag = True
                     break
-            if not skipflag:
+            if not skipFlag:
                 regions_single.append((seg_img, area, [x, y, x + w, y + h]))
 
         regions_single.sort(key=lambda x: x[1])
@@ -456,12 +456,12 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20
             x, y, w, h = cv2.boundingRect(c)
 
             # Double check if ROI has a large IoU with the previous ones
-            skipflag = False
+            skipFlag = False
             for region in regions_single:
                 if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:
-                    skipflag = True
+                    skipFlag = True
                     break
-            if not skipflag:
+            if not skipFlag:
                 regions_single.append((seg_img, area, [x, y, x + w, y + h]))
 
         regions_single.sort(key=lambda x: x[1])

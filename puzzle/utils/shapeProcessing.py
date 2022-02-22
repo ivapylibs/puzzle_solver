@@ -19,7 +19,7 @@
 
 def bb_intersection_over_union(boxA, boxB):
     """
-    @brief  Compute the intersection of two boundingboxes.
+    @brief  Compute the intersection of two bounding boxes.
             See https://gist.github.com/meyerjo/dd3533edc97c81258898f60d8978eddc
 
     Args:
@@ -47,7 +47,7 @@ def bb_intersection_over_union(boxA, boxB):
 
     # Compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
+    # areas - the intersection area
     iou = interArea / float(boxAArea + boxBArea - interArea)
 
     # Return the intersection over union value
