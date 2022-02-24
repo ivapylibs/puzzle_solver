@@ -35,13 +35,13 @@ from puzzle.utils.pygameProcessing import multiLineSurface
 
 @dataclass
 class ParamST(ParamSTL):
-    delta_t: float = 0.1  # <- Unit: s. The time length for a simulation step.
-    speed: float = 100  # <- Unit: pixel/s. The speed of the agent movement.
-    static_duration: float = 0.1  # <- Unit: s. The duration of the static actions.
-    FPS: int = 60  # <- Flash rate for the simulator.
+    delta_t: float = 0.1  # @< Unit: s. The time length for a simulation step.
+    speed: float = 100  # @< Unit: pixel/s. The speed of the agent movement.
+    static_duration: float = 0.1  # @< Unit: s. The duration of the static actions.
+    FPS: int = 60  # @< Flash rate for the simulator.
 
-    fx: float = 0.5  # <- The x scale of display.
-    fy: float = 0.5  # <- The y scale of display.
+    fx: float = 0.5  # @< The x scale of display.
+    fy: float = 0.5  # @< The y scale of display.
 
 class SimTime(SimTimeLess):
     """
@@ -195,7 +195,10 @@ class SimTime(SimTimeLess):
                 break
 
     def instruction(self):
+        """
+        @brief Display a screen with some instructions.
 
+        """
         WHITE = (255, 255, 255)
         BLACK = (0, 0, 0)
 
@@ -231,7 +234,13 @@ class SimTime(SimTimeLess):
                     break
 
     def calibrate(self, ID_DISPLAY=True):
+        """
+        @brief Provide the user with an option to manually segment the solution board into several regions by mouse. The regions could be used later.
 
+        Args:
+            ID_DISPLAY: Display the ID or not.
+
+        """
         drawing = False
         mouse_position = (0, 0)
         WHITE = (255, 255, 255)
@@ -460,6 +469,7 @@ class SimTime(SimTimeLess):
         # Step 1: Instruction screen
         self.instruction()
 
+        # If only needed, we can use the Calibration process to get the cluster assignment
         # # Step 2: Calibration process
         # self.calibrate(ID_DISPLAY=ID_DISPLAY)
 

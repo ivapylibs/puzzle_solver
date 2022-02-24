@@ -31,8 +31,8 @@ from puzzle.utils.dataProcessing import checkKey
 @dataclass
 class ParamBasic:
 
-    canvas_H: int = 2500  # <- The height of the scene.
-    canvas_W: int = 3500  # <- The width of the scene.
+    canvas_H: int = 2500  # @< The height of the scene.
+    canvas_W: int = 3500  # @< The width of the scene.
 
     fig_H: int = 15
     fig_W: int = 20
@@ -53,10 +53,10 @@ class Basic:
         """
 
 
-        self.puzzle = thePuzzle  # <- The display board.
-        self.solution = theSolution
+        self.puzzle = thePuzzle  # @< The display board.
+        self.solution = theSolution # @< The solution board.
 
-        self.planner = thePlanner
+        self.planner = thePlanner # @< The planner for the robot (without hand).
 
         self.param = theParams
 
@@ -71,11 +71,11 @@ class Basic:
         # The setting for the displayed board. If True, we assume the planner will share
         # the same board instance with the simulator. Otherwise, they will be different.
         # Accordingly, the takeAction operation has to be translated first.
+        # shareFlag is more realistic
         self.shareFlag = shareFlag
 
         # We only need the matched index.
-        # It is only used for simulation cases so current matching should always be perfect.
-        #
+        # It is only used for simulation cases and we assume that current matching should always be perfect.
         if shareFlag == False:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments

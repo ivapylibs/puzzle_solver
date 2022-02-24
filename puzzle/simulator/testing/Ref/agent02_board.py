@@ -115,7 +115,7 @@ ax = plt.gca()
 vis_scene(init_board, canvas, agent=agent, title="Initial Scene", ax=ax)
 plt.pause(1)
 
-# plt.pause(7)    #<- give me time to setup for the gif recording.
+# plt.pause(7)    #@< give me time to setup for the gif recording.
 
 
 # ==[3] Agent executes the action until finishing the puzzle
