@@ -19,14 +19,20 @@
 
 import numpy as np
 import cv2
+from dataclasses import dataclass
 
 from puzzle.piece.template import Template
 
 # ========================= puzzle.simulator.hand ========================
 
+@dataclass
+class ParamHand:
+    pieceHandDis: float = 120  # @< Unit: pixel. The distance from the piece to the top-left hand region.
+                              # It should be relevant to the area of the hand.
+
 class Hand:
 
-    def __init__(self, app, arm_image=None, arm_mask=None):
+    def __init__(self, app, arm_image=None, arm_mask=None, theParams=ParamHand):
         """
         @brief  The Agent class equip the Base with the actions and the planning ability
 
@@ -38,6 +44,8 @@ class Hand:
         self.arm_mask = arm_mask  # @< The mask for the arm part
         self.arm_region = None
         self.cache_piece = None  # @< A piece instance in hand
+
+        self.param = theParams
 
     def move(self, param):
 
@@ -55,11 +63,11 @@ class Hand:
 
         return (True, None)
 
-    def pieceInHand(self, rLoc):
+    def pieceInHand(self, rLoc, dis=80):
 
         theDist = np.linalg.norm(np.array(rLoc) - np.array(self.app.rLoc))
 
-        return theDist < 80
+        return theDist < dis
 
     def pick(self, puzzle, piece_id=None):
         """
@@ -87,7 +95,7 @@ class Hand:
         except:
             print('s')
 
-        if self.pieceInHand(piece.rLoc):
+        if self.pieceInHand(piece.rLoc, self.param.pieceHandDis):
 
             print('Pick the piece.')
 

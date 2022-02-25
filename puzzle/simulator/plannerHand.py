@@ -3,7 +3,8 @@
 # @class    puzzle.simulator.plannerHand
 #
 # @brief    The planner for producing the action sequence to solve the puzzle.
-#           Hand needs to have more interpretations.
+#           Hand needs to have more interpretations for the action. Mainly for simulation.
+#           It is only useful for the synthetic case.
 # @note     Yunzhi: more like a wrapper of solver & manager in the test script.
 #
 # ========================= puzzle.simulator.plannerHand ========================
@@ -35,7 +36,7 @@ class PlannerHand(Planner):
         """
         super(PlannerHand, self).__init__(solver, manager, theParams=theParams)
 
-    def process(self, input, hand, COMPLETE_PLAN=True):
+    def process(self, input, hand, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -43,9 +44,11 @@ class PlannerHand(Planner):
             input: A measured board or an RGB image.
             hand: The hand instance.
             COMPLETE_PLAN: Whether to plan the whole sequence.
-
+            SAVED_PLAN: Use the saved plan (self.plan) or not.
+            RUN_SOLVER: Whether to compute the solver to get the next action plan.
+                        Otherwise, only the board will be recognized and updated.
         Returns:
-            plan_new(The updated plan for hand)
+            plan_new: The updated plan for hand.
         """
 
         if issubclass(type(input), Board):
@@ -54,10 +57,13 @@ class PlannerHand(Planner):
             # Remove the hand area
             meaBoard = self.measure(input)
 
-        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN)
+        plan = self.adapt(meaBoard, rLoc_hand=hand.app.rLoc, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
-        # Interpretations for hand, more like ants moving
+        # Interpretations for hand one by one
         plan_new = []
+
+        if plan is None:
+            return plan_new
 
         for i, action in enumerate(plan):
             if action is None:

@@ -3,6 +3,7 @@
 # @class    puzzle.simulator.planner
 #
 # @brief    The planner for producing the action sequence to solve the puzzle.
+#           This one is more general for most cases.
 # @note     Yunzhi: more like a wrapper of solver & manager in the test script.
 #
 # ========================= puzzle.simulator.planner ========================
@@ -36,7 +37,7 @@ class Planner:
         self.param = theParams
 
         # match: id to sol_id
-        self.record = {'meaBoard': None, 'match': {}}
+        self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
 
     def measure(self, img):
 
@@ -62,13 +63,36 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def adapt(self, meaBoard, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
 
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
 
         record_board_temp = Board()
         record_match_temp = {}
+
+
+
+        # For place
+        flagFound_place = False
+        if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
+
+            if not np.array_equal(rLoc_hand,self.record['rLoc_hand']):
+                # Check if there was no puzzle piece in the tracker board before in the hand region (last saved)
+                for piece in self.record['meaBoard'].pieces.values():
+
+                    if piece.status == PieceStatus.MEASURED and \
+                        np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 50:
+                            flagFound_place = True
+                            break
+
+                # Check if we can see a new piece in the hand region (last saved)
+                if flagFound_place is False:
+                    for piece in meaBoard.pieces.values():
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 50:
+                            print('The hand just dropped a piece')
+                            break
+
 
         # For tracking
         for record_match in self.record['match'].items():
@@ -100,14 +124,44 @@ class Planner:
                 record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
                 record_match_temp[record_board_temp.id_count-1] = new_match[1]
 
+        # Update
         self.record['meaBoard'] = record_board_temp
         self.record['match'] = record_match_temp
 
-        # # Debug only
-        # Current id to solution id
-        print('Match in the new measured board:', self.manager.pAssignments)
-        # Note that the printed tracking id is not the one used in meaBoard
-        print('Match in the tracking record:', self.record['match'])
+        # For pick
+        flagFound_pick = False
+        if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
+            if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
+                # Check if there was a piece in the hand region (last saved)
+                for piece in self.record['meaBoard'].pieces.values():
+
+                    # Be careful about the distance thresh (It should be large enough),
+                    # when picked up the piece, the hand may be far from the original piece rLoc,
+                    if piece.status == PieceStatus.TRACKED and \
+                            np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 120:
+                        flagFound_pick = True
+                        break
+
+                # Check if there was no puzzle piece in the hand region (last saved)
+                if flagFound_pick is True:
+                    flagFound_pick_2 = False
+                    for piece in meaBoard.pieces.values():
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 50:
+                            flagFound_pick_2 = True
+                            break
+
+                    if flagFound_pick_2 is False:
+                        print('The hand just picked up a piece')
+
+        self.record['rLoc_hand'] = rLoc_hand
+
+        # # # Debug only
+        # if self.record['rLoc_hand'] is not None:
+        #     print('Current hand location:', self.record['rLoc_hand'])
+        # # Current id to solution id
+        # print('Match in the new measured board:', self.manager.pAssignments)
+        # # Note that the printed tracking id is not the one used in meaBoard nor the one used in DisplayBoard (simulator)
+        # print('Match in the tracking record:', self.record['match'])
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
@@ -137,7 +191,7 @@ class Planner:
         else:
             return None
 
-    def process(self, input, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def process(self, input, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -146,7 +200,9 @@ class Planner:
         Args:
             input: A measured board or RGB image.
             COMPLETE_PLAN: Whether to plan the whole sequence.
-
+            SAVED_PLAN: Use the saved plan (self.plan) or not.
+            RUN_SOLVER: Whether to compute the solver to get the next action plan.
+                        Otherwise, only the board will be recognized and updated.
         Returns:
             plan: The action plan for the simulator to perform
         """
@@ -157,6 +213,6 @@ class Planner:
             meaBoard = self.measure(input)
 
         # We have the option to not plan anything
-        plan = self.adapt(meaBoard, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+        plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan

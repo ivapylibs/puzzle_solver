@@ -105,15 +105,14 @@ class Simple(Base):
             plan: Processed plan list.
         """
 
-        if SAVED_PLAN == True:
+        if SAVED_PLAN is True:
             COMPLETE_PLAN = True
+        else:
+            self.plan = None
 
         # Mandatory check on STEP_WISE. Only if rotation does not exist, the option is valid.
         if self.rotation_match is None:
             STEP_WISE = True
-
-        if SAVED_PLAN is False:
-            self.plan = None
 
         # FixMe: If we implement all the actions directly, but not from self.plan, then there will be a bug
 

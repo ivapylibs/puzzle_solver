@@ -215,6 +215,7 @@ class SimTime(SimTimeLess):
                                   '- Right: Move the hand right\n'
                                   '- z: Pick the puzzle piece\n'
                                   '- c: Place the puzzle piece if there is one in the hand\n'
+                                  '- i: Run the hand\'s planner to update its boards\n' 
                                   '- o: Run the puzzle solver for the robot\n'
                                   '- p: Run the puzzle solver for the hand\n\n'
                                   'Use you mouse to segment the solution board for a calibration.\n\n'
@@ -385,6 +386,49 @@ class SimTime(SimTimeLess):
                 self.cache_action.append(["pick", None])
             elif key[pygame.K_c]:
                 self.cache_action.append(["place", None])
+
+            elif key[pygame.K_u]:
+                print(f"Hand's location: {self.hand.app.rLoc}")
+
+            elif key[pygame.K_i]:
+                print('The hand\'s planner only updates its boards.')
+
+                # Let the hand plays
+                if self.plannerHand is None:
+                    print('plannerHand has not been set up yet.')
+                else:
+                    if self.shareFlag == True:
+                        _ = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True, RUN_SOLVER=False)
+                    else:
+
+                        # Enable hand occlusion, assume this info can be used by the planner
+                        if self.param.HAND_OCCLUSION == True:
+                            # Get the hand mask
+                            theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
+                            theMask = self.hand.app.getMask(theMask)
+
+                            # Get the arm mask
+                            if self.hand.arm_region is not None:
+                                theMask[self.hand.arm_region[0][1]:self.hand.arm_region[1][1], \
+                                self.hand.arm_region[0][0]:self.hand.arm_region[1][0]] = 1
+
+                            # Invert to work on the other region
+                            theMask = np.invert(theMask)
+
+                            # # Debug only
+                            # mask_debug = (theMask.astype('float')*255).astype('uint8')
+                            # mask_debug = cv2.resize(mask_debug,(0,0), fx=0.5,fy=0.5)
+                            # cv2.imshow('debug', mask_debug)
+                            # cv2.waitKey()
+                        else:
+                            theMask = None
+
+                        _ = self.plannerHand.process(
+                            self.toImage(theImage=np.zeros_like(self.canvas), theMask=theMask,
+                                         ID_DISPLAY=False, CONTOUR_DISPLAY=False, BOUNDING_BOX=False), self.hand,
+                            COMPLETE_PLAN=False, RUN_SOLVER=False)
+
+
             elif key[pygame.K_o]:
                 print('The robot executes a move.')
 
@@ -414,7 +458,7 @@ class SimTime(SimTimeLess):
                         plan = self.plannerHand.process(self.puzzle, self.hand, COMPLETE_PLAN=True)
                     else:
 
-                        # Enable hand occlusion
+                        # Enable hand occlusion, assume this info can be used by the planner
                         if self.param.HAND_OCCLUSION == True:
                             # Get the hand mask
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
