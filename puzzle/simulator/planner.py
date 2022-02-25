@@ -78,18 +78,18 @@ class Planner:
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
             if not np.array_equal(rLoc_hand,self.record['rLoc_hand']):
-                # Check if there was no puzzle piece in the tracker board before in the hand region (last saved)
+                # Check if there was no puzzle piece in the tracker board (no matter measured or tracked) before in the hand region (last saved)
                 for piece in self.record['meaBoard'].pieces.values():
 
-                    if piece.status == PieceStatus.MEASURED and \
-                        np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 50:
+                    if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED) and \
+                        np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 120:
                             flagFound_place = True
                             break
 
                 # Check if we can see a new piece in the hand region (last saved)
                 if flagFound_place is False:
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 50:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 120:
                             print('The hand just dropped a piece')
                             break
 
@@ -146,7 +146,7 @@ class Planner:
                 if flagFound_pick is True:
                     flagFound_pick_2 = False
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 50:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 120:
                             flagFound_pick_2 = True
                             break
 
