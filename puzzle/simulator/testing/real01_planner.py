@@ -42,7 +42,7 @@ cpath = fpath.rsplit('/', 1)[0]
 VIDEO_DIR = 'puzzle_real_sample_black_hand_2'
 # VIDEO_DIR = 'puzzle_real_sample_black_hand_robot'
 
-theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_mea_000.png')
+theImageSol = cv2.imread(cpath + f'/../../testing/data/{VIDEO_DIR}/test_yunzhi_mea_031.png')
 
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol = preprocess_real_puzzle(theImageSol)
@@ -89,9 +89,8 @@ for i in range(0,len(file_list)):
     # ==[5] Manager processing
     #
     try:
-        theManager.process(theArrangeMea)
-
         if thePlanner is None:
+            theManager.process(theArrangeMea)
             theSolver = Simple(theArrangeSol, theArrangeMea)
             thePlanner = Planner(theSolver, theManager, ParamArrange(areaThresholdLower=1000))
 
@@ -104,7 +103,7 @@ for i in range(0,len(file_list)):
         # while the ids in the assignment board refer to the ids in the solution board.
         #
 
-        bMeasImage = theManager.bMeas.toImage(ID_DISPLAY=True)
+        bMeasImage = thePlanner.manager.bMeas.toImage(ID_DISPLAY=True)
 
         bTrackImage = thePlanner.record['meaBoard'].toImage(ID_DISPLAY=True)
     except:
