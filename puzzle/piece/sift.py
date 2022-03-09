@@ -111,7 +111,11 @@ class Sift(MatchSimilar):
         kp_A, des_A = self.process(yA)
         kp_B, des_B = self.process(yB)
 
+        if des_A is None or des_B is None:
+            return 0
+
         matches = calculateMatches(des_A, des_B, self.theThreshMatch)
+
         distance = 100 * (len(matches) / min(len(kp_A), len(kp_B)))
 
         return distance

@@ -134,7 +134,7 @@ class FromLayer(centroidMulti):
                                            cv2.CHAIN_APPROX_SIMPLE)
 
         if len(cnts) == 0:
-            return
+            return []
 
         hierarchy = hierarchy[0]
 
