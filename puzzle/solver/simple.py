@@ -36,7 +36,7 @@ from puzzle.solver.base import Base
 
 class Simple(Base):
 
-    def __init__(self, theSol, thePuzzle):
+    def __init__(self, theSol, thePuzzle=None):
         """
         @brief  Constructor for the simple puzzle solver. Assume existence
         of solution state and current puzzle state, the match is built up by
