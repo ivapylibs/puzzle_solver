@@ -102,9 +102,13 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
 
     matches = bf.knnMatch(des2, des1, k=2)
     topResults2 = []
-    for m, n in matches:
-        if m.distance < ratio_threshold * n.distance:
-            topResults2.append([m])
+    try:
+        for m, n in matches:
+            if m.distance < ratio_threshold * n.distance:
+                topResults2.append([m])
+    except:
+        print('No matches')
+        return []
 
     topResults = []
     for match1 in topResults1:
