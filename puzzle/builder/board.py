@@ -259,11 +259,16 @@ class Board:
         """
 
         # [[min x, min y], [max x, max y]]
+
+
         bbox = self.boundingBox()
 
-        lengths = bbox[1] - bbox[0]
+        if bbox is not None:
+            lengths = bbox[1] - bbox[0]
 
-        return lengths
+            return lengths
+        else:
+            return None
 
     def boundingBox(self):
         """
@@ -275,7 +280,8 @@ class Board:
         """
 
         if self.size() == 0:
-            raise RuntimeError('No pieces exist')
+            return None
+            # raise RuntimeError('No pieces exist')
         else:
             # process to get min x, min y, max x, and max y
             bbox = np.array([[float('inf'), float('inf')], [0, 0]])
@@ -336,7 +342,14 @@ class Board:
 
         if theImage is not None:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
-            lengths = self.extents().astype('int')
+
+            lengths = self.extents()
+
+            if lengths is None:
+                # No piece found
+                return theImage
+
+            lengths= lengths.astype('int')
             bbox = self.boundingBox().astype('int')
 
             enlarge = [0,0]

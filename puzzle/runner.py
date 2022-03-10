@@ -78,8 +78,9 @@ class RealSolver:
 
         plan = self.thePlanner.process(theArrangeMea, COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
-        self.bMeasImage = self.thePlanner.manager.bMeas.toImage(ID_DISPLAY=True)
-        self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(ID_DISPLAY=True)
+        # with full size view
+        self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
+        self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
         return plan
 
