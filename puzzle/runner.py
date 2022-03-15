@@ -71,7 +71,7 @@ class RealSolver:
     def process(self, theImageMea):
 
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, verbose=False)
+        theMaskMea = preprocess_real_puzzle(theImageMea, WITH_AREA_THRESH=True, verbose=False)
 
         # Create an arrangement instance.
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)

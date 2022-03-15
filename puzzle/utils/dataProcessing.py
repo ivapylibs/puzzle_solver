@@ -94,15 +94,16 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
         topResults: The final matches.
     """
     bf = cv2.BFMatcher()
-    matches = bf.knnMatch(des1, des2, k=2)
-    topResults1 = []
-    for m, n in matches:
-        if m.distance < ratio_threshold * n.distance:
-            topResults1.append([m])
-
-    matches = bf.knnMatch(des2, des1, k=2)
-    topResults2 = []
     try:
+        matches = bf.knnMatch(des1, des2, k=2)
+        topResults1 = []
+        for m, n in matches:
+            if m.distance < ratio_threshold * n.distance:
+                topResults1.append([m])
+
+        matches = bf.knnMatch(des2, des1, k=2)
+        topResults2 = []
+    
         for m, n in matches:
             if m.distance < ratio_threshold * n.distance:
                 topResults2.append([m])

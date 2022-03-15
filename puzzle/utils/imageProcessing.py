@@ -202,15 +202,18 @@ def extract_region(img, verbose=False):
 
     return regions
 
-def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50), verbose=False):
+def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (30,80), cannyThresh=(30, 50), WITH_AREA_THRESH=False ,verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
+            Note that the threshold is very important. It requires to have the prior knowledge.
 
     Args:
         img: RGB image input.
         mask: Mask image input.
         areaThresh: The lower threshold of the area.
+        BoudingboxThresh: The size threshold of the bounding box area.
         cannyThresh: The threshold for canny.
+        WITH_AREA_THRESH: Mainly for previous codes which have not set the BoudingboxThresh properly.
         verbose: The flag of whether to debug.
 
     Returns:
@@ -283,7 +286,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
         cnts, hierarchy = cv2.findContours(im_pre_dilate, cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter out the outermost contours
+
         regions_single = []
         for c in cnts:
 
@@ -304,6 +307,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
             if not skipFlag:
                 regions_single.append((seg_img, area, [x, y, x + w, y + h]))
 
+        # Sort
         regions_single.sort(key=lambda x: x[1])
 
         # if verbose:
@@ -311,10 +315,22 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
         #         cv2.imshow('regions_single',regions_single[i][0])
         #         cv2.waitKey()
 
-        # Step 2: Remove the outermost contour
+        # Step 2: Filtering by Bounding box area size
         seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
-        for i in range(len(regions_single) - 1):
-            seg_img_combined = seg_img_combined | regions_single[i][0]
+
+        if WITH_AREA_THRESH:
+            for i in range(len(regions_single)):
+
+                h = regions_single[i][2][3]-regions_single[i][2][1]
+                w = regions_single[i][2][2]-regions_single[i][2][0]
+
+                if BoudingboxThresh[0] < w < BoudingboxThresh[1] and BoudingboxThresh[0] < h < BoudingboxThresh[1] \
+                        and h*w > areaThresh:
+                    seg_img_combined = seg_img_combined | regions_single[i][0]
+        else:
+            # They serve to be compatible with previous circle outermost contour removal idea
+            for i in range(len(regions_single) - 1):
+                seg_img_combined = seg_img_combined | regions_single[i][0]
 
         if verbose:
             cv2.imshow('seg_img_combined', seg_img_combined)
@@ -365,6 +381,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(30, 50)
 def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20, 80), verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
+    #  Todo: Maybe we can combine preprocess_real_puzzle and preprocess_synthetic_puzzle together
 
     Args:
         img: RGB image input.
@@ -443,7 +460,6 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20
         cnts, hierarchy = cv2.findContours(im_pre_dilate, cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter out the outermost contours
         regions_single = []
         for c in cnts:
 
@@ -471,7 +487,7 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20
         #         cv2.imshow('regions_single',regions_single[i][0])
         #         cv2.waitKey()
 
-        # Step 2: Remove the outermost contour
+        # Step 2: Keep all the contours
         seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
         for i in range(len(regions_single)):
             seg_img_combined = seg_img_combined | regions_single[i][0]
