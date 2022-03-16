@@ -136,6 +136,7 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     Returns:
         theGridMea: The measured board.
         theGridSol: The solution board.
+        gt_pAssignments: The ground truth assignments.
     """
 
     theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)

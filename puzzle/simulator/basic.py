@@ -75,7 +75,7 @@ class Basic:
         self.shareFlag = shareFlag
 
         # We only need the matched index.
-        # It is only used for simulation cases and we assume that current matching should always be perfect.
+        # It is only used for simulation cases and we assume that this matching result should always be perfect.
         if shareFlag == False:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
@@ -85,39 +85,44 @@ class Basic:
         @brief Check the status of the progress. (Return the ratio of the completed puzzle pieces)
 
         @note
-        It is still a simplified function which assumes a puzzle shares the
+        It is still a simplified function which assumes if a puzzle piece shares the
         same id occupies the same place, then it is completed.
-        It is not always true. Need further check.
+
+        It is not always true when the rotation is not correct.
 
         Returns:
             thePercentage: The progress.
         """
 
-        # We should check the current display board
+        # We should check the current display board to get all the pieces location
         pLocs = self.puzzle.pieceLocations()
+        print(pLocs)
 
-        # Match may be incomplete
+        # Get match between measured board and the solution board, it may be incomplete
+        # Then we have some matched pieces id: location
         pLocs_sol = {}
         for match in self.planner.manager.pAssignments.items():
             pLocs_sol[match[1]] = pLocs[match[0]]
 
-        # Todo: We may add a solution board to the simulator
+        print(pLocs_sol)
+
+        # Check all the matched pieces
+        # inPlace is just checking the top left corner for now. It is not 100% accurate.
+        # Todo: We may add a solution board to the simulator to make it easier
         inPlace = self.planner.manager.solution.piecesInPlace(pLocs_sol, tauDist=3)
 
-        # val_list = [val for _, val in inPlace.items()]
-        # thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(self.puzzle.pieces))
-
-        # Check if match is correct.
-        # Todo: Only make sense when all the pieces are extracted
+        # Another check if match is correct.
+        # It only makes sense when all the pieces have been successfully extracted in the solution board.
         val_list = []
         for key in inPlace:
             if checkKey(self.planner.manager.pAssignments, gt_pAssignments, key):
                 val_list.append(key)
 
+        print(val_list)
         # # Debug only
         # print(val_list)
 
-        thePercentage = '{:.1%}'.format(len(val_list) / len(self.puzzle.pieces))
+        thePercentage = '{:.1%}'.format(len(val_list) / len(self.planner.manager.solution.pieces))
 
         return thePercentage
 
