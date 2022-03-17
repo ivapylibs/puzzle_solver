@@ -16,6 +16,7 @@
 
 
 # ==[0] Prep environment
+from dataclasses import dataclass
 import copy
 import os
 import cv2
@@ -32,12 +33,22 @@ from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner
+from puzzle.piece.template import Template, PieceStatus
+from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
+# ===== Helper Elements
+#
+
+@dataclass
+class ParamRunner(ParamArrange):
+    areaThresholdLower: int = 1000,
+    areaThresholdUpper: int = 10000,
+    pieceConstructor: any  = Template
+    pieceStatus: int = PieceStatus.MEASURED
+    tauDist: int = 100
 
 class RealSolver:
-    def __init__(self, theParams=ParamArrange):
+    def __init__(self, theParams=ParamRunner):
 
         # Todo: will decide later what other parameters needs to be figured out.
         self.params = theParams
@@ -100,7 +111,7 @@ class RealSolver:
         # Check all the matched pieces
         # inPlace is just checking the top left corner for now. It is not 100% accurate.
         # Todo: We may add a solution board to the simulator to make it easier
-        inPlace = self.thePlanner.manager.solution.piecesInPlace(pLocs_sol, tauDist=100)
+        inPlace = self.thePlanner.manager.solution.piecesInPlace(pLocs_sol, tauDist=self.params.tauDist)
 
         val_list = [val for _, val in inPlace.items()]
 
@@ -111,7 +122,7 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea):
+    def process(self, theImageMea, hTracker_BEV):
 
         # Create an improcessor to obtain the mask.
         theMaskMea = preprocess_real_puzzle(theImageMea, WITH_AREA_THRESH=True, verbose=False)
@@ -125,7 +136,10 @@ class RealSolver:
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
-        return plan
+        # hTracker_BEV is the trackpointer of the hand, (2, 1)
+        id_dict = get_near_hand_puzzles(hTracker_BEV, self.thePlanner.manager.bMeas.pieceLocations())
+
+        return plan, id_dict
 
 #
 # ========================== puzzle.runner =========================

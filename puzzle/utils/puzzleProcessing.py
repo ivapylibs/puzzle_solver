@@ -192,5 +192,30 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
     print('Extracted pieces:', theGridMea.size())
 
     return theGridMea, theGridSol, gt_pAssignments
+
+def get_near_hand_puzzles(hTracker_BEV, pLocs,hand_radius=220):
+    """
+    @brief Get the puzzle pieces id & locations near the hand.
+
+    Args:
+        hTracker_BEV: The location of the hand center.
+        pLocs: A dict of puzzle pieces' id & center location.
+        hand_radius: The radius of the hand.
+
+    Returns:
+        id_dict: A dict of valid puzzle pieces' id & center location.
+    """
+    # if either hand or puzzle pieces are not presented, then return None
+    if hTracker_BEV is None or not pLocs:
+        id_dict = None
+    else:
+        id_dict = {}
+        for id, loc in pLocs.items():
+            #  get puzzle-to-human distances
+            dis = np.sum((loc.reshape(2,1) - hTracker_BEV) ** 2, axis=0) ** 0.5
+            if dis < hand_radius:
+                id_dict[id] = loc
+
+    return id_dict
 #
 # ====================== puzzle.utils.puzzleProcessing ======================

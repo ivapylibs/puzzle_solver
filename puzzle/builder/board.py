@@ -301,10 +301,13 @@ class Board:
 
             return bbox
 
-    def pieceLocations(self):
+    def pieceLocations(self, isCenter=False):
         """
         @brief      Returns list/array of puzzle piece locations.
-
+	
+	    Args:
+	        isCenter: The flag indicating whether the given location is for the center.
+	
         Returns:
             pLocs: A dict of puzzle piece id & location.
         """
@@ -312,7 +315,11 @@ class Board:
         pLocs = {}
         for key in self.pieces:
             piece = self.pieces[key]
-            pLocs[piece.id] = piece.rLoc
+            
+            if isCenter:
+            	pLocs[piece.id] = piece.rLoc + np.ceil(piece.y.size / 2)
+            else:
+            	pLocs[piece.id] = piece.rLoc
 
         return pLocs
 
