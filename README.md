@@ -2,7 +2,7 @@
 
 Shape-based puzzle solving algorithms, including shape matching and rotation matching
 
-## installation instruction
+## Install
 
 ```
 git clone git@github.com:ivapylibs/puzzle_solver.git
