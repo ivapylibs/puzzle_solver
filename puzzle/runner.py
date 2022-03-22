@@ -46,6 +46,7 @@ class ParamRunner(ParamArrange):
     pieceConstructor: any  = Template
     pieceStatus: int = PieceStatus.MEASURED
     tauDist: int = 100
+    hand_radius: int = 200
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -137,7 +138,7 @@ class RealSolver:
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
         # hTracker_BEV is the trackpointer of the hand, (2, 1)
-        id_dict = get_near_hand_puzzles(hTracker_BEV, self.thePlanner.manager.bMeas.pieceLocations())
+        id_dict = get_near_hand_puzzles(hTracker_BEV, self.thePlanner.manager.bMeas.pieceLocations(), hand_radius=self.params.hand_radius)
 
         return plan, id_dict
 

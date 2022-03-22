@@ -193,7 +193,7 @@ def create_synthetic_puzzle(theImageSol, theMaskSol_src, explodeDis=(200,200), m
 
     return theGridMea, theGridSol, gt_pAssignments
 
-def get_near_hand_puzzles(hTracker_BEV, pLocs,hand_radius=220):
+def get_near_hand_puzzles(hTracker_BEV, pLocs,hand_radius=200):
     """
     @brief Get the puzzle pieces id & locations near the hand.
 
