@@ -29,7 +29,7 @@ from puzzle.manager import Manager, ManagerParms
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.sift import Sift
 from puzzle.simulator.basic import Basic
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 
@@ -113,7 +113,7 @@ theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
-thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000))
+thePlanner = Planner(theSolver, theManager, ParamPlanner(areaThresholdLower=1000))
 
 # ==[4] Create a simulator for display
 #

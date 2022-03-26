@@ -34,7 +34,7 @@ from puzzle.piece.sift import Sift
 from puzzle.simulator.basic import Basic, ParamBasic
 from puzzle.solver.simple import Simple
 from puzzle.utils.puzzleProcessing import create_synthetic_puzzle
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -67,7 +67,7 @@ for trial_index in range(NUM):
 
     theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
     theSolver = Simple(theGridSol, theGridMea)
-    thePlanner = Planner(theSolver, theManager, ParamGrid(areaThresholdLower=1000))
+    thePlanner = Planner(theSolver, theManager, ParamPlanner(areaThresholdLower=1000))
 
     # ==[3] Create a simulator for display
     #

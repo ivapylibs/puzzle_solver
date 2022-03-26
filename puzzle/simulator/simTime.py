@@ -391,7 +391,7 @@ class SimTime(SimTimeLess):
                 print(f"Hand's location: {self.hand.app.rLoc}")
 
             elif key[pygame.K_i]:
-                print('The hand\'s planner only updates its boards.')
+                print('Update the boards states by the hand\'s planner.')
 
                 # Let the hand plays
                 if self.plannerHand is None:

@@ -22,6 +22,7 @@
 import improcessor.basic as improcessor
 import cv2
 import numpy as np
+from dataclasses import  dataclass
 
 # from puzzle.builder.arrangement import Arrangement
 from puzzle.builder.interlocking import Interlocking
@@ -29,15 +30,21 @@ from puzzle.builder.gridded import ParamGrid
 from puzzle.builder.board import Board
 from puzzle.piece.template import PieceStatus
 
+@dataclass
+class ParamPlanner(ParamGrid):
+    hand_radius: int = 120
 
 class Planner:
-    def __init__(self, solver, manager, theParams=ParamGrid):
+    def __init__(self, solver, manager, theParams=ParamPlanner):
         self.solver = solver
         self.manager = manager
         self.param = theParams
 
         # match: id to sol_id
         self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
+
+        # For recording hand_activity, where 0: nothing; 1: pick; 2: place.
+        self.hand_activity = 0
 
     def measure(self, img):
 
@@ -71,25 +78,27 @@ class Planner:
         record_board_temp = Board()
         record_match_temp = {}
 
-
+        # 0: nothing; 1: pick; 2: place.
+        self.hand_activity = 0
 
         # For place
         flagFound_place = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
-            if not np.array_equal(rLoc_hand,self.record['rLoc_hand']):
+            if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
                 # Check if there was no puzzle piece in the tracker board (no matter measured or tracked) before in the hand region (last saved)
                 for piece in self.record['meaBoard'].pieces.values():
 
-                    if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED) and \
-                        np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 120:
+                    if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED):
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
                             flagFound_place = True
                             break
 
                 # Check if we can see a new piece in the hand region (last saved)
                 if flagFound_place is False:
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< 120:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                            self.hand_activity = 2
                             print('The hand just dropped a piece')
                             break
 
@@ -137,20 +146,21 @@ class Planner:
 
                     # Be careful about the distance thresh (It should be large enough),
                     # when picked up the piece, the hand may be far from the original piece rLoc,
-                    if piece.status == PieceStatus.TRACKED and \
-                            np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 120:
-                        flagFound_pick = True
-                        break
+                    if piece.status == PieceStatus.TRACKED:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                            flagFound_pick = True
+                            break
 
                 # Check if there was no puzzle piece in the hand region (last saved)
                 if flagFound_pick is True:
                     flagFound_pick_2 = False
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < 120:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
                             flagFound_pick_2 = True
                             break
 
                     if flagFound_pick_2 is False:
+                        self.hand_activity = 1
                         print('The hand just picked up a piece')
 
         self.record['rLoc_hand'] = rLoc_hand

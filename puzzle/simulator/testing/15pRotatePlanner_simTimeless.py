@@ -26,7 +26,7 @@ from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.sift import Sift
 from puzzle.piece.template import Template
 from puzzle.simulator.hand import Hand
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.simulator.plannerHand import PlannerHand
 from puzzle.simulator.simTimeless import SimTimeLess
 from puzzle.solver.simple import Simple

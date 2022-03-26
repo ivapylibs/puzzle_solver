@@ -27,12 +27,12 @@ import glob
 
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.builder.board import Board
-from puzzle.builder.arrangement import Arrangement, ParamArrange
+from puzzle.builder.arrangement import Arrangement
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.solver.simple import Simple
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.piece.template import Template, PieceStatus
 from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 
@@ -40,7 +40,7 @@ from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 #
 
 @dataclass
-class ParamRunner(ParamArrange):
+class ParamRunner(ParamPlanner):
     areaThresholdLower: int = 1000,
     areaThresholdUpper: int = 10000,
     pieceConstructor: any  = Template
@@ -131,16 +131,18 @@ class RealSolver:
         # Create an arrangement instance.
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)
 
-        plan = self.thePlanner.process(theArrangeMea, COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV ,COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
+        # Todo: May change to another place
         # hTracker_BEV is the trackpointer of the hand, (2, 1)
         id_dict = get_near_hand_puzzles(hTracker_BEV, self.thePlanner.manager.bMeas.pieceLocations(), hand_radius=self.params.hand_radius)
 
-        return plan, id_dict
+        # Return action plan, the id number near hand, hand_activity
+        return plan, id_dict, self.thePlanner.hand_activity
 
 #
 # ========================== puzzle.runner =========================

@@ -27,7 +27,7 @@ from puzzle.parser.fromSketch import FromSketch
 from puzzle.piece.sift import Sift
 from puzzle.piece.template import Template
 from puzzle.simulator.hand import Hand
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.simulator.plannerHand import PlannerHand
 from puzzle.simulator.simTime import SimTime
 from puzzle.solver.simple import Simple
@@ -115,10 +115,10 @@ theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
 
 theManager = Manager(theGridSol, ManagerParms(matcher=Sift()))
 theSolver = Simple(theGridSol, theGridMea)
-thePlanner = Planner(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
+thePlanner = Planner(theSolver, theManager, theParams=ParamPlanner(areaThresholdLower=20000))
 
 # Todo: May need another instance
-thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamGrid(areaThresholdLower=20000))
+thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamPlanner(areaThresholdLower=20000))
 
 # ==[4] Read the source image to create a hand.
 #
