@@ -131,7 +131,8 @@ class RealSolver:
         # Create an arrangement instance.
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)
 
-        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV ,COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+        # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
+        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV,COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)

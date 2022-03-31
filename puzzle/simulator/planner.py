@@ -81,25 +81,28 @@ class Planner:
         # 0: nothing; 1: pick; 2: place.
         self.hand_activity = 0
 
+        # For both pick and place, we assume the change of the appearance of one puzzle piece near Hand is caused by hand
         # For place
         flagFound_place = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
             if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
-                # Check if there was no puzzle piece in the tracker board (no matter measured or tracked) before in the hand region (last saved)
+                # Check if there was no puzzle piece in the tracked board (no matter measured or tracked) before in the hand region (last saved)
+                # We need the non-updated tracked board. Otherwise, we will see the piece can be found there.
                 for piece in self.record['meaBoard'].pieces.values():
 
                     if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED):
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1))< self.param.hand_radius:
                             flagFound_place = True
                             break
 
                 # Check if we can see a new piece in the hand region (last saved)
                 if flagFound_place is False:
+                    # We need the current meaBoard
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1))< self.param.hand_radius:
                             self.hand_activity = 2
-                            print('The hand just dropped a piece')
+                            # print('The hand just dropped a piece')
                             break
 
 
@@ -141,28 +144,31 @@ class Planner:
         flagFound_pick = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
             if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
-                # Check if there was a piece in the hand region (last saved)
+                # Check if there was a piece disappearing in the hand region (last saved)
+                # We need an updated tracked board here
                 for piece in self.record['meaBoard'].pieces.values():
 
                     # Be careful about the distance thresh (It should be large enough),
                     # when picked up the piece, the hand may be far from the original piece rLoc,
                     if piece.status == PieceStatus.TRACKED:
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
                             flagFound_pick = True
                             break
 
-                # Check if there was no puzzle piece in the hand region (last saved)
+                # Check if there is no puzzle piece in the hand region (last saved) right now
                 if flagFound_pick is True:
                     flagFound_pick_2 = False
+                    # We need teh current meaBoard
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
                             flagFound_pick_2 = True
                             break
 
                     if flagFound_pick_2 is False:
                         self.hand_activity = 1
-                        print('The hand just picked up a piece')
+                        # print('The hand just picked up a piece')
 
+        # Update the rLoc_hand in the end
         self.record['rLoc_hand'] = rLoc_hand
 
         # # # Debug only
