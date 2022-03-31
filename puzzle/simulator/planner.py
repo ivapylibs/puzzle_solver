@@ -88,7 +88,7 @@ class Planner:
 
             # We only work on the cases where teh hand moves
             # Todo: May want to add some epsilon here
-            if not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1)):
+            if rLoc_hand is None or (not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1))):
                 # Check if there was no puzzle piece in the tracked board (no matter measured or tracked) before in the hand region (last saved)
                 # We need the non-updated tracked board. Otherwise, we will see the piece can be found there.
                 for piece in self.record['meaBoard'].pieces.values():
@@ -148,7 +148,7 @@ class Planner:
 
             # We only work on the cases where teh hand moves
             # Todo: May want to add some epsilon here
-            if not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1)):
+            if rLoc_hand is None or (not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1))):
                 # Check if there was a piece disappearing in the hand region (last saved)
                 # We need an updated tracked board here
                 for piece in self.record['meaBoard'].pieces.values():
