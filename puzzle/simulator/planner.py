@@ -33,6 +33,7 @@ from puzzle.piece.template import PieceStatus
 @dataclass
 class ParamPlanner(ParamGrid):
     hand_radius: int = 120
+    tracking_life_thresh: int = 15
 
 class Planner:
     def __init__(self, solver, manager, theParams=ParamPlanner):
@@ -86,9 +87,11 @@ class Planner:
         flagFound_place = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
-            # We only work on the cases where teh hand moves
+            # We only work on the cases where the hand moves
             # Todo: May want to add some epsilon here
             if rLoc_hand is None or (not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1))):
+
+                # Todo: This assumption needs update (if one added)
                 # Check if there was no puzzle piece in the tracked board (no matter measured or tracked) before in the hand region (last saved)
                 # We need the non-updated tracked board. Otherwise, we will see the piece can be found there.
                 for piece in self.record['meaBoard'].pieces.values():
@@ -114,6 +117,8 @@ class Planner:
             for match in self.manager.pAssignments.items():
                 if record_match[1] == match[1]:
                     # 1) If some pieces are available on both boards, those pieces will have an updated status.
+
+                    # The new meaBoard will always have pieces of 0 tracking_life
                     record_board_temp.addPiece(meaBoard.pieces[match[0]])
                     record_match_temp[record_board_temp.id_count-1] = match[1]
                     findFlag = True
@@ -121,10 +126,13 @@ class Planner:
 
             if findFlag == False:
                 # 2) If some pieces are only available on the record board, their status will be marked as TRACKED.
-                # Todo: If their status has been TRACKED for a while. They will be deleted from the record board.
                 self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
-                record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
-                record_match_temp[record_board_temp.id_count-1] = record_match[1]
+                self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
+
+                # If their status has been TRACKED for a while. They will be deleted from the record board.
+                if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
+                    record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
+                    record_match_temp[record_board_temp.id_count-1] = record_match[1]
 
         for new_match in self.manager.pAssignments.items():
             findFlag = False
@@ -160,6 +168,7 @@ class Planner:
                             flagFound_pick = True
                             break
 
+                # Todo: This assumption needs update (if one removed)
                 # Check if there is no puzzle piece in the hand region (last saved) right now
                 if flagFound_pick is True:
                     flagFound_pick_2 = False

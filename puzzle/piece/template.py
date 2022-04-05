@@ -84,6 +84,8 @@ class Template:
         self.status = pieceStatus  # @< To save the status of the puzzle pieces, for tracking purpose.
         self.theta = theta  # @< Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright.
 
+        self.tracking_life = 0 # @< For saving the life count, only useful in the tracking function
+
     def size(self):
         """
         @brief  Return the dimensions of the puzzle piece image.

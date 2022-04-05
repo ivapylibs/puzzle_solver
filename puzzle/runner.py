@@ -47,6 +47,7 @@ class ParamRunner(ParamPlanner):
     pieceStatus: int = PieceStatus.MEASURED
     tauDist: int = 100
     hand_radius: int = 200
+    tracking_life_thresh: int = 15
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
