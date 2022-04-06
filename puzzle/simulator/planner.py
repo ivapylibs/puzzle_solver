@@ -91,7 +91,7 @@ class Planner:
             # Todo: May want to add some epsilon here
             if rLoc_hand is None or (not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1))):
 
-                # Todo: This assumption needs update (if one added)
+                # Todo: This assumption needs update -> if one added
                 # Check if there was no puzzle piece in the tracked board (no matter measured or tracked) before in the hand region (last saved)
                 # We need the non-updated tracked board. Otherwise, we will see the piece can be found there.
                 for piece in self.record['meaBoard'].pieces.values():
@@ -154,34 +154,63 @@ class Planner:
         flagFound_pick = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
-            # We only work on the cases where teh hand moves
-            # Todo: May want to add some epsilon here
-            if rLoc_hand is None or (not np.array_equal(rLoc_hand.reshape(2,-1), self.record['rLoc_hand'].reshape(2,-1))):
+            # We only work on the cases where the hand moves
+            if (rLoc_hand is None or (np.linalg.norm(rLoc_hand.reshape(2,-1)- self.record['rLoc_hand'].reshape(2,-1))>30)):
+                print('CHECK PICK START')
+                print('PREVIOUS HAND LOC:', self.record['rLoc_hand'].reshape(2,-1))
+                # We want to make sure the current measured area is not occluded
+                # Adhoc
+
                 # Check if there was a piece disappearing in the hand region (last saved)
                 # We need an updated tracked board here
+
+                # And is not in the hand region (last saved) right now
+                # And is far from current hand
+
+                # num_before = 0
                 for piece in self.record['meaBoard'].pieces.values():
 
                     # Be careful about the distance thresh (It should be large enough),
                     # when picked up the piece, the hand may be far from the original piece rLoc,
                     if piece.status == PieceStatus.TRACKED:
                         if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
-                            flagFound_pick = True
-                            break
 
-                # Todo: This assumption needs update (if one removed)
-                # Check if there is no puzzle piece in the hand region (last saved) right now
-                if flagFound_pick is True:
-                    flagFound_pick_2 = False
-                    # We need teh current meaBoard
-                    for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
-                            flagFound_pick_2 = True
-                            break
+                            flagFound_pick_2 = False
+                            for piece_2 in meaBoard.pieces.values():
+                                if np.linalg.norm(piece.rLoc.reshape(2, -1) - piece_2.rLoc.reshape(2,-1)) < 50:
+                                    flagFound_pick_2 = True
 
-                    if flagFound_pick_2 is False:
-                        self.hand_activity = 1
-                        # print('The hand just picked up a piece')
+                            if flagFound_pick_2 is False:
+                                self.hand_activity = 1
+                                break
 
+                            # print('BEFORE:', piece.rLoc.reshape(2,-1))
+                            # num_before += 1
+                            # flagFound_pick = True
+                            # break
+
+                # # Todo: This assumption needs update -> if one removed
+                # # Check if there is no puzzle piece in the hand region (last saved) right now
+                #
+                # if num_before>0:
+                # # if flagFound_pick is True:
+                #     # flagFound_pick_2 = False
+                #     # We need the current meaBoard
+                #
+                #     num_now = 0
+                #     for piece in meaBoard.pieces.values():
+                #         if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
+                #             # print('NOW:', piece.rLoc.reshape(2, -1))
+                #             num_now += 1
+                #             # flagFound_pick_2 = True
+                #             # break
+                #
+                #     # Maybe more than one disappears due to occlusion
+                #     if num_now < num_before:
+                #     # if flagFound_pick_2 is False:
+                #         self.hand_activity = 1
+                #         # print('The hand just picked up a piece')
+                print('CHECK PICK END')
         # Update the rLoc_hand in the end
         self.record['rLoc_hand'] = rLoc_hand
 
