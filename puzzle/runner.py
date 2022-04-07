@@ -124,7 +124,7 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea, hTracker_BEV):
+    def process(self, theImageMea, theImageMask, hTracker_BEV):
 
         # Create an improcessor to obtain the mask.
         theMaskMea = preprocess_real_puzzle(theImageMea, WITH_AREA_THRESH=True, verbose=False)
@@ -133,7 +133,7 @@ class RealSolver:
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
-        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV,COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+        plan = self.thePlanner.process(theArrangeMea,theImageMask, rLoc_hand=hTracker_BEV,COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)

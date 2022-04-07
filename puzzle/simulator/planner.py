@@ -71,7 +71,7 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def adapt(self, meaBoard, mask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
 
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
@@ -154,30 +154,39 @@ class Planner:
         flagFound_pick = False
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
-            # We only work on the cases where the hand moves
+            # 0: Check if the hand moves or not visible now
             if (rLoc_hand is None or (np.linalg.norm(rLoc_hand.reshape(2,-1)- self.record['rLoc_hand'].reshape(2,-1))>30)):
                 print('CHECK PICK START')
                 print('PREVIOUS HAND LOC:', self.record['rLoc_hand'].reshape(2,-1))
-                # We want to make sure the current measured area is not occluded
-                # Adhoc
 
-                # Check if there was a piece disappearing in the hand region (last saved)
                 # We need an updated tracked board here
-
-                # And is not in the hand region (last saved) right now
-                # And is far from current hand
-
-                # num_before = 0
                 for piece in self.record['meaBoard'].pieces.values():
 
-                    # Be careful about the distance thresh (It should be large enough),
-                    # when picked up the piece, the hand may be far from the original piece rLoc,
-                    if piece.status == PieceStatus.TRACKED:
-                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
 
+                    if piece.status == PieceStatus.TRACKED:
+                        # 1: Check if there was piece disappearing in the hand region (last saved),
+                        # which means not in the hand region (last saved) right now
+
+                        # Be careful about the distance thresh (It should be large enough),
+                        # when picked up the piece, the hand may be far from the original piece rLoc,
+                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
+                            print('Piece in the record board:', piece.rLoc.reshape(2, -1))
+
+                            # # Todo:
+                            # # And most of its part is visible in the input RGB
+                            # if
+
+                            mask_temp = np.zeros(mask.shape,dtype='uint8')
+                            mask_temp[piece.rLoc[1]:piece.rLoc[1]+piece.y.size[1],piece.rLoc[0]:piece.rLoc[0]+piece.y.size[0]] = piece.y.mask
+
+                            aa = len(np.where(mask.astype('uint8') + mask_temp ==2))
+
+
+                            # 2: Check if the disappeared piece is not visible in the current measured board
                             flagFound_pick_2 = False
                             for piece_2 in meaBoard.pieces.values():
                                 if np.linalg.norm(piece.rLoc.reshape(2, -1) - piece_2.rLoc.reshape(2,-1)) < 50:
+                                    print('Piece in the new board:', piece_2.rLoc.reshape(2,-1))
                                     flagFound_pick_2 = True
 
                             if flagFound_pick_2 is False:
@@ -250,7 +259,7 @@ class Planner:
         else:
             return None
 
-    def process(self, input, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def process(self, input, mask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -272,6 +281,6 @@ class Planner:
             meaBoard = self.measure(input)
 
         # We have the option to not plan anything
-        plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+        plan = self.adapt(meaBoard, mask, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan
