@@ -82,18 +82,17 @@ class Planner:
         # 0: nothing; 1: pick; 2: place.
         self.hand_activity = 0
 
-        # For both pick and place, we assume the change of the appearance of one puzzle piece near Hand is caused by hand
+        # For both pick and place, we assume the change of location of one puzzle piece near Hand is only caused by hand
         # For place
-
         if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
             # 0: Check if the hand moves or not visible now
             if rLoc_hand is None or (np.linalg.norm(rLoc_hand.reshape(2,-1)- self.record['rLoc_hand'].reshape(2,-1))>30):
-                print('CHECK PLACE START')
+                print('*****CHECK PLACE START*****')
                 print('PREVIOUS HAND LOC:', self.record['rLoc_hand'].reshape(2, -1))
 
                 # Check if how many puzzle pieces in the tracked board (no matter measured or tracked) before in the hand region (last saved)
-                # We need the non-updated tracked board. Otherwise, we will see the piece can be found there.
+                # We need the non-updated tracked board. Otherwise, we will see the piece can be found there
                 num_before = 0
                 for piece in self.record['meaBoard'].pieces.values():
                     if piece.status == PieceStatus.TRACKED or piece.status == PieceStatus.MEASURED:
@@ -128,7 +127,7 @@ class Planner:
                 if num_now>num_before:
                     self.hand_activity = 2
 
-                # Corner case: if one puzzle piece is moved from a place to another place not far away, our assumption of caclulating num diff does not hold.
+                # Corner case: if one puzzle piece is moved from a place to another place not far away (both in the hand region), our assumption of caclulating num diff does not hold
                 if num_now>0 and num_now==num_before:
                     # Piece in the record board: [[978]
                     #  [589]] Status: PieceStatus.MEASURED
@@ -145,22 +144,22 @@ class Planner:
 
                     # Re-check if one piece moved
                     for piece in self.record['meaBoard'].pieces.values():
-                        flagFound_place = False
-                        if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1))< self.param.hand_radius:
-                            for piece_2 in meaBoard.pieces.values():
-                                if np.linalg.norm(piece_2.rLoc.reshape(2, -1) - self.record['rLoc_hand'].reshape(2,
-                                                                                                               -1)) < self.param.hand_radius:
-                                    if np.linalg.norm(piece.rLoc.reshape(2, -1) - piece_2.rLoc.reshape(2, -1)) < 50:
-                                        flagFound_place = True
 
-                            # Cannot find one without move
-                            if flagFound_place == False:
-                                if piece.status==PieceStatus.TRACKED:
-                                    self.hand_activity = 2
+                        if piece.status == PieceStatus.TRACKED or piece.status == PieceStatus.MEASURED:
+                            flagFound_place = False
+                            if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1))< self.param.hand_radius:
+                                for piece_2 in meaBoard.pieces.values():
+                                    if piece_2.status == PieceStatus.TRACKED or piece_2.status == PieceStatus.MEASURED:
+                                        if np.linalg.norm(piece_2.rLoc.reshape(2, -1) - self.record['rLoc_hand'].reshape(2, -1)) < self.param.hand_radius:
+                                            if np.linalg.norm(piece.rLoc.reshape(2, -1) - piece_2.rLoc.reshape(2, -1)) < 50:
+                                                flagFound_place = True
 
+                                # Cannot find one without move
+                                if flagFound_place == False:
+                                    if piece.status==PieceStatus.TRACKED:
+                                        self.hand_activity = 2
 
-
-                print('CHECK PLACE END')
+                print('*****CHECK PLACE END*****')
 
 
         # For tracking
@@ -168,7 +167,7 @@ class Planner:
             findFlag = False
             for match in self.manager.pAssignments.items():
                 if record_match[1] == match[1]:
-                    # 1) If some pieces are available on both boards, those pieces will have an updated status.
+                    # 1) If some pieces are available on both boards, those pieces will have an updated status
 
                     # The new meaBoard will always have pieces of 0 tracking_life
                     record_board_temp.addPiece(meaBoard.pieces[match[0]])
@@ -177,11 +176,17 @@ class Planner:
                     break
 
             if findFlag == False:
-                # 2) If some pieces are only available on the record board, their status will be marked as TRACKED.
-                self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+                # 2) If some pieces are only available on the record board, their status will be marked as TRACKED
+                # Do not update INHAND ones (it could be considered as a special state)
+                # if self.record['meaBoard'].pieces[record_match[0]].status!=PieceStatus.INHAND:
+
+                # Todo: Seems not working.
+                if self.record['meaBoard'].pieces[record_match[0]].status != PieceStatus.INHAND:
+                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+
                 self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
 
-                # If their status has been TRACKED for a while. They will be deleted from the record board.
+                # If their status has been TRACKED for a while but no update. They will be deleted from the record board
                 if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
                     record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                     record_match_temp[record_board_temp.id_count-1] = record_match[1]
@@ -194,7 +199,7 @@ class Planner:
                     break
 
             if findFlag == False:
-                # 3) If some pieces are only available on the new board, they will be added to the record board.
+                # 3) If some pieces are only available on the new board, they will be added to the record board
                 record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
                 record_match_temp[record_board_temp.id_count-1] = new_match[1]
 
@@ -204,23 +209,26 @@ class Planner:
 
         if  self.hand_activity == 0:
             # For pick
-            flagFound_pick = False
             if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 
                 # 0: Check if the hand moves or not visible now
                 if rLoc_hand is None or (np.linalg.norm(rLoc_hand.reshape(2,-1)- self.record['rLoc_hand'].reshape(2,-1))>30):
-                    print('CHECK PICK START')
+                    print('*****CHECK PICK START*****')
                     print('PREVIOUS HAND LOC:', self.record['rLoc_hand'].reshape(2,-1))
 
                     # We need an updated tracked board here
-                    for piece in self.record['meaBoard'].pieces.values():
+                    for key, piece in self.record['meaBoard'].pieces.items():
 
+                        # Corner case: if a piece has been picked up but not placed yet, it will be re-checked falsely
                         if piece.status == PieceStatus.TRACKED:
                             # 1: Check if there was piece disappearing in the hand region (last saved),
                             # which means not in the hand region (last saved) right now
 
+                            # Todo: Corner case: if a piece is not visible in the previous timestamp but shows up in the next timestep, we will believe there is a pick action.
+                            # However, if the pieces are close to the hand, chances are that, it is unluckily not detected before but luckily detected again.
+
                             # Be careful about the distance thresh (It should be large enough),
-                            # when picked up the piece, the hand may be far from the original piece rLoc,
+                            # when picked up the piece, the hand may be far from piece rLoc.
                             if np.linalg.norm(piece.rLoc.reshape(2,-1) - self.record['rLoc_hand'].reshape(2,-1)) < self.param.hand_radius:
                                 print('Piece in the record board:', piece.rLoc.reshape(2, -1))
 
@@ -234,18 +242,20 @@ class Planner:
                                 #     cv2.imshow('debug_visible', mask_temp*255)
                                 #     cv2.waitKey()
 
+
                                 if ratio_visible > 0.85:
-                                    # 3: Check if the disappeared piece is not visible in the current measured board
-                                    flagFound_pick_2 = False
+                                    # 3: Check if the disappeared piece is visible in the current measured board, we want it to be not
+                                    flagFound_pick = False
                                     for piece_2 in meaBoard.pieces.values():
                                         if np.linalg.norm(piece.rLoc.reshape(2, -1) - piece_2.rLoc.reshape(2,-1)) < 50:
                                             print('Piece in the current measured board:', piece_2.rLoc.reshape(2,-1))
-                                            flagFound_pick_2 = True
+                                            flagFound_pick = True
 
-                                    if flagFound_pick_2 is False:
+                                    if flagFound_pick is False:
                                         self.hand_activity = 1
+                                        self.record['meaBoard'].pieces[key].status = PieceStatus.INHAND
                                         break
-                    print('CHECK PICK END')
+                    print('*****CHECK PICK END*****')
 
         # Update the rLoc_hand in the end
         self.record['rLoc_hand'] = rLoc_hand
@@ -295,7 +305,7 @@ class Planner:
         Args:
             input: A measured board or RGB image.
             rLoc_hand: The location of the hand.
-            visibleMask: The mask of the visible area on the table (puzzle included)
+            visibleMask: The mask of the visible area on the table (puzzle included).
             COMPLETE_PLAN: Whether to plan the whole sequence.
             SAVED_PLAN: Use the saved plan (self.plan) or not.
             RUN_SOLVER: Whether to compute the solver to get the next action plan.
@@ -309,7 +319,7 @@ class Planner:
         else:
             meaBoard = self.measure(input)
 
-        # We have the option to not plan anything
+        # We have the option to not plan anything but just update tracked board
         plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan
