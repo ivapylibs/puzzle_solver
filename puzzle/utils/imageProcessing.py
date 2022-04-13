@@ -307,9 +307,10 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (
             if not skipFlag:
                 regions_single.append((seg_img, area, [x, y, x + w, y + h]))
 
-        # Sort
+        # Sort, from small area to large ones
         regions_single.sort(key=lambda x: x[1])
 
+        # # # Show the debug plot only when we have some big trouble with piece extraction
         # if verbose:
         #     for i in range(len(regions_single)):
         #         cv2.imshow('regions_single',regions_single[i][0])

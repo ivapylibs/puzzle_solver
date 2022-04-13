@@ -207,7 +207,7 @@ class Planner:
         self.record['meaBoard'] = record_board_temp
         self.record['match'] = record_match_temp
 
-        if  self.hand_activity == 0:
+        if self.hand_activity == 0:
             # For pick
             if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
 

@@ -41,8 +41,11 @@ from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 
 @dataclass
 class ParamRunner(ParamPlanner):
-    areaThresholdLower: int = 1000,
-    areaThresholdUpper: int = 10000,
+    areaThresholdLower: int = 1000
+    areaThresholdUpper: int = 10000
+    lengthThresholdLower: int = 1000
+    areaThresh: int = 10
+    BoudingboxThresh: tuple = (10,200)
     pieceConstructor: any  = Template
     pieceStatus: int = PieceStatus.MEASURED
     tauDist: int = 100
@@ -73,7 +76,8 @@ class RealSolver:
             theArrangeSol = Arrangement(input)
         else:
             # Read the input image and template to build up the solution board.
-            theMaskSol = preprocess_real_puzzle(input)
+            theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
+
             theArrangeSol = Arrangement.buildFrom_ImageAndMask(input, theMaskSol,self.params)
 
         # For theManager & theSolver
@@ -127,7 +131,7 @@ class RealSolver:
     def process(self, theImageMea, visibleMask, hTracker_BEV):
 
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, WITH_AREA_THRESH=True, verbose=False)
+        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
 
         # Create an arrangement instance.
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)
