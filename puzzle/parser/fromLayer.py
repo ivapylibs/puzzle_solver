@@ -200,7 +200,7 @@ class FromLayer(centroidMulti):
 
         return desired_cnts
 
-    def mask2regions(self, I, M):
+    def mask2regions(self, I, M, verbose=False):
         """
         @brief      Convert the selection mask into a bunch of regions.
                     Mainly based on findContours function.
@@ -216,8 +216,9 @@ class FromLayer(centroidMulti):
         mask = M.astype('uint8')
 
         # # Debug only
-        # cv2.imshow('debug',mask)
-        # cv2.waitKey()
+        if verbose:
+            cv2.imshow('debug_ori_mask',mask)
+            cv2.waitKey()
 
         desired_cnts = self.findCorrectedContours(mask)
 
@@ -225,16 +226,18 @@ class FromLayer(centroidMulti):
         if len(desired_cnts) == 0:
             desired_cnts = self.findCorrectedContours(mask, FILTER=False)
 
-        # print('size of desired_cnts is', len(desired_cnts))
+        if verbose:
+            print('size of desired_cnts is', len(desired_cnts))
 
         # # Debug only
-        # debug_mask = np.zeros_like(mask_enlarged).astype('uint8')
-        # for c in desired_cnts:
-        #   cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
-        #
-        # debug_mask = cv2.resize(debug_mask, (int(debug_mask.shape[1] / 2), int(debug_mask.shape[0] / 2)), interpolation=cv2.INTER_AREA)
-        # cv2.imshow('after area thresh',debug_mask)
-        # cv2.waitKey()
+        if verbose:
+            debug_mask = np.zeros_like(mask).astype('uint8')
+            for c in desired_cnts:
+              cv2.drawContours(debug_mask, [c], -1, (255, 255, 255), 2)
+
+            debug_mask = cv2.resize(debug_mask, (int(debug_mask.shape[1] / 2), int(debug_mask.shape[0] / 2)), interpolation=cv2.INTER_AREA)
+            cv2.imshow('debug_after_area_thresh',debug_mask)
+            cv2.waitKey()
 
         regions = []
         # Get the individual part
@@ -243,8 +246,9 @@ class FromLayer(centroidMulti):
             cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
 
             # # Debug only
-            # cv2.imshow('debug',seg_img)
-            # cv2.waitKey()
+            if verbose:
+                cv2.imshow('debug_individual_seg',seg_img)
+                cv2.waitKey()
 
             # Get ROI, OpenCV style
             x, y, w, h = cv2.boundingRect(c)

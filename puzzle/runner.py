@@ -78,7 +78,7 @@ class RealSolver:
             # Read the input image and template to build up the solution board.
             theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
 
-            theArrangeSol = Arrangement.buildFrom_ImageAndMask(input, theMaskSol,self.params)
+            theArrangeSol = Arrangement.buildFrom_ImageAndMask(input, theMaskSol, self.params)
 
         # For theManager & theSolver
         # Todo: Need double check
