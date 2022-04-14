@@ -91,7 +91,7 @@ class Planner:
                 print('*****CHECK PLACE START*****')
                 print('PREVIOUS HAND LOC:', self.record['rLoc_hand'].reshape(2, -1))
 
-                # Check if how many puzzle pieces in the tracked board (no matter measured or tracked) before in the hand region (last saved)
+                # Check how many puzzle pieces in the tracked board (no matter measured or tracked) before in the hand region (last saved)
                 # We need the non-updated tracked board. Otherwise, we will see the piece can be found there
                 num_before = 0
                 for piece in self.record['meaBoard'].pieces.values():
@@ -103,7 +103,7 @@ class Planner:
 
                             num_before +=1
 
-                # Check if how many puzzle pieces in the current measured board (no matter measured or tracked) before in the hand region (last saved)
+                # Check how many puzzle pieces in the current measured board (no matter measured or tracked) before in the hand region (last saved)
                 num_now = 0
                 for piece in meaBoard.pieces.values():
 
@@ -243,7 +243,7 @@ class Planner:
                                 #     cv2.waitKey()
 
 
-                                if ratio_visible > 0.85:
+                                if ratio_visible > 0.95:
                                     # 3: Check if the disappeared piece is visible in the current measured board, we want it to be not
                                     flagFound_pick = False
                                     for piece_2 in meaBoard.pieces.values():

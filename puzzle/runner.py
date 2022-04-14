@@ -69,7 +69,6 @@ class RealSolver:
         self.bTrackImage = None
 
     def setSolBoard(self, input):
-
         # Assuming the input is already in RGB
 
         if issubclass(type(input), Board):
@@ -152,3 +151,66 @@ class RealSolver:
 
 #
 # ========================== puzzle.runner =========================
+
+
+if __name__ == "__main__":
+
+    # Reproduce the results on the rosbag for debug purpose
+
+    target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_2'
+
+    # Build up the puzzle solver
+    configs_puzzleSolver = ParamRunner(
+        areaThresholdLower=2000,
+        areaThresholdUpper=8000,
+        pieceConstructor=Template,
+        lengthThresholdLower=1000,
+        areaThresh=1000,
+        BoudingboxThresh=(20, 100),
+        tauDist=100,  # @< The radius distance determining if one piece is at the right position.
+        hand_radius=200,  # @< The radius distance to the hand center determining the near-by pieces.
+        tracking_life_thresh=15  # @< Tracking life for the pieces, it should be set according to the processing speed.
+    )
+
+    puzzleSolver = RealSolver(configs_puzzleSolver)
+
+    for call_back_id in range(len(glob.glob(os.path.join(target_folder,'*.npy')))):
+
+        if call_back_id ==219:
+            print('Debug on the specific frame!')
+
+        # Read
+        postImg = cv2.imread(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_puzzle.png'))
+        postImg = cv2.cvtColor(postImg, cv2.COLOR_BGR2RGB)
+        visibleMask = cv2.imread(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_visibleMask.png'), -1)
+        with open(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_hTracker.npy'),'rb') as f:
+            hTracker_BEV = np.load(f, allow_pickle=True)
+            if hTracker_BEV.size==1:
+                hTracker_BEV = None
+
+        # Todo: Currently, initialize the SolBoard with the very first frame.
+        # We assume SolBoard is perfect (all the pieces have been recognized successfully)
+        # We can hack it with something outside
+        if call_back_id == 0:
+            puzzleSolver.setSolBoard(postImg)
+            print(f'Number of puzzle pieces registered in the solution board: {len(puzzleSolver.theManager.solution.pieces)}')
+
+        # Plan not used yet
+        plan, id_dict, hand_activity = puzzleSolver.process(postImg, visibleMask, hTracker_BEV)
+
+        # # Note: It seems that this process is unnecessary to us as we have integrated the nearHand into pick & place interpretation
+        # # @note there may be false negatives
+        # print('ID from puzzle solver:', id_dict)
+        print('Hand activity:', hand_activity)
+
+
+        # Compute progress
+        # Note that the solution board should be correct, otherwise it will fail.
+        try:
+            thePercent = puzzleSolver.progress()
+            print(f"Progress: {thePercent}")
+        except:
+            print('Double check the solution board to make it right.')
+
+        print(f"The processed test frame id: {call_back_id} ")
+        print('\n\n')
