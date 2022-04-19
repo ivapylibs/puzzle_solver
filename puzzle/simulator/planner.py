@@ -47,6 +47,12 @@ class Planner:
         # For recording hand_activity, where 0: nothing; 1: pick; 2: place.
         self.hand_activity = 0
 
+        # For saving the tracked board with solution board ID
+        self.displayBoard = None
+
+        # For saving the status history
+        self.status_history = None
+
     def measure(self, img):
 
         # Debug only
@@ -171,7 +177,7 @@ class Planner:
                 if record_match[1] == match[1]:
                     # 1) If some pieces are available on both boards, those pieces will have an updated status
 
-                    # The new meaBoard will always have pieces of 0 tracking_life
+                    # The new meaBoard will always have pieces of tracking_life as 0
                     record_board_temp.addPiece(meaBoard.pieces[match[0]])
                     record_match_temp[record_board_temp.id_count-1] = match[1]
                     findFlag = True
@@ -182,11 +188,26 @@ class Planner:
                 # Do not update INHAND ones (it could be considered as a special state)
                 # if self.record['meaBoard'].pieces[record_match[0]].status!=PieceStatus.INHAND:
 
-                # Todo: Seems not working.
-                if self.record['meaBoard'].pieces[record_match[0]].status != PieceStatus.INHAND:
-                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+                # # ROI-based idea (stop for now)
+                # # Todo: Seems not working.
+                # if self.record['meaBoard'].pieces[record_match[0]].status != PieceStatus.INHAND:
+                #     self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+                # self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
 
-                self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
+                # # For puzzle piece state change idea
+                # Check if most of the piece's part is visible in the current visibleMask
+                mask_temp = np.zeros(visibleMask.shape,dtype='uint8')
+                mask_temp[self.record['meaBoard'].pieces[record_match[0]].rLoc[1]:self.record['meaBoard'].pieces[record_match[0]].rLoc[1]+self.record['meaBoard'].pieces[record_match[0]].y.size[1], \
+                            self.record['meaBoard'].pieces[record_match[0]].rLoc[0]:self.record['meaBoard'].pieces[record_match[0]].rLoc[0]+self.record['meaBoard'].pieces[record_match[0]].y.size[0]] \
+                           = (self.record['meaBoard'].pieces[record_match[0]].y.mask/255).astype('uint8')
+                ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum()/mask_temp.sum()
+                # print('RATIO:', ratio_visible)
+
+                # Todo: Not sure how to set up the threshold
+                if ratio_visible > 0.99:
+                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.GONE
+                else:
+                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
 
                 # If their status has been TRACKED for a while but no update. They will be deleted from the record board
                 if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
@@ -264,15 +285,32 @@ class Planner:
         # Update the rLoc_hand in the end
         self.record['rLoc_hand'] = rLoc_hand
 
+
+        # For puzzle piece state change idea
+        for match in self.record['match'].items():
+            self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].status)
+
         # # # Debug only
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])
         # # Current id to solution id
         # print('Match in the new measured board:', self.manager.pAssignments)
-        # # Note that the printed tracking id is not the one used in meaBoard nor the one used in DisplayBoard (simulator)
+
+        # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator),
+        # or the one used in SolBoard.
         # print('Match in the tracking record:', self.record['match'])
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
+
+        # Debug only
+        # We want to print the ID from the solution board.
+        self.displayBoard = Board()
+        for match in self.record['match'].items():
+            print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[1]].status}")
+
+            # Save for demo
+            self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
+
 
         if RUN_SOLVER:
             # Solver plans for the measured board

@@ -38,10 +38,14 @@ class PieceStatus(Enum):
     @brief PieceStatus used to keep track of the status of pieces.
     """
 
-    UNKNOWN = 0
-    MEASURED = 1
-    TRACKED = 2
+    UNKNOWN = 0 # @< The default status.
+    MEASURED = 1  # @< The initial status in the current measured board (visible).
+    TRACKED = 2 # @< Not present in the current measured board (including INVISIBLE & GONE).
     INHAND = 3
+
+    INVISIBLE=4 # @< A subset of TRACKED, which is occluded.
+    GONE=5 # @< A subset of TRACKED, which is not occluded. Be careful that this status may be inaccurate when piece extraction fails.
+
 
 
 @dataclass

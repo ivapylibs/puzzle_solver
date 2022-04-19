@@ -68,6 +68,8 @@ class RealSolver:
         self.bMeasImage = None
         self.bTrackImage = None
 
+        self.bTrackImage_SolID = None
+
     def setSolBoard(self, input):
         # Assuming the input is already in RGB
 
@@ -90,6 +92,11 @@ class RealSolver:
         self.theSolver.desired = theArrangeSol
 
         self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(input), BOUNDING_BOX=False, ID_DISPLAY=True)
+
+        # For saving the status history
+        self.thePlanner.status_history = dict()
+        for i in range(self.theManager.solution.size()):
+            self.thePlanner.status_history[i] = []
 
     def progress(self):
         """
@@ -141,6 +148,7 @@ class RealSolver:
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
+        self.bTrackImage_SolID = self.thePlanner.displayBoard.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
         # # Note: It seems that this process is unnecessary to us as we have integrated the nearHand into pick & place interpretation
         # # hTracker_BEV is the trackpointer of the hand, (2, 1)
