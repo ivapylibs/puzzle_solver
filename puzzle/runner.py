@@ -34,7 +34,7 @@ from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.piece.template import Template, PieceStatus
-from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
+# from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 
 # ===== Helper Elements
 #
@@ -58,16 +58,14 @@ class RealSolver:
         # Todo: will decide later what other parameters needs to be figured out.
         self.params = theParams
 
-        # Create empty manager & solver -> empty planner
+        # Create empty manager & empty solver -> empty planner
         self.theManager = Manager(None, ManagerParms(matcher=Sift()))
-        # bSolImage = theManager.solution.toImage(ID_DISPLAY=True)
         self.theSolver = Simple(None)
         self.thePlanner = Planner(self.theSolver, self.theManager, self.params)
 
         # Mainly for debug
         self.bMeasImage = None
         self.bTrackImage = None
-
         self.bTrackImage_SolID = None
 
     def setSolBoard(self, input):
@@ -82,7 +80,6 @@ class RealSolver:
             theArrangeSol = Arrangement.buildFrom_ImageAndMask(input, theMaskSol, self.params)
 
         # For theManager & theSolver
-        # Todo: Need double check
         self.theManager.solution = theArrangeSol
 
         # # Debug only
@@ -95,8 +92,10 @@ class RealSolver:
 
         # For saving the status history
         self.thePlanner.status_history = dict()
+        self.thePlanner.loc_history = dict()
         for i in range(self.theManager.solution.size()):
             self.thePlanner.status_history[i] = []
+            self.thePlanner.loc_history[i] = []
 
     def progress(self):
         """

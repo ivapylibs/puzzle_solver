@@ -78,9 +78,9 @@ class Manager(FromLayer):
         self.pAssignments = {}  # @< Assignments: meas to sol.
         self.pAssignments_rotation = {}  # @< Assignments: meas to sol. The rotation angles (degree).
 
-        self.matcher = theParams.matcher  # @< Matcher instance
+        self.matcher = theParams.matcher  # @< Matcher instance.
 
-        self.skipList = [] # @< Be set up by the simulator
+        self.skipList = [] # @< Be set up by the simulator. We want to skip some pieces that are in a clutter.
 
         if isinstance(self.matcher, MatchDifferent):
             self.scoreType = SCORE_DIFFERENCE  # @< The type of comparator.
@@ -143,7 +143,7 @@ class Manager(FromLayer):
         for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
             for idx_y, SolPiece in enumerate(self.solution.pieces):
 
-                # @todo Currently, it does not support two scoreTables.
+                # Todo: Currently, it does not support two scoreTables. We currently use the sift features, only one table.
                 if idx_y in self.skipList:
                     if self.scoreType == SCORE_DIFFERENCE:
                         scoreTable_shape[idx_x][idx_y] = 1e18
@@ -152,10 +152,6 @@ class Manager(FromLayer):
                     continue
 
                 ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
-                """
-                Todo: Will update this part. We may need two scoreTables. 
-                Currently, only use the shape feature and add up the distances.
-                """
 
                 # Debug only
                 # if idx_x==11 and (idx_y==2):

@@ -42,6 +42,7 @@ class Planner:
         self.param = theParams
 
         # match: id to sol_id
+        # It is always the updated one
         self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
 
         # For recording hand_activity, where 0: nothing; 1: pick; 2: place.
@@ -52,6 +53,9 @@ class Planner:
 
         # For saving the status history
         self.status_history = None
+
+        # For saving the puzzle piece's location history
+        self.loc_history = None
 
     def measure(self, img):
 
@@ -285,41 +289,43 @@ class Planner:
         # Update the rLoc_hand in the end
         self.record['rLoc_hand'] = rLoc_hand
 
-
         # For puzzle piece state change idea
+        # We want to print the ID from the solution board.
+        self.displayBoard = Board()
         for match in self.record['match'].items():
+            # Save for analysis
             self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].status)
+            self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].rLoc)
 
-        # # # Debug only
+            # Save for demo
+            self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
+
+        # # Debug only
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])
         # # Current id to solution id
         # print('Match in the new measured board:', self.manager.pAssignments)
 
-        # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator),
-        # or the one used in SolBoard.
+        # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator), or the one used in SolBoard.
         # print('Match in the tracking record:', self.record['match'])
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         # Debug only
         # We want to print the ID from the solution board.
-        self.displayBoard = Board()
         for match in self.record['match'].items():
             print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[1]].status}")
-
-            # Save for demo
-            self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
-
 
         if RUN_SOLVER:
             # Solver plans for the measured board
             self.solver.setCurrBoard(meaBoard)
             self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
-            # Right now, can only work when puzzle board is not re-processed.
-            # Otherwise, the connected ones will not be considered in the list.
-            # As a result, same effect.
+            """
+            Right now, can only work when puzzle board is not re-processed. 
+            Otherwise, the connected ones will not be considered in the list. 
+            As a result, same effect, so it is fine.
+            """
 
             # Get the index of the pieces with the occlusion and skip them
             meaBoard.processAdjacency()
