@@ -38,6 +38,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from scipy.optimize import linear_sum_assignment
+
 from puzzle.parser.fromLayer import FromLayer
 from puzzle.piece.matchDifferent import MatchDifferent
 from puzzle.piece.matchSimilar import MatchSimilar
@@ -89,6 +91,9 @@ class Manager(FromLayer):
         else:
             raise TypeError('The matcher is of wrong input.')
 
+        # Save for debug
+        self.scoreTable_shape = None
+
     def measure(self, *argv):
         """
         @brief Get the match based on the input.
@@ -116,19 +121,24 @@ class Manager(FromLayer):
         pFilteredAssignments = {}
         for assignment in self.pAssignments.items():
             ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
-            if ret:
 
-                # Some matchers calculate the rotation as well
-                # from mea to sol (counter-clockwise)
-                if isinstance(ret, tuple):
+
+            # Some matchers calculate the rotation as well
+            # from mea to sol (counter-clockwise)
+            if isinstance(ret, tuple):
+                if ret[0]:
                     self.pAssignments_rotation[assignment[0]]=ret[1]
-                else:
+
+                    pFilteredAssignments[assignment[0]] = assignment[1]
+            else:
+                if ret:
                     self.pAssignments_rotation[assignment[0]] = \
                         self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
 
-                pFilteredAssignments[assignment[0]] = assignment[1]
-
+                    pFilteredAssignments[assignment[0]] = assignment[1]
+            print(ret)
         # pAssignments refers to the id of the puzzle piece
+        print(pFilteredAssignments)
         self.pAssignments = pFilteredAssignments
 
     def matchPieces(self):
@@ -164,9 +174,46 @@ class Manager(FromLayer):
                 else:
                     scoreTable_shape[idx_x][idx_y] = ret
 
+        # Save for debug
+        self.scoreTable_shape = scoreTable_shape.copy()
+
         # The measured piece will be assigned a solution piece
         # However, for some measured piece, they may not have a match according to the threshold.
-        self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+        # self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+
+        self.pAssignments = self.hungarianAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+
+
+    def hungarianAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
+        """
+        @brief  Run the hungarianAssignment for the score table.
+
+        Args:
+            scoreTable_shape:  The score table for the pairwise comparison (shape).
+            scoreTable_color:  The score table for the pairwise comparison (color).
+            scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
+
+        Returns:
+            matched_id: The matched pair dict.
+        """
+
+        # Todo: Currently we only use scoreTable_shape
+
+        pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
+        pieceKeysList_solution = list(self.solution.pieces.keys())
+
+        matched_id = {}
+
+        if self.scoreType == SCORE_DIFFERENCE:
+            row_ind, col_ind = linear_sum_assignment(scoreTable_shape)
+        else:
+            row_ind, col_ind = linear_sum_assignment(scoreTable_shape, maximize=True)
+
+
+        for i, idx in enumerate(col_ind):
+            matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
+
+        return matched_id
 
     def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
         """
