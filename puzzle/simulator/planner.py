@@ -83,6 +83,17 @@ class Planner:
 
     def adapt(self, meaBoard, visibleMask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
 
+        # Todo: Not sure if this hard threshold is a good idea or not.
+        # Remove the measured pieces if they are too close to the hand.
+        # Only meaningful when we can see a hand.
+        if rLoc_hand is not None:
+            meaBoard_filtered = Board()
+            for piece in meaBoard.pieces.values():
+                if np.linalg.norm(piece.rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.param.hand_radius+50:
+                    meaBoard_filtered.addPiece(piece)
+
+            meaBoard = meaBoard_filtered
+
         # manager processes the measured board to establish the association
         self.manager.process(meaBoard)
 
