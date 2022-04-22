@@ -143,25 +143,31 @@ class Sift(MatchSimilar):
 
         # Estimate affine transform model using all coordinates
 
-        src = []
-        dst = []
+        if len(matches)!=0:
+            src = []
+            dst = []
 
-        for match in matches:
-            src.append(kp_A[match[0].queryIdx].pt)
-            dst.append(kp_B[match[0].trainIdx].pt)
-        src = np.array(src)
-        dst = np.array(dst)
+            for match in matches:
+                src.append(kp_A[match[0].queryIdx].pt)
+                dst.append(kp_B[match[0].trainIdx].pt)
+            src = np.array(src)
+            dst = np.array(dst)
 
-        # It only makes sense for translation if both piece images have the same origin
-        src = np.array(src) + piece_A.rLoc
-        dst = np.array(dst) + piece_B.rLoc
+            # It only makes sense for translation if both piece images have the same origin
 
-        model = AffineTransform()
-        model.estimate(src, dst)
 
-        # Note: model.translation is not 100% consistent with what we what. Use pieceLocation instead.
+            src = np.array(src) + piece_A.rLoc
+            dst = np.array(dst) + piece_B.rLoc
 
-        return distance > self.tau, np.rad2deg(model.rotation), model.params
+
+            model = AffineTransform()
+            model.estimate(src, dst)
+
+            # Note: model.translation is not 100% consistent with what we what. Use pieceLocation instead.
+
+            return distance > self.tau, np.rad2deg(model.rotation), model.params
+        else:
+            return False, None, None
 
         ## Robustly estimate affine transform model with RANSAC. However, too slow
         # if len(src) > 3:
