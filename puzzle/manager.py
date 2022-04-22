@@ -136,9 +136,13 @@ class Manager(FromLayer):
                         self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
 
                     pFilteredAssignments[assignment[0]] = assignment[1]
-            print(ret)
+
+
+            # # Debug only
+            # print(ret)
+
         # pAssignments refers to the id of the puzzle piece
-        print(pFilteredAssignments)
+        # print(pFilteredAssignments)
         self.pAssignments = pFilteredAssignments
 
     def matchPieces(self):

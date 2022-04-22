@@ -40,7 +40,7 @@ copyreg.pickle(cv2.KeyPoint().__class__, _pickle_keypoints)
 #
 class Sift(MatchSimilar):
 
-    def __init__(self, tau=5, theThreshMatch=0.5):
+    def __init__(self, tau=10, theThreshMatch=0.5):
         """
         @brief  Constructor for the puzzle piece sift class.
 
