@@ -29,6 +29,8 @@ from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import ParamGrid
 from puzzle.builder.board import Board
 from puzzle.piece.template import PieceStatus
+from puzzle.manager import Manager, ManagerParms
+from puzzle.piece.sift import Sift
 
 @dataclass
 class ParamPlanner(ParamGrid):
@@ -186,60 +188,103 @@ class Planner:
         #
 
         # For tracking
+
+        # Note: The matching with the last frame may help when pieces look different from the one in the solution board (due to light)
+        # But it may also hurt for a while when a piece has been falsely associated with one in the solution board
+
+        match_intra = {}
+        if self.record['meaBoard'] is not None:
+            # Create a new manager for association between last frame and the current frame
+            theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
+            theManager_intra.process(meaBoard)
+
+            for match in theManager_intra.pAssignments.items():
+                # We only care about the ones which do not move
+                # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
+                match_intra[match[0]]=match[1]
+
+
         for record_match in self.record['match'].items():
             findFlag = False
+
             for match in self.manager.pAssignments.items():
                 if record_match[1] == match[1]:
                     # 1) If some pieces are available on both boards, those pieces will have an updated status
 
-                    # The new meaBoard will always have pieces of tracking_life as 0
-                    record_board_temp.addPiece(meaBoard.pieces[match[0]])
-                    record_match_temp[record_board_temp.id_count-1] = match[1]
-                    findFlag = True
-                    break
+                    # If only the piece can be matched to the same one in the tracking board.
+                    if match[0] in match_intra:
+                        if match_intra[match[0]]==record_match[0]:
+                            # All three associations agree, then update
+
+                            del match_intra[match[0]]
+                            # The new meaBoard will always have pieces of tracking_life as 0
+                            record_board_temp.addPiece(meaBoard.pieces[match[0]])
+                            record_match_temp[record_board_temp.id_count-1] = record_match[1]
+                            findFlag = True
+                            break
 
             if findFlag == False:
-                # 2) If some pieces are only available on the record board, their status will be marked as TRACKED
-                # Do not update INHAND ones (it could be considered as a special state)
-                # if self.record['meaBoard'].pieces[record_match[0]].status!=PieceStatus.INHAND:
+                findFlag_2 = False
+                # e,g, ID 1 (meaBoard)->4 (tracked)->4 (solBoard)
+                if record_match[0] in match_intra.values():
+                    key_new = list(match_intra.values()).index(record_match[0])
 
-                # # ROI-based idea (stop for now)
-                # # Todo: Seems not working.
-                # if self.record['meaBoard'].pieces[record_match[0]].status != PieceStatus.INHAND:
-                #     self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
-                # self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
+                    # We only care about the cases where pieces do not move
+                    if np.linalg.norm(meaBoard.pieces[key_new].rLoc.reshape(2,-1) - self.record['meaBoard'].pieces[record_match[0]].rLoc.reshape(2,-1)) < 50:
 
-                # # For puzzle piece state change idea
-                # Check if most of the piece's part is visible in the current visibleMask
-                mask_temp = np.zeros(visibleMask.shape,dtype='uint8')
-                mask_temp[self.record['meaBoard'].pieces[record_match[0]].rLoc[1]:self.record['meaBoard'].pieces[record_match[0]].rLoc[1]+self.record['meaBoard'].pieces[record_match[0]].y.size[1], \
-                            self.record['meaBoard'].pieces[record_match[0]].rLoc[0]:self.record['meaBoard'].pieces[record_match[0]].rLoc[0]+self.record['meaBoard'].pieces[record_match[0]].y.size[0]] \
-                           = (self.record['meaBoard'].pieces[record_match[0]].y.mask/255).astype('uint8')
-                ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum()/mask_temp.sum()
-                # print('RATIO:', ratio_visible)
+                        # The new meaBoard will always have pieces of tracking_life as 0
+                        record_board_temp.addPiece(meaBoard.pieces[key_new])
+                        record_match_temp[record_board_temp.id_count - 1] = record_match[1]
+                        findFlag_2 = True
+                        del match_intra[key_new]
 
-                # Todo: Not sure how to set up the threshold
-                if ratio_visible > 0.99:
-                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.GONE
-                else:
-                    self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
+                if findFlag_2 == False:
+                    # 2) If some pieces are only available on the record board, their status will be marked as TRACKED
 
-                # If their status has been TRACKED for a while but no update. They will be deleted from the record board
-                if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
-                    record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
-                    record_match_temp[record_board_temp.id_count-1] = record_match[1]
+                    # # ROI-based idea (stop for now)
+                    # # Todo: Seems not working.
+                    # if self.record['meaBoard'].pieces[record_match[0]].status != PieceStatus.INHAND:
+                    #     self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+                    # self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
+
+                    # # For puzzle piece state change idea
+                    # Check if most of the piece's part is visible in the current visibleMask
+                    mask_temp = np.zeros(visibleMask.shape,dtype='uint8')
+                    mask_temp[self.record['meaBoard'].pieces[record_match[0]].rLoc[1]:self.record['meaBoard'].pieces[record_match[0]].rLoc[1]+self.record['meaBoard'].pieces[record_match[0]].y.size[1], \
+                                self.record['meaBoard'].pieces[record_match[0]].rLoc[0]:self.record['meaBoard'].pieces[record_match[0]].rLoc[0]+self.record['meaBoard'].pieces[record_match[0]].y.size[0]] \
+                               = (self.record['meaBoard'].pieces[record_match[0]].y.mask/255).astype('uint8')
+                    ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum()/mask_temp.sum()
+                    # print('RATIO:', ratio_visible)
+
+                    # Todo: Not sure how to set up the threshold
+                    if ratio_visible > 0.99:
+                        self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.GONE
+                    else:
+                        self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
+
+                    # If their status has been TRACKED for a while but no update. They will be deleted from the record board
+                    if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
+                        record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
+                        record_match_temp[record_board_temp.id_count-1] = record_match[1]
+
 
         for new_match in self.manager.pAssignments.items():
             findFlag = False
             for match in record_match_temp.items():
                 if new_match[1] == match[1]:
+                    # Some that have the false associations will be filtered out here
                     findFlag = True
                     break
 
             if findFlag == False:
                 # 3) If some pieces are only available on the new board, they will be added to the record board
-                record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
-                record_match_temp[record_board_temp.id_count-1] = new_match[1]
+
+                if new_match[0] in match_intra:
+                    # 4) If some pieces can only be associated to the one in the record board, throw it away
+                    pass
+                else:
+                    record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
+                    record_match_temp[record_board_temp.id_count-1] = new_match[1]
 
         # Update
         self.record['meaBoard'] = record_board_temp
