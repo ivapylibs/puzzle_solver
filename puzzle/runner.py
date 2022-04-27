@@ -149,12 +149,8 @@ class RealSolver:
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
         self.bTrackImage_SolID = self.thePlanner.displayBoard.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
-        # # Note: It seems that this process is unnecessary to us as we have integrated the nearHand into pick & place interpretation
-        # # hTracker_BEV is the trackpointer of the hand, (2, 1)
-        # id_dict = get_near_hand_puzzles(hTracker_BEV, self.thePlanner.manager.bMeas.pieceLocations(), hand_radius=self.params.hand_radius)
-
         # Return action plan, the id number near hand (We assign it as None since we do not need it now), hand_activity
-        return plan, None, self.thePlanner.hand_activity
+        return plan
 
 #
 # ========================== puzzle.runner =========================
