@@ -90,10 +90,9 @@ class Hand:
 
             piece_id = min(theDists, key=theDists.get)
 
-        try:
             piece = puzzle.pieces[piece_id]
-        except:
-            print('s')
+
+
 
         if self.pieceInHand(piece.rLoc, self.param.pieceHandDis):
 

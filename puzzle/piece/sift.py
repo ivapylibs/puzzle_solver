@@ -45,7 +45,8 @@ class Sift(MatchSimilar):
         @brief  Constructor for the puzzle piece sift class.
 
         Args:
-            tau: The threshold param to determine similarity.
+            tau: The threshold param to determine similarity for SIFT feature.
+            theThreshMatch: The threshold to determine match (0-1).
         """
 
         self.theThreshMatch = theThreshMatch

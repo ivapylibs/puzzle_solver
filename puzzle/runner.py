@@ -163,8 +163,7 @@ class RealSolver:
 if __name__ == "__main__":
 
     # Reproduce the results on the rosbag for debug purpose
-
-    target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_2'
+    target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_4'
 
     # Build up the puzzle solver
     configs_puzzleSolver = ParamRunner(
@@ -183,7 +182,7 @@ if __name__ == "__main__":
 
     for call_back_id in range(len(glob.glob(os.path.join(target_folder,'*.npy')))):
 
-        if call_back_id ==219:
+        if call_back_id ==33:
             print('Debug on the specific frame!')
 
         # Read
@@ -210,7 +209,6 @@ if __name__ == "__main__":
         # print('ID from puzzle solver:', id_dict)
         print('Hand activity:', hand_activity)
 
-
         # Compute progress
         # Note that the solution board should be correct, otherwise it will fail.
         try:
@@ -221,3 +219,7 @@ if __name__ == "__main__":
 
         print(f"The processed test frame id: {call_back_id} ")
         print('\n\n')
+
+        # Display
+        cv2.imshow('bTrackImage_SolID', puzzleSolver.bTrackImage_SolID[:, :, ::-1])
+        cv2.waitKey(1)
