@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 
+import improcessor.basic as improcessor
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
@@ -36,6 +37,7 @@ from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.piece.template import Template, PieceStatus
 
+
 # ===== Helper Elements
 #
 
@@ -45,12 +47,13 @@ class ParamRunner(ParamPlanner):
     areaThresholdUpper: int = 10000
     lengthThresholdLower: int = 1000
     areaThresh: int = 10
-    BoudingboxThresh: tuple = (10,200)
-    pieceConstructor: any  = Template
+    BoudingboxThresh: tuple = (10, 200)
+    pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.MEASURED
     tauDist: int = 100
     hand_radius: int = 200
     tracking_life_thresh: int = 15
+
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -72,7 +75,7 @@ class RealSolver:
         self.theCalibrated = Board()
         self.thePrevImage = None
 
-    def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1):
+    def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1, verbose=False):
         """
         @brief  To obtain the solution board from a rosbag for calibration.
                 Adapted from puzzle.utils.puzzleProcessing.calibrate_real_puzzle
@@ -89,6 +92,15 @@ class RealSolver:
 
         if hTracker_BEV is None:
 
+            if verbose:
+                print('Valid input. Process!')
+
+            improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
+                                       improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
+                                       cv2.erode, (np.ones((3, 3), np.uint8),),
+                                       cv2.dilate, (np.ones((3, 3), np.uint8),)
+                                       )
+
             if self.thePrevImage is None:
                 self.thePrevImage = theImageMea.copy()
                 thePrevMask = preprocess_real_puzzle(self.thePrevImage, verbose=False)
@@ -99,26 +111,40 @@ class RealSolver:
             theCurMask = preprocess_real_puzzle(theCurImage, verbose=False)
             theCurImage = cv2.bitwise_and(theCurImage, theCurImage, mask=theCurMask)
 
+            if verbose:
+                cv2.imshow('theCurMask', cv2.resize(theCurMask, (0,0), fx=0.5, fy=0.5))
+                cv2.waitKey()
+
             # Step 2: frame difference
-            diff = cv2.absdiff(theCurImage, thePrevImage)
+            diff = cv2.absdiff(theCurImage, self.thePrevImage)
             mask = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
 
             canvas = np.ones_like(theCurImage, np.uint8)
 
+            th = 30
+            imask = mask > th
+
             if option == 0:
                 canvas[imask] = theCurImage[imask]
             else:
-                canvas[imask] = thePrevImage[imask]
+                canvas[imask] = self.thePrevImage[imask]
 
             # Step 3: threshold
             theMaskMea = improc.apply(canvas)
 
+            if verbose:
+                cv2.imshow('theCurMask', cv2.resize(theMaskMea, (0,0), fx=0.5, fy=0.5))
+                cv2.waitKey()
+
             theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
                                                                  self.params)
-            if theBoard_single.size()>0:
+            if theBoard_single.size() > 0:
                 self.theCalibrated.addPiece(theBoard_single.pieces[0])
+                print('Add a new piece.')
             else:
                 print('No new piece is detected.')
+
+            print(f'Current calibrated pieces number: {self.theCalibrated.size()}')
 
             self.thePrevImage = theCurImage
 
@@ -136,7 +162,9 @@ class RealSolver:
             theArrangeSol = Arrangement.buildFromFile_Puzzle(input)
         else:
             # Read the input image and template to build up the solution board.
-            theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
+            theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh,
+                                                BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
+                                                verbose=False)
 
             theArrangeSol = Arrangement.buildFrom_ImageAndMask(input, theMaskSol, self.params)
 
@@ -149,7 +177,8 @@ class RealSolver:
 
         self.theSolver.desired = theArrangeSol
 
-        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(input), BOUNDING_BOX=False, ID_DISPLAY=True)
+        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(input), BOUNDING_BOX=False,
+                                                          ID_DISPLAY=True)
 
         # For saving the status history
         self.thePlanner.status_history = dict()
@@ -207,21 +236,28 @@ class RealSolver:
             plan: The action plan.
         """
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
+        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresh=self.params.areaThresh,
+                                            BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
+                                            verbose=False)
 
         # Create an arrangement instance.
-        theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea,self.params)
+        theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
-        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask, COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
+                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
 
         # with full size view
-        self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
-        self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
-        self.bTrackImage_SolID = self.thePlanner.displayBoard.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
+        self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False,
+                                                                ID_DISPLAY=True)
+        self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea),
+                                                                      BOUNDING_BOX=False, ID_DISPLAY=True)
+        self.bTrackImage_SolID = self.thePlanner.displayBoard.toImage(theImage=np.zeros_like(theImageMea),
+                                                                      BOUNDING_BOX=False, ID_DISPLAY=True)
 
         # Return action plan
         return plan
+
 
 #
 # ========================== puzzle.runner =========================
@@ -230,11 +266,21 @@ class RealSolver:
 if __name__ == "__main__":
 
     # Reproduce the results on the rosbag for debug purpose
-    target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_4'
+
+    # Basic Settings
+
+    # target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_4'
+    # puzzle_solver_mode = 0
+
+    # target_folder = '../../Surveillance/Surveillance/deployment/ROS/data_2022-04-28-14-35-07'
+    target_folder = '../../Surveillance/Surveillance/deployment/ROS/data_test'
+    puzzle_solver_mode = 1
+    # verbose = True
+    verbose = False
 
     # Build up the puzzle solver
     configs_puzzleSolver = ParamRunner(
-        areaThresholdLower=2000,
+        areaThresholdLower=1500,
         areaThresholdUpper=8000,
         pieceConstructor=Template,
         lengthThresholdLower=1000,
@@ -247,41 +293,54 @@ if __name__ == "__main__":
 
     puzzleSolver = RealSolver(configs_puzzleSolver)
 
-    for call_back_id in range(len(glob.glob(os.path.join(target_folder,'*.npy')))):
+    npy_file_list = glob.glob(os.path.join(target_folder, '*.npy'))
+    npy_file_list.sort()
 
-        if call_back_id ==33:
-            print('Debug on the specific frame!')
+    for npy_file in npy_file_list:
+
+        call_back_id = int(os.path.basename(npy_file)[:4])
+
+        # if call_back_id == 43:
+        #     print('Debug on the specific frame!')
+
 
         # Read
-        postImg = cv2.imread(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_puzzle.png'))
+        postImg = cv2.imread(os.path.join(target_folder, f'{str(call_back_id).zfill(4)}_puzzle.png'))
         postImg = cv2.cvtColor(postImg, cv2.COLOR_BGR2RGB)
-        visibleMask = cv2.imread(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_visibleMask.png'), -1)
-        with open(os.path.join(target_folder,f'{str(call_back_id).zfill(4)}_hTracker.npy'),'rb') as f:
+        visibleMask = cv2.imread(os.path.join(target_folder, f'{str(call_back_id).zfill(4)}_visibleMask.png'), -1)
+        with open(os.path.join(target_folder, f'{str(call_back_id).zfill(4)}_hTracker.npy'), 'rb') as f:
             hTracker_BEV = np.load(f, allow_pickle=True)
-            if hTracker_BEV.size==1:
+            if hTracker_BEV.size == 1:
                 hTracker_BEV = None
 
-        # Todo: Currently, initialize the SolBoard with the very first frame.
-        # We assume SolBoard is perfect (all the pieces have been recognized successfully)
-        # We can hack it with something outside
-        if call_back_id == 0:
-            puzzleSolver.setSolBoard(postImg)
-            print(f'Number of puzzle pieces registered in the solution board: {len(puzzleSolver.theManager.solution.pieces)}')
+        if puzzle_solver_mode == 0:
+            if call_back_id == 0:
+                puzzleSolver.setSolBoard(postImg)
+                print(
+                    f'Number of puzzle pieces registered in the solution board: {len(puzzleSolver.theManager.solution.pieces)}')
 
-        # Plan not used yet
-        plan, id_dict, hand_activity = puzzleSolver.process(postImg, visibleMask, hTracker_BEV)
+            # Plan not used yet
+            plan = puzzleSolver.process(postImg, visibleMask, hTracker_BEV)
+        elif puzzle_solver_mode == 1:
+            plan = puzzleSolver.calibrate(postImg, visibleMask, hTracker_BEV, verbose=verbose)
 
-        # Compute progress
-        # Note that the solution board should be correct, otherwise it will fail.
-        try:
-            thePercent = puzzleSolver.progress()
-            print(f"Progress: {thePercent}")
-        except:
-            print('Double check the solution board to make it right.')
+        if puzzle_solver_mode!=1:
+            # Compute progress
+            # Note that the solution board should be correct, otherwise it will fail.
+            try:
+                thePercent = puzzleSolver.progress()
+                print(f"Progress: {thePercent}")
+            except:
+                print('Double check the solution board to make it right.')
 
         print(f"The processed test frame id: {call_back_id} ")
         print('\n\n')
 
         # Display
-        cv2.imshow('bTrackImage_SolID', puzzleSolver.bTrackImage_SolID[:, :, ::-1])
-        cv2.waitKey(1)
+        if puzzle_solver_mode == 0:
+            cv2.imshow('bTrackImage_SolID', puzzleSolver.bTrackImage_SolID[:, :, ::-1])
+            cv2.waitKey(1)
+
+    if puzzle_solver_mode == 1:
+        cv2.imshow('debug_solBoard', puzzleSolver.theCalibrated.toImage(ID_DISPLAY=True, COLOR=[0,255,0])[:, :, ::-1])
+        cv2.waitKey()

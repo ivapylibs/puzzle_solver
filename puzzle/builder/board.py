@@ -390,8 +390,14 @@ class Board:
             else:
                 raise RuntimeError('The image is too small. Please try again.')
         else:
-            # Create image with proper dimensions.
-            lengths = self.extents().astype('int')
+
+            lengths = self.extents()
+
+            if lengths is None:
+                # No piece found
+                raise RuntimeError('No piece found')
+
+            lengths = lengths.astype('int')
             bbox = self.boundingBox().astype('int')
 
             if BOUNDING_BOX:
