@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-# ============================= real01_manager =============================
+# ============================= realSingle_manager =============================
 #
 # @brief    Tests the core functionality of the puzzle.manager class. The manager
 #           will have access to measurement and solution images & masks to generate
 #           associations between them. (real img)
 #
 #
-# ============================= real01_manager =============================
+# ============================= realSingle_manager =============================
 #
-# @file     real01_manager.py
+# @file     realSingle_manager.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/10/12 [created]
 #
-# ============================= real01_manager =============================
+# ============================= realSingle_manager =============================
 
 
 # ==[0] Prep environment
@@ -110,4 +110,4 @@ print('Num. of matched cases:', len(theManager.pAssignments))
 
 plt.show()
 #
-# ============================= real01_manager =============================
+# ============================= realSingle_manager =============================

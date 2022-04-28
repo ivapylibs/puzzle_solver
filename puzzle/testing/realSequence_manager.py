@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-# ============================= real02_manager =============================
+# ============================= realSequence_manager =============================
 #
 # @brief    Tests the core functionality of the puzzle.manager class. The manager
 #           will have access to measurement and solution images & masks to generate
 #           associations between them. (a sequence of real imgs)
 #
 #
-# ============================= real02_manager =============================
+# ============================= realSequence_manager =============================
 #
-# @file     real02_manager.py
+# @file     realSequence_manager.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2022/02/15 [created]
 #
-# ============================= real02_manager =============================
+# ============================= realSequence_manager =============================
 
 
 # ==[0] Prep environment
@@ -99,4 +99,4 @@ for i in range(1,40):
 plt.ioff()
 plt.show()
 #
-# ============================= real02_manager =============================
+# ============================= realSequence_manager =============================
