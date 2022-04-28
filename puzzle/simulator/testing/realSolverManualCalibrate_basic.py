@@ -21,7 +21,6 @@ import os
 
 import cv2
 import imageio
-import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 
 from puzzle.builder.board import Board
@@ -50,8 +49,8 @@ theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 # theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_1', 0)
 theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_big_cali_4', 1, fsize=fsize)
 
-# Debug only
 theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
+print('Close the window to proceed.')
 plt.show()
 
 # theCalibrated.pieces[6].display()
@@ -100,7 +99,7 @@ axarr[1].title.set_text('Solution')
 print('The first index refers to the measured board while the second one refers to the solution board. Note that '
       'the index in different boards may refer to different puzzle pieces.')
 print(theManager.pAssignments)
-
+print('Close the window to proceed.')
 plt.show()
 
 # ==[4] Create simple solver and set up the match
@@ -133,9 +132,6 @@ i = 0
 j = 0
 
 theCalibrated = Board()
-improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                           )
 
 while 1:
 
