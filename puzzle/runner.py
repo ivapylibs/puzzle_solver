@@ -31,6 +31,7 @@ from puzzle.builder.arrangement import Arrangement
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
+from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.piece.template import Template, PieceStatus
@@ -67,11 +68,72 @@ class RealSolver:
         self.bTrackImage = None
         self.bTrackImage_SolID = None
 
+        # Mainly for calibration of the solution board
+        self.theCalibrated = Board()
+        self.thePrevImage = None
+
+    def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1):
+        """
+        @brief  To obtain the solution board from a rosbag for calibration.
+                Adapted from puzzle.utils.puzzleProcessing.calibrate_real_puzzle
+
+        Args:
+            theImageMea: The input image (from the surveillance system).
+            visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
+            hTracker_BEV: The location of the hand in the BEV.
+            option: The option 0 is to assemble the puzzle while option 1 is to disassemble the puzzle
+
+        Returns:
+            theCalibrated: A board of calibrated pieces
+        """
+
+        if hTracker_BEV is None:
+
+            if self.thePrevImage is None:
+                self.thePrevImage = theImageMea.copy()
+                thePrevMask = preprocess_real_puzzle(self.thePrevImage, verbose=False)
+                self.thePrevImage = cv2.bitwise_and(self.thePrevImage, self.thePrevImage, mask=thePrevMask)
+
+            # Step 1: preprocess real imgs
+            theCurImage = theImageMea.copy()
+            theCurMask = preprocess_real_puzzle(theCurImage, verbose=False)
+            theCurImage = cv2.bitwise_and(theCurImage, theCurImage, mask=theCurMask)
+
+            # Step 2: frame difference
+            diff = cv2.absdiff(theCurImage, thePrevImage)
+            mask = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
+
+            canvas = np.ones_like(theCurImage, np.uint8)
+
+            if option == 0:
+                canvas[imask] = theCurImage[imask]
+            else:
+                canvas[imask] = thePrevImage[imask]
+
+            # Step 3: threshold
+            theMaskMea = improc.apply(canvas)
+
+            theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
+                                                                 self.params)
+            if theBoard_single.size()>0:
+                self.theCalibrated.addPiece(theBoard_single.pieces[0])
+            else:
+                print('No new piece is detected.')
+
+            self.thePrevImage = theCurImage
+
     def setSolBoard(self, input):
-        # Assuming the input is already in RGB
+        """
+        @brief Set up the solution board.
+
+        Args:
+            input: A board/path/raw image.
+        """
 
         if issubclass(type(input), Board):
             theArrangeSol = Arrangement(input)
+        elif isinstance(input, str):
+            theArrangeSol = Arrangement.buildFromFile_Puzzle(input)
         else:
             # Read the input image and template to build up the solution board.
             theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
@@ -138,7 +200,7 @@ class RealSolver:
 
         Args:
             theImageMea: The input image (from the surveillance system).
-            visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system)
+            visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
             hTracker_BEV: The location of the hand in the BEV.
 
         Returns:
