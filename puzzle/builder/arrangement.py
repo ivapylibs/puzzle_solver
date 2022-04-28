@@ -1,6 +1,6 @@
 # ======================= puzzle.builder.arrangement ======================
 #
-# @class    arrangement
+# @class    puzzle.builder.arrangement
 #
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations in the image with no occlusion or
@@ -78,14 +78,8 @@ class Arrangement(Board):
             pLoc: A dict of puzzle piece id & location.
 
         Returns:
-            theVects(A dict of puzzle piece id & vectors)
+            theVects: A dict of puzzle piece id & vectors.
         """
-        # @note
-        # pLocTrue = GET ARRAY OF SOLUTION LOCATIONS.
-        # theVects = pLocTrue - pLoc
-        #
-        # RETURN theVects
-        # SIMPLIFY PYTHON AS DESIRED.
 
         theVects = {}
         pLocTrue = self.pieceLocations()
@@ -147,7 +141,7 @@ class Arrangement(Board):
             pLoc: A dict of puzzle piece id & location.
 
         Returns:
-            theScore(The score for the current board)
+            theScore: The score for the current board.
         """
 
         errDists = self.distances(pLoc)
@@ -173,7 +167,7 @@ class Arrangement(Board):
             theBoard: A puzzle board in 1-1 ordered correspondence with solution.
 
         Returns:
-            theScore(The score compared with the given board)
+            theScore: The score compared with the given board.
         """
 
         if theBoard.size() == self.size():
@@ -193,7 +187,7 @@ class Arrangement(Board):
             pLoc: A dict of puzzle piece id & location.
 
         Returns:
-            theScores(A dict of id & bool variable indicating whether the piece is correctly in place or not.)
+            theScores: A dict of id & bool variable indicating whether the piece is correctly in place or not.
         """
 
         errDists = self.distances(pLoc)
@@ -207,21 +201,18 @@ class Arrangement(Board):
 
         return theScores
 
-    # ======================== buildFromFile_Puzzle =======================
-    #
-    # @brief      Load a saved arrangement calibration/solution puzzle board.
-    #
-    # The python file contains the puzzle board information. It gets
-    # dumped into an arrangement instance. If a threshold variable
-    # ``tauDist`` is found, then it is applied to the # arrangement
-    # instance.
-    #
-    # @param[in]  fileName    The python file (.obj) to load
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution puzzle board.
+
+        Args:
+            fileName: The python file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         theBoard = None
         with open(fileName, 'rb') as fp:
@@ -242,22 +233,23 @@ class Arrangement(Board):
 
         return thePuzzle
 
-    # ===================== buildFromFile_ImageAndMask ====================
-    #
-    # @brief      Load a saved arrangement calibration/solution stored as
-    #             an image and a mask.
-    #
-    # The python file contains the puzzle board mask and image source
-    # data. It gets processed into an arrangement instance. If a threshold
-    # variable ``tauDist`` is found, then it is applied to the arrangement
-    # instance.
-    #
-    # @param[in]  fileName    The python file (.obj) to load.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution stored as an image and a mask.
+
+        The python file contains the puzzle board mask and image source
+        data. It gets processed into an arrangement instance. If a threshold
+        variable ``tauDist`` is found, then it is applied to the arrangement
+        instance.
+
+        Args:
+            fileName: The python file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         I = None
         M = None
@@ -277,23 +269,24 @@ class Arrangement(Board):
 
         return thePuzzle
 
-    # ==================== buildFromFiles_ImageAndMask ====================
-    #
-    # @brief      Load a saved arrangement calibration/solution stored as
-    #             separate image and mask files.
-    #
-    # The source file contain the puzzle board image and mask data. It
-    # gets processed into an arrangement instance. If a threshold variable
-    # ``tauDist`` is found, then it is applied to the arrangement
-    # instance.
-    #
-    # @param[in]  imFile      The image file (.png) to load.
-    # @param[in]  maskFile    The mask file (.png) to load.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution stored as
+               separate image and mask files.
+
+        The source file contain the puzzle board image and mask data. It
+        gets processed into an arrangement instance. If a threshold variable
+        ``tauDist`` is found, then it is applied to the arrangement instance.
+
+        Args:
+            imFile: The image file to load.
+            maskFile: The mask file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         I = cv2.imread(imFile)
         M = cv2.imread(maskFile, cv2.IMREAD_GRAYSCALE)
@@ -309,22 +302,23 @@ class Arrangement(Board):
 
         return thePuzzle
 
-    # ======================= buildFrom_ImageAndMask ======================
-    #
-    # @brief      Given an image and an image mask, parse both to recover
-    #             the puzzle calibration/solution.
-    #
-    # Instantiates a puzzle parsing operator, then applies it to the
-    # submitted data to create a puzzle board instance. That instance is
-    # the calibration/solution.
-    #
-    # @param[in]  theImage    The puzzle image data.
-    # @param[in]  theMask     The puzzle piece mask information.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
+        """
+        @brief Given an image and an image mask, parse both to recover
+               the puzzle calibration/solution.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theMask: The puzzle mask data.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         if hasattr(theParams, 'areaThresholdLower'):
             pParser = FromLayer(theParams)
@@ -339,24 +333,25 @@ class Arrangement(Board):
 
         return thePuzzle
 
-    # ===================== buildFrom_ImageProcessing =====================
-    #
-    # @brief      Given an image with regions clearly separated by some
-    #             color or threshold, parse it to recover the puzzle
-    #             calibration/solution. Can source alternative detector.
-    #
-    # Instantiates a puzzle parser that gets applied to the submitted data
-    # to create a puzzle board instance. That instance is the
-    # calibration/solution.
-    #
-    # @param[in]  theImage        The puzzle image data.
-    # @param[in]  theProcessor    The processing scheme.
-    # @param[in]  theDetector     The detector scheme.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
+        """
+        @brief Given an image with regions clearly separated by some
+               color or threshold, parse it to recover the puzzle
+               calibration/solution. Can source alternative detector.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theProcessor: The processing scheme.
+            theDetector: The detector scheme.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         if theDetector is None and theProcessor is None:
             if theImage.ndim == 3:
@@ -388,25 +383,26 @@ class Arrangement(Board):
 
         return thePuzzle
 
-    # ===================== buildFrom_Sketch =====================
-    #
-    # @brief      Given an image with regions clearly separated by some
-    #             color or threshold, parse it to recover the puzzle
-    #             calibration/solution. Can source alternative detector.
-    #
-    # Instantiates a puzzle parser that gets applied to the submitted data
-    # to create a puzzle board instance. That instance is the
-    # calibration/solution.
-    #
-    # @param[in]  theImage        The puzzle image data.
-    # @param[in]  theMask         The puzzle mask data.
-    # @param[in]  theProcessor    The processing scheme.
-    # @param[in]  theDetector     The detector scheme.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
+        """
+        @brief Given an image with regions clearly separated by some
+               color or threshold, parse it to recover the puzzle
+               calibration/solution. Can source alternative detector.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theMask: The puzzle mask data.
+            theProcessor: The processing scheme.
+            theDetector: The detector scheme.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The arrangement puzzle board instance.
+        """
 
         if theDetector is None and theProcessor is None:
             if theImage.ndim == 3:

@@ -61,8 +61,7 @@ class ManagerParms:
 #
 
 class Manager(FromLayer):
-    # @note
-    # Yunzhi: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
+    # Note: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
     def __init__(self, solution, theParams=ManagerParms):
         """
@@ -102,7 +101,6 @@ class Manager(FromLayer):
             I: RGB image.
             M: Mask image.
             board: The measured board.
-
         """
 
         if len(argv) == 1:
@@ -136,7 +134,6 @@ class Manager(FromLayer):
                         self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
 
                     pFilteredAssignments[assignment[0]] = assignment[1]
-
 
             # # Debug only
             # print(ret)

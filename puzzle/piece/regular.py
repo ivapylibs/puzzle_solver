@@ -134,7 +134,7 @@ class Regular(Template):
 
     def _process(self, enable_rotate=True):
         """
-        @brief  Run the sideExtractor.
+        @brief Run the sideExtractor.
         """
 
         # d_thresh is related to the size of the puzzle piece
@@ -168,7 +168,7 @@ class Regular(Template):
             theta: The rotation angle.
 
         Returns:
-            The rotated regular piece.
+            theRegular: The rotated regular piece.
         """
 
         # @todo May need to change from redo everything to focus on transformation.
@@ -192,7 +192,7 @@ class Regular(Template):
             rLoc: The puzzle piece location in the whole image.
 
         Returns:
-            The puzzle piece instance.
+            theRegular: The puzzle piece instance.
         """
 
         thePiece = Template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)

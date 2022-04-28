@@ -48,8 +48,12 @@ class Basic:
         @brief  Constructor for the class. Requires a puzzle board.
 
         Args:
-            thePuzzle: The puzzle board info for simulation.
-            theFig: The figure handle to use (optional).
+            thePuzzle: The puzzle board.
+            theSolution: The solution board.
+            thePlanner: The planner instance.
+            theFig: The figure handle to use.
+            shareFlag: Whether to share the board with the display.
+            theParams: The params.
         """
 
 
@@ -89,6 +93,9 @@ class Basic:
         same id occupies the same place, then it is completed.
 
         It is not always true when the rotation is not correct.
+
+        Args:
+            gt_pAssignments: The ground truth assignment.
 
         Returns:
             thePercentage: The progress.
@@ -131,7 +138,7 @@ class Basic:
         @brief  Add puzzle piece instance to the board.
 
         Args:
-            piece:  A puzzle piece instance.
+            piece: A puzzle piece instance.
         """
 
         self.puzzle.addPiece(piece)
@@ -148,11 +155,10 @@ class Basic:
 
     def setPieces(self, pLocs):
         """
-        @brief  Sets the positions of pieces.
+        @brief Sets the positions of pieces.
 
         Args:
             pLocs: A dict of puzzle pieces ids and their locations.
-
         """
         for ii in range(self.puzzle.size()):
             if self.puzzle.pieces[ii].id in pLocs.keys():
@@ -190,7 +196,7 @@ class Basic:
 
     def takeAction(self, plan):
         """
-        @brief  Perform the plan.
+        @brief Perform the plan.
 
         Args:
             plan: A tuple (piece_id, piece_index, action_type, action_param)
@@ -276,7 +282,6 @@ class Basic:
             ID_DISPLAY: The flag indicating ID_DISPLAY or not.
             CONTOUR_DISPLAY: The flag indicating CONTOUR_DISPLAY or not.
             BOUNDING_BOX: The flag indicating display with a limited bounding box region or not.
-
         """
 
         if not self.fig:

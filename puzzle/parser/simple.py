@@ -49,11 +49,11 @@ class Simple(PerceiverSimple.simple):
 
     def measure(self, I, M=None):
         """
-        @brief      Process data from mask layer and image.
+        @brief Process data from mask layer and image.
 
         Args:
-            I:  The puzzle image source.
-            M:  The puzzle template mask.
+            I: The puzzle image source.
+            M: The puzzle template mask.
         """
 
         self.I = I
@@ -84,7 +84,6 @@ class Simple(PerceiverSimple.simple):
             self.haveObs = True
             self.haveState = True
             self.haveRun = True
-            # @note   Is this right? Review meanings and correct/confirm.
 
     def process(self, I, M=None):
         """

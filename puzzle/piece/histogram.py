@@ -38,14 +38,14 @@ class Histogram(MatchDifferent):
     @staticmethod
     def colorFeaExtract(piece):
         """
-        @brief  Compute histogram from the raw puzzle data.
-                See https://opencv-tutorial.readthedocs.io/en/latest/histogram/histogram.html
+        @brief Compute histogram from the raw puzzle data.
+               See https://opencv-tutorial.readthedocs.io/en/latest/histogram/histogram.html
 
         Args:
             piece: A template instance saving a piece's info.
 
         Returns:
-            The histogram.
+            hist: The histogram.
         """
 
         if issubclass(type(piece), Template):
@@ -81,14 +81,14 @@ class Histogram(MatchDifferent):
 
     def score(self, piece_A, piece_B):
         """
-        @brief  Compute the score between two passed puzzle piece data.
+        @brief Compute the score between two passed puzzle piece data.
 
         Args:
             piece_A: A template instance saving a piece's info.
             piece_B: A template instance saving a piece's info.
 
         Returns:
-            Distance.
+            distance: Distance.
         """
 
         hist_A = self.process(piece_A)

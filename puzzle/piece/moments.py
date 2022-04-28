@@ -50,7 +50,7 @@ class Moments(MatchDifferent):
             piece: A template instance saving a piece's info.
 
         Returns:
-            A list of huMoments value.
+            huMoments: A list of huMoments value.
         """
 
         if issubclass(type(piece), Template):
@@ -69,7 +69,7 @@ class Moments(MatchDifferent):
 
     def process(self, piece):
         """
-        @brief  Process the puzzle piece.
+        @brief Process the puzzle piece.
 
         Returns:
             The processed feature.
@@ -79,14 +79,14 @@ class Moments(MatchDifferent):
 
     def score(self, piece_A, piece_B):
         """
-        @brief  Compute the score between two passed puzzle piece data.
+        @brief Compute the score between two passed puzzle piece data.
 
         Args:
             piece_A: A template instance saving a piece's info.
             piece_B: A template instance saving a piece's info.
 
         Returns:
-            Distance.
+            distance: Distance.
         """
 
         huMoments_A = self.process(piece_A)

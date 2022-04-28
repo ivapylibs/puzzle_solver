@@ -34,7 +34,6 @@ from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.piece.template import Template, PieceStatus
-# from puzzle.utils.puzzleProcessing import get_near_hand_puzzles
 
 # ===== Helper Elements
 #
@@ -134,7 +133,17 @@ class RealSolver:
         return thePercentage
 
     def process(self, theImageMea, visibleMask, hTracker_BEV):
+        """
+        @brief Process the input from the surveillance system.
 
+        Args:
+            theImageMea: The input image (from the surveillance system).
+            visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system)
+            hTracker_BEV: The location of the hand in the BEV.
+
+        Returns:
+            plan: The action plan.
+        """
         # Create an improcessor to obtain the mask.
         theMaskMea = preprocess_real_puzzle(theImageMea, areaThresh=self.params.areaThresh, BoudingboxThresh = self.params.BoudingboxThresh, WITH_AREA_THRESH=True, verbose=False)
 
@@ -149,7 +158,7 @@ class RealSolver:
         self.bTrackImage = self.thePlanner.record['meaBoard'].toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
         self.bTrackImage_SolID = self.thePlanner.displayBoard.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False, ID_DISPLAY=True)
 
-        # Return action plan, the id number near hand (We assign it as None since we do not need it now), hand_activity
+        # Return action plan
         return plan
 
 #
@@ -199,11 +208,6 @@ if __name__ == "__main__":
 
         # Plan not used yet
         plan, id_dict, hand_activity = puzzleSolver.process(postImg, visibleMask, hTracker_BEV)
-
-        # # Note: It seems that this process is unnecessary to us as we have integrated the nearHand into pick & place interpretation
-        # # @note there may be false negatives
-        # print('ID from puzzle solver:', id_dict)
-        print('Hand activity:', hand_activity)
 
         # Compute progress
         # Note that the solution board should be correct, otherwise it will fail.

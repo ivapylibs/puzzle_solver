@@ -44,25 +44,24 @@ class ParamST(ParamSTL):
     fy: float = 0.5  # @< The y scale of display.
 
 class SimTime(SimTimeLess):
-    """
-    @brief: The timeless simulator class that simulates the puzzle solving progress.
-
-    The class stores an initial board, a solution board, and an agent instance.
-    During the simulation, the simulator will execute the following process:
-    1. Let the agent observe the board
-    2. Let the agent process the board, which means:
-        2.1 Plan actions if don't know what to do (no more stored actions)
-        2.2 Execute the next planned actions
-    3. If no more process result, meaning no more plans or actions to be executed,
-        then end the simulation. Otherwise repreat the above process
-
-    @param[in]  thePuzzle           The current board
-    @param[in]  agent               The puzzle solving agent
-    @param[in]  param               The parameters
-    """
-
     def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig=None, shareFlag=True,
                  theParams=ParamST()):
+        """
+        @brief: The timeless simulator class that simulates the puzzle solving progress.
+
+        The class stores an initial board, a solution board, and an agent instance.
+        During the simulation, the simulator will execute the following process:
+        1. Let the agent observe the board
+        2. Let the agent process the board, which means:
+            2.1 Plan actions if don't know what to do (no more stored actions)
+            2.2 Execute the next planned actions
+        3. If no more process result, meaning no more plans or actions to be executed,
+            then end the simulation. Otherwise repreat the above process
+
+        @param[in]  thePuzzle           The current board
+        @param[in]  agent               The puzzle solving agent
+        @param[in]  param               The parameters
+        """
 
         super(SimTime, self).__init__(thePuzzle, theHand, thePlanner=thePlanner, thePlannerHand=thePlannerHand,
                                       theFig=theFig, shareFlag=shareFlag, theParams=theParams)
@@ -86,10 +85,10 @@ class SimTime(SimTimeLess):
         @brief  Move a step given the target location.
                 Note that the target location might not be reachable within a step's time length.
         Args:
-            target_loc: The target location of the "move"
+            param: The input params.
 
         Returns:
-            finishFlag(Indicator of whether the target location has been reached)
+            finishFlag: Indicator of whether the target location has been reached
         """
 
         opParam = (False, None)
@@ -134,6 +133,16 @@ class SimTime(SimTimeLess):
         return finishFlag, opParam
 
     def _pause_step(self, action):
+        """
+        @brief Create the simulation for the pause action.
+
+        Args:
+            action: The input action.
+
+        Returns:
+            finishFlag: The flag of finish.
+            opParam: The operation parameters.
+        """
 
         # Have to be pick or place for now
         assert action[0] != "move"
@@ -161,10 +170,22 @@ class SimTime(SimTimeLess):
         return finishFlag, opParam
 
     def reset_cache(self):
+        """
+        @brief Reset the cache.
+        """
+
         self.cache_action = []
         self.timer = self.param.static_duration
 
     def simulate_step(self, robot_only=False, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+        """
+        @brief Create the simulation.
+
+        Args:
+            robot_only: If there is no hand.
+            ID_DISPLAY: Display the ID on the board.
+            CONTOUR_DISPLAY: Display the contours of the puzzle pieces or not.
+        """
 
         cache_image = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY,
                                           BOUNDING_BOX=False)
@@ -197,8 +218,8 @@ class SimTime(SimTimeLess):
     def instruction(self):
         """
         @brief Display a screen with some instructions.
-
         """
+
         WHITE = (255, 255, 255)
         BLACK = (0, 0, 0)
 

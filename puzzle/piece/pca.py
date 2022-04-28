@@ -63,7 +63,7 @@ class PCA(MatchDifferent):
             piece_B: A template instance saving a piece's info.
 
         Returns:
-            The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
+            distance: The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
         """
 
         theta_A = self.process(piece_A)
@@ -83,7 +83,7 @@ class PCA(MatchDifferent):
             img: A mask image.
 
         Returns:
-            A dict saving centerized points, main vectors.
+            dict: A dict saving centerized points, main vectors.
         """
         y, x = np.nonzero(img)
         x = x - np.mean(x)

@@ -73,7 +73,7 @@ class FromLayer(centroidMulti):
         @brief  Return the track-pointer state. Override the original one.
 
         Returns:
-            tstate(The board measurement)
+            tstate: The board measurement.
         """
         tstate = self.bMeas
 
@@ -202,8 +202,8 @@ class FromLayer(centroidMulti):
 
     def mask2regions(self, I, M, verbose=False):
         """
-        @brief      Convert the selection mask into a bunch of regions.
-                    Mainly based on findContours function.
+        @brief Convert the selection mask into a bunch of regions.
+               Mainly based on findContours function.
 
         Args:
             I:  RGB image.
@@ -281,7 +281,7 @@ class FromLayer(centroidMulti):
 
     def regions2pieces(self, regions):
         """
-        @brief  Convert the region information into puzzle pieces.
+        @brief Convert the region information into puzzle pieces.
 
         Args:
             regions: A list of region pairs (mask, segmented image, location in the source image).

@@ -142,7 +142,15 @@ class Hand:
         return (True, None)
 
     def rotate(self, action_param):
+        """
+        Rotate the puzzle piece.
 
+        Args:
+            action_param: The action param.
+
+        Returns:
+
+        """
         if self.cache_piece is None:
             raise RuntimeError('There is no piece in hand')
 
@@ -156,7 +164,7 @@ class Hand:
         Execute an action given the action label and parameter
 
         Overwrite the execute function since we need to keep the self.app.rLoc updated
-        NOTE:This is necessary only when we are using the puzzle.template as the appearance model
+        Note that this is necessary only when we are using the puzzle.template as the appearance model
         """
 
         # if it is pick action, then get the puzzle piece as the real parameter

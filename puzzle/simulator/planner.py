@@ -39,6 +39,15 @@ class ParamPlanner(ParamGrid):
 
 class Planner:
     def __init__(self, solver, manager, theParams=ParamPlanner):
+        """
+        @brief Work like a wrapper of solver & manager in the test script.
+
+        Args:
+            solver: The solver instance.
+            manager: The manager instance.
+            theParams: The params.
+        """
+
         self.solver = solver
         self.manager = manager
         self.param = theParams
@@ -57,6 +66,15 @@ class Planner:
         self.loc_history = None
 
     def measure(self, img):
+        """
+        @brief Process the input image to get the measured board.
+
+        Args:
+            img: The input image.
+
+        Returns:
+            meaBoard: The measured board instance.
+        """
 
         # Debug only
         # cv2.imshow('debug', cv2.cvtColor(img,cv2.COLOR_RGB2BGR))
@@ -81,7 +99,20 @@ class Planner:
         return meaBoard
 
     def adapt(self, meaBoard, visibleMask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+        """
+        @brief Update the tracked board/history and generate the action plan for the robot.
 
+        Args:
+            meaBoard: The measured board for the current view.
+            visibleMask: The mask image for the visible area.
+            rLoc_hand: The location of the hand.
+            COMPLETE_PLAN: Whether to generate the complete plan.
+            SAVED_PLAN: Use the saved plan (self.plan) or not.
+            RUN_SOLVER: Run solver or not.
+
+        Returns:
+            plan: The action plan.
+        """
         # Todo: Not sure if this hard threshold is a good idea or not.
         # Remove the measured pieces if they are too close to the hand.
         # Only meaningful when we can see a hand.

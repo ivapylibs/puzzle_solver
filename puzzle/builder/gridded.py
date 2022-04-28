@@ -1,6 +1,6 @@
 # ========================= puzzle.builder.gridded ========================
 #
-# @class    gridded
+# @class    puzzle.builder.gridded
 #
 # @brief    This type of puzzle is simply a set of interlocking puzzle
 #           pieces that get put together in a grid structure.
@@ -56,13 +56,14 @@ class ParamGrid(ParamInter):
 #
 
 class Gridded(Interlocking):
-
-    # ============================== adjacent =============================
-    #
-    # @brief  Constructor for the puzzle.builder.adjacent class.
-    #
-    #
     def __init__(self, theBoard=[], theParams=ParamGrid):
+        """
+        @brief Constructor for the puzzle.builder.adjacent class.
+
+        Args:
+            theBoard: The input board instance.
+            theParams: The params.
+        """
 
         super(Gridded, self).__init__(theBoard, theParams)
 
@@ -82,7 +83,7 @@ class Gridded(Interlocking):
                 interlocking and the grid ordering. Grid ordering helps to
                 determine adjacency.
 
-        @note   If the pieces are close to each other, this function may fail when the location of a piece is not computed properly.
+        Note that if the pieces are close to each other, this function may fail when the location of a piece is not computed properly.
 
         Args:
             reorder: The flag signaling whether to reorder the piece id according to the location.
@@ -161,10 +162,12 @@ class Gridded(Interlocking):
         @brief  Randomly swap rLoc of two puzzle pieces for num times.
 
         Returns:
-          Generated puzzle image & Generated puzzle board.
+          epImage: Generated puzzle image.
+          epBoard: Generated puzzle board.
+          change_dict: The ground truth change dict (Old -> New).
         """
 
-        # @note We do not care about id in this function.
+        # Note: We do not care about id in this function.
         epBoard = deepcopy(self)
 
         pieceKeysList = list(epBoard.pieces.keys())
@@ -206,10 +209,14 @@ class Gridded(Interlocking):
         rapidly parse.
 
         Args:
-          dx: The horizontal offset when exploding.
-          dy: The vertical offset when exploding.
-          bgColor: The background color to use.
-          Exploded puzzle image & Exploded puzzle board.
+            dx: The horizontal offset when exploding.
+            dy: The vertical offset when exploding.
+            bgColor: The background color to use.
+            Exploded puzzle image & Exploded puzzle board.
+
+        Returns:
+            epImage: The image of the exploded puzzle pieces.
+            epBoard: The board instance of the exploded puzzle pieces.
         """
 
         # --[1] First figure out how big the exploded image should be based
@@ -250,21 +257,18 @@ class Gridded(Interlocking):
 
         return epImage, epBoard
 
-    # ======================== buildFromFile_Puzzle =======================
-    #
-    # @brief      Load a saved arrangement calibration/solution puzzle board.
-    #
-    # The python file contains the puzzle board information. It gets
-    # dumped into an arrangement instance. If a threshold variable
-    # ``tauDist`` is found, then it is applied to the # arrangement
-    # instance.
-    #
-    # @param[in]  fileName    The python file to load.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution puzzle board.
+
+        Args:
+            fileName: The python file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFromFile_Puzzle(fileName, theParams)
 
@@ -281,22 +285,23 @@ class Gridded(Interlocking):
 
         return thePuzzle
 
-    # ===================== buildFromFile_ImageAndMask ====================
-    #
-    # @brief      Load a saved arrangement calibration/solution stored as
-    #             an image and a mask.
-    #
-    # The python file contains the puzzle board mask and image source
-    # data. It gets processed into an arrangement instance. If a threshold
-    # variable ``tauDist`` is found, then it is applied to the arrangement
-    # instance.
-    #
-    # @param[in]  fileName    The python file to load.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution stored as an image and a mask.
+
+        The python file contains the puzzle board mask and image source
+        data. It gets processed into an arrangement instance. If a threshold
+        variable ``tauDist`` is found, then it is applied to the arrangement
+        instance.
+
+        Args:
+            fileName: The python file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
 
@@ -307,23 +312,24 @@ class Gridded(Interlocking):
 
         return thePuzzle
 
-    # ==================== buildFromFiles_ImageAndMask ====================
-    #
-    # @brief      Load a saved arrangement calibration/solution stored as
-    #             separate image and mask files.
-    #
-    # The source file contain the puzzle board image and mask data. It
-    # gets processed into an arrangement instance. If a threshold variable
-    # ``tauDist`` is found, then it is applied to the arrangement
-    # instance.
-    #
-    # @param[in]  imFile      The image file to load.
-    # @param[in]  maskFile    The maske file to load.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
+        """
+        @brief Load a saved arrangement calibration/solution stored as
+               separate image and mask files.
+
+        The source file contain the puzzle board image and mask data. It
+        gets processed into an arrangement instance. If a threshold variable
+        ``tauDist`` is found, then it is applied to the arrangement instance.
+
+        Args:
+            imFile: The image file to load.
+            maskFile: The mask file to load.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
@@ -334,22 +340,23 @@ class Gridded(Interlocking):
 
         return thePuzzle
 
-    # ======================= buildFrom_ImageAndMask ======================
-    #
-    # @brief      Given an image and an image mask, parse both to recover
-    #             the puzzle calibration/solution.
-    #
-    # Instantiates a puzzle parsing operator, then applies it to the
-    # submitted data to create a puzzle board instance. That instance is
-    # the calibration/solution.
-    #
-    # @param[in]  theImage    The puzzle image data.
-    # @param[in]  theMask     The puzzle piece mask information.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
+        """
+        @brief Given an image and an image mask, parse both to recover
+               the puzzle calibration/solution.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theMask: The puzzle mask data.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
@@ -360,24 +367,25 @@ class Gridded(Interlocking):
 
         return thePuzzle
 
-    # ===================== buildFrom_ImageProcessing =====================
-    #
-    # @brief      Given an image with regions clearly separated by some
-    #             color or threshold, parse it to recover the puzzle
-    #             calibration/solution. Can source alternative detector.
-    #
-    # Instantiates a puzzle parser that gets applied to the submitted data
-    # to create a puzzle board instance. That instance is the
-    # calibration/solution.
-    #
-    # @param[in]  theImage        The puzzle image data.
-    # @param[in]  theProcessor    The processing scheme.
-    # @param[in]  theDetector     The detector scheme.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
+        """
+        @brief Given an image with regions clearly separated by some
+               color or threshold, parse it to recover the puzzle
+               calibration/solution. Can source alternative detector.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theProcessor: The processing scheme.
+            theDetector: The detector scheme.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFrom_ImageProcessing(theImage, theProcessor, theDetector, theParams)
 
@@ -388,25 +396,26 @@ class Gridded(Interlocking):
 
         return thePuzzle
 
-    # ===================== buildFrom_Sketch =====================
-    #
-    # @brief      Given an image with regions clearly separated by some
-    #             color or threshold, parse it to recover the puzzle
-    #             calibration/solution. Can source alternative detector.
-    #
-    # Instantiates a puzzle parser that gets applied to the submitted data
-    # to create a puzzle board instance. That instance is the
-    # calibration/solution.
-    #
-    # @param[in]  theImage        The puzzle image data.
-    # @param[in]  theMask         The puzzle mask data.
-    # @param[in]  theProcessor    The processing scheme.
-    # @param[in]  theDetector     The detector scheme.
-    #
-    # @param[out] thePuzzle   The arrangement puzzle board instance.
-    #
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
+        """
+        @brief Given an image with regions clearly separated by some
+               color or threshold, parse it to recover the puzzle
+               calibration/solution. Can source alternative detector.
+
+        Instantiates a puzzle parser that gets applied to the submitted data
+        to create a puzzle board instance. That instance is the calibration/solution.
+
+        Args:
+            theImage: The puzzle image data.
+            theMask: The puzzle mask data.
+            theProcessor: The processing scheme.
+            theDetector: The detector scheme.
+            theParams: The params.
+
+        Returns:
+            thePuzzle: The gridded puzzle board instance.
+        """
 
         aPuzzle = Arrangement.buildFrom_Sketch(theImage, theMask, theProcessor, theDetector, theParams)
 

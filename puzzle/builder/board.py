@@ -1,5 +1,7 @@
 # ============================== puzzle.board =============================
 #
+# @class    puzzle.builder.board
+#
 # @brief    A base representation for a puzzle board, which is basically
 #           a collection of pieces.  Gets used in many different ways.
 #
@@ -46,8 +48,7 @@ class Board:
                 instantiation time or delay until later.
 
         Args:
-            *argv: The input params
-
+            *argv: The input params.
         """
 
         # Note that Python 3.7+ has preserved the order of the element in the dict
@@ -81,7 +82,6 @@ class Board:
 
         Args:
             piece: A puzzle piece instance.
-
         """
 
         # Do not directly modify piece
@@ -96,11 +96,10 @@ class Board:
 
     def rmPiece(self, id):
         """
-        @brief      Remove puzzle piece instance from the board
+        @brief Remove puzzle piece instance from the board
 
         Args:
             id: The puzzle piece id (for display)
-
         """
 
         rm_id = None
@@ -116,10 +115,8 @@ class Board:
 
     def clear(self):
         """
-        @brief  Clear all the puzzle pieces from the board.
-
+        @brief Clear all the puzzle pieces from the board.
         """
-        # self.pieces = []
 
         self.pieces = {}
         self.id_count = 0
@@ -212,16 +209,14 @@ class Board:
                         pts.append(((start + far) / 2).astype('int'))
                         pts.append(((far + end) / 2).astype('int'))
 
-
                 # Debug only
                 # cv2.imshow('demo',img)
                 # cv2.waitKey()
             else:
                 for i in range(hull.shape[0]):
                     pts.append(cnt[hull[i][0]][0])
-                    if i>0:
-                        pts.append(((cnt[hull[i][0]][0]+cnt[hull[i-1][0]][0])/2).astype('int'))
-
+                    if i > 0:
+                        pts.append(((cnt[hull[i][0]][0] + cnt[hull[i - 1][0]][0]) / 2).astype('int'))
 
             # Remove duplicates
             pts = np.unique(pts, axis=0)
@@ -259,8 +254,6 @@ class Board:
         """
 
         # [[min x, min y], [max x, max y]]
-
-
         bbox = self.boundingBox()
 
         if bbox is not None:
@@ -304,10 +297,10 @@ class Board:
     def pieceLocations(self, isCenter=False):
         """
         @brief      Returns list/array of puzzle piece locations.
-	
-	    Args:
+
+        Args:
 	        isCenter: The flag indicating whether the given location is for the center.
-	
+
         Returns:
             pLocs: A dict of puzzle piece id & location.
         """
@@ -315,11 +308,11 @@ class Board:
         pLocs = {}
         for key in self.pieces:
             piece = self.pieces[key]
-            
+
             if isCenter:
-            	pLocs[piece.id] = piece.rLoc + np.ceil(piece.y.size / 2)
+                pLocs[piece.id] = piece.rLoc + np.ceil(piece.y.size / 2)
             else:
-            	pLocs[piece.id] = piece.rLoc
+                pLocs[piece.id] = piece.rLoc
 
         return pLocs
 
@@ -356,16 +349,17 @@ class Board:
                 # No piece found
                 return theImage
 
-            lengths= lengths.astype('int')
+            lengths = lengths.astype('int')
             bbox = self.boundingBox().astype('int')
 
-            enlarge = [0,0]
-            if bbox[0][0]<0:
-                enlarge[0]=bbox[0][0]
-            if bbox[0][1]<0:
-                enlarge[1]=bbox[0][1]
+            enlarge = [0, 0]
+            if bbox[0][0] < 0:
+                enlarge[0] = bbox[0][0]
+            if bbox[0][1] < 0:
+                enlarge[1] = bbox[0][1]
 
-            theImage_enlarged = np.zeros((theImage.shape[0]+abs(enlarge[0]),theImage.shape[1]+abs(enlarge[1]),3),dtype='uint8')
+            theImage_enlarged = np.zeros((theImage.shape[0] + abs(enlarge[0]), theImage.shape[1] + abs(enlarge[1]), 3),
+                                         dtype='uint8')
 
             # Have to deal with cases where pieces are out of bounds
             if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
@@ -373,7 +367,8 @@ class Board:
 
                     piece = self.pieces[key]
 
-                    piece.placeInImage(theImage_enlarged, offset=(abs(enlarge[0]),abs(enlarge[1])), CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+                    piece.placeInImage(theImage_enlarged, offset=(abs(enlarge[0]), abs(enlarge[1])),
+                                       CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
@@ -382,14 +377,15 @@ class Board:
 
                         y, x = np.nonzero(piece.y.mask)
 
-                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0]+abs(enlarge[0]),
-                               int(piece.rLoc[1] + np.mean(y)) + char_size[1]+abs(enlarge[1]))
+                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0] + abs(enlarge[0]),
+                               int(piece.rLoc[1] + np.mean(y)) + char_size[1] + abs(enlarge[1]))
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
                         cv2.putText(theImage_enlarged, str(piece.id), pos, font,
                                     font_scale, ID_COLOR, 2, cv2.LINE_AA)
 
-                theImage=theImage_enlarged[abs(enlarge[0]):abs(enlarge[0])+theImage.shape[0],abs(enlarge[1]):abs(enlarge[1])+theImage.shape[1],:]
+                theImage = theImage_enlarged[abs(enlarge[0]):abs(enlarge[0]) + theImage.shape[0],
+                           abs(enlarge[1]):abs(enlarge[1]) + theImage.shape[1], :]
 
             else:
                 raise RuntimeError('The image is too small. Please try again.')
@@ -445,7 +441,7 @@ class Board:
 
         Args:
             fh: The figure handle if available.
-            ID_DISPLAY:  The flag indicating displaying ID or not.
+            ID_DISPLAY: The flag indicating displaying ID or not.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
 
         Returns:
@@ -458,7 +454,8 @@ class Board:
         else:
             fh = plt.figure()
 
-        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,BOUNDING_BOX=BOUNDING_BOX)
+        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+                                BOUNDING_BOX=BOUNDING_BOX)
 
         plt.imshow(theImage)
 

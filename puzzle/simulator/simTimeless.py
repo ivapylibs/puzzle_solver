@@ -33,26 +33,26 @@ class ParamSTL(ParamBasic):
     HAND_OCCLUSION: bool = True # @< The flag of enabling hand occlusion or not.
 
 class SimTimeLess(Basic):
-    """
-    @brief: The timeless simulator class that simulates the puzzle solving progress.
-
-    The class stores an initial board, a solution board, and an agent instance.
-    During the simulation, the simulator will execute the following process:
-    1. Let the agent observe the board
-    2. Let the agent process the board, which means:
-        2.1 Plan actions if don't know what to do (no more stored actions)
-        2.2 Execute the next planned actions
-    3. If no more process result, meaning no more plans or actions to be executed,
-        then end the simulation. Otherwise repreat the above process
-
-    @param[in]  init_board          The initial board
-    @param[in]  sol_board           The solution board
-    @param[in]  agent               The puzzle solving agent
-    @param[in]  param               The parameters
-    """
-
     def __init__(self, thePuzzle, theHand, thePlanner=None, thePlannerHand=None, theFig=None, shareFlag=True,
                  theParams=ParamSTL()):
+        """
+        @brief: The timeless simulator class that simulates the puzzle solving progress.
+
+        The class stores an initial board, a solution board, and an agent instance.
+        During the simulation, the simulator will execute the following process:
+        1. Let the agent observe the board
+        2. Let the agent process the board, which means:
+            2.1 Plan actions if don't know what to do (no more stored actions)
+            2.2 Execute the next planned actions
+        3. If no more process result, meaning no more plans or actions to be executed,
+            then end the simulation. Otherwise repreat the above process
+
+        @param[in]  init_board          The initial board
+        @param[in]  sol_board           The solution board
+        @param[in]  agent               The puzzle solving agent
+        @param[in]  param               The parameters
+        """
+
         super(SimTimeLess, self).__init__(thePuzzle=thePuzzle, thePlanner=thePlanner, theFig=theFig,
                                           shareFlag=shareFlag, theParams=theParams)
 
@@ -78,6 +78,13 @@ class SimTimeLess(Basic):
         self.im = None
 
     def simulate_step(self, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
+        """
+        @brief Create the simulation.
+
+        Args:
+            ID_DISPLAY: Display the ID on the board.
+            CONTOUR_DISPLAY: Display the contours of the puzzle pieces or not.
+        """
 
         if len(self.cache_action) > 0:
             action = self.cache_action.pop(0)

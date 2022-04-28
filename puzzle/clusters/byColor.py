@@ -58,7 +58,7 @@ class ByColor(Board):
 
     def process(self):
         """
-        @ brief Extract color features from the data.
+        @brief Extract color features from the data.
         """
 
         for key in self.pieces:

@@ -48,7 +48,7 @@ class MatchSimilar(Matcher):
             piece_B: A template instance saving a piece's info.
 
         Returns:
-            Comparison result
+            The comparison result
         """
 
         # score is to calculate the similarity while it will call the feature extraction process inside

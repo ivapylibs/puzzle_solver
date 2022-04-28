@@ -164,6 +164,7 @@ class Simple(Base):
         @brief  Plan is to solve puzzle pieces in order (col-wise).
 
         Args:
+            occlusionList: The occlusion list.
             STEP_WISE: If disabled, we will put the puzzle piece's rotation & location
                         in a single step.
             COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
@@ -285,7 +286,7 @@ class Simple(Base):
 
     def planNew(self):
         """
-        @brief Implement Dr. Adan Vela's algorithm
+        @brief Implement Dr. Adan Vela's algorithm.
 
         Returns:
             plan: The plan list.

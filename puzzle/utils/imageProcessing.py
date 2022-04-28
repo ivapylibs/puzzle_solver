@@ -79,7 +79,6 @@ def rotate_im(image, angle, mask=None):
     diagonal_square = (image_width * image_width) + (
             image_height * image_height
     )
-    #
     diagonal = round(math.sqrt(diagonal_square))
     padding_top = round((diagonal - image_height) / 2)
     padding_bottom = round((diagonal - image_height) / 2)
@@ -119,6 +118,7 @@ def rotate_im(image, angle, mask=None):
 
     rLoc_relative = rLoc_relative - np.array([x, y])
 
+    # Debug only
     # print(x, y, w, h)
     # cv2.imshow('rotate', rotated_image)
     # cv2.imshow('src', image)
@@ -137,22 +137,22 @@ def rotate_im(image, angle, mask=None):
 
     rLoc_relative = rLoc_relative + np.array([2, 2])
 
+    # Debug only
     # cv2.imshow('dst', final_image)
     # cv2.waitKey()
-
-    # return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2)
 
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), rLoc_relative
 
 
 def white_balance(img):
     """
+    @brief Change the white balance of the image.
 
     Args:
         img: Input image.
 
     Returns:
-        Processed image with white balance.
+        result: The processed image with white balance.
     """
     result = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     avg_a = np.average(result[:, :, 1])
@@ -168,11 +168,11 @@ def extract_region(img, verbose=False):
     @brief Extract the regions from user's self-defined template image.
 
     Args:
-        img: The input image
+        img: The input image.
         verbose: The flag of whether to debug.
 
     Returns:
-
+        regions: The mask region list.
     """
     # Manually add a black bounding box on the edges,
     # otherwise, the region connected to the border will be removed
@@ -382,7 +382,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (
 def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20, 80), verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
-    #  Todo: Maybe we can combine preprocess_real_puzzle and preprocess_synthetic_puzzle together
+    Todo: Maybe we can combine preprocess_real_puzzle and preprocess_synthetic_puzzle together
 
     Args:
         img: RGB image input.
@@ -546,7 +546,7 @@ def find_nonzero_mask(mask):
         mask: The input mask image with 0 or 1
 
     Returns:
-        The coordinates of the non-zero elements (x,y style)
+        rcoords: The coordinates of the non-zero elements (x,y style)
     """
 
     rcoords = list(np.nonzero(mask))  # 2 (row,col) x N

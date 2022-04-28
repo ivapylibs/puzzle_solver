@@ -30,7 +30,7 @@ class Edge(MatchDifferent):
     def __init__(self, tau_shape=100, tau_color=400):
         """
         @brief  Constructor for the puzzle piece edge class.
-                150 for lab space/400 for RGB space
+                150 for lab space/400 for RGB space.
         Args:
             tau_shape: The threshold for the shape feature.
             tau_color: The threshold for the color feature.
@@ -51,7 +51,7 @@ class Edge(MatchDifferent):
             method: The comparison method, we have two modes: type or shape coords.
 
         Returns:
-            Shape feature.
+            shapeFeaList: The list of teh shape feature.
         """
 
         if not issubclass(type(piece), Regular):
@@ -83,14 +83,14 @@ class Edge(MatchDifferent):
     @staticmethod
     def colorFeaExtract(piece, feaLength=300):
         """
-        @brief  Extract the edge color feature from an input image of the edge.
+        @brief Extract the edge color feature from an input image of the edge.
 
         Args:
-            edge:  An EdgeDes instance.
+            edge: An EdgeDes instance.
             feaLength: The resized feature vector length setting.
 
         Returns:
-            The resized feature vector.
+            colorFeaResizeList: The resized feature vector.
         """
 
         if not issubclass(type(piece), Regular):
@@ -153,7 +153,8 @@ class Edge(MatchDifferent):
                     or just the types of the edges.
 
         Returns:
-            The shape & color distance between the two passed data.
+            distance_shape: The shape distance between the two passed data.
+            distance_color: The color distance between the two passed data.
         """
 
         def dis_shape(shapeFea_A, shapeFea_B, method=method):

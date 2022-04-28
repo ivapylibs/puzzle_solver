@@ -112,7 +112,6 @@ class Template:
 
         Returns:
             theta: The aligned angle (degree).
-
         """
 
         # @note Currently, we use the image center
@@ -177,7 +176,8 @@ class Template:
 
     def getMask(self, theMask, offset=[0, 0]):
         """
-        @brief Get an updated mask of the target
+        @brief Get an updated mask of the target.
+
         Args:
             theMask: The original mask of the target.
             offset: The movement.
@@ -309,7 +309,7 @@ class Template:
             fh: The figure label/handle if available. (optional)
 
         Returns:
-            The handle of the image.
+            fh: The handle of the image.
         """
 
         if fh:
@@ -340,7 +340,7 @@ class Template:
             rLoc: The puzzle piece location in the whole image.
 
         Returns:
-            The puzzle piece instance.
+            thePiece: The puzzle piece instance.
         """
 
         y = PuzzleTemplate()
@@ -399,7 +399,7 @@ class Template:
             theta: The rotated angle.
 
         Returns:
-            A new puzzle template instance.
+            thePiece: A new puzzle template instance.
         """
 
         # Create a new instance. Without rLoc.
@@ -468,7 +468,7 @@ class Template:
             rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
 
         Returns:
-            The puzzle piece instance.
+            thePiece: The puzzle piece instance.
         """
 
         y = PuzzleTemplate()
@@ -506,13 +506,16 @@ class Template:
     @staticmethod
     def buildSphere(radius, color, rLoc=None):
         """
-        @brief  Build a sphere piece
+        @brief  Build a sphere piece.
 
         Args:
             radius: The radius of the sphere.
             color: (3,). The RGB color.
             rLoc: (x, y). The puzzle piece location in the whole image. x: left-to-right. y:top-to-down
             The puzzle piece instance.
+
+        Returns:
+            thePiece: The puzzle piece instance.
         """
 
         y = PuzzleTemplate()

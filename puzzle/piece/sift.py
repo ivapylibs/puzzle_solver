@@ -61,8 +61,8 @@ class Sift(MatchSimilar):
             piece: A template instance saving a piece's info.
 
         Returns:
-            The sift keypoints & the sift descriptor.
-
+            kp: The sift keypoints.
+            des: The sift descriptor.
         """
 
         if issubclass(type(piece), Template):
@@ -106,7 +106,7 @@ class Sift(MatchSimilar):
             yB: A template instance saving a piece's info.
 
         Returns:
-            The distance between the two passed puzzle piece data.
+            distance: The distance between the two passed puzzle piece data.
         """
 
         kp_A, des_A = self.process(yA)
@@ -132,7 +132,7 @@ class Sift(MatchSimilar):
             piece_B: A template instance saving a piece's info.
 
         Returns:
-            Comparison result & rotation angle(degree).
+            Comparison result & rotation angle(degree) & other params.
         """
 
         # Score is to calculate the similarity while it will call the feature extraction process inside
