@@ -90,9 +90,7 @@ class Hand:
 
             piece_id = min(theDists, key=theDists.get)
 
-            piece = puzzle.pieces[piece_id]
-
-
+        piece = puzzle.pieces[piece_id]
 
         if self.pieceInHand(piece.rLoc, self.param.pieceHandDis):
 

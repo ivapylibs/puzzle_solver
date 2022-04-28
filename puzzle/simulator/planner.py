@@ -285,6 +285,149 @@ class Planner:
         else:
             return None
 
+    def adapt_simulator(self, meaBoard, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+        """
+        @brief Update the tracked board/history and generate the action plan for the robot.
+               Todo: To be compatible with the old version. Maybe integrated later.
+
+        Args:
+            meaBoard: The measured board for the current view.
+            visibleMask: The mask image for the visible area.
+            rLoc_hand: The location of the hand.
+            COMPLETE_PLAN: Whether to generate the complete plan.
+            SAVED_PLAN: Use the saved plan (self.plan) or not.
+            RUN_SOLVER: Run solver or not.
+
+        Returns:
+            plan: The action plan.
+        """
+
+        # manager processes the measured board to establish the association
+        self.manager.process(meaBoard)
+
+        record_board_temp = Board()
+        record_match_temp = {}
+
+        # For place
+        flagFound_place = False
+        if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
+
+            if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
+                # Check if there was no puzzle piece in the tracker board (no matter measured or tracked) before in the hand region (last saved)
+                for piece in self.record['meaBoard'].pieces.values():
+
+                    if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED):
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                            flagFound_place = True
+                            break
+
+                # Check if we can see a new piece in the hand region (last saved)
+                if flagFound_place is False:
+                    for piece in meaBoard.pieces.values():
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                            print('The hand just dropped a piece')
+                            break
+
+
+        # For tracking
+        for record_match in self.record['match'].items():
+            findFlag = False
+            for match in self.manager.pAssignments.items():
+                if record_match[1] == match[1]:
+                    # 1) If some pieces are available on both boards, those pieces will have an updated status.
+                    record_board_temp.addPiece(meaBoard.pieces[match[0]])
+                    record_match_temp[record_board_temp.id_count-1] = match[1]
+                    findFlag = True
+                    break
+
+            if findFlag == False:
+                # 2) If some pieces are only available on the record board, their status will be marked as TRACKED.
+                # Todo: If their status has been TRACKED for a while. They will be deleted from the record board.
+                self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.TRACKED
+                record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
+                record_match_temp[record_board_temp.id_count-1] = record_match[1]
+
+        for new_match in self.manager.pAssignments.items():
+            findFlag = False
+            for match in record_match_temp.items():
+                if new_match[1] == match[1]:
+                    findFlag = True
+                    break
+
+            if findFlag == False:
+                # 3) If some pieces are only available on the new board, they will be added to the record board.
+                record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
+                record_match_temp[record_board_temp.id_count-1] = new_match[1]
+
+        # Update
+        self.record['meaBoard'] = record_board_temp
+        self.record['match'] = record_match_temp
+
+        # For pick
+        flagFound_pick = False
+        if self.record['meaBoard'] is not None and self.record['rLoc_hand'] is not None:
+            if not np.array_equal(rLoc_hand, self.record['rLoc_hand']):
+                # Check if there was a piece in the hand region (last saved)
+                for piece in self.record['meaBoard'].pieces.values():
+
+                    # Be careful about the distance thresh (It should be large enough),
+                    # when picked up the piece, the hand may be far from the original piece rLoc,
+                    if piece.status == PieceStatus.TRACKED:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                            flagFound_pick = True
+                            break
+
+                # Check if there was no puzzle piece in the hand region (last saved)
+                if flagFound_pick is True:
+                    flagFound_pick_2 = False
+                    for piece in meaBoard.pieces.values():
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                            flagFound_pick_2 = True
+                            break
+
+                    if flagFound_pick_2 is False:
+                        print('The hand just picked up a piece')
+
+        self.record['rLoc_hand'] = rLoc_hand
+
+        # # # Debug only
+        # if self.record['rLoc_hand'] is not None:
+        #     print('Current hand location:', self.record['rLoc_hand'])
+        # # Current id to solution id
+        # print('Match in the new measured board:', self.manager.pAssignments)
+        # # Note that the printed tracking id is not the one used in meaBoard nor the one used in DisplayBoard (simulator)
+        # print('Match in the tracking record:', self.record['match'])
+        # for match in self.record['match'].items():
+        #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
+
+        if RUN_SOLVER:
+            # Solver plans for the measured board
+            self.solver.setCurrBoard(meaBoard)
+            self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
+
+            """
+            Right now, can only work when puzzle board is not re-processed. 
+            Otherwise, the connected ones will not be considered in the list. 
+            As a result, same effect, so it is fine.
+            """
+
+            # Get the index of the pieces with the occlusion and skip them
+            meaBoard.processAdjacency()
+            occlusionList = []
+            pieceKeysList = list(meaBoard.pieces.keys())
+            for index in range(meaBoard.adjMat.shape[0]):
+                if sum(meaBoard.adjMat[index, :]) > 1:
+                    occlusionList.append(pieceKeysList[index])
+
+            # print('Occlusion:', occlusionList)
+
+            # Plan is for the measured piece
+            plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
+            # print(plan)
+            return plan
+        else:
+            return None
+
     def process(self, input, rLoc_hand=None, visibleMask=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
         @brief  Draft the action plan given the measured board.
@@ -309,6 +452,11 @@ class Planner:
             meaBoard = self.measure(input)
 
         # We have the option to not plan anything but just update tracked board
-        plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+
+        # Todo: May need double check the unit test
+        if visibleMask is not None:
+            plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+        else:
+            plan = self.adapt_simulator(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan

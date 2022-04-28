@@ -57,7 +57,7 @@ class PlannerHand(Planner):
             # Remove the hand area
             meaBoard = self.measure(input)
 
-        plan = self.adapt(meaBoard, rLoc_hand=hand.app.rLoc, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+        plan = self.adapt_simulator(meaBoard, rLoc_hand=hand.app.rLoc, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         # Interpretations for hand one by one
         plan_new = []
