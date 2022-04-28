@@ -342,8 +342,8 @@ class Manager(FromLayer):
         @brief  Run the tracking pipeline for image measurement or directly work
                 on a measured board. Assume two modes: 1. I & M or 2. A measured board.
         Args:
-            I:   RGB image.
-            M:   Mask image.
+            I: RGB image.
+            M: Mask image.
             board: The measured board.
         """
 

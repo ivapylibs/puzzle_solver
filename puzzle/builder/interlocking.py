@@ -1,6 +1,6 @@
 # ====================== puzzle.builder.interlocking ======================
 #
-# @class    interlocking
+# @class    puzzle.builder.interlocking
 #
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations that should actually interlock. Placement
