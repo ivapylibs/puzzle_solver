@@ -46,7 +46,6 @@ class ParamRunner(ParamPlanner):
     areaThresholdLower: int = 1000
     areaThresholdUpper: int = 10000
     lengthThresholdLower: int = 1000
-    areaThresh: int = 10
     BoudingboxThresh: tuple = (10, 200)
     pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.MEASURED
@@ -163,7 +162,8 @@ class RealSolver:
             theArrangeSol = Arrangement.buildFromFile_Puzzle(input)
         else:
             # Read the input image and template to build up the solution board.
-            theMaskSol = preprocess_real_puzzle(input, areaThresh=self.params.areaThresh,
+            theMaskSol = preprocess_real_puzzle(input, areaThresholdLower=self.params.areaThresholdLower,
+                                                areaThresholdUpper=self.params.areaThresholdUpper,
                                                 BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                                 verbose=False)
 
@@ -237,7 +237,8 @@ class RealSolver:
             plan: The action plan.
         """
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresh=self.params.areaThresh,
+        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresholdLower=self.params.areaThresholdLower,
+                                                areaThresholdUpper=self.params.areaThresholdUpper,
                                             BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                             verbose=False)
 
@@ -281,11 +282,10 @@ if __name__ == "__main__":
 
     # Build up the puzzle solver
     configs_puzzleSolver = ParamRunner(
-        areaThresholdLower=1500,
+        areaThresholdLower=1000,
         areaThresholdUpper=8000,
         pieceConstructor=Template,
         lengthThresholdLower=1000,
-        areaThresh=1000,
         BoudingboxThresh=(20, 100),
         tauDist=100,  # @< The radius distance determining if one piece is at the right position.
         hand_radius=200,  # @< The radius distance to the hand center determining the near-by pieces.

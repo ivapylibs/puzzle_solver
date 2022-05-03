@@ -202,7 +202,7 @@ def extract_region(img, verbose=False):
 
     return regions
 
-def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (30,80), cannyThresh=(30, 50), WITH_AREA_THRESH=False ,verbose=False):
+def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, BoudingboxThresh = (30,80), cannyThresh=(30, 50), WITH_AREA_THRESH=False ,verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
             Note that the threshold is very important. It requires to have the prior knowledge.
@@ -210,7 +210,8 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (
     Args:
         img: RGB image input.
         mask: Mask image input.
-        areaThresh: The lower threshold of the area.
+        areaThresholdLower: The lower threshold of the area.
+        areaThresholdUpper: The upper threshold of the area.
         BoudingboxThresh: The size threshold of the bounding box area.
         cannyThresh: The threshold for canny.
         WITH_AREA_THRESH: Mainly for previous codes which have not set the BoudingboxThresh properly.
@@ -326,7 +327,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (
                 w = regions_single[i][2][2]-regions_single[i][2][0]
 
                 if BoudingboxThresh[0] < w < BoudingboxThresh[1] and BoudingboxThresh[0] < h < BoudingboxThresh[1] \
-                        and h*w > areaThresh:
+                        and areaThresholdLower< h*w < areaThresholdUpper:
                     seg_img_combined = seg_img_combined | regions_single[i][0]
         else:
             # They serve to be compatible with previous circle outermost contour removal idea
@@ -378,8 +379,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresh=1000, BoudingboxThresh = (
 
     return seg_img_combined
 
-
-def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20, 80), verbose=False):
+def preprocess_synthetic_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, cannyThresh=(20, 80), verbose=False):
     """
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
     Todo: Maybe we can combine preprocess_real_puzzle and preprocess_synthetic_puzzle together
@@ -387,7 +387,8 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresh=1000, cannyThresh=(20
     Args:
         img: RGB image input.
         mask: Mask image input.
-        areaThresh: The lower threshold of the area.
+        areaThresholdLower: The lower threshold of the area.
+        areaThresholdUpper: The upper threshold of the area.
         cannyThresh: The threshold for canny.
         verbose: The flag of whether to debug.
 
