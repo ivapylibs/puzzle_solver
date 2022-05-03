@@ -52,7 +52,7 @@ class ParamRunner(ParamPlanner):
     tauDist: int = 100
     hand_radius: int = 200
     tracking_life_thresh: int = 15
-
+    solution_area: np.array = np.array([0,0,0,0])
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -72,12 +72,13 @@ class RealSolver:
 
         # Mainly for calibration of the solution board
         self.theCalibrated = Board()
+
+        # For solution board calibration & solution area
         self.thePrevImage = None
 
     def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1, verbose=False):
         """
         @brief  To obtain the solution board from a rosbag for calibration.
-                Adapted from puzzle.utils.puzzleProcessing.calibrate_real_puzzle
 
         Args:
             theImageMea: The input image (from the surveillance system).
@@ -85,68 +86,11 @@ class RealSolver:
             hTracker_BEV: The location of the hand in the BEV.
             option: The option 0 is to assemble the puzzle while option 1 is to disassemble the puzzle
 
-        Returns:
-            theCalibrated: A board of calibrated pieces
         """
 
         # Only work when hand is not present
         if hTracker_BEV is None:
-
-            if verbose:
-                print('Valid input. Process!')
-
-            improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
-                                       improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
-                                       cv2.erode, (np.ones((3, 3), np.uint8),),
-                                       cv2.dilate, (np.ones((3, 3), np.uint8),)
-                                       )
-
-            if self.thePrevImage is None:
-                self.thePrevImage = theImageMea.copy()
-                thePrevMask = preprocess_real_puzzle(self.thePrevImage, verbose=False)
-                self.thePrevImage = cv2.bitwise_and(self.thePrevImage, self.thePrevImage, mask=thePrevMask)
-
-            # Step 1: preprocess real imgs
-            theCurImage = theImageMea.copy()
-            theCurMask = preprocess_real_puzzle(theCurImage, verbose=False)
-            theCurImage = cv2.bitwise_and(theCurImage, theCurImage, mask=theCurMask)
-
-            if verbose:
-                cv2.imshow('theCurMask', cv2.resize(theCurMask, (0,0), fx=0.5, fy=0.5))
-                cv2.waitKey()
-
-            # Step 2: frame difference
-            diff = cv2.absdiff(theCurImage, self.thePrevImage)
-            mask = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
-
-            canvas = np.ones_like(theCurImage, np.uint8)
-
-            th = 30
-            imask = mask > th
-
-            if option == 0:
-                canvas[imask] = theCurImage[imask]
-            else:
-                canvas[imask] = self.thePrevImage[imask]
-
-            # Step 3: threshold
-            theMaskMea = improc.apply(canvas)
-
-            if verbose:
-                cv2.imshow('theCurMask', cv2.resize(theMaskMea, (0,0), fx=0.5, fy=0.5))
-                cv2.waitKey()
-
-            theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
-                                                                 self.params)
-            if theBoard_single.size() > 0:
-                self.theCalibrated.addPiece(theBoard_single.pieces[0])
-                print('Add a new piece.')
-            else:
-                print('No new piece is detected.')
-
-            print(f'Current calibrated pieces number: {self.theCalibrated.size()}')
-
-            self.thePrevImage = theCurImage
+            self.thePrevImage, self.theCalibrated = calibrate_real_puzzle(theImageMea, self.thePrevImage, self.theCalibrated, params=self.params, option=option)
 
     def setSolBoard(self, input):
         """
@@ -236,6 +180,25 @@ class RealSolver:
         Returns:
             plan: The action plan.
         """
+
+        # Todo: Move to somewhere else
+        # We will adopt the frame difference idea in the solution area
+        mask_working = np.ones(theImageMea.shape[:2],dtype='uint8')
+        mask_working[self.params.solution_area[2]:self.params.solution_area[3], self.params.solution_area[0]:self.params.solution_area[1]] = 0
+        mask_solution = 1 - mask_working
+
+        theImageMea_solutionArea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_solution)
+
+        self.thePrevImage, theMea_solution = calibrate_real_puzzle(theImageMea_solutionArea, self.thePrevImage, params=self.params,
+                                                                   option=0)
+
+        theImageMea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
+
+        # Debug only
+        # cv2.imshow('debug_theImageMea_solution', theImageMea_solution)
+        # cv2.waitKey()
+
+
         # Create an improcessor to obtain the mask.
         theMaskMea = preprocess_real_puzzle(theImageMea, areaThresholdLower=self.params.areaThresholdLower,
                                                 areaThresholdUpper=self.params.areaThresholdUpper,
@@ -244,6 +207,10 @@ class RealSolver:
 
         # Create an arrangement instance.
         theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
+
+        # Combination of the pieces from the solution area and other working area
+        for piece in theMea_solution.pieces:
+            theArrangeMea.addPiece(piece)
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
         plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
@@ -274,9 +241,9 @@ if __name__ == "__main__":
     # target_folder = '../../Surveillance/Surveillance/deployment/ROS/activity_multi_free_4'
     # puzzle_solver_mode = 0
 
-    # target_folder = '../../Surveillance/Surveillance/deployment/ROS/data_2022-04-28-14-35-07'
     target_folder = '../../Surveillance/Surveillance/deployment/ROS/data_test'
     puzzle_solver_mode = 1
+
     # verbose = True
     verbose = False
 

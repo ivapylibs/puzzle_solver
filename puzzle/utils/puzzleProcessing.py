@@ -36,7 +36,83 @@ cpath = fpath.rsplit('/', 1)[0]
 # ====================== puzzle.utils.puzzleProcessing ======================
 
 
-def calibrate_real_puzzle(img_folder, option, fsize=1, verbose=False):
+def calibrate_real_puzzle(theImageMea, thePrevImage=None, theCalibrated = Board(), params=ParamPuzzle, option=1, verbose=False):
+    """
+    @brief  To obtain the solution board or the pieces in the solution area.
+
+    Args:
+        theImageMea: The input image.
+        thePrevImage: The pre-saved image of last frame.
+        theCalibrated: Load a pre-saved board.
+        params: Parameter settings to extract the pieces.
+        option: The option 0 is to assemble the puzzle while option 1 is to disassemble the puzzle
+        verbose: Whether to debug
+
+    Returns:
+        thePrevImage: The updated previous image.
+        theCalibrated: A board of calibrated pieces.
+    """
+
+    if verbose:
+        print('Valid input. Process!')
+
+    improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
+                               improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
+                               cv2.erode, (np.ones((3, 3), np.uint8),),
+                               cv2.dilate, (np.ones((3, 3), np.uint8),)
+                               )
+
+    if thePrevImage is None:
+        thePrevImage = theImageMea.copy()
+        thePrevMask = preprocess_real_puzzle(thePrevImage, verbose=False)
+        thePrevImage = cv2.bitwise_and(thePrevImage, thePrevImage, mask=thePrevMask)
+
+    # Step 1: preprocess real imgs
+    theCurImage = theImageMea.copy()
+    theCurMask = preprocess_real_puzzle(theCurImage, verbose=False)
+    theCurImage = cv2.bitwise_and(theCurImage, theCurImage, mask=theCurMask)
+
+    if verbose:
+        cv2.imshow('theCurMask', cv2.resize(theCurMask, (0, 0), fx=0.5, fy=0.5))
+        cv2.waitKey()
+
+    # Step 2: frame difference
+    diff = cv2.absdiff(theCurImage, thePrevImage)
+    mask = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
+
+    canvas = np.ones_like(theCurImage, np.uint8)
+
+    th = 30
+    imask = mask > th
+
+    if option == 0:
+        canvas[imask] = theCurImage[imask]
+    else:
+        canvas[imask] = thePrevImage[imask]
+
+    # Step 3: threshold
+    theMaskMea = improc.apply(canvas)
+
+    if verbose:
+        cv2.imshow('theCurMask', cv2.resize(theMaskMea, (0, 0), fx=0.5, fy=0.5))
+        cv2.waitKey()
+
+    theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
+                                                         params)
+    if theBoard_single.size() > 0:
+        theCalibrated.addPiece(theBoard_single.pieces[0])
+        print('Add a new piece.')
+    else:
+        print('No new piece is detected.')
+
+    print(f'Current calibrated pieces number: {theCalibrated.size()}')
+
+    thePrevImage = theCurImage
+
+    return thePrevImage, theCalibrated
+
+
+def calibrate_real_puzzle_sequence(img_folder, option, fsize=1, verbose=False):
     """
     @brief  To obtain the solution board from an image sequence for calibration.
 

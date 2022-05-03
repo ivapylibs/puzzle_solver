@@ -31,7 +31,7 @@ from puzzle.piece.sift import Sift
 from puzzle.simulator.basic import Basic
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
-from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
+from puzzle.utils.puzzleProcessing import calibrate_real_puzzle_sequence
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -46,8 +46,8 @@ theImageMea = cv2.cvtColor(theImageMea, cv2.COLOR_BGR2RGB)
 # ==[2] Read the source images and reconstruct the solution board.
 #
 
-# theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_cali_1', 0)
-theCalibrated = calibrate_real_puzzle('data/puzzle_real_sample_black_big_cali_4', 1, fsize=fsize)
+# theCalibrated = calibrate_real_puzzle_sequence('data/puzzle_real_sample_black_cali_1', 0)
+theCalibrated = calibrate_real_puzzle_sequence('data/puzzle_real_sample_black_big_cali_4', 1, fsize=fsize)
 
 theCalibrated.display(ID_DISPLAY=True, CONTOUR_DISPLAY=False)
 print('Close the window to proceed.')

@@ -234,6 +234,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
 
         # Manually threshold the img if mask is not given. It should not be better than the one
         # obtained by the surveillance system.
+        # Right now we will always use this step for now.
         improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                    cv2.medianBlur, (5,),
                                    improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),

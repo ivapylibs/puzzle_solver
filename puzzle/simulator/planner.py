@@ -86,8 +86,8 @@ class Planner:
                                    )
         theMaskMea = improc.apply(img)
 
-        # Debug only
-        # cv2.imshow('debug', theMaskMea)
+        # # Debug only
+        # cv2.imshow('debug_theMaskMea', theMaskMea)
         # cv2.waitKey()
 
         meaBoard = Interlocking.buildFrom_ImageAndMask(img, theMaskMea,
@@ -446,9 +446,11 @@ class Planner:
             plan: The action plan for the simulator to perform
         """
 
+        # Todo: Maybe good to incorporate the measure step here for the real case
         if issubclass(type(input), Board):
             meaBoard = input
         else:
+            # Only used by the synthetic case
             meaBoard = self.measure(input)
 
         # Todo: May need double check the unit test
