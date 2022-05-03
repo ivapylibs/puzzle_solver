@@ -90,6 +90,7 @@ class RealSolver:
             theCalibrated: A board of calibrated pieces
         """
 
+        # Only work when hand is not present
         if hTracker_BEV is None:
 
             if verbose:

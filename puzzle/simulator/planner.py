@@ -451,12 +451,12 @@ class Planner:
         else:
             meaBoard = self.measure(input)
 
-        # We have the option to not plan anything but just update tracked board
-
         # Todo: May need double check the unit test
         if visibleMask is not None:
+            # We have the option to not plan anything but just update tracked board
             plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
         else:
+            # We have the option to not plan anything but just update tracked board
             plan = self.adapt_simulator(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
 
         return plan
