@@ -233,14 +233,16 @@ class Planner:
         # For puzzle piece state change idea
         # We want to print the ID from the solution board.
         self.displayBoard = Board()
-        for match in self.record['match'].items():
-            # Save for analysis
-            self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].status)
-            self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].rLoc)
+        try:
+            for match in self.record['match'].items():
+                # Save for analysis
+                self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].status)
+                self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].rLoc)
 
-            # Save for demo
-            self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
-
+                # Save for demo
+                self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
+        except:
+            print('s')
         # # Debug only
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])

@@ -142,5 +142,25 @@ def checkKey(dict1, dict2, value):
     key2 = list(dict2.keys())[list(dict2.values()).index(value)]
 
     return key1 == key2
+
+def closestNumber(num, basis=50, lower=True):
+    """
+    @brief Get the closest number to the basis target for the input number.
+    e.g., 580 with 50 -> 550
+
+    Args:
+        num: The input number.
+        basis: The basis target number.
+        lower: The direction.
+
+    Returns:
+        The integar of the closest number.
+
+    """
+    if lower:
+        return int(num-num%basis)
+    else:
+        return int(num-num%basis+basis)
+
 #
 # ====================== puzzle.utils.dataProcessing ======================

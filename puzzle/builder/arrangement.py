@@ -220,6 +220,9 @@ class Arrangement(Board):
 
             if hasattr(data, 'board'):
                 theBoard = data.board
+            elif issubclass(type(data), Board):
+                theBoard = data
+
             if hasattr(data, 'tauDist'):
                 theParams = ParamArrange(tauDist=data.tauDist)
 

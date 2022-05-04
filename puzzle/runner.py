@@ -31,6 +31,7 @@ from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
+from puzzle.utils.dataProcessing import closestNumber
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 from puzzle.solver.simple import Simple
@@ -92,7 +93,7 @@ class RealSolver:
         if hTracker_BEV is None:
             self.thePrevImage, self.theCalibrated = calibrate_real_puzzle(theImageMea, self.thePrevImage, self.theCalibrated, params=self.params, option=option)
 
-    def setSolBoard(self, input):
+    def setSolBoard(self, img_input, input=None):
         """
         @brief Set up the solution board.
 
@@ -104,6 +105,10 @@ class RealSolver:
             theArrangeSol = Arrangement(input)
         elif isinstance(input, str):
             theArrangeSol = Arrangement.buildFromFile_Puzzle(input)
+            # Currently, we only change the solution area if we have already calibrated it
+
+            self.params.solution_area = [closestNumber(theArrangeSol.boundingBox()[0][0], 30), closestNumber(theArrangeSol.boundingBox()[0][1],30), \
+                                         closestNumber(theArrangeSol.boundingBox()[1][0], 30, lower=False), closestNumber(theArrangeSol.boundingBox()[1][1], 30, lower=False)]
         else:
             # Read the input image and template to build up the solution board.
             theMaskSol = preprocess_real_puzzle(input, areaThresholdLower=self.params.areaThresholdLower,
@@ -122,7 +127,7 @@ class RealSolver:
 
         self.theSolver.desired = theArrangeSol
 
-        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(input), BOUNDING_BOX=False,
+        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
                                                           ID_DISPLAY=True)
 
         # For saving the status history
