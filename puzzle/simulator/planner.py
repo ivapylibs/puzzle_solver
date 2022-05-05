@@ -22,6 +22,7 @@
 import improcessor.basic as improcessor
 import cv2
 import numpy as np
+from copy import deepcopy
 from dataclasses import  dataclass
 
 # from puzzle.builder.arrangement import Arrangement
@@ -65,6 +66,8 @@ class Planner:
         # For saving the puzzle piece's location history
         self.loc_history = None
 
+        # Debug only
+        self.theManager_intra = None
     def measure(self, img):
         """
         @brief Process the input image to get the measured board.
@@ -138,10 +141,10 @@ class Planner:
         match_intra = {}
         if self.record['meaBoard'] is not None:
             # Create a new manager for association between last frame and the current frame
-            theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
-            theManager_intra.process(meaBoard)
+            self.theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
+            self.theManager_intra.process(meaBoard)
 
-            for match in theManager_intra.pAssignments.items():
+            for match in self.theManager_intra.pAssignments.items():
                 # We only care about the ones which do not move
                 # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
                 match_intra[match[0]]=match[1]
@@ -172,7 +175,7 @@ class Planner:
                 if record_match[0] in match_intra.values():
                     key_new = list(match_intra.values()).index(record_match[0])
 
-                    # We only care about the cases where pieces do not move
+                    # We only care about the cases where pieces do not move, then update them with the one in the tracked board
                     if np.linalg.norm(meaBoard.pieces[key_new].rLoc.reshape(2,-1) - self.record['meaBoard'].pieces[record_match[0]].rLoc.reshape(2,-1)) < 50:
 
                         # The new meaBoard will always have pieces of tracking_life as 0
@@ -233,16 +236,21 @@ class Planner:
         # For puzzle piece state change idea
         # We want to print the ID from the solution board.
         self.displayBoard = Board()
-        try:
-            for match in self.record['match'].items():
-                # Save for analysis
-                self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].status)
-                self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[1]].rLoc)
 
-                # Save for demo
-                self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[1]], ORIGINAL_ID=True)
-        except:
-            print('s')
+        for match in self.record['match'].items():
+            # Save for analysis
+            self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[0]].status)
+            self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[0]].rLoc)
+
+
+            # # Note that it just follows the connection at the very beginning
+            # self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[0]], ORIGINAL_ID=True)
+
+            # # Save for demo
+            piece = deepcopy(self.record['meaBoard'].pieces[match[0]])
+            piece.id = match[1]
+            self.displayBoard.addPiece(piece, ORIGINAL_ID=True)
+
         # # Debug only
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])
@@ -257,7 +265,7 @@ class Planner:
         # Debug only
         # We want to print the ID from the solution board.
         for match in self.record['match'].items():
-            print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[1]].status}")
+            print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         if RUN_SOLVER:
             # Solver plans for the measured board

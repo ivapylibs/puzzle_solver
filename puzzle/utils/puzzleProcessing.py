@@ -36,14 +36,14 @@ cpath = fpath.rsplit('/', 1)[0]
 # ====================== puzzle.utils.puzzleProcessing ======================
 
 
-def calibrate_real_puzzle(theImageMea, thePrevImage=None, theCalibrated = Board(), params=ParamPuzzle, option=1, verbose=False):
+def calibrate_real_puzzle(theImageMea, thePrevImage=None, theCalibrated = None, params=ParamPuzzle, option=1, verbose=False):
     """
     @brief  To obtain the solution board or the pieces in the solution area.
 
     Args:
         theImageMea: The input image.
         thePrevImage: The pre-saved image of last frame.
-        theCalibrated: Load a pre-saved board.
+        theCalibrated: Load a pre-saved board, otherwise create an empty one.
         params: Parameter settings to extract the pieces.
         option: The option 0 is to assemble the puzzle while option 1 is to disassemble the puzzle
         verbose: Whether to debug
@@ -52,9 +52,12 @@ def calibrate_real_puzzle(theImageMea, thePrevImage=None, theCalibrated = Board(
         thePrevImage: The updated previous image.
         theCalibrated: A board of calibrated pieces.
     """
-
+    
     if verbose:
         print('Valid input. Process!')
+
+    if theCalibrated is None:
+        theCalibrated = Board()
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_RGB2GRAY,),
                                improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
@@ -94,7 +97,7 @@ def calibrate_real_puzzle(theImageMea, thePrevImage=None, theCalibrated = Board(
     theMaskMea = improc.apply(canvas)
 
     if verbose:
-        cv2.imshow('theCurMask', cv2.resize(theMaskMea, (0, 0), fx=0.5, fy=0.5))
+        cv2.imshow('theMaskMea', cv2.resize(theMaskMea, (0, 0), fx=0.5, fy=0.5))
         cv2.waitKey()
 
     theBoard_single = Arrangement.buildFrom_ImageAndMask(canvas, theMaskMea,
