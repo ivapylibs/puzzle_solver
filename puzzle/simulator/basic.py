@@ -62,11 +62,11 @@ class Basic:
 
         self.planner = thePlanner # @< The planner for the robot (without hand).
 
-        self.param = theParams
+        self.params = theParams
 
         # Save background info
         self.canvas = np.zeros(
-            (self.param.canvas_H, self.param.canvas_W, 3),
+            (self.params.canvas_H, self.params.canvas_W, 3),
             dtype=np.uint8
         )
 
@@ -285,7 +285,7 @@ class Basic:
         """
 
         if not self.fig:
-            self.fig = plt.figure(figsize=(self.param.fig_W, self.param.fig_H), dpi=80)
+            self.fig = plt.figure(figsize=(self.params.fig_W, self.params.fig_H), dpi=80)
 
         if theImage is None:
             self.puzzle.display(theImage=np.zeros_like(self.canvas), fh=self.fig, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY, BOUNDING_BOX=BOUNDING_BOX)

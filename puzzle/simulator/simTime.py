@@ -66,10 +66,10 @@ class SimTime(SimTimeLess):
         super(SimTime, self).__init__(thePuzzle, theHand, thePlanner=thePlanner, thePlannerHand=thePlannerHand,
                                       theFig=theFig, shareFlag=shareFlag, theParams=theParams)
 
-        self.timer = self.param.static_duration  # The timer
+        self.timer = self.params.static_duration  # The timer
 
         # Setting up FPS
-        self.FPS = self.param.FPS
+        self.FPS = self.params.FPS
         self.FramePerSec = pygame.time.Clock()
 
         # To save the display window
@@ -106,9 +106,9 @@ class SimTime(SimTimeLess):
 
         # determine where to end up
         step_loc = np.array([-1, -1])
-        if distance >= self.param.delta_t * self.param.speed:
-            x_step = delta_x * (self.param.delta_t * self.param.speed) / distance
-            y_step = delta_y * (self.param.delta_t * self.param.speed) / distance
+        if distance >= self.params.delta_t * self.params.speed:
+            x_step = delta_x * (self.params.delta_t * self.params.speed) / distance
+            y_step = delta_y * (self.params.delta_t * self.params.speed) / distance
             step_loc[0] = self.hand.app.rLoc[0] + x_step
             step_loc[1] = self.hand.app.rLoc[1] + y_step
             finishFlag = False
@@ -150,7 +150,7 @@ class SimTime(SimTimeLess):
         opParam = (False, None)
 
         # If have not been executed, then execute first before pause there
-        if abs(self.timer - self.param.static_duration) < 1e-04:
+        if abs(self.timer - self.params.static_duration) < 1e-04:
             if self.shareFlag == False and action[0] == "pick":
                 piece_id = self.translateAction(self.plannerHand.manager.pAssignments, action[1])
                 action[1] = piece_id
@@ -159,7 +159,7 @@ class SimTime(SimTimeLess):
                 opParam = self.hand.execute(self.puzzle, action[0], action[1])
 
         # Continue to run the timer
-        self.timer -= self.param.delta_t
+        self.timer -= self.params.delta_t
 
         # If timer is below zero, then it is up!
         if self.timer < 0:
@@ -175,7 +175,7 @@ class SimTime(SimTimeLess):
         """
 
         self.cache_action = []
-        self.timer = self.param.static_duration
+        self.timer = self.params.static_duration
 
     def simulate_step(self, robot_only=False, ID_DISPLAY=True, CONTOUR_DISPLAY=True):
         """
@@ -204,7 +204,7 @@ class SimTime(SimTimeLess):
                 self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
                 # pygame APIs to update the figure
-                theImage_demo = cv2.resize(theImage, (0, 0), fx=self.param.fx, fy=self.param.fy)
+                theImage_demo = cv2.resize(theImage, (0, 0), fx=self.params.fx, fy=self.params.fy)
                 background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
                 self.pygameFig.blit(background, (0, 0))
                 pygame.display.update()
@@ -225,8 +225,8 @@ class SimTime(SimTimeLess):
 
         # Instruction
         font = pygame.font.SysFont('chalkduster.ttf', 72)
-        rect = pygame.Rect((0, 0), (int(self.canvas.shape[1] * self.param.fx),
-                                    int(self.canvas.shape[0] * self.param.fy)))
+        rect = pygame.Rect((0, 0), (int(self.canvas.shape[1] * self.params.fx),
+                                    int(self.canvas.shape[0] * self.params.fy)))
 
         insFig = multiLineSurface('Welcome to the Puzzle Solver.\n\n'
                                   'Key board instruction:\n'
@@ -396,13 +396,13 @@ class SimTime(SimTimeLess):
         def press_handle(key):
 
             if key[pygame.K_UP]:
-                self.cache_action.append(["move", np.array([0, -self.param.displacement]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([0, -self.params.displacement]) + self.hand.app.rLoc])
             elif key[pygame.K_LEFT]:
-                self.cache_action.append(["move", np.array([-self.param.displacement, 0]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([-self.params.displacement, 0]) + self.hand.app.rLoc])
             elif key[pygame.K_DOWN]:
-                self.cache_action.append(["move", np.array([0, self.param.displacement]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([0, self.params.displacement]) + self.hand.app.rLoc])
             elif key[pygame.K_RIGHT]:
-                self.cache_action.append(["move", np.array([self.param.displacement, 0]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([self.params.displacement, 0]) + self.hand.app.rLoc])
             elif key[pygame.K_z]:
                 self.cache_action.append(["pick", None])
             elif key[pygame.K_c]:
@@ -423,7 +423,7 @@ class SimTime(SimTimeLess):
                     else:
 
                         # Enable hand occlusion, assume this info can be used by the planner
-                        if self.param.HAND_OCCLUSION == True:
+                        if self.params.HAND_OCCLUSION == True:
                             # Get the hand mask
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
                             theMask = self.hand.app.getMask(theMask)
@@ -480,7 +480,7 @@ class SimTime(SimTimeLess):
                     else:
 
                         # Enable hand occlusion, assume this info can be used by the planner
-                        if self.param.HAND_OCCLUSION == True:
+                        if self.params.HAND_OCCLUSION == True:
                             # Get the hand mask
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
                             theMask = self.hand.app.getMask(theMask)
@@ -526,8 +526,8 @@ class SimTime(SimTimeLess):
         BLACK = (0, 0, 0)
 
         # with a black screen
-        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.param.fx),
-                                                    int(self.canvas.shape[0]*self.param.fy)))
+        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.params.fx),
+                                                    int(self.canvas.shape[0]*self.params.fy)))
         self.pygameFig.fill(BLACK)
         pygame.display.set_caption("Puzzle Solver")
 
@@ -542,10 +542,10 @@ class SimTime(SimTimeLess):
         theImage = self.puzzle.toImage(theImage=np.zeros_like(self.canvas), ID_DISPLAY=ID_DISPLAY, BOUNDING_BOX=False)
         self.hand.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
 
-        theImage_demo = cv2.resize(theImage, (0, 0), fx=self.param.fx, fy=self.param.fy)
+        theImage_demo = cv2.resize(theImage, (0, 0), fx=self.params.fx, fy=self.params.fy)
         background = pygame.surfarray.make_surface(np.moveaxis(theImage_demo, 0, 1))
-        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.param.fx),
-                                                    int(self.canvas.shape[0]*self.param.fy)))
+        self.pygameFig = pygame.display.set_mode((int(self.canvas.shape[1]*self.params.fx),
+                                                    int(self.canvas.shape[0]*self.params.fy)))
 
         self.pygameFig.blit(background, (0, 0))
 

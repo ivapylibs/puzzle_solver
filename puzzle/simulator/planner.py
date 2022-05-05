@@ -51,7 +51,7 @@ class Planner:
 
         self.solver = solver
         self.manager = manager
-        self.param = theParams
+        self.params = theParams
 
         # match: id to sol_id
         # It is always the updated one
@@ -68,6 +68,7 @@ class Planner:
 
         # Debug only
         self.theManager_intra = None
+
     def measure(self, img):
         """
         @brief Process the input image to get the measured board.
@@ -94,7 +95,7 @@ class Planner:
         # cv2.waitKey()
 
         meaBoard = Interlocking.buildFrom_ImageAndMask(img, theMaskMea,
-                                                       theParams=self.param)
+                                                       theParams=self.params)
         # # Debug only
         # meaBoard.pieces[10].display()
         # import matplotlib.pyplot as plt
@@ -122,7 +123,7 @@ class Planner:
         if rLoc_hand is not None:
             meaBoard_filtered = Board()
             for piece in meaBoard.pieces.values():
-                if np.linalg.norm(piece.rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.param.hand_radius+50:
+                if np.linalg.norm(piece.rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.params.hand_radius+50:
                     meaBoard_filtered.addPiece(piece)
 
             meaBoard = meaBoard_filtered
@@ -158,8 +159,8 @@ class Planner:
 
                     # Note: If the piece is put into the solution area, then we do not care if it is well associated with the tracked board or not
                     # Since they should lie on the nearby area, light effect is not so big
-                    if (hasattr(self.param, 'solution_area') and self.param.solution_area[0]< meaBoard.pieces[match[0]].rLoc[0]< self.param.solution_area[2] and \
-                     self.param.solution_area[1]< meaBoard.pieces[match[0]].rLoc[1]< self.param.solution_area[3]):
+                    if (hasattr(self.params, 'solution_area') and self.params.solution_area[0]< meaBoard.pieces[match[0]].rLoc[0]< self.params.solution_area[2] and \
+                     self.params.solution_area[1]< meaBoard.pieces[match[0]].rLoc[1]< self.params.solution_area[3]):
 
                         if match[0] in match_intra:
                               del match_intra[match[0]]
@@ -218,7 +219,7 @@ class Planner:
                         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
 
                     # If their status has been TRACKED for a while but no update. They will be deleted from the record board
-                    if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
+                    if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.params.tracking_life_thresh:
                         record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                         record_match_temp[record_board_temp.id_count-1] = record_match[1]
 
@@ -274,10 +275,10 @@ class Planner:
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
-        # Debug only
-        # We want to print the ID from the solution board.
-        for match in self.record['match'].items():
-            print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
+        # # Debug only
+        # # We want to print the ID from the solution board.
+        # for match in self.record['match'].items():
+        #     print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         if RUN_SOLVER:
             # Solver plans for the measured board
@@ -339,14 +340,14 @@ class Planner:
                 for piece in self.record['meaBoard'].pieces.values():
 
                     if (piece.status == PieceStatus.MEASURED or piece.status == PieceStatus.TRACKED):
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.params.hand_radius:
                             flagFound_place = True
                             break
 
                 # Check if we can see a new piece in the hand region (last saved)
                 if flagFound_place is False:
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand'])< self.params.hand_radius:
                             print('The hand just dropped a piece')
                             break
 
@@ -395,7 +396,7 @@ class Planner:
                     # Be careful about the distance thresh (It should be large enough),
                     # when picked up the piece, the hand may be far from the original piece rLoc,
                     if piece.status == PieceStatus.TRACKED:
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.params.hand_radius:
                             flagFound_pick = True
                             break
 
@@ -403,7 +404,7 @@ class Planner:
                 if flagFound_pick is True:
                     flagFound_pick_2 = False
                     for piece in meaBoard.pieces.values():
-                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.param.hand_radius:
+                        if np.linalg.norm(piece.rLoc - self.record['rLoc_hand']) < self.params.hand_radius:
                             flagFound_pick_2 = True
                             break
 

@@ -57,10 +57,10 @@ class SimTimeLess(Basic):
                                           shareFlag=shareFlag, theParams=theParams)
 
         self.hand = theHand
-        self.param = theParams
+        self.params = theParams
 
         self.canvas = np.zeros(
-            (self.param.canvas_H, self.param.canvas_W, 3),
+            (self.params.canvas_H, self.params.canvas_W, 3),
             dtype=np.uint8
         )
 
@@ -143,13 +143,13 @@ class SimTimeLess(Basic):
             sys.stdout.flush()
 
             if event.key == 'up':
-                self.cache_action.append(["move", np.array([0, -self.param.displacement]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([0, -self.params.displacement]) + self.hand.app.rLoc])
             elif event.key == 'left':
-                self.cache_action.append(["move", np.array([-self.param.displacement, 0]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([-self.params.displacement, 0]) + self.hand.app.rLoc])
             elif event.key == 'down':
-                self.cache_action.append(["move", np.array([0, self.param.displacement]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([0, self.params.displacement]) + self.hand.app.rLoc])
             elif event.key == 'right':
-                self.cache_action.append(["move", np.array([self.param.displacement, 0]) + self.hand.app.rLoc])
+                self.cache_action.append(["move", np.array([self.params.displacement, 0]) + self.hand.app.rLoc])
             elif event.key == 'z':
                 self.cache_action.append(["pick", None])
             elif event.key == 'c':
@@ -183,7 +183,7 @@ class SimTimeLess(Basic):
                     else:
 
                         # Enable hand occlusion
-                        if self.param.HAND_OCCLUSION == True:
+                        if self.params.HAND_OCCLUSION == True:
                             # Get the hand mask
                             theMask = np.zeros((self.canvas.shape[:2])).astype('bool')
                             theMask = self.hand.app.getMask(theMask)

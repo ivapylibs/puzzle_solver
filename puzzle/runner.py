@@ -340,7 +340,7 @@ if __name__ == "__main__":
             # Compute progress
             # Note that the solution board should be correct, otherwise it will fail.
             try:
-                thePercent = puzzleSolver.progress()
+                thePercent = puzzleSolver.progress(USE_MEASURED=False)
                 print(f"Progress: {thePercent}")
             except:
                 print('Double check the solution board to make it right.')

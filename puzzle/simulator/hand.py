@@ -45,7 +45,7 @@ class Hand:
         self.arm_region = None
         self.cache_piece = None  # @< A piece instance in hand
 
-        self.param = theParams
+        self.params = theParams
 
     def move(self, param):
 
@@ -92,7 +92,7 @@ class Hand:
 
         piece = puzzle.pieces[piece_id]
 
-        if self.pieceInHand(piece.rLoc, self.param.pieceHandDis):
+        if self.pieceInHand(piece.rLoc, self.params.pieceHandDis):
 
             print('Pick the piece.')
 
