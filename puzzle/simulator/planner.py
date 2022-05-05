@@ -149,7 +149,6 @@ class Planner:
                 # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
                 match_intra[match[0]]=match[1]
 
-
         for record_match in self.record['match'].items():
             findFlag = False
 
@@ -157,10 +156,24 @@ class Planner:
                 if record_match[1] == match[1]:
                     # 1) If some pieces are available on both boards, those pieces will have an updated status
 
-                    # If only the piece can be matched to the same one in the tracking board.
+                    # Note: If the piece is put into the solution area, then we do not care if it is well associated with the tracked board or not
+                    # Since they should lie on the nearby area, light effect is not so big
+                    if (hasattr(self.param, 'solution_area') and self.param.solution_area[0]< meaBoard.pieces[match[0]].rLoc[0]< self.param.solution_area[2] and \
+                     self.param.solution_area[1]< meaBoard.pieces[match[0]].rLoc[1]< self.param.solution_area[3]):
+
+                        if match[0] in match_intra:
+                              del match_intra[match[0]]
+
+                        # The new meaBoard will always have pieces of tracking_life as 0
+                        record_board_temp.addPiece(meaBoard.pieces[match[0]])
+                        record_match_temp[record_board_temp.id_count - 1] = record_match[1]
+                        findFlag = True
+                        break
+
+                    # Only if the piece can be matched to the same one in the tracked board.
                     if match[0] in match_intra:
                         if match_intra[match[0]]==record_match[0]:
-                            # All three associations agree, then update
+                            # Note: Only if all three associations agree, then update
 
                             del match_intra[match[0]]
                             # The new meaBoard will always have pieces of tracking_life as 0
@@ -208,7 +221,6 @@ class Planner:
                     if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.param.tracking_life_thresh:
                         record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                         record_match_temp[record_board_temp.id_count-1] = record_match[1]
-
 
         for new_match in self.manager.pAssignments.items():
             findFlag = False
@@ -258,7 +270,7 @@ class Planner:
         # print('Match in the new measured board:', self.manager.pAssignments)
 
         # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator), or the one used in SolBoard.
-        # print('Match in the tracking record:', self.record['match'])
+        # print('Match in the tracked record:', self.record['match'])
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 

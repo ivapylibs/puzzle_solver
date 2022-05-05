@@ -151,26 +151,32 @@ class RealSolver:
             thePercentage: The progress.
         """
 
+        # Use the tracked board
+        # pLocs = self.thePlanner.record['meaBoard'].pieceLocations()
+
+        manager = self.thePlanner.manager
+
         # Check the measured board to get all the pieces location
-        pLocs = self.thePlanner.manager.bMeas.pieceLocations()
+        # Use the measured board
+        pLocs = manager.bMeas.pieceLocations()
 
         # Get match between measured board and the solution board, it may be incomplete
         # Then we have some matched pieces id: location
         pLocs_sol = {}
-        for match in self.thePlanner.manager.pAssignments.items():
+        for match in manager.pAssignments.items():
             pLocs_sol[match[1]] = pLocs[match[0]]
 
         # Check all the matched pieces
         # inPlace is just checking the top left corner for now. It is not 100% accurate.
         # Todo: We may add a solution board to the simulator to make it easier
-        inPlace = self.thePlanner.manager.solution.piecesInPlace(pLocs_sol, tauDist=self.params.tauDist)
+        inPlace = manager.solution.piecesInPlace(pLocs_sol, tauDist=self.params.tauDist)
 
         val_list = [val for _, val in inPlace.items()]
 
         # # Debug only
         # print(val_list)
 
-        thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(self.thePlanner.manager.solution.pieces))
+        thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(manager.solution.pieces))
 
         return thePercentage
 
