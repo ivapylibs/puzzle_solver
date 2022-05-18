@@ -52,6 +52,8 @@ class ParamRunner(ParamPlanner):
     hand_radius: int = 200
     tracking_life_thresh: int = 15
     solution_area: np.array = np.array([0,0,0,0])
+    solution_area_center: np.array = np.array([0,0])
+    solution_area_size: np.array = np.array([0,0])
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
