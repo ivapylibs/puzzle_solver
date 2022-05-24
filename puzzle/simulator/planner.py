@@ -27,7 +27,7 @@ from dataclasses import  dataclass
 
 # from puzzle.builder.arrangement import Arrangement
 from puzzle.builder.interlocking import Interlocking
-from puzzle.builder.gridded import ParamGrid
+from puzzle.builder.gridded import ParamGrid, Gridded
 from puzzle.builder.board import Board
 from puzzle.piece.template import PieceStatus
 from puzzle.manager import Manager, ManagerParms
@@ -120,12 +120,18 @@ class Planner:
         # Todo: Not sure if this hard threshold is a good idea or not.
         # Remove the measured pieces if they are too close to the hand.
         # Only meaningful when we can see a hand.
+        print("The hand present?: {}".format((rLoc_hand is not None)))
         if rLoc_hand is not None:
             meaBoard_filtered = Board()
             for piece in meaBoard.pieces.values():
                 if np.linalg.norm(piece.rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.params.hand_radius+50:
                     meaBoard_filtered.addPiece(piece)
 
+            # TODO: bug here(occur when the hand present.) 
+            # The reason is that the meaBoard is supposed to be a "Gridded" for the planner (meaBoard.processAdjacency is called)
+            # But it is constructed as a "Board" here. 
+            # The relation: the "Gridded" is constructed from the "Board" and add some functions
+            # Fix this in the future.
             meaBoard = meaBoard_filtered
 
         # manager processes the measured board to establish the association
@@ -458,13 +464,14 @@ class Planner:
         @note In principle, the process is not triggered by key but should be called every processing time
 
         Args:
-            input: A measured board or RGB image.
-            rLoc_hand: The location of the hand.
-            visibleMask: The mask of the visible area on the table (puzzle included).
-            COMPLETE_PLAN: Whether to plan the whole sequence.
-            SAVED_PLAN: Use the saved plan (self.plan) or not.
-            RUN_SOLVER: Whether to compute the solver to get the next action plan.
-                        Otherwise, only the board will be recognized and updated.
+            input:          A measured board or RGB image.
+            rLoc_hand:      The location of the hand.
+            visibleMask:    The mask of the visible area on the table (puzzle included).
+            COMPLETE_PLAN:  Whether to plan the whole sequence.
+            SAVED_PLAN:     Use the saved plan (self.plan) or not. NOTE: this option overwrite the COMPLETE_PLAN option. 
+                            (i.e. If this is True, then the COMPLETE_PLAN will be set to true)
+            RUN_SOLVER:     Whether to compute the solver to get the next action plan.
+                            Otherwise, only the board will be recognized and updated.
         Returns:
             plan: The action plan for the simulator to perform
         """

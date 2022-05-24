@@ -19,6 +19,7 @@
 from dataclasses import dataclass
 import copy
 import os
+from tkinter import Grid
 import cv2
 import time
 import matplotlib.pyplot as plt
@@ -27,6 +28,7 @@ import glob
 
 from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 from puzzle.utils.dataProcessing import closestNumber
@@ -100,9 +102,9 @@ class RealSolver:
         """
 
         if issubclass(type(input), Board):
-            theArrangeSol = Arrangement(input)
+            theArrangeSol = Gridded(input)
         elif isinstance(input, str):
-            theArrangeSol = Arrangement.buildFromFile_Puzzle(input)
+            theArrangeSol = Gridded.buildFromFile_Puzzle(input)
             # Currently, we only change the solution area if we have already calibrated it
 
             self.params.solution_area = [closestNumber(theArrangeSol.boundingBox()[0][0], 30), closestNumber(theArrangeSol.boundingBox()[0][1],30), \
@@ -117,7 +119,7 @@ class RealSolver:
                                                 BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                                 verbose=False)
 
-            theArrangeSol = Arrangement.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
+            theArrangeSol = Gridded.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
 
         # For theManager & theSolver
         self.theManager.solution = theArrangeSol
@@ -231,7 +233,7 @@ class RealSolver:
                                             verbose=False)
 
         # Create an arrangement instance.
-        theArrangeMea = Arrangement.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
+        theArrangeMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
 
         # Only update when the hand is far away or not visible
         if hTracker_BEV is None or \
@@ -247,7 +249,7 @@ class RealSolver:
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
         plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
-                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=False)
+                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=True)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False,
