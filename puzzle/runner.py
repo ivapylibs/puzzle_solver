@@ -264,6 +264,11 @@ class RealSolver:
         # Return action plan
         return plan
 
+    def getMeaBoard(self):
+        return self.thePlanner.manager.bMeas
+    
+    def getSolBoard(self):
+        return self.thePlanner.manager.solution
 
 #
 # ========================== puzzle.runner =========================

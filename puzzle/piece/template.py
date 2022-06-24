@@ -378,7 +378,7 @@ class Template:
         # For now, not concerned about bad image data outside of mask.
         y.image = theImage
 
-        if not rLoc:
+        if rLoc is None:
             thePiece = Template(y)
         else:
             thePiece = Template(y, rLoc)

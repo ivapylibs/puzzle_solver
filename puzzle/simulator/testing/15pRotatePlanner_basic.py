@@ -74,7 +74,7 @@ _, epBoard = theGridSol.explodedPuzzle(dx=400, dy=400)
 #
 theGridMea = Gridded(epBoard, ParamGrid(reorder=True))
 
-_, epBoard, _ = theGridMea.swapPuzzle()
+# _, epBoard, _ = theGridMea.swapPuzzle()
 
 # ==[2.3] Randomly rotate the puzzle pieces.
 #
@@ -104,6 +104,12 @@ theMaskMea = improc.apply(epImage)
 
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True))
+fh = theGridMea.display()
+img = theGridMea.toImage()
+# cv2.imwrite("explode_img.png", img[:,:,::-1])
+# plt.imshow(img)
+# plt.show()
+# exit()
 
 # ==[3] Create a manager & simple solver and integrate them into planner
 #
