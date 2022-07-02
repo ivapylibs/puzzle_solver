@@ -264,10 +264,10 @@ class RealSolver:
         # Return action plan
         return plan
 
-    def getMeaBoard(self):
+    def getMeaBoard(self)->Gridded:
         return self.thePlanner.manager.bMeas
     
-    def getSolBoard(self):
+    def getSolBoard(self)->Gridded:
         return self.thePlanner.manager.solution
 
 #

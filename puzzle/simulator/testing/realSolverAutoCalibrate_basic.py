@@ -91,6 +91,10 @@ theGridSol = Gridded(theBoard)
 theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
                                                                 pieceConstructor=Regular))
+# fhSol, fhMea = plt.figure(), plt.figure()
+# theGridSol.display(fh=fhSol)
+# theGridMea.display(fh=fhMea)
+# plt.show()
 
 # ==[3] Create a manager
 #
@@ -144,7 +148,7 @@ while 1:
 
     print(f'Step {i + 1}:')
 
-    plan = theSolver.takeTurn(defaultPlan='order')
+    plan = theSolver.takeTurn(defaultPlan='order', COMPLETE_PLAN=False, SAVED_PLAN=False)
 
     finishFlag = theSim.takeAction(plan)
 

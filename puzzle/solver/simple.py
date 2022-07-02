@@ -227,7 +227,7 @@ class Simple(Base):
 
             # Check if can find the match for best_id_sol
             if best_id_sol not in theScores:
-                # print(f'No assignment found')
+                print(f'No assignment found')
                 continue
 
             for match in self.match.items():

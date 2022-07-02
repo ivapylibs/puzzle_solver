@@ -101,7 +101,7 @@ class Gridded(Interlocking):
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
         if kmeans_cluster[0] is None:
-            x_thresh = np.mean([self.pieces[key].y.size[0] for key in self.pieces]) / 2
+            x_thresh = np.mean([self.pieces[key].y.size[0] for key in self.pieces]) / 3
             x_thresh = min(x_thresh, piece_thresh)
             x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
             x_label = updateLabel(x_list, x_label)  # from 0
@@ -110,7 +110,7 @@ class Gridded(Interlocking):
             x_label = x_kmeans.labels_
 
         if kmeans_cluster[1] is None:
-            y_thresh = np.mean([self.pieces[key].y.size[1] for key in self.pieces]) / 2
+            y_thresh = np.mean([self.pieces[key].y.size[1] for key in self.pieces]) / 3
             y_thresh = min(y_thresh, piece_thresh)
             y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
             y_label = updateLabel(y_list, y_label)  # from 0

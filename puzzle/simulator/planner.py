@@ -39,7 +39,7 @@ class ParamPlanner(ParamGrid):
     tracking_life_thresh: int = 15
 
 class Planner:
-    def __init__(self, solver, manager, theParams=ParamPlanner):
+    def __init__(self, solver, manager:Manager, theParams=ParamPlanner):
         """
         @brief Work like a wrapper of solver & manager in the test script.
 
