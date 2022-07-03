@@ -17,8 +17,10 @@
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
+#           Yiye Chen,              yychen2019@gatech.edu
 # @date     2021/07/28 [created]
 #           2021/08/01 [modified]
+#           2022/07/03 [modified]
 #
 #
 # ============================== puzzle.board =============================
@@ -34,6 +36,8 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.distance import cdist
+
+from puzzle.piece.template import Template
 
 
 #
@@ -112,6 +116,15 @@ class Board:
             del self.pieces[rm_id]
         else:
             raise RuntimeError('Cannot find the target')
+    
+    def getPiece(self, id)->Template:
+        """Get a puzzle piece instance given the id
+
+        Args:
+            id (int): The puzzle piece id
+        """
+        assert id in self.pieces.keys(), "The required piece is not in the board."
+        return self.pieces[id]
 
     def clear(self):
         """
@@ -300,6 +313,7 @@ class Board:
 
         Args:
 	        isCenter: The flag indicating whether the given location is for the center.
+                        Otherwise, the returned is the upper left corner locations.
 
         Returns:
             pLocs: A dict of puzzle piece id & location.

@@ -219,6 +219,8 @@ class Simple(Base):
 
         for i, j in itertools.product(range(int(x_max + 1)), range(int(y_max + 1))):
 
+            print("Determining the plan for the solution piece ({}, {})".format(i,j))
+
             # best_index_sol is just the next target, no matter if the assignment is ready or not
             best_index_sol = np.argwhere((self.desired.gc.T == [i, j]).all(axis=1)).flatten()[0]
 
@@ -236,6 +238,7 @@ class Simple(Base):
 
             # Skip pieces with occlusion
             if best_id_mea in occlusionList:
+                print("Skip due to the occlusion")
                 continue
 
             # Skip if theScore is False
@@ -270,8 +273,8 @@ class Simple(Base):
                 if COMPLETE_PLAN == False:
                     break
 
-            # # Display the plan
-            # print(f'Move piece {best_id_mea} by {theCorrect[best_id_sol]}')
+            # Display the plan
+            print(f'Move piece {best_id_mea} by {theCorrect[best_id_sol]}')
 
             # In some rare cases, we have to skip re-append move action
             if skipFlag == True:
