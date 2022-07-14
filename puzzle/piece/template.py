@@ -70,7 +70,7 @@ class PuzzleTemplate:
 
 class Template:
 
-    def __init__(self, y=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
+    def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         """
         @brief  Constructor for template class.
 
