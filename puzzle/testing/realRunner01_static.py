@@ -38,7 +38,7 @@ def get_args():
     parse = ArgumentParser("The arguments for the puzzle solving planner real world unit test")
     parse.add_argument("--root_data_folder", type=str, default="./data_rosbag/Testing/Yiye/robot_puzzle",
                         help="The root of the rosbag test data.")
-    parse.add_argument("--piece_num", default=9, type=int, 
+    parse.add_argument("--piece_num", default=20, type=int, 
                         help="The number of pieces. For determining the test cases")
     parse.add_argument("--shuffleRot", action="store_true",
                         help="Add shuffle and rotation or not. For determining the test cases")
@@ -158,15 +158,23 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
         theSim.takeAction([plan])
     img_assemble = theSim.toImage()
 
-    # visualize
-    #display_images_cv([rgb[:,:,::-1]], ratio=0.6, window_name="The test rgb frame")
-    #display_images_cv([img_assemble])
-    #opKey = cv2.waitKey(1)
+    # -- visualization for debugging
 
+    # the surveillance system 
     fh, (ax1, ax2) = plt.subplots(1, 2)
+    fh.tight_layout()
+    fh.suptitle("The Surveillance system")
     ax1.imshow(rgb)
     ax1.set_title("THe test rgb frame")
+    ax2.imshow(puzzle_layer)
+    ax2.set_title("THe extracted puzzle layer")
 
+    # the puzzle solver
+    fh2, (ax1, ax2) = plt.subplots(1, 2)
+    fh2.tight_layout()
+    fh2.suptitle("The puzzle solver")
+    ax1.imshow(meaBoard.toImage())
+    ax1.set_title("THe measure board")
     ax2.imshow(img_assemble)
     ax2.set_title("THe simulated assembly result")
 
