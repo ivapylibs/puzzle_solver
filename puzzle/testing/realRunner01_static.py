@@ -15,11 +15,15 @@
 # ===[0] prepare Dependencies
 from argparse import ArgumentParser
 import os, sys
+from copy import deepcopy
 
 import rosbag
 from cv_bridge import CvBridge
 import matplotlib.pyplot as plt
 import cv2
+
+# display
+from camera.utils.display import display_images_cv
 
 # surveillance
 from utils.survRunner import SurvRunner
@@ -27,6 +31,7 @@ from utils.survRunner import SurvRunner
 # puzzle solver
 from puzzle.piece.template import Template
 from puzzle.runner import ParamRunner, RealSolver
+from puzzle.simulator.basic import Basic
 
 # ===[1] Get arguments
 def get_args():
@@ -109,17 +114,65 @@ solImg = puzzle_solver.bSolImage
 plt.figure()
 plt.title("The solution board")
 plt.imshow(solImg)
-plt.pause(1)
+plt.show()
 
 
 # ===[4] Run
 rgb = None
 dep = None
-for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_dep"]):
+for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
+
+    # ----- Read data
     if topic == "/test_rgb":
-        rgb = bridge.imgmsg_to_cv2(msg)[:,:,::-1]
-    elif topic == "/test_dep":
+        rgb = bridge.imgmsg_to_cv2(msg)
+    elif topic == "/test_depth":
         dep = bridge.imgmsg_to_cv2(msg) * depth_scale
+
+    # if either is None, then continue to read data 
+    if rgb is None or dep is None: 
+        continue
     
-    cv2.imshow("THe test rgb image", rgb[:,:,::-1])
-    cv2.waitKey(1)
+    # ----- If obtained both modalities, process the data
+
+    # surveillance
+    surv_runner.process(rgb, dep)
+
+    # get the puzzle layer info
+    puzzle_mask = surv_runner.surv.scene_interpreter.get_layer("puzzle", mask_only=True, BEV_rectify=False)
+    puzzle_layer = surv_runner.surv.scene_interpreter.get_layer("puzzle", mask_only=False, BEV_rectify=False)
+    puzzle_layer_BEV = surv_runner.surv.scene_interpreter.get_layer("puzzle", mask_only=False, BEV_rectify=True)
+    puzzle_trackers = surv_runner.surv.scene_interpreter.get_trackers("puzzle", BEV_rectify=False)
+    human_layer = surv_runner.surv.scene_interpreter.get_layer("human", mask_only=False, BEV_rectify=False)
+
+    # plan
+    postImg = surv_runner.surv.meaBoardImg
+    visibleMask = surv_runner.surv.visibleMask
+    hTracker_BEV = surv_runner.surv.scene_interpreter.get_trackers("human", BEV_rectify=True)  # (2, 1)
+        
+    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False)
+
+    # simulate the plan
+    meaBoard = puzzle_solver.getMeaBoard()
+    theSim = Basic(deepcopy(meaBoard))
+    for plan in plans:
+        theSim.takeAction([plan])
+    img_assemble = theSim.toImage()
+
+    # visualize
+    #display_images_cv([rgb[:,:,::-1]], ratio=0.6, window_name="The test rgb frame")
+    #display_images_cv([img_assemble])
+    #opKey = cv2.waitKey(1)
+
+    fh, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.imshow(rgb)
+    ax1.set_title("THe test rgb frame")
+
+    ax2.imshow(img_assemble)
+    ax2.set_title("THe simulated assembly result")
+
+    plt.show()
+
+    # reset
+    rgb = None
+    dep = None
+    
