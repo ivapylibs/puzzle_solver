@@ -15,6 +15,7 @@
 # ===[0] prepare Dependencies
 from argparse import ArgumentParser
 import os, sys
+from tqdm import tqdm
 from copy import deepcopy
 
 import rosbag
@@ -38,7 +39,7 @@ def get_args():
     parse = ArgumentParser("The arguments for the puzzle solving planner real world unit test")
     parse.add_argument("--root_data_folder", type=str, default="./data_rosbag/Testing/Yiye/robot_puzzle",
                         help="The root of the rosbag test data.")
-    parse.add_argument("--piece_num", default=20, type=int, 
+    parse.add_argument("--piece_num", default=9, type=int, 
                         help="The number of pieces. For determining the test cases")
     parse.add_argument("--shuffleRot", action="store_true",
                         help="Add shuffle and rotation or not. For determining the test cases")
@@ -110,17 +111,35 @@ puzzle_solver = RealSolver(configs_puzzleSolver)
 
 # puzzle solver - set solution board
 puzzle_solver.setSolBoard(rgb_example, sol_path)
+
 solImg = puzzle_solver.bSolImage
 plt.figure()
 plt.title("The solution board")
 plt.imshow(solImg)
-plt.show()
+plt.pause(1)
+# assert the solution board coordinate is assigned correctly. In some cases it maps multiple pieces to a same coordinate.
+solBoard = puzzle_solver.getSolBoard()
+if not solBoard.assert_gc(verbose=True):
+    print(solBoard.getGc())
+    print("GC assignment incorrect")
+    exit()
 
 
 # ===[4] Run
 rgb = None
 dep = None
+
+# prepare plt.figures
+fh, (ax1_sv, ax2_sv) = plt.subplots(1, 2)
+fh.tight_layout()
+fh.suptitle("The Surveillance system")
+fh2, (ax1_ps, ax2_ps) = plt.subplots(1, 2)
+fh2.suptitle("The puzzle solver.")
+fh2.tight_layout()
+
+tqdm_bar = tqdm(total=test_rosbag.get_message_count(topic_filters=["/test_rgb"]))
 for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
+    tqdm_bar.update(1)
 
     # ----- Read data
     if topic == "/test_rgb":
@@ -149,36 +168,30 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     visibleMask = surv_runner.surv.visibleMask
     hTracker_BEV = surv_runner.surv.scene_interpreter.get_trackers("human", BEV_rectify=True)  # (2, 1)
         
-    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False)
+    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False, debug=False)
 
     # simulate the plan
     meaBoard = puzzle_solver.getMeaBoard()
     theSim = Basic(deepcopy(meaBoard))
     for plan in plans:
-        theSim.takeAction([plan])
+        theSim.takeAction([plan], verbose=False)
     img_assemble = theSim.toImage()
 
     # -- visualization for debugging
 
     # the surveillance system 
-    fh, (ax1, ax2) = plt.subplots(1, 2)
-    fh.tight_layout()
-    fh.suptitle("The Surveillance system")
-    ax1.imshow(rgb)
-    ax1.set_title("THe test rgb frame")
-    ax2.imshow(puzzle_layer)
-    ax2.set_title("THe extracted puzzle layer")
+    ax1_sv.imshow(rgb)
+    ax1_sv.set_title("THe test rgb frame")
+    ax2_sv.imshow(puzzle_layer)
+    ax2_sv.set_title("THe extracted puzzle layer")
 
     # the puzzle solver
-    fh2, (ax1, ax2) = plt.subplots(1, 2)
-    fh2.tight_layout()
-    fh2.suptitle("The puzzle solver")
-    ax1.imshow(meaBoard.toImage())
-    ax1.set_title("THe measure board")
-    ax2.imshow(img_assemble)
-    ax2.set_title("THe simulated assembly result")
+    ax1_ps.imshow(meaBoard.toImage())
+    ax1_ps.set_title("THe measure board")
+    ax2_ps.imshow(img_assemble)
+    ax2_ps.set_title("THe simulated assembly result")
 
-    plt.show()
+    plt.pause(1)
 
     # reset
     rgb = None

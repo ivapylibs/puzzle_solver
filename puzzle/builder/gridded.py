@@ -19,8 +19,10 @@
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
+#           Yiye Chen,              yychen2019@gatech.edu
 # @date     2021/08/04 [created]
 #           2021/08/05 [modified]
+#           2022/07/15 [modified]
 #
 # ========================= puzzle.builder.gridded ========================
 
@@ -30,6 +32,7 @@
 import pickle
 from copy import deepcopy
 from dataclasses import dataclass
+from matplotlib.cbook import ls_mapper
 
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
@@ -101,7 +104,7 @@ class Gridded(Interlocking):
         # It is based on the assumption that all the puzzle pieces are of similar sizes.
 
         if kmeans_cluster[0] is None:
-            x_thresh = np.mean([self.pieces[key].y.size[0] for key in self.pieces]) / 3
+            x_thresh = np.mean([self.pieces[key].y.size[0] for key in self.pieces]) / 5
             x_thresh = min(x_thresh, piece_thresh)
             x_label = hcluster.fclusterdata(x_list, x_thresh, criterion="distance")  # from 1
             x_label = updateLabel(x_list, x_label)  # from 0
@@ -110,7 +113,7 @@ class Gridded(Interlocking):
             x_label = x_kmeans.labels_
 
         if kmeans_cluster[1] is None:
-            y_thresh = np.mean([self.pieces[key].y.size[1] for key in self.pieces]) / 3
+            y_thresh = np.mean([self.pieces[key].y.size[1] for key in self.pieces]) / 5
             y_thresh = min(y_thresh, piece_thresh)
             y_label = hcluster.fclusterdata(y_list, y_thresh, criterion="distance")
             y_label = updateLabel(y_list, y_label)  # from 0
@@ -156,6 +159,30 @@ class Gridded(Interlocking):
                 self.gc[:, ii] = x_label[ii], y_label[ii]
 
     # OTHER CODE / MEMBER FUNCTIONS
+
+    def assert_gc(self, verbose=False):
+        """Assert the assigned grid coordinates are correct.
+        The criteria:
+            1. The distinct coordinate number is equal to the solution board piece number
+
+        Return:
+            flag (bool):        True if the grid cooridnates are correct, else False
+        """
+        flag = True
+
+        # 1. Check the unique of the gc
+        gc_unique = np.unique(self.gc, axis=1)
+        num_unique = gc_unique.shape[1]
+        # TODO: finish here
+        if num_unique != self.size():
+            flag = False
+            if verbose:
+                Warning("Grid coordinate is wrong. The assigned number does not equal to the piece number")
+        else:
+            if verbose:
+                print("Grid coordinate assignment passes the check.") 
+            
+        return flag
 
     def swapPuzzle(self, num=100):
         """
@@ -256,6 +283,15 @@ class Gridded(Interlocking):
         """
 
         return epImage, epBoard
+    
+    def getGc(self):
+        """
+        Obtained the solution board pieces' grid coordinates
+
+        Returns:
+            gc (2, N_pieces):       The grid coordinates assigned to each pieces
+        """
+        return self.gc
 
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):

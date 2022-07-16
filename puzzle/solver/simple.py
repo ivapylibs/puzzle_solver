@@ -274,7 +274,7 @@ class Simple(Base):
                     break
 
             # Display the plan
-            print(f'Move piece {best_id_mea} by {theCorrect[best_id_sol]}')
+            # print(f'Move piece {best_id_mea} by {theCorrect[best_id_sol]}')
 
             # In some rare cases, we have to skip re-append move action
             if skipFlag == True:

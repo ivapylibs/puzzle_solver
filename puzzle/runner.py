@@ -203,14 +203,17 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea, visibleMask, hTracker_BEV, verbose=False):
+    def process(self, theImageMea, visibleMask, hTracker_BEV, verbose=False, debug=False):
         """
         @brief Process the input from the surveillance system.
+                It first obtain the measured pieces, which is categorized into the solution area pieces and the working area pieces.
+                Then the solving plan is obtained.
 
         Args:
             theImageMea: The input image (from the surveillance system).
             visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
             hTracker_BEV: The location of the hand in the BEV.
+            debug: If True, will display the detected measured pieces, from working or solution area.
 
         Returns:
             plan: The action plan.
@@ -236,6 +239,7 @@ class RealSolver:
 
         # Create an arrangement instance.
         theArrangeMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
+        theArrangeMea_work_img = theArrangeMea.toImage()
 
         # Only update when the hand is far away or not visible
         if hTracker_BEV is None or \
@@ -248,6 +252,19 @@ class RealSolver:
             # Combination of the pieces from the solution area and other working area
             for piece in self.theCalibrated.pieces.values():
                 theArrangeMea.addPiece(piece)
+        theArrangeMea_all_img = theArrangeMea.toImage()
+        
+        # visualize
+        if debug:
+            print("Showing the debug info of the puzzle solver before the planning. Press any key on the last window to continue...")
+            cv2.imshow("THe work space measured pieces", theImageMea[:,:,::-1])
+            cv2.imshow("THe solution space measured pieces", theImageMea_solutionArea[:,:,::-1])
+            cv2.imshow("The work space puzzle mask", theMaskMea)
+            cv2.imshow("The work space board", theArrangeMea_work_img[:,:,::-1])
+            cv2.imshow("The all space board", theArrangeMea_all_img[:,:,::-1])
+            cv2.waitKey()
+            cv2.destroyAllWindows()
+
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
         plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,

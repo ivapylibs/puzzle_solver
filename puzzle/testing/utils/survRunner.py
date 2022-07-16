@@ -53,11 +53,13 @@ class SurvRunner():
             run_system= True,        
             # activity_label = args.act_collect
             # Postprocessing
-            bound_limit = [200,200,50,50], # @< The ignored region area. Top/Bottom/Left/Right. E.g., Top: 200, 0-200 is ignored.
+            bound_limit = [200,60,50,50], # @< The ignored region area. Top/Bottom/Left/Right. E.g., Top: 200, 0-200 is ignored.
             mea_mode = 'test', # @< The mode for the postprocessing function, 'test' or 'sol'.
             mea_test_r = 150,  # @< The circle size in the postprocessing for the measured board.
         )
         self.surv = BaseSurveillanceDeploy.buildPub(configs, bag_path=self.calib_bag_path)
+
+        bg_seg = self.surv.scene_interpreter.bg_seg
 
 
         print("\n=========== The Surveillance Calibration finished===========")
