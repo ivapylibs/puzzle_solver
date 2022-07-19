@@ -119,10 +119,12 @@ plt.imshow(solImg)
 plt.pause(1)
 # assert the solution board coordinate is assigned correctly. In some cases it maps multiple pieces to a same coordinate.
 solBoard = puzzle_solver.getSolBoard()
+print(solBoard.getGc())
 if not solBoard.assert_gc(verbose=True):
-    print(solBoard.getGc())
     print("GC assignment incorrect")
     exit()
+else:
+    print("GC assignment is good.")
 
 
 # ===[4] Run
@@ -192,6 +194,7 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     ax2_ps.set_title("THe simulated assembly result")
 
     plt.pause(1)
+    # plt.show()
 
     # reset
     rgb = None

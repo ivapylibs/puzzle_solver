@@ -102,6 +102,9 @@ class RealSolver:
         Args:
             input: A board/path/raw image.
         """
+        solParams = ParamGrid(
+            gcMethod="rectangle"
+        )
 
         if issubclass(type(input), Board):
             theArrangeSol = Gridded(input)
