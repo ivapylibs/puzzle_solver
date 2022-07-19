@@ -179,6 +179,13 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
         theSim.takeAction([plan], verbose=False)
     img_assemble = theSim.toImage()
 
+
+    # -- print key information for debugging
+    print("The correspondence detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments))
+    print("The rotations detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments_rotation))
+    print("The measure board adjacency matrix: \n {}".format(meaBoard.adjMat))
+
+
     # -- visualization for debugging
 
     # the surveillance system 
@@ -188,13 +195,13 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     ax2_sv.set_title("THe extracted puzzle layer")
 
     # the puzzle solver
-    ax1_ps.imshow(meaBoard.toImage())
+    ax1_ps.imshow(meaBoard.toImage(ID_DISPLAY=True))
     ax1_ps.set_title("THe measure board")
     ax2_ps.imshow(img_assemble)
     ax2_ps.set_title("THe simulated assembly result")
 
-    plt.pause(1)
-    # plt.show()
+    # plt.pause(1)
+    plt.show()
 
     # reset
     rgb = None

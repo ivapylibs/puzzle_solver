@@ -82,9 +82,9 @@ class Gridded(Interlocking):
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid)
+        self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid, debug=False)
 
-    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster=(None, None)):
+    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster=(None, None), debug=False):
         """
         @brief  Process the solution board and determine what pieces are
                 interlocking and the grid ordering. Grid ordering helps to
@@ -111,18 +111,19 @@ class Gridded(Interlocking):
             x_labels, y_labels = self.__processGrid_rectangle(x_list, y_list)
 
         # For debug. Plot the coordinates 
-        colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1)) 
-        colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1)) 
-        fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
-        ax1.scatter(x_list, y_list)
-        ax1.set_title("The piece coordinates")
-        colors_x = np.array([colors_x_all[l, :] for l in x_labels])
-        ax2.scatter(x_list, y_list, color=colors_x)
-        ax2.set_title("The gc x coordinate assignment")
-        colors_y = np.array([colors_y_all[l] for l in y_labels])
-        ax3.scatter(x_list, y_list, color=colors_y)
-        ax3.set_title("The gc y coordinate assignment")
-        plt.show()
+        if debug:
+            colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1)) 
+            colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1)) 
+            fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
+            ax1.scatter(x_list, y_list)
+            ax1.set_title("The piece coordinates")
+            colors_x = np.array([colors_x_all[l, :] for l in x_labels])
+            ax2.scatter(x_list, y_list, color=colors_x)
+            ax2.set_title("The gc x coordinate assignment")
+            colors_y = np.array([colors_y_all[l] for l in y_labels])
+            ax3.scatter(x_list, y_list, color=colors_y)
+            ax3.set_title("The gc y coordinate assignment")
+            plt.show()
 
         # Reorder the pieces, so the id will correspond to the grid location
         if reorder:

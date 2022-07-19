@@ -107,9 +107,9 @@ class RealSolver:
         )
 
         if issubclass(type(input), Board):
-            theArrangeSol = Gridded(input)
+            theArrangeSol = Gridded(input, solParams)
         elif isinstance(input, str):
-            theArrangeSol = Gridded.buildFromFile_Puzzle(input)
+            theArrangeSol = Gridded.buildFromFile_Puzzle(input, solParams)
             # Currently, we only change the solution area if we have already calibrated it
 
             self.params.solution_area = [closestNumber(theArrangeSol.boundingBox()[0][0], 30), closestNumber(theArrangeSol.boundingBox()[0][1],30), \
