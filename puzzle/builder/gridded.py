@@ -230,8 +230,8 @@ class Gridded(Interlocking):
                 y_errors = y_parts - y_avgs
                 error_this = (np.mean(np.abs(x_errors)) + np.mean(np.abs(y_errors))) / 2.
 
-                print("The x_num: {}, y_num: {}".format(x_num, y_num))
-                print("The error: {} \n".format(error_this))
+                # print("The x_num: {}, y_num: {}".format(x_num, y_num))
+                # print("The error: {} \n".format(error_this))
 
                 # update the result if small error
                 if error_this < error_min:

@@ -55,6 +55,7 @@ class Planner:
 
         # match: id to sol_id
         # It is always the updated one
+        # NOTE: meaboard - previous track board; match: 
         self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
 
         # For saving the tracked board with solution board ID
@@ -102,7 +103,7 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, visibleMask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def adapt(self, meaBoard, visibleMask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, PLAN_WITH_TRACKBOARD=True):
         """
         @brief Update the tracked board/history and generate the action plan for the robot.
 
@@ -135,6 +136,8 @@ class Planner:
             meaBoard = meaBoard_filtered
 
         # manager processes the measured board to establish the association
+        # NOTE: it is now using the meaBoard to assemble the puzzle pieces
+        # if not PLAN_WITH_TRACKBOARD:
         self.manager.process(meaBoard)
 
         record_board_temp = Board()
@@ -145,7 +148,7 @@ class Planner:
         # Note: The matching with the last frame may help when pieces look different from the one in the solution board (due to light)
         # But it may also hurt for a while when a piece has been falsely associated with one in the solution board
 
-        match_intra = {}
+        match_intra = {}    # store the association between the last track board and this meaboard
         if self.record['meaBoard'] is not None:
             # Create a new manager for association between last frame and the current frame
             self.theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
@@ -159,6 +162,8 @@ class Planner:
         for record_match in self.record['match'].items():
             findFlag = False
 
+            # First check whether the current assignment match one of the previous assignment, 
+            # in which case the two pieces are treated as the same one.
             for match in self.manager.pAssignments.items():
                 if record_match[1] == match[1]:
                     # 1) If some pieces are available on both boards, those pieces will have an updated status
@@ -188,10 +193,11 @@ class Planner:
                             record_match_temp[record_board_temp.id_count-1] = record_match[1]
                             findFlag = True
                             break
-
+            
             if findFlag == False:
                 findFlag_2 = False
                 # e,g, ID 1 (meaBoard)->4 (tracked)->4 (solBoard)
+                # If 
                 if record_match[0] in match_intra.values():
                     key_new = list(match_intra.values()).index(record_match[0])
 
@@ -288,8 +294,14 @@ class Planner:
 
         if RUN_SOLVER:
             # Solver plans for the measured board
-            self.solver.setCurrBoard(meaBoard)
-            self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
+            if not PLAN_WITH_TRACKBOARD:
+                self.solver.setCurrBoard(meaBoard)
+                self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
+            # solver plans for the tracking board
+            else:
+                self.manager.process(self.record['meaBoard'])
+                self.solver.setCurrBoard(meaBoard)
+                self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
             """
             Right now, can only work when puzzle board is not re-processed. 
@@ -300,10 +312,10 @@ class Planner:
             # Get the index of the pieces with the occlusion and skip them
             meaBoard.processAdjacency()
             occlusionList = []
-            pieceKeysList = list(meaBoard.pieces.keys())
-            for index in range(meaBoard.adjMat.shape[0]):
-                if sum(meaBoard.adjMat[index, :]) > 1:
-                    occlusionList.append(pieceKeysList[index])
+            # pieceKeysList = list(meaBoard.pieces.keys())
+            # for index in range(meaBoard.adjMat.shape[0]):
+            #     if sum(meaBoard.adjMat[index, :]) > 1:
+            #         occlusionList.append(pieceKeysList[index])
 
             # print('Occlusion:', occlusionList)
 
@@ -457,7 +469,7 @@ class Planner:
         else:
             return None
 
-    def process(self, input, rLoc_hand=None, visibleMask=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
+    def process(self, input, rLoc_hand=None, visibleMask=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, planOnTrack=False):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -486,7 +498,7 @@ class Planner:
         # Todo: May need double check the unit test
         if visibleMask is not None:
             # We have the option to not plan anything but just update tracked board
-            plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
+            plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER, PLAN_WITH_TRACKBOARD=planOnTrack)
         else:
             # We have the option to not plan anything but just update tracked board
             plan = self.adapt_simulator(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)

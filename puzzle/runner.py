@@ -68,6 +68,9 @@ class RealSolver:
         self.theSolver = Simple(None)
         self.thePlanner = Planner(self.theSolver, self.theManager, self.params)
 
+        # Current measure board
+        self.meaBoard = None
+
         # Mainly for debug
         self.bMeasImage = None
         self.bTrackImage = None
@@ -206,7 +209,7 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea, visibleMask, hTracker_BEV, verbose=False, debug=False):
+    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, verbose=False, debug=False, planOnTrack=False):
         """
         @brief Process the input from the surveillance system.
                 It first obtain the measured pieces, which is categorized into the solution area pieces and the working area pieces.
@@ -270,8 +273,9 @@ class RealSolver:
 
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
+        self.meaBoard = theArrangeMea
         plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
-                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=True)
+                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=run_solver, planOnTrack=planOnTrack)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False,
@@ -285,10 +289,14 @@ class RealSolver:
         return plan
 
     def getMeaBoard(self)->Gridded:
-        return self.thePlanner.manager.bMeas
+        return self.meaBoard
     
     def getSolBoard(self)->Gridded:
         return self.thePlanner.manager.solution
+    
+    def getTrackBoard(self)->Gridded:
+        return self.thePlanner.record['meaBoard']
+
 
 #
 # ========================== puzzle.runner =========================

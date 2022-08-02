@@ -6,9 +6,11 @@
                         Hence, this can be treated as an augmentation of the previous real-world unit test for the robustness.
 
                         The test focuses on the puzzle solving planner, rather than the activity-related functions.
+
+                        This script test on the the case involving the view blocking simulatled by the black paper.
     
     @author:            Yiye Chen,          yychen2019@gatech.edu
-    @date:              07/14/2022[created]
+    @date:              08/01/2022[created]
 
 """
 
@@ -39,19 +41,25 @@ def get_args():
     parse = ArgumentParser("The arguments for the puzzle solving planner real world unit test")
     parse.add_argument("--root_data_folder", type=str, default="./data_rosbag/Testing/Yiye/robot_puzzle",
                         help="The root of the rosbag test data.")
-    parse.add_argument("--piece_num", default=9, type=int, 
-                        help="The number of pieces. For determining the test cases")
-    parse.add_argument("--shuffleRot", action="store_true",
-                        help="Add shuffle and rotation or not. For determining the test cases")
+    #parse.add_argument("--piece_num", default=9, type=int, 
+    #                    help="The number of pieces. For determining the test cases")
+    #parse.add_argument("--shuffleRot", action="store_true",
+    #                    help="Add shuffle and rotation or not. For determining the test cases")
 
     args = parse.parse_args()
     return args
 
 def parse_args(args):
-    args.data_folder = os.path.join(args.root_data_folder, "pieces_{}".format(args.piece_num))
-    args.sol_path = os.path.join(args.data_folder, "sol{}.obj".format(args.piece_num))
-    post_fix = "noShuffleRot" if not args.shuffleRot else "yesShuffleRot"
-    args.test_data_path = os.path.join(args.data_folder, "static_{}.bag".format(post_fix))
+    #args.sol_path = os.path.join(args.data_folder, "sol{}.obj".format(args.piece_num))
+    #post_fix = "noShuffleRot" if not args.shuffleRot else "yesShuffleRot"
+    #args.test_data_path = os.path.join(args.data_folder, "static_{}.bag".format(post_fix))
+
+    args.planOnTrack=True
+
+    # NOTE: add "_B" due to the recalibration of the system.
+    args.data_folder = os.path.join(args.root_data_folder, "pieces_20")
+    args.test_data_path = os.path.join(args.data_folder, "dynamic_blockShuffle_B.bag")
+    args.sol_path = os.path.join(args.data_folder, "sol20_B.obj")
 
     return args
 
@@ -135,7 +143,7 @@ dep = None
 fh, (ax1_sv, ax2_sv) = plt.subplots(1, 2)
 fh.tight_layout()
 fh.suptitle("The Surveillance system")
-fh2, (ax1_ps, ax2_ps) = plt.subplots(1, 2)
+fh2, (ax1_ps, ax2_ps, ax3_ps) = plt.subplots(1, 3)
 fh2.suptitle("The puzzle solver.")
 fh2.tight_layout()
 
@@ -170,21 +178,25 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     visibleMask = surv_runner.surv.visibleMask
     hTracker_BEV = surv_runner.surv.scene_interpreter.get_trackers("human", BEV_rectify=True)  # (2, 1)
         
-    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False, debug=False)
+    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False, debug=False, planOnTrack=args.planOnTrack)
 
     # simulate the plan
-    # meaBoard = puzzle_solver.getMeaBoard()
-    meaBoard = puzzle_solver.getTrackBoard()
-    theSim = Basic(deepcopy(meaBoard))
+    meaBoard = puzzle_solver.getMeaBoard()
+    trackBoard = puzzle_solver.getTrackBoard()
+    if args.planOnTrack:
+        boardPlan = trackBoard 
+    else:
+        boardPlan = meaBoard
+    theSim = Basic(deepcopy(boardPlan))
     for plan in plans:
         theSim.takeAction([plan], verbose=False)
-    img_assemble = theSim.toImage()
+    img_assemble = theSim.toImage(ID_DISPLAY=True)
 
 
     # -- print key information for debugging
     print("The correspondence detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments))
     print("The rotations detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments_rotation))
-    # print("The measure board adjacency matrix: \n {}".format(meaBoard.adjMat))
+    # print("The track board adjacency matrix: \n {}".format(trackBoard.adjMat))    # NOTE: 
 
 
     # -- visualization for debugging
@@ -198,8 +210,10 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     # the puzzle solver
     ax1_ps.imshow(meaBoard.toImage(ID_DISPLAY=True))
     ax1_ps.set_title("THe measure board")
-    ax2_ps.imshow(img_assemble)
-    ax2_ps.set_title("THe simulated assembly result")
+    ax2_ps.imshow(trackBoard.toImage(ID_DISPLAY=True))
+    ax2_ps.set_title("THe tracking board")
+    ax3_ps.imshow(img_assemble)
+    ax3_ps.set_title("THe simulated assembly result")
 
     plt.pause(1)
     # plt.show()

@@ -41,13 +41,8 @@ class SurvRunner():
 
         ### build the surveillance
         configs = bParams(
-            markerLength = 0.075,
-            W = 1920,               # The width of the frames
-            H = 1080,                # The depth of the frames
             reCalibrate = False,
             ros_pub = False,         # Publish the test data to the ros or not
-            test_rgb_topic = self.rgb_topic,
-            test_depth_topic = self.dep_topic,
             # activity_topic= test_activity_topic,
             visualize = True,
             run_system= True,        
