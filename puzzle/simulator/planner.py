@@ -367,7 +367,7 @@ class Planner:
             """
 
             # Get the index of the pieces with the occlusion and skip them
-            meaBoard.processAdjacency()
+            # meaBoard.processAdjacency()
             occlusionList = []
             # pieceKeysList = list(meaBoard.pieces.keys())
             # for index in range(meaBoard.adjMat.shape[0]):
