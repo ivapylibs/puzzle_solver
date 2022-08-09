@@ -33,6 +33,17 @@ from puzzle.piece.template import PieceStatus
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 @dataclass
 class ParamPlanner(ParamGrid):
     hand_radius: int = 120
@@ -55,7 +66,7 @@ class Planner:
 
         # match: id to sol_id
         # It is always the updated one
-        # NOTE: meaboard - previous track board; match: 
+        # NOTE: meaboard - previous track board; match: previous calculated match
         self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
 
         # For saving the tracked board with solution board ID
@@ -108,7 +119,7 @@ class Planner:
         @brief Update the tracked board/history and generate the action plan for the robot.
 
         Args:
-            meaBoard: The measured board for the current view.
+            meaBoard: The measured board for the current view. Contains pieces at all the working area (include solution area)
             visibleMask: The mask image for the visible area.
             rLoc_hand: The location of the hand.
             COMPLETE_PLAN: Whether to generate the complete plan.
@@ -148,6 +159,7 @@ class Planner:
         # Note: The matching with the last frame may help when pieces look different from the one in the solution board (due to light)
         # But it may also hurt for a while when a piece has been falsely associated with one in the solution board
 
+        # ============== Detect the match between the previous track board and the current meaBoard ========================
         match_intra = {}    # store the association between the last track board and this meaboard
         if self.record['meaBoard'] is not None:
             # Create a new manager for association between last frame and the current frame
@@ -158,6 +170,10 @@ class Planner:
                 # We only care about the ones which do not move
                 # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
                 match_intra[match[0]]=match[1]
+
+        # ============== Update the trackboard(self.record["meaBoard"]) and tracked match(self.record["match"]) =====================
+        # ============== i.e. Updates the tracked pieces in the trackboard =====================
+        added_piece_ids = []         # A list of piece_ids in the current meaBoard that are already added to the updated tracking board
 
         for record_match in self.record['match'].items():
             findFlag = False
@@ -179,6 +195,7 @@ class Planner:
                         # The new meaBoard will always have pieces of tracking_life as 0
                         record_board_temp.addPiece(meaBoard.pieces[match[0]])
                         record_match_temp[record_board_temp.id_count - 1] = record_match[1]
+                        added_piece_ids.append(match[0])
                         findFlag = True
                         break
 
@@ -191,9 +208,13 @@ class Planner:
                             # The new meaBoard will always have pieces of tracking_life as 0
                             record_board_temp.addPiece(meaBoard.pieces[match[0]])
                             record_match_temp[record_board_temp.id_count-1] = record_match[1]
+                            added_piece_ids.append(match[0])
                             findFlag = True
                             break
             
+
+            # Deal with the pieces who match one of the previously tracked pieces (record board),
+            # but are not assigned to the same solution-board piece as the tracked piece.
             if findFlag == False:
                 findFlag_2 = False
                 # e,g, ID 1 (meaBoard)->4 (tracked)->4 (solBoard)
@@ -207,6 +228,7 @@ class Planner:
                         # The new meaBoard will always have pieces of tracking_life as 0
                         record_board_temp.addPiece(meaBoard.pieces[key_new])
                         record_match_temp[record_board_temp.id_count - 1] = record_match[1]
+                        added_piece_ids.append(key_new)
                         findFlag_2 = True
                         del match_intra[key_new]
 
@@ -234,7 +256,9 @@ class Planner:
                     if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.params.tracking_life_thresh:
                         record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                         record_match_temp[record_board_temp.id_count-1] = record_match[1]
+                        added_piece_ids.append(record_match[0])
 
+        # ===================================== No go through the newly detected pieces whose assignment are found
         for new_match in self.manager.pAssignments.items():
             findFlag = False
             for match in record_match_temp.items():
@@ -242,6 +266,11 @@ class Planner:
                     # Some that have the false associations will be filtered out here
                     findFlag = True
                     break
+
+            # NOTE: added by Yiye. Not sure whether it is a good idea
+            for added_piece in record_board_temp.pieces.values():
+                if np.linalg.norm(meaBoard.pieces[new_match[0]].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 75:
+                    findFlag = True
 
             if findFlag == False:
                 # 3) If some pieces are only available on the new board, they will be added to the record board
@@ -252,6 +281,34 @@ class Planner:
                 else:
                     record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
                     record_match_temp[record_board_temp.id_count-1] = new_match[1]
+                    added_piece_ids.append(new_match[0])
+
+        # =========================================================================================== 
+        # NOTE: added by Yiye. The above will omit the pieces whose match is not found. S
+        # So add below to go through the pieces whose assignment are not FOUND.
+        # Will aim to pass the test of the testing/realRunner02_dynamic.py. Not sure if it will influence others
+        # =========================================================================================== 
+        # go through all the measured pieces
+
+        remain_mea_ids = [id for id in range(len(meaBoard.pieces)) if id not in added_piece_ids]
+        # print(f"{bcolors.WARNING}The missing pieces: {remain_mea_ids}{bcolors.ENDC}")
+        # print(f"{bcolors.WARNING}The pieces number before adding the missing pieces: {len(added_piece_ids)}{bcolors.ENDC}")
+
+        for id in remain_mea_ids:
+            # Make sure the remain piece does not overlap with the current piece, 
+            # It might be the case since the manager is not always reliable.
+            overlap = False
+            for added_piece in record_board_temp.pieces.values():
+                if np.linalg.norm(meaBoard.pieces[id].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 10:
+                    overlap = True
+
+            if not overlap:
+                record_board_temp.addPiece(meaBoard.pieces[id])
+            # NOTE: since the match is not detected, just don't update the match. Will this cause bugs?
+            # record_match_temp[record_board_temp.id_count-1] = new_match[1]
+            
+        # Yiye Update ends here.
+        # =========================================================================================== 
 
         # Update
         self.record['meaBoard'] = record_board_temp
@@ -300,7 +357,7 @@ class Planner:
             # solver plans for the tracking board
             else:
                 self.manager.process(self.record['meaBoard'])
-                self.solver.setCurrBoard(meaBoard)
+                self.solver.setCurrBoard(self.record['meaBoard'])
                 self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
             """
