@@ -7,7 +7,9 @@
 # @file     dataProcessing.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#           Yiye Chen,              yychen2019@gatech.edu
 # @date     2021/08/09 [created]
+#           2022/07/18 [updated]
 #
 #
 # ====================== puzzle.utils.dataProcessing ======================
@@ -161,6 +163,49 @@ def closestNumber(num, basis=50, lower=True):
         return int(num-num%basis)
     else:
         return int(num-num%basis+basis)
+    
+def partition_even(data_list, partition_num, order="ascend"):
+    """Partition a list of numbers evenly into a number of sets based on their values
+    e.g. data = [4, 11, 14, 3, 32, 35], partition_number = 3, order=ascend.
+    result: labels = [0, 1, 1, 0, 2, 2]
+
+    Args:
+        data_list ((N, )):              The list of data
+        partition_num (int):            The partition numebr
+        order (str):                    ascend or descend. THe partition is based on increase order or decrease order
+                                        (i.e. The numbers in the first set is the lowest or the highest)
+    Returns:
+        labels ((N, 1)):                                                The partition label
+        part_results ((partition_num, N/partition_num)):                The partition results
+    """
+    data_list = np.array(data_list).squeeze()
+    assert data_list.size % partition_num == 0, "Please make sure the data number is divisible by the partition number"
+    partition_ppl = int(data_list.size / partition_num)
+    
+    # the partition labels after sorting
+    labels_sort = np.repeat(np.arange(partition_num), partition_ppl)
+
+    # data sort index
+    if order == "ascend":
+        idx_sort = np.argsort(data_list)
+        data_sort = np.sort(data_list)
+    elif order == "descend":
+        idx_sort = np.argsort(data_list)[::-1]
+        data_sort = np.sort(data_list)[::-1]
+
+    # get the partition data and labels
+    part_results = np.array(np.split(data_sort, partition_num))
+    labels = np.zeros_like(data_list, dtype=np.int)
+    for i in range(labels_sort.size):
+        labels[idx_sort[i]] = labels_sort[i] 
+
+    return labels, part_results
+
+     
 
 #
 # ====================== puzzle.utils.dataProcessing ======================
+
+if __name__ == "__main__":
+    data = np.array([4, 11, 14, 3, 32, 35])
+    print(partition_even(data, 3, order="ascend"))
