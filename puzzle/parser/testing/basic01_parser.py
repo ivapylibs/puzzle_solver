@@ -20,7 +20,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.parser.fromLayer import FromLayer
+from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
 
 # ==[1] Create image
 #
@@ -29,7 +29,7 @@ theImage = np.zeros((100, 100, 3))
 # Basic setting to draw a circle
 center_coordinates = (25, 25)
 radius = 10
-color = (255, 0, 0)
+color = (255, 255, 0) # If too dark, the circle will not be ignored by the detector (we have that setting mainly for real images)
 thickness = -1
 
 theImage = cv2.circle(theImage, center_coordinates, radius, color, thickness)

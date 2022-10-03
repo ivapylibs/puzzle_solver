@@ -264,11 +264,12 @@ class FromLayer(centroidMulti):
                         skipFlag = True
                         break
 
+            # Note that float64 is not supported by cv2
             # Todo: A tricky solution to skip regions of all black, which is for our real scene
-            if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
+            if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')).astype('float32'),
                                                            cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
-                # Debug only
-                # cv2.imshow('seg_img', seg_img)
+                # # Debug only
+                # cv2.imshow('seg_img_all_black', seg_img)
                 # cv2.imshow('I', I)
                 # cv2.waitKey()
                 continue
