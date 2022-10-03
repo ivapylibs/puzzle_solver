@@ -160,6 +160,7 @@ while 1:
 
     # Re-plan for every iteration
     plan = thePlanner.process(theSim.puzzle, COMPLETE_PLAN=True)
+    print("Plan: ", plan)
 
     finishFlag = theSim.takeAction(plan)
 

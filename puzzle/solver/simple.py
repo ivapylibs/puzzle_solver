@@ -159,7 +159,7 @@ class Simple(Base):
                 plan = [None]
         return plan
 
-    def planOrdered(self, occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False):
+    def planOrdered(self, occlusionList=[], STEP_WISE=True, COMPLETE_PLAN=False, verbose = False):
         """
         @brief  Plan is to solve puzzle pieces in order (col-wise).
 
@@ -168,6 +168,7 @@ class Simple(Base):
             STEP_WISE: If disabled, we will put the puzzle piece's rotation & location
                         in a single step.
             COMPLETE_PLAN:  If enabled, we will create the complete plan instead a single step.
+            verbose: For debug purpose.
 
         Returns:
             plan: The plan list.
@@ -229,7 +230,8 @@ class Simple(Base):
 
             # Check if can find the match for best_id_sol
             if best_id_sol not in theScores:
-                print(f'No assignment found')
+                if verbose:
+                    print(f'No assignment found')
                 continue
 
             for match in self.match.items():
@@ -238,7 +240,8 @@ class Simple(Base):
 
             # Skip pieces with occlusion
             if best_id_mea in occlusionList:
-                print("Skip due to the occlusion")
+                if verbose:
+                    print("Skip due to the occlusion")
                 continue
 
             # Skip if theScore is False

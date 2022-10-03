@@ -82,9 +82,9 @@ class Gridded(Interlocking):
         else:
             raise TypeError('Not initialized properly')
 
-        self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid, debug=False)
+        self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid, verbose=False)
 
-    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster=(None, None), debug=False):
+    def __processGrid(self, reorder=False, piece_thresh=float('inf'), kmeans_cluster=(None, None), verbose=False):
         """
         @brief  Process the solution board and determine what pieces are
                 interlocking and the grid ordering. Grid ordering helps to
@@ -111,7 +111,7 @@ class Gridded(Interlocking):
             x_labels, y_labels = self.__processGrid_rectangle(x_list, y_list)
 
         # For debug. Plot the coordinates 
-        if debug:
+        if verbose:
             colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1)) 
             colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1)) 
             fh, (ax1, ax2, ax3) = plt.subplots(1, 3)

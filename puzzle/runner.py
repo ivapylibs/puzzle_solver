@@ -209,7 +209,7 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, verbose=False, debug=False, planOnTrack=False):
+    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, verbose=False, planOnTrack=False):
         """
         @brief Process the input from the surveillance system.
                 It first obtain the measured pieces, which is categorized into the solution area pieces and the working area pieces.
@@ -219,7 +219,7 @@ class RealSolver:
             theImageMea: The input image (from the surveillance system).
             visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
             hTracker_BEV: The location of the hand in the BEV.
-            debug: If True, will display the detected measured pieces, from working or solution area.
+            verbose: If True, will display the detected measured pieces, from working or solution area.
 
         Returns:
             plan: The action plan.
@@ -261,7 +261,7 @@ class RealSolver:
         theArrangeMea_all_img = theArrangeMea.toImage()
         
         # visualize
-        if debug:
+        if verbose:
             print("Showing the debug info of the puzzle solver before the planning. Press any key on the last window to continue...")
             cv2.imshow("THe work space measured pieces", theImageMea[:,:,::-1])
             cv2.imshow("THe solution space measured pieces", theImageMea_solutionArea[:,:,::-1])

@@ -32,7 +32,7 @@ from trackpointer.centroidMulti import centroidMulti
 from puzzle.builder.board import Board
 from puzzle.piece.template import Template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
-
+import warnings
 
 # ===== Helper Elements
 #
@@ -126,6 +126,9 @@ class FromLayer(centroidMulti):
         Returns:
             desired_cnts: Contour list.
         """
+
+        # Dummy way to ignore the warning https://stackoverflow.com/a/35466382
+        warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
         # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
         # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff

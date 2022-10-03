@@ -38,7 +38,7 @@ class TwoAgent(Simple):
     def __init__(self, theSol, thePuzzle, agent1=None, agent2=None):
         """
         @brief  Derived from the simple puzzle solver, it also takes in two
-                solver build functiond to seed with information.  Defaults
+                solver build functions to seed with information.  Defaults
                 to simple solvers if none given.
         Args:
             theSol: The solution board.
@@ -88,6 +88,9 @@ class TwoAgent(Simple):
         print(f'It is agent {self.iMove}\'s turn:')
 
         plan = self.agents[self.iMove].takeTurn(thePlan=thePlan, defaultPlan=defaultPlan)
+
+        # A dummy way to skip the next move as the other agent will do the same thing.
+        _ = self.agents[self.iMove].takeTurn(thePlan=thePlan, defaultPlan=defaultPlan)
 
         if (self.iMove == 0):  # Toggle back and forth between agents.
             self.iMove = 1

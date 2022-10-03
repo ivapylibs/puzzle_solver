@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # ============================ realSolverNoCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver & with no calibration process. (real img)
+# @brief    Test script with command from the solver & with no calibration process (we directly take as a exploded puzzle as the solution).
+#           (real img)
 #
 # ============================ realSolverNoCalibrate_basic ===========================
 

@@ -86,7 +86,7 @@ theHand = Hand(theHandAppearance)
 
 # ==[4] Create a simulator and display.
 #
-
+print("Creating a simulator. Should see a window (figure).")
 simulator = SimTimeLess(epBoard, theHand)
 
 simulator.display()

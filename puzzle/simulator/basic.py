@@ -80,7 +80,7 @@ class Basic:
 
         # We only need the matched index.
         # It is only used for simulation cases and we assume that this matching result should always be perfect.
-        if shareFlag == False:
+        if self.shareFlag == False:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
 

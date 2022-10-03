@@ -371,7 +371,7 @@ class SimTime(SimTimeLess):
 
         # Todo: Maybe too slow, have to be updated later
         # finishFlag is only about the animation, opParam is about the implementation
-        if action[0] == "place" and opParam[0] == True:
+        if action[0] == "place" and opParam[0] == True and not self.shareFlag:
             # Update self.matchSimulator
 
             # Remove the old association

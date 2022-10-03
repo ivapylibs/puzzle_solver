@@ -178,7 +178,7 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     visibleMask = surv_runner.surv.visibleMask
     hTracker_BEV = surv_runner.surv.scene_interpreter.get_trackers("human", BEV_rectify=True)  # (2, 1)
         
-    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False, debug=False, planOnTrack=args.planOnTrack)
+    plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False, planOnTrack=args.planOnTrack)
 
     # simulate the plan
     meaBoard = puzzle_solver.getMeaBoard()

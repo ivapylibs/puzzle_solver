@@ -175,6 +175,7 @@ while 1:
     print(f'Step {i + 1}:')
 
     plan = theSolver.takeTurn(defaultPlan='order')
+    print("Plan: ", plan)
 
     finishFlag = theSim.takeAction(plan)
 

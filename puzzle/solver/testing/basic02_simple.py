@@ -119,6 +119,7 @@ while 1:
         finishFlag = True
     else:
 
+        # Todo: We have combined piece_id & piece_index, index has been a legacy one.
         piece_id = plan[0][0]
         piece_index = plan[0][1]
         action_type = plan[0][2]
