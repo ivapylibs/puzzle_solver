@@ -102,7 +102,7 @@ with open(cpath + '/data/image_15p.obj', 'wb') as fp:
 
 del theData_save
 
-# ==[2] Create an Grid instance
+# ==[2] Create a Grid instance
 #
 
 print('Running through test cases. Will take a bit.')

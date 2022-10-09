@@ -66,7 +66,7 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0].imshow(bSource)
 axarr[0].title.set_text('Source solution board')
 
-# ==[2] Create an Grid instance and explode it
+# ==[2] Create a Grid instance and explode it
 #
 
 print('Running through test cases. Will take a bit.')
