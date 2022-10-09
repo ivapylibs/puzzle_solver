@@ -58,6 +58,7 @@ class Histogram(MatchDifferent):
         # cv2.waitKey()
 
         # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
+        # https://www.geeksforgeeks.org/python-opencv-cv2-calchist-method/
         img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
         hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, [int(180/3), int(256/2)], [0, 180, 0, 256])
         cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)

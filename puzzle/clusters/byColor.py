@@ -17,7 +17,9 @@ from dataclasses import dataclass
 # ===== Environment / Dependencies
 #
 import numpy as np
+import cv2
 import scipy.cluster.hierarchy as hcluster
+from sklearn.cluster import AgglomerativeClustering
 
 from puzzle.builder.board import Board
 from puzzle.piece.histogram import Histogram
@@ -66,16 +68,25 @@ class ByColor(Board):
             self.feature.append(self.feaExtractor.colorFeaExtract(piece).flatten())
         self.feature = np.array(self.feature)
 
-        # From 0
-        yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1
+        distance_matrix = np.zeros((len(self.feature), len(self.feature)))
 
-        # # Define the model
-        # model = sklearn.cluster.MeanShift()
+        for i in range(len(self.feature)):
+            for j in range(len(self.feature)):
+                # https://docs.opencv.org/5.x/d8/dc8/tutorial_histogram_comparison.html
+                # https://vovkos.github.io/doxyrest-showcase/opencv/sphinx_rtd_theme/enum_cv_HistCompMethods.html
+                distance_matrix[i][j] = cv2.compareHist(self.feature[i], self.feature[j], 3)
 
-        # # Assign a cluster to each example, from 0
-        # yhat = model.fit_predict(self.feature)
+        model = AgglomerativeClustering(affinity='precomputed', n_clusters=None, linkage='complete', distance_threshold=self.params.tauDist).fit(distance_matrix)
+        # model = sklearn.cluster.AgglomerativeClustering(affinity='precomputed', n_clusters=2, linkage='complete').fit(distance_matrix)
 
-        self.feaLabel = yhat
+        self.feaLabel = model.labels_
+        # print(model.labels_)
+
+
+        # It seems that the provided distance metric is not good enough.
+        # # From 0
+        # yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1
+        # self.feaLabel = yhat
 
 #
 # ================================ puzzle.clusters.byColor ================================
