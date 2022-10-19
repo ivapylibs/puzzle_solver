@@ -15,6 +15,7 @@
 
 
 # ==[0] Prep environment
+import copy
 import os
 
 import matplotlib.pyplot as plt
@@ -31,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import improcessor.basic as improcessor
+from puzzle.piece.regular import Regular
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
 from puzzle.parser.fromSketch import FromSketch
@@ -43,6 +45,9 @@ cpath = fpath.rsplit('/', 1)[0]
 # ==[1] Read the source image and template.
 #
 theImageSol = cv2.imread(cpath + '/../../testing/data/earth.jpg')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+# theImageSol = cv2.imread(cpath + '/../../testing/data/duck.jpg')
+
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
@@ -60,14 +65,15 @@ theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000))
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular))
 
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+# Display the original board
+# theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
 
-theColorCluster = ByColor(theGrid, theParams=ParamColorCluster(tauDist=0.6))
+theColorCluster = ByColor(theGrid, theParams=ParamColorCluster(cluster_num=4, cluster_mode='number'))
 theColorCluster.process()
 
 # ==[3] Display the extracted features.
@@ -76,6 +82,14 @@ theColorCluster.process()
 print('Should see 15 pieces. They are clustered into 3 groups.')
 print('The number of pieces:', len(theColorCluster.feature))
 print('The cluster label:', theColorCluster.feaLabel)
+
+# Copy and paste a new board but with the cluster label displayed.
+theGrid2 = copy.deepcopy(theGrid)
+for key in theGrid2.pieces:
+    theGrid2.pieces[key].id = theColorCluster.feaLabel[key]
+
+theGrid2.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+
 
 plt.show()
 

@@ -18,12 +18,10 @@ from dataclasses import dataclass
 #
 import numpy as np
 import cv2
-import scipy.cluster.hierarchy as hcluster
 from sklearn.cluster import AgglomerativeClustering
 
 from puzzle.builder.board import Board
 from puzzle.piece.histogram import Histogram
-
 
 # ===== Helper Elements
 #
@@ -31,7 +29,8 @@ from puzzle.piece.histogram import Histogram
 @dataclass
 class ParamColorCluster:
     tauDist: float = 0.5
-
+    cluster_num: int = 2
+    cluster_mode: str = 'threshold' # 'threshold' or 'number'
 
 #
 # ================================ puzzle.clusters.byColor ================================
@@ -76,17 +75,16 @@ class ByColor(Board):
                 # https://vovkos.github.io/doxyrest-showcase/opencv/sphinx_rtd_theme/enum_cv_HistCompMethods.html
                 distance_matrix[i][j] = cv2.compareHist(self.feature[i], self.feature[j], 3)
 
-        model = AgglomerativeClustering(affinity='precomputed', n_clusters=None, linkage='complete', distance_threshold=self.params.tauDist).fit(distance_matrix)
-        # model = sklearn.cluster.AgglomerativeClustering(affinity='precomputed', n_clusters=2, linkage='complete').fit(distance_matrix)
+        if self.params.cluster_mode == 'threshold':
+            # Using threshold
+            model = AgglomerativeClustering(affinity='precomputed', n_clusters=None, linkage='complete', distance_threshold=self.params.tauDist).fit(distance_matrix)
+        elif self.params.cluster_mode == 'number':
+            model = AgglomerativeClustering(affinity='precomputed', n_clusters=self.params.cluster_num, linkage='complete').fit(distance_matrix)
+        else:
+            raise ValueError('Unknown cluster mode!')
 
         self.feaLabel = model.labels_
         # print(model.labels_)
-
-
-        # It seems that the provided distance metric is not good enough.
-        # # From 0
-        # yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1
-        # self.feaLabel = yhat
 
 #
 # ================================ puzzle.clusters.byColor ================================

@@ -19,7 +19,6 @@ import cv2
 from puzzle.piece.matchDifferent import MatchDifferent
 from puzzle.piece.template import Template
 
-
 #
 # ================================ puzzle.piece.histogram ================================
 #
@@ -36,7 +35,7 @@ class Histogram(MatchDifferent):
         super(Histogram, self).__init__(tau)
 
     @staticmethod
-    def colorFeaExtract(piece):
+    def colorFeaExtract(piece, color_mode="RGB"):
         """
         @brief Compute histogram from the raw puzzle data.
                See https://opencv-tutorial.readthedocs.io/en/latest/histogram/histogram.html
@@ -54,13 +53,25 @@ class Histogram(MatchDifferent):
         else:
             raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
-        # cv2.imshow('demo', piece.y.mask)
+        # Debug only
+        # cv2.imshow('debug_mask', piece.y.mask)
+        # cv2.imshow('debug_image', cv2.cvtColor(piece.y.image,cv2.COLOR_RGB2BGR))
         # cv2.waitKey()
 
-        # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
-        # https://www.geeksforgeeks.org/python-opencv-cv2-calchist-method/
-        img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
-        hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, [int(180/3), int(256/2)], [0, 180, 0, 256])
+        if color_mode == "HSV":
+            # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
+            # https://www.geeksforgeeks.org/python-opencv-cv2-calchist-method/
+
+            # HSV
+            img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
+            hist = cv2.calcHist([img_hsv], [0, 1, 2], piece.y.mask, [int(180/3), int(256/2), int(256/2)], [0, 180, 0, 256,  0, 256])
+        elif color_mode == "RGB":
+            # RGB
+            hist = cv2.calcHist([piece.y.image], [0, 1, 2], piece.y.mask, [16, 16, 16],
+                                [0, 256, 0, 256, 0, 256])
+        else:
+            raise ValueError('The input color mode is wrong. Need "RGB" or "HSV".')
+
         cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
         piece.y.colorFea = hist
