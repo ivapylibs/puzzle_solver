@@ -38,12 +38,18 @@ fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument('--image', type=str, default='duck', choices=['duck', 'earth', 'balloon', 'elsa1', 'elsa2', 'rapunzel', 'dinos'])
-argparser.add_argument('--mask', type=int, default=15, choices=[15, 35, 60])
-argparser.add_argument('--with_cluster', action='store_true')
-argparser.add_argument('--cluster_mode', type=str, default='number', choices=['number', 'threshold'])
-argparser.add_argument('--cluster_number', type=int, default=4)
-argparser.add_argument('--cluster_threshold', type=float, default=0.5)
+argparser.add_argument('--image', type=str, default='duck', choices=['duck', 'earth', 'balloon', 'elsa1', 'elsa2', 'rapunzel', 'dinos'],
+                       help='The image to be used for the puzzle.')
+argparser.add_argument('--mask', type=int, default=15, choices=[15, 35, 60],
+                       help = 'The number of pieces in the puzzle.')
+argparser.add_argument('--with_cluster', action='store_true',
+                       help='Whether to use the cluster algorithm to separate the pieces.')
+argparser.add_argument('--cluster_mode', type=str, default='number', choices=['number', 'threshold'],
+                       help='The mode of the cluster algorithm.')
+argparser.add_argument('--cluster_number', type=int, default=4,
+                       help='The number of clusters to be used.')
+argparser.add_argument('--cluster_threshold', type=float, default=0.5,
+                       help='The threshold of the cluster algorithm.')
 
 opt = argparser.parse_args()
 
