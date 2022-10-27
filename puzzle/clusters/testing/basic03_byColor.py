@@ -59,13 +59,14 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.GaussianBlur, ((3, 3), 0,),
                            cv2.Canny, (30, 200,),
+                           cv2.dilate, (np.ones((3, 3), np.uint8),),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular))
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000))
 
 # Display the original board
 # theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
@@ -79,7 +80,7 @@ theColorCluster.process()
 # ==[3] Display the extracted features.
 #
 
-print('Should see 15 pieces. They are clustered into 3 groups.')
+print('Should see 15 pieces. They are clustered into 4 groups.')
 print('The number of pieces:', len(theColorCluster.feature))
 print('The cluster label:', theColorCluster.feaLabel)
 

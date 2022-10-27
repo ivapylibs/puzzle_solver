@@ -298,8 +298,16 @@ class FromLayer(centroidMulti):
             theMask = region[0]
             theImage = region[1]
             rLoc = region[2]
+
+            # # Debug only
+            # cv2.imshow('debug_mask', theMask)
+            # cv2.waitKey()
+
             thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc,
                                                                    pieceStatus=self.params.pieceStatus)
+            # # Debug only
+            # cv2.imshow('debug_piece', thePiece.toImage())
+            # cv2.waitKey()
 
             pieces.append(thePiece)
 
