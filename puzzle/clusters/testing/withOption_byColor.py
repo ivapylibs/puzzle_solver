@@ -38,9 +38,9 @@ fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument('--image', type=str, default='duck', choices=['duck', 'earth', 'balloon', 'elsa1', 'elsa2', 'rapunzel', 'dinos'],
+argparser.add_argument('--image', type=str, default='fish', choices=['duck', 'earth', 'balloon', 'elsa1', 'elsa2', 'rapunzel', 'dinos', 'fish'],
                        help='The image to be used for the puzzle.')
-argparser.add_argument('--mask', type=int, default=15, choices=[15, 35, 60],
+argparser.add_argument('--mask', type=int, default=48, choices=[15, 35, 48, 60],
                        help = 'The number of pieces in the puzzle.')
 argparser.add_argument('--with_cluster', action='store_true',
                        help='Whether to use the cluster algorithm to separate the pieces.')
@@ -60,12 +60,14 @@ img_dict = {
     'elsa1': 'FrozenII_Elsa_1.jpg',
     'elsa2': 'FrozenII_Elsa_2.jpg',
     'rapunzel': 'Rapunzel.jpg',
-    'dinos': 'Amazon_Dinos_2.jpg'
+    'dinos': 'Amazon_Dinos_2.jpg',
+    'fish': 'fish.jpg',
 }
 
 mask_dict = {
     15: 'puzzle_15p_123rf.png',
     35: 'puzzle_35p.png',
+    48: 'puzzle_48p.jpg',
     60: 'puzzle_60p_AdSt408534841.png'
 }
 
@@ -93,7 +95,7 @@ theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000,reorder=True))
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
 
 # Display the original board
 theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
@@ -124,6 +126,8 @@ if opt.with_cluster:
         theGrid2.pieces[key].id = theColorCluster.feaLabel[key]
 
     theGrid2.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+
+plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 
 plt.show()
 
