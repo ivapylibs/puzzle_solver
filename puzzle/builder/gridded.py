@@ -280,10 +280,13 @@ class Gridded(Interlocking):
         """
         @brief  Randomly swap rLoc of two puzzle pieces for num times.
 
+        Args:
+            num:  The number of times to swap.
+
         Returns:
-          epImage: Generated puzzle image.
-          epBoard: Generated puzzle board.
-          change_dict: The ground truth change dict (Old -> New).
+            epImage: Generated puzzle image.
+            epBoard: Generated puzzle board.
+            change_dict: The ground truth change dict (Old -> New).
         """
 
         # Note: We do not care about id in this function.

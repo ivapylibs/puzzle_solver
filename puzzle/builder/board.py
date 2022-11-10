@@ -302,8 +302,11 @@ class Board:
                 # bottom right coordinate
                 br = piece.rLoc + piece.size()
 
-                bbox[0] = np.min([bbox[0], tl], axis=0)
-                bbox[1] = np.max([bbox[1], br], axis=0)
+                try:
+                    bbox[0] = np.min([bbox[0], tl], axis=0)
+                    bbox[1] = np.max([bbox[1], br], axis=0)
+                except:
+                    print('Error in boundingBox')
 
             return bbox
 
@@ -330,7 +333,7 @@ class Board:
 
         return pLocs
 
-    def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
+    def toImage(self, theImage=None, ID_DISPLAY=False, ID_DISPLAY_OPTION=0, COLOR=(0, 0, 0),
                 ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Uses puzzle piece locations to create an image for
@@ -345,6 +348,7 @@ class Board:
         Args:
             theImage: The image to insert pieces into.
             ID_DISPLAY: The flag indicating displaying ID or not.
+            ID_DISPLAY_OPTION: The option for displaying ID. 0: Piece ID. 1: Cluster ID.
             COLOR: The background color.
             ID_COLOR: The ID color.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
@@ -395,8 +399,13 @@ class Board:
                                int(piece.rLoc[1] + np.mean(y)) + char_size[1] + abs(enlarge[1]))
 
                         font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
-                        cv2.putText(theImage_enlarged, str(piece.id), pos, font,
-                                    font_scale, ID_COLOR, 2, cv2.LINE_AA)
+
+                        if ID_DISPLAY_OPTION == 0:
+                            cv2.putText(theImage_enlarged, str(piece.id), pos, font,
+                                        font_scale, ID_COLOR, 2, cv2.LINE_AA)
+                        elif ID_DISPLAY_OPTION == 1:
+                            cv2.putText(theImage_enlarged, str(piece.cluster_id), pos, font,
+                                        font_scale, ID_COLOR, 2, cv2.LINE_AA)
 
                 theImage = theImage_enlarged[abs(enlarge[0]):abs(enlarge[0]) + theImage.shape[0],
                            abs(enlarge[1]):abs(enlarge[1]) + theImage.shape[1], :]
@@ -445,8 +454,14 @@ class Board:
                                int(piece.rLoc[1] + np.mean(y)) + char_size[1])
 
                     font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
-                    cv2.putText(theImage, str(piece.id), pos, font,
-                                font_scale, ID_COLOR, 2, cv2.LINE_AA)
+
+                    if ID_DISPLAY_OPTION == 0:
+                        cv2.putText(theImage, str(piece.id), pos, font,
+                                    font_scale, ID_COLOR, 2, cv2.LINE_AA)
+                    elif ID_DISPLAY_OPTION == 1:
+                        cv2.putText(theImage, str(piece.cluster_id), pos, font,
+                                    font_scale, ID_COLOR, 2, cv2.LINE_AA)
+
 
             # # For better segmentation result, we need some black paddings
             # # However, it may cause some problems
@@ -455,12 +470,13 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
-    def display(self, theImage=None, fh=None, ID_DISPLAY=False, ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
+    def display(self, theImage=None, fh=None, TITLE=None, ID_DISPLAY=False, ID_DISPLAY_OPTION=0, ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
         """
         @brief  Display the puzzle board as an image.
 
         Args:
             fh: The figure handle if available.
+            TITLE: The title of the figure.
             ID_DISPLAY: The flag indicating displaying ID or not.
             CONTOUR_DISPLAY: The flag indicating drawing contour or not.
 
@@ -474,7 +490,10 @@ class Board:
         else:
             fh = plt.figure()
 
-        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, ID_COLOR=ID_COLOR, CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+        if TITLE:
+            plt.title(TITLE)
+
+        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, ID_DISPLAY_OPTION=ID_DISPLAY_OPTION, ID_COLOR=ID_COLOR, CONTOUR_DISPLAY=CONTOUR_DISPLAY,
                                 BOUNDING_BOX=BOUNDING_BOX)
 
         plt.imshow(theImage)

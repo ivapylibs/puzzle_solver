@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================ withOption_byColor ===========================
 #
-# @brief    Test script for basic functionality of byColor on simulated puzzle pieces. Provide mroe options to the user.
+# @brief    Test script for basic functionality of byColor on simulated puzzle pieces. Provide more options to the user.
 #
 # ============================ withOption_byColor ===========================
 
@@ -98,7 +98,7 @@ theMaskSol = theDet.getState().x
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
 
 # Display the original board
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
@@ -114,18 +114,13 @@ if opt.with_cluster:
 
     theColorCluster.process()
 
-    # ==[3] Display the extracted features.
-    #
+    for k, v in theColorCluster.feaLabel_dict.items():
+        theGrid.pieces[k].cluster_id = v
 
     print('The number of pieces:', len(theColorCluster.feature))
     print('The cluster label:', theColorCluster.feaLabel)
 
-    # Copy and paste a new board but with the cluster label displayed.
-    theGrid2 = copy.deepcopy(theGrid)
-    for key in theGrid2.pieces:
-        theGrid2.pieces[key].id = theColorCluster.feaLabel[key]
-
-    theGrid2.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+    theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
 
 plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 

@@ -19,6 +19,8 @@ from dataclasses import dataclass
 import numpy as np
 import cv2
 from sklearn.cluster import AgglomerativeClustering
+from sklearn import metrics
+from scipy.optimize import linear_sum_assignment
 
 from puzzle.builder.board import Board
 from puzzle.piece.histogram import Histogram
@@ -55,6 +57,11 @@ class ByColor(Board):
         self.feature = []
         self.feaLabel = []
 
+        self.feature_dict = {}
+
+        # A dict of featureLabel, id: label
+        self.feaLabel_dict = {}
+
         self.params = theParams
 
     def process(self):
@@ -84,7 +91,83 @@ class ByColor(Board):
             raise ValueError('Unknown cluster mode!')
 
         self.feaLabel = model.labels_
+
+        for key in self.pieces:
+            self.feaLabel_dict[key] = self.feaLabel[key]
+
+        # Collect the features for each cluster
+        for idx, cluster_id in enumerate(self.feaLabel):
+            if cluster_id not in self.feature_dict:
+                self.feature_dict[cluster_id] = []
+
+            self.feature_dict[cluster_id].append(self.feature[idx])
+
+        # Aggregate & normalize the features in each cluster
+        for i in self.feature_dict:
+            feature_processed = np.sum(np.array(self.feature_dict[i]), axis=0)
+            cv2.normalize(feature_processed, feature_processed, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+            self.feature_dict[i] = feature_processed
+
         # print(model.labels_)
+
+    def score(self, cluster_id_pred_dict, method='label'):
+        """
+        @brief  Score the clustering result. See https://scikit-learn.org/stable/modules/clustering.html#overview-of-clustering-methods
+
+        Args:
+            cluster_id_pred_dict: The predicted cluster id for each piece.
+            method: The method to score the clustering result. ['label', 'histogram']
+
+        Returns:
+            The score of the clustering result.
+        """
+
+        if method == 'label':
+            labels_pred = []
+            labels_true = []
+            for k, v in cluster_id_pred_dict.items():
+                labels_pred.append(v)
+                labels_true.append(self.feaLabel_dict[k])
+
+            rand_score = metrics.rand_score(labels_true, labels_pred)
+
+            return rand_score
+
+        elif method == 'histogram':
+
+            # Collect the features for each cluster
+            feature_pred_dict = {}
+            for piece_id, cluster_id in cluster_id_pred_dict.items():
+                if cluster_id not in feature_pred_dict:
+                    feature_pred_dict[cluster_id] = []
+                feature_pred_dict[cluster_id].append(self.feature[piece_id])
+
+            # Aggregate & normalize the features in each cluster
+            for i in feature_pred_dict:
+                feature_processed = np.sum(np.array(feature_pred_dict[i]), axis=0)
+                cv2.normalize(feature_processed, feature_processed, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+                feature_pred_dict[i] = feature_processed
+
+            # Score is the sum of the distance between the aggregated features in each cluster
+            distance_matrix = np.zeros((len(feature_pred_dict), len(self.feature_dict)))
+
+            for i in range(len(feature_pred_dict)):
+                for j in range(len(self.feature_dict)):
+                    # https://docs.opencv.org/5.x/d8/dc8/tutorial_histogram_comparison.html
+                    # https://vovkos.github.io/doxyrest-showcase/opencv/sphinx_rtd_theme/enum_cv_HistCompMethods.html
+                    distance_matrix[i][j] = cv2.compareHist(feature_pred_dict[i], self.feature_dict[j], 3)
+
+            row_ind, col_ind = linear_sum_assignment(distance_matrix, maximize=True)
+
+            score = 0
+            for i,j in zip(row_ind, col_ind):
+                score += distance_matrix[i][j]
+
+            return score
+
+
+
+
 
 #
 # ================================ puzzle.clusters.byColor ================================
