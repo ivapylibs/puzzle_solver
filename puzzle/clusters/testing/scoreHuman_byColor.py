@@ -32,6 +32,7 @@ import improcessor.basic as improcessor
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.parser.fromSketch import FromSketch
 from puzzle.utils.imageProcessing import cropImage
+from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 import argparse
 
@@ -125,7 +126,8 @@ theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITL
 
 # ==[3.1] Simulate randomly clustering the pieces.
 
-_, epBoard = theGrid.explodedPuzzle(dx=250, dy=250)
+# _, epBoard = theGrid.explodedPuzzle(dx=250, dy=250)
+_, epBoard = theGrid.explodedPuzzle(dx=500, dy=500)
 
 epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False))
 
@@ -159,7 +161,7 @@ region_dict = {
     3: [x_mid,y_mid,x_mid*2,y_mid*2],
 }
 
-# Compute the cluster id of each piece (based on the region)
+# Compute the cluster id of each piece (based on the initial region)
 piece_human_cluster_dict = {}
 for piece_id in epBoard.pieces:
 
@@ -190,15 +192,45 @@ plt.imshow(epImage)
 plt.title(f'Randomly clustered pieces/Score: {score:.3f}')
 
 fh = plt.figure()
-# Force to change the epBoard according to the reference clustering (one by one).
 for idx, piece_id in enumerate(epBoard.pieces):
+
+    # If piece_human_cluster is not aligned with the computer computed one,
+    # we force to change the epBoard according to the reference clustering (one by one).
     if piece_human_cluster_dict[piece_id] != cluster_region_dict[epBoard.pieces[piece_id].cluster_id]:
 
         def random_place(rectangle_list):
-            # Todo: we may need to check if the new location is valid.
-            return np.array([np.random.randint(rectangle_list[0]+300, rectangle_list[2]-300), np.random.randint(rectangle_list[1]+300, rectangle_list[3]-300)])
 
-        epBoard.pieces[piece_id].rLoc = random_place(region_dict[cluster_region_dict[epBoard.pieces[piece_id].cluster_id]])
+            return np.array([np.random.randint(rectangle_list[0] + 300, rectangle_list[2] - 300),
+                      np.random.randint(rectangle_list[1] + 300, rectangle_list[3] - 300)])
+
+        rLoc_valid = False
+        new_rLoc = None
+
+        while not rLoc_valid:
+            new_rLoc = random_place(region_dict[cluster_region_dict[epBoard.pieces[piece_id].cluster_id]])
+
+            num_success = 0
+
+            # Check if the new location is valid (do not overlap with other pieces).
+            for piece_id_other in epBoard.pieces:
+                if piece_id == piece_id_other:
+                    continue
+
+                query_bb = [new_rLoc[0], new_rLoc[1], new_rLoc[0] + epBoard.pieces[piece_id].y.size[0],
+                            new_rLoc[1] + epBoard.pieces[piece_id].y.size[1]]
+                target_bb = [epBoard.pieces[piece_id_other].rLoc[0], epBoard.pieces[piece_id_other].rLoc[1],
+                             epBoard.pieces[piece_id_other].rLoc[0] + epBoard.pieces[piece_id_other].y.size[0], epBoard.pieces[piece_id_other].rLoc[1]+epBoard.pieces[piece_id_other].y.size[1]]
+
+                if bb_intersection_over_union(query_bb, target_bb) > 0:
+                    rLoc_valid = False
+                    break
+                else:
+                    num_success += 1
+
+            if num_success == len(epBoard.pieces) - 1:
+                rLoc_valid = True
+
+        epBoard.pieces[piece_id].rLoc = new_rLoc
 
         # Update piece_human_cluster_dict
         piece_human_cluster_dict[piece_id] = cluster_region_dict[epBoard.pieces[piece_id].cluster_id]

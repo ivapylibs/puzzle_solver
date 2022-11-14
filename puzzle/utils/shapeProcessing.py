@@ -31,9 +31,9 @@ def bb_intersection_over_union(boxA, boxB):
     """
 
     # A faster check
-    if boxA[2]<boxB[0] and boxA[3]<boxB[1]:
+    if boxA[2] < boxB[0] and boxA[3] < boxB[1]:
         return 0
-    if boxB[2]<boxA[0] and boxB[3]<boxA[1]:
+    if boxB[2] < boxA[0] and boxB[3] < boxA[1]:
         return 0
 
     # Determine the (x, y)-coordinates of the intersection rectangle

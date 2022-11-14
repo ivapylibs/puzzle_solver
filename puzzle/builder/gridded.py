@@ -330,6 +330,9 @@ class Gridded(Interlocking):
         piece well separated for simple puzzle interpretation algorithms to
         rapidly parse.
 
+        Currently, it is just explode but without changing the order.
+        Otherwise, gc has to be updated too.
+
         Args:
             dx: The horizontal offset when exploding.
             dy: The vertical offset when exploding.
@@ -368,14 +371,7 @@ class Gridded(Interlocking):
             r_new = -r_origin + piece.rLoc + np.array([dx, dy]) * self.gc[:, idx].flatten()
             r_new = r_new.astype('int')
             piece.placeInImageAt(epImage, rc=r_new)
-            # epBoard.pieces[idx].setPlacement(r_new)
             piece.setPlacement(r_new)
-        # epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
-
-        """
-        Todo: Currently, it is just explode but without changing the order.
-        Otherwise, gc has to be updated too.
-        """
 
         return epImage, epBoard
     
