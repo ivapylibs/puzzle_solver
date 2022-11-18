@@ -195,13 +195,26 @@ def partition_even(data_list, partition_num, order="ascend"):
 
     # get the partition data and labels
     part_results = np.array(np.split(data_sort, partition_num))
-    labels = np.zeros_like(data_list, dtype=np.int)
+    labels = np.zeros_like(data_list, dtype=int)
     for i in range(labels_sort.size):
         labels[idx_sort[i]] = labels_sort[i] 
 
     return labels, part_results
 
-     
+
+def convert_serializable(input):
+    """
+    @brief Convert the object to a serializable object.
+
+    Args:
+        input: the input object.
+
+    Returns:
+        The serializable object.
+    """
+
+    if isinstance(input, np.int64): return int(input)
+    raise TypeError
 
 #
 # ====================== puzzle.utils.dataProcessing ======================
