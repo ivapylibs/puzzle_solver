@@ -418,7 +418,7 @@ class Board:
 
             if lengths is None:
                 # No piece found
-                raise RuntimeError('No piece found')
+                raise RuntimeError('No piece found. Please input an image param in advance if no piece is available.')
 
             lengths = lengths.astype('int')
             bbox = self.boundingBox().astype('int')
