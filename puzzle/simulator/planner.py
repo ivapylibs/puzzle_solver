@@ -78,7 +78,7 @@ class Planner:
         # For saving the puzzle piece's location history
         self.loc_history = None
 
-        # Debug only
+        # A manager instance for association between last measured board and the current measured board
         self.theManager_intra = None
 
     def measure(self, img):
@@ -132,23 +132,18 @@ class Planner:
         # Todo: Not sure if this hard threshold is a good idea or not.
         # Remove the measured pieces if they are too close to the hand.
         # Only meaningful when we can see a hand.
-        print("The hand present?: {}".format((rLoc_hand is not None)))
         if rLoc_hand is not None:
             meaBoard_filtered = Board()
             for piece in meaBoard.pieces.values():
                 if np.linalg.norm(piece.rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.params.hand_radius+50:
                     meaBoard_filtered.addPiece(piece)
 
-            # TODO: bug here(occur when the hand present.) 
-            # The reason is that the meaBoard is supposed to be a "Gridded" for the planner (meaBoard.processAdjacency is called)
-            # But it is constructed as a "Board" here. 
-            # The relation: the "Gridded" is constructed from the "Board" and add some functions
-            # Fix this in the future.
-            meaBoard = meaBoard_filtered
+            # Yunzhi: with the new update, it does not matter much if it is simple Board instance or an Interlocking instance or more.
+            meaBoard = Interlocking(meaBoard_filtered)
 
         # manager processes the measured board to establish the association
         # NOTE: it is now using the meaBoard to assemble the puzzle pieces
-        # if not PLAN_WITH_TRACKBOARD:
+
         self.manager.process(meaBoard)
 
         record_board_temp = Board()
@@ -162,7 +157,7 @@ class Planner:
         # ============== Detect the match between the previous track board and the current meaBoard ========================
         match_intra = {}    # store the association between the last track board and this meaboard
         if self.record['meaBoard'] is not None:
-            # Create a new manager for association between last frame and the current frame
+            # Create a new manager for association between last measured board and the current measured board
             self.theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
             self.theManager_intra.process(meaBoard)
 
@@ -190,7 +185,7 @@ class Planner:
                      self.params.solution_area[1]< meaBoard.pieces[match[0]].rLoc[1]< self.params.solution_area[3]):
 
                         if match[0] in match_intra:
-                              del match_intra[match[0]]
+                            del match_intra[match[0]]
 
                         # The new meaBoard will always have pieces of tracking_life as 0
                         record_board_temp.addPiece(meaBoard.pieces[match[0]])
@@ -218,7 +213,6 @@ class Planner:
             if findFlag == False:
                 findFlag_2 = False
                 # e,g, ID 1 (meaBoard)->4 (tracked)->4 (solBoard)
-                # If 
                 if record_match[0] in match_intra.values():
                     key_new = list(match_intra.values()).index(record_match[0])
 
@@ -267,10 +261,11 @@ class Planner:
                     findFlag = True
                     break
 
-            # NOTE: added by Yiye. Not sure whether it is a good idea
-            for added_piece in record_board_temp.pieces.values():
-                if np.linalg.norm(meaBoard.pieces[new_match[0]].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 75:
-                    findFlag = True
+            # Yunzhi: We revert Yiye's logic here to be more strict about what pieces to be loaded
+            # # NOTE: added by Yiye. Not sure whether it is a good idea
+            # for added_piece in record_board_temp.pieces.values():
+            #     if np.linalg.norm(meaBoard.pieces[new_match[0]].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 75:
+            #         findFlag = True
 
             if findFlag == False:
                 # 3) If some pieces are only available on the new board, they will be added to the record board
@@ -283,32 +278,33 @@ class Planner:
                     record_match_temp[record_board_temp.id_count-1] = new_match[1]
                     added_piece_ids.append(new_match[0])
 
-        # =========================================================================================== 
-        # NOTE: added by Yiye. The above will omit the pieces whose match is not found. S
-        # So add below to go through the pieces whose assignment are not FOUND.
-        # Will aim to pass the test of the testing/realRunner02_dynamic.py. Not sure if it will influence others
-        # =========================================================================================== 
-        # go through all the measured pieces
-
-        remain_mea_ids = [id for id in range(len(meaBoard.pieces)) if id not in added_piece_ids]
-        # print(f"{bcolors.WARNING}The missing pieces: {remain_mea_ids}{bcolors.ENDC}")
-        # print(f"{bcolors.WARNING}The pieces number before adding the missing pieces: {len(added_piece_ids)}{bcolors.ENDC}")
-
-        for id in remain_mea_ids:
-            # Make sure the remain piece does not overlap with the current piece, 
-            # It might be the case since the manager is not always reliable.
-            overlap = False
-            for added_piece in record_board_temp.pieces.values():
-                if np.linalg.norm(meaBoard.pieces[id].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 10:
-                    overlap = True
-
-            if not overlap:
-                record_board_temp.addPiece(meaBoard.pieces[id])
-            # NOTE: since the match is not detected, just don't update the match. Will this cause bugs?
-            # record_match_temp[record_board_temp.id_count-1] = new_match[1]
-            
-        # Yiye Update ends here.
-        # =========================================================================================== 
+        # Yunzhi: We revert Yiye's logic here to be more strict about what pieces to be loaded
+        # # ===========================================================================================
+        # # NOTE: added by Yiye. The above will omit the pieces whose match is not found. S
+        # # So add below to go through the pieces whose assignment are not FOUND.
+        # # Will aim to pass the test of the testing/realRunner02_dynamic.py. Not sure if it will influence others
+        # # ===========================================================================================
+        # # go through all the measured pieces
+        #
+        # remain_mea_ids = [id for id in range(len(meaBoard.pieces)) if id not in added_piece_ids]
+        # # print(f"{bcolors.WARNING}The missing pieces: {remain_mea_ids}{bcolors.ENDC}")
+        # # print(f"{bcolors.WARNING}The pieces number before adding the missing pieces: {len(added_piece_ids)}{bcolors.ENDC}")
+        #
+        # for id in remain_mea_ids:
+        #     # Make sure the remain piece does not overlap with the current piece,
+        #     # It might be the case since the manager is not always reliable.
+        #     overlap = False
+        #     for added_piece in record_board_temp.pieces.values():
+        #         if np.linalg.norm(meaBoard.pieces[id].rLoc.reshape(2,-1) - added_piece.rLoc.reshape(2,-1)) < 10:
+        #             overlap = True
+        #
+        #     if not overlap:
+        #         record_board_temp.addPiece(meaBoard.pieces[id])
+        #     # NOTE: since the match is not detected, just don't update the match. Will this cause bugs?
+        #     # record_match_temp[record_board_temp.id_count-1] = new_match[1]
+        #
+        # # Yiye Update ends here.
+        # # ===========================================================================================
 
         # Update
         self.record['meaBoard'] = record_board_temp
@@ -323,7 +319,6 @@ class Planner:
             # Save for analysis
             self.status_history[match[1]].append(self.record['meaBoard'].pieces[match[0]].status)
             self.loc_history[match[1]].append(self.record['meaBoard'].pieces[match[0]].rLoc)
-
 
             # # Note that it just follows the connection at the very beginning
             # self.displayBoard.addPiece(self.record['meaBoard'].pieces[match[0]], ORIGINAL_ID=True)
@@ -350,6 +345,7 @@ class Planner:
         #     print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
         if RUN_SOLVER:
+
             # Solver plans for the measured board
             if not PLAN_WITH_TRACKBOARD:
                 self.solver.setCurrBoard(meaBoard)
@@ -360,24 +356,7 @@ class Planner:
                 self.solver.setCurrBoard(self.record['meaBoard'])
                 self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
-            """
-            Right now, can only work when puzzle board is not re-processed. 
-            Otherwise, the connected ones will not be considered in the list. 
-            As a result, same effect, so it is fine.
-            """
-
-            # Get the index of the pieces with the occlusion and skip them
-            # meaBoard.processAdjacency()
-            occlusionList = []
-            # pieceKeysList = list(meaBoard.pieces.keys())
-            # for index in range(meaBoard.adjMat.shape[0]):
-            #     if sum(meaBoard.adjMat[index, :]) > 1:
-            #         occlusionList.append(pieceKeysList[index])
-
-            # print('Occlusion:', occlusionList)
-
-            # Plan is for the measured piece
-            plan = self.solver.takeTurn(defaultPlan='order', occlusionList=occlusionList, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
+            plan = self.solver.takeTurn(defaultPlan='order', COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN)
             # print(plan)
             return plan
         else:
@@ -504,9 +483,11 @@ class Planner:
             self.solver.setMatch(self.manager.pAssignments, self.manager.pAssignments_rotation)
 
             """
-            Right now, can only work when puzzle board is not re-processed. 
+            Right now, this occlusion idea can only work when puzzle board is not re-processed. 
             Otherwise, the connected ones will not be considered in the list. 
             As a result, same effect, so it is fine.
+            
+            It may not be useful for the real cases, so we remove that there.
             """
 
             # Get the index of the pieces with the occlusion and skip them
