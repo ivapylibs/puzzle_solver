@@ -28,6 +28,7 @@ import glob
 
 from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import Gridded, ParamGrid
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
@@ -55,7 +56,7 @@ class ParamRunner(ParamPlanner):
     tracking_life_thresh: int = 15
     solution_area: np.array = np.array([0,0,0,0])
     solution_area_center: np.array = np.array([0,0])
-    solution_area_size: np.array = np.array([0,0])
+    solution_area_size: float = 0.0
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -105,18 +106,18 @@ class RealSolver:
         Args:
             input: A board/path/raw image.
         """
-        solParams = ParamGrid(
-            gcMethod="rectangle"
-        )
+
+        # @note For our old random test cases, the solution board does not have to a grid board.
+        # That's why we choose Arrangement class at first.
 
         if issubclass(type(input), Board):
-            theArrangeSol = Gridded(input, solParams)
+            theGridSol = Gridded(input)
         elif isinstance(input, str):
-            theArrangeSol = Gridded.buildFromFile_Puzzle(input, solParams)
+            theGridSol = Gridded.buildFromFile_Puzzle(input)
             # Currently, we only change the solution area if we have already calibrated it
 
-            self.params.solution_area = [closestNumber(theArrangeSol.boundingBox()[0][0], 30), closestNumber(theArrangeSol.boundingBox()[0][1],30), \
-                                         closestNumber(theArrangeSol.boundingBox()[1][0], 30, lower=False), closestNumber(theArrangeSol.boundingBox()[1][1], 30, lower=False)]
+            self.params.solution_area = [closestNumber(theGridSol.boundingBox()[0][0], 30), closestNumber(theGridSol.boundingBox()[0][1],30), \
+                                         closestNumber(theGridSol.boundingBox()[1][0], 30, lower=False), closestNumber(theGridSol.boundingBox()[1][1], 30, lower=False)]
 
             self.params.solution_area_center = np.array([(self.params.solution_area[0] + self.params.solution_area[2]) / 2, (self.params.solution_area[1] + self.params.solution_area[3]) / 2])
             self.params.solution_area_size = np.linalg.norm(self.params.solution_area_center-np.array([self.params.solution_area[0],self.params.solution_area[1]]))
@@ -127,16 +128,16 @@ class RealSolver:
                                                 BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                                 verbose=False)
 
-            theArrangeSol = Gridded.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
+            theGridSol = Gridded.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
 
         # For theManager & theSolver
-        self.theManager.solution = theArrangeSol
+        self.theManager.solution = theGridSol
 
         # # Debug only
         # cv2.imshow('Debug', self.theManager.solution.toImage())
         # cv2.waitKey()
 
-        self.theSolver.desired = theArrangeSol
+        self.theSolver.desired = theGridSol
 
         self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
                                                           ID_DISPLAY=True)
@@ -157,7 +158,7 @@ class RealSolver:
         It is not always true when the matching is wrong/rotation is not correct. So there are some false positives.
 
         Args:
-            USE_MEASURED: Use the measured board or use the tracked board.
+            USE_MEASURED: Use the measured board, otherwise use the tracked board.
 
         Returns:
             thePercentage: The progress.
@@ -226,13 +227,12 @@ class RealSolver:
         """
 
         # Todo: Move to somewhere else
-        # We will adopt the frame difference idea in the solution area
+        # We will adopt the frame difference idea in the solution area to get the pieces
         mask_working = np.ones(theImageMea.shape[:2],dtype='uint8')
         mask_working[self.params.solution_area[1]:self.params.solution_area[3], self.params.solution_area[0]:self.params.solution_area[2]] = 0
         mask_solution = 1 - mask_working
 
         theImageMea_solutionArea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_solution)
-
 
         theImageMea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
 
@@ -243,9 +243,9 @@ class RealSolver:
                                             BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                             verbose=False)
 
-        # Create an arrangement instance.
-        theArrangeMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
-        theArrangeMea_work_img = theArrangeMea.toImage()
+        # Create an Interlocking instance.
+        theInterMea = Interlocking.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
+        theInterMea_work_img = theInterMea.toImage()
 
         # Only update when the hand is far away or not visible
         if hTracker_BEV is None or \
@@ -257,8 +257,10 @@ class RealSolver:
 
             # Combination of the pieces from the solution area and other working area
             for piece in self.theCalibrated.pieces.values():
-                theArrangeMea.addPiece(piece)
-        theArrangeMea_all_img = theArrangeMea.toImage()
+                theInterMea.addPiece(piece)
+
+
+        theInterMea_all_img = theInterMea.toImage(theImage=np.zeros_like(theImageMea))
         
         # visualize
         if verbose:
@@ -266,15 +268,15 @@ class RealSolver:
             cv2.imshow("THe work space measured pieces", theImageMea[:,:,::-1])
             cv2.imshow("THe solution space measured pieces", theImageMea_solutionArea[:,:,::-1])
             cv2.imshow("The work space puzzle mask", theMaskMea)
-            cv2.imshow("The work space board", theArrangeMea_work_img[:,:,::-1])
-            cv2.imshow("The all space board", theArrangeMea_all_img[:,:,::-1])
+            cv2.imshow("The work space board", theInterMea_work_img[:,:,::-1])
+            cv2.imshow("The all space board", theInterMea_all_img[:,:,::-1])
             cv2.waitKey()
             cv2.destroyAllWindows()
 
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
-        self.meaBoard = theArrangeMea
-        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
+        self.meaBoard = theInterMea
+        plan = self.thePlanner.process(theInterMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
                                        COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=run_solver, planOnTrack=planOnTrack)
 
         # with full size view
@@ -288,13 +290,13 @@ class RealSolver:
         # Return action plan
         return plan
 
-    def getMeaBoard(self)->Gridded:
+    def getMeaBoard(self):
         return self.meaBoard
     
-    def getSolBoard(self)->Gridded:
+    def getSolBoard(self):
         return self.thePlanner.manager.solution
     
-    def getTrackBoard(self)->Gridded:
+    def getTrackBoard(self):
         return self.thePlanner.record['meaBoard']
 
 
