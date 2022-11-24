@@ -20,7 +20,7 @@ import copy
 # Surveillance system
 from Surveillance.deployment.Base import BaseSurveillanceDeploy
 from Surveillance.deployment.Base import Params as bParams
-
+from Surveillance.utils.configs import CfgNode_Surv as CfgSurv
 
 class SurvRunner():
     """
@@ -52,7 +52,9 @@ class SurvRunner():
             mea_mode = 'test', # @< The mode for the postprocessing function, 'test' or 'sol'.
             mea_test_r = 150,  # @< The circle size in the postprocessing for the measured board.
         )
-        self.surv = BaseSurveillanceDeploy.buildPub(configs, bag_path=self.calib_bag_path)
+        cfg = CfgSurv()
+        cfg.load_defaults()
+        self.surv = BaseSurveillanceDeploy.buildPub(configs, cfg=cfg, bag_path=self.calib_bag_path)
 
         bg_seg = self.surv.scene_interpreter.bg_seg
 
