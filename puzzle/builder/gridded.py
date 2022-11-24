@@ -54,9 +54,9 @@ class ParamGrid(ParamInter):
     tauGrid: float = float('inf')  # The threshold size of the puzzle piece.
     reorder: bool = False
     grid: tuple = (None, None)
-    gcMethod: str = "rectangle"       # The method to obtain the grid coordinates. 
+    gcMethod: str = "rectangle"     # The method to obtain the grid coordinates.
                                     # Choices: ["rectangle", "cluster"]
-
+                                    # Yunzhi: I assume "rectangle" may work better since it uses a stronger prior info
 
 #
 # ====================== puzzle.builder.interlocking ======================
@@ -105,63 +105,68 @@ class Gridded(Interlocking):
 
 
         # get the x, y labels
-        if self.params.gcMethod == "cluster":
-            x_labels, y_labels = self.__processGrid_cluster(x_list, y_list, kmeans_cluster, piece_thresh)
-        elif self.params.gcMethod == "rectangle":
-            x_labels, y_labels = self.__processGrid_rectangle(x_list, y_list)
 
-        # For debug. Plot the coordinates 
-        if verbose:
-            colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1)) 
-            colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1)) 
-            fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
-            ax1.scatter(x_list, y_list)
-            ax1.set_title("The piece coordinates")
-            colors_x = np.array([colors_x_all[l, :] for l in x_labels])
-            ax2.scatter(x_list, y_list, color=colors_x)
-            ax2.set_title("The gc x coordinate assignment")
-            colors_y = np.array([colors_y_all[l] for l in y_labels])
-            ax3.scatter(x_list, y_list, color=colors_y)
-            ax3.set_title("The gc y coordinate assignment")
-            plt.show()
+        try:
+            if self.params.gcMethod == "cluster":
+                x_labels, y_labels = self.__processGrid_cluster(x_list, y_list, kmeans_cluster, piece_thresh)
+            elif self.params.gcMethod == "rectangle":
+                x_labels, y_labels = self.__processGrid_rectangle(x_list, y_list)
 
-        # Reorder the pieces, so the id will correspond to the grid location
-        if reorder:
-            pieces_src = deepcopy(self.pieces)
-            pieceKeysList = list(self.pieces.keys())
+            # For debug. Plot the coordinates
+            if verbose:
+                colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1))
+                colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1))
+                fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
+                ax1.scatter(x_list, y_list)
+                ax1.set_title("The piece coordinates")
+                colors_x = np.array([colors_x_all[l, :] for l in x_labels])
+                ax2.scatter(x_list, y_list, color=colors_x)
+                ax2.set_title("The gc x coordinate assignment")
+                colors_y = np.array([colors_y_all[l] for l in y_labels])
+                ax3.scatter(x_list, y_list, color=colors_y)
+                ax3.set_title("The gc y coordinate assignment")
+                plt.show()
 
-            num = 0
+            # Reorder the pieces, so the id will correspond to the grid location
+            if reorder:
+                pieces_src = deepcopy(self.pieces)
+                pieceKeysList = list(self.pieces.keys())
 
-            # Save the changes, {new:old}
-            dict_conversion = {}
+                num = 0
 
-            for jj in range(max(y_labels) + 1):
-                for ii in range(max(x_labels) + 1):
-                    for idx, pts in enumerate(zip(x_labels, y_labels)):
-                        if pts[0] == ii and pts[1] == jj:
-                            self.pieces[num] = pieces_src[pieceKeysList[idx]]
-                            dict_conversion[num] = pieceKeysList[idx]
-                            self.pieces[num].id = num
-                            self.gc[:, num] = ii, jj
-                            num = num + 1
-                            break
+                # Save the changes, {new:old}
+                dict_conversion = {}
 
-            # Have to re-compute adjMat/ilMat
-            adjMat_src = deepcopy(self.adjMat)
-            for ii in range(self.size()):
-                for jj in range(ii + 1, self.size()):
-                    self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
-                    self.adjMat[jj, ii] = self.adjMat[ii, jj]
+                for jj in range(max(y_labels) + 1):
+                    for ii in range(max(x_labels) + 1):
+                        for idx, pts in enumerate(zip(x_labels, y_labels)):
+                            if pts[0] == ii and pts[1] == jj:
+                                self.pieces[num] = pieces_src[pieceKeysList[idx]]
+                                dict_conversion[num] = pieceKeysList[idx]
+                                self.pieces[num].id = num
+                                self.gc[:, num] = ii, jj
+                                num = num + 1
+                                break
 
-            self.ilMat = self.adjMat
+                # Have to re-compute adjMat/ilMat
+                adjMat_src = deepcopy(self.adjMat)
+                for ii in range(self.size()):
+                    for jj in range(ii + 1, self.size()):
+                        self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
+                        self.adjMat[jj, ii] = self.adjMat[ii, jj]
 
-        else:
-            for ii in range(self.size()):
-                # The order is in line with the one saving in self.pieces
+                self.ilMat = self.adjMat
 
-                # Todo: Eventually, this has to be upgraded to a dict?
-                self.gc[:, ii] = x_labels[ii], y_labels[ii]
-            
+            else:
+                for ii in range(self.size()):
+                    # The order is in line with the one saving in self.pieces
+
+                    # Todo: Eventually, this has to be upgraded to a dict?
+                    self.gc[:, ii] = x_labels[ii], y_labels[ii]
+        except:
+            # Clustering may fail in some cases
+            # Todo: Currently, do nothing (some functions like explodedPuzzle may not work properly)
+            pass
 
     def __processGrid_cluster(self, x_list, y_list, kmeans_cluster=(None, None), piece_thresh=float('inf')):
         # @note
