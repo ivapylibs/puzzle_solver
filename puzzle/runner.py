@@ -245,7 +245,7 @@ class RealSolver:
 
         # Create an Interlocking instance.
         theInterMea = Interlocking.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
-        theInterMea_work_img = theInterMea.toImage()
+        theInterMea_work_img = theInterMea.toImage(theImage=np.zeros_like(theImageMea))
 
         # Only update when the hand is far away or not visible
         if hTracker_BEV is None or \
