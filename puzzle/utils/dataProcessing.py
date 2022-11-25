@@ -19,6 +19,9 @@
 import types
 import cv2
 import numpy as np
+from std_msgs.msg import String
+import json
+from rospy_message_converter import message_converter, json_message_converter
 
 
 # ====================== puzzle.utils.dataProcessing ======================
@@ -81,7 +84,6 @@ class copyAttributes(object):
             setattr(target, attr, value)
         return target
 
-
 def calculateMatches(des1, des2, ratio_threshold=0.7):
     """
     @brief  Calculate the matches based on KNN
@@ -125,7 +127,6 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
             if (match1QueryIndex == match2TrainIndex) and (match1TrainIndex == match2QueryIndex):
                 topResults.append(match1)
     return topResults
-
 
 def checkKey(dict1, dict2, value):
     """
@@ -213,8 +214,42 @@ def convert_serializable(input):
         The serializable object.
     """
 
-    if isinstance(input, np.int64): return int(input)
-    raise TypeError
+    if isinstance(input, np.int64):
+        return int(input)
+    else:
+        raise TypeError(f"Problem with {input}")
+
+def convert_dict2ROS(info_dict):
+    """
+    @brief Convert the dict to ROS string. See https://github.com/uos/rospy_message_converter
+
+    Args:
+        info_dict: the input dict.
+
+    Returns:
+        json_str: the ROS string.
+    """
+
+    message_json = json.dumps(info_dict, indent=4, default=convert_serializable)
+    message = String(data=f'{message_json}')
+    json_str = json_message_converter.convert_ros_message_to_json(message)
+
+    return json_str
+
+def convert_ROS2dict(message):
+    """
+    @brief Convert the ROS string to dict.
+
+    Args:
+        message: the input ROS string.
+
+    Returns:
+        info_dict: the obtained dict.
+    """
+
+    info_dict = json.loads(json.loads(message.data)['data'])
+
+    return info_dict
 
 #
 # ====================== puzzle.utils.dataProcessing ======================
