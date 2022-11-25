@@ -113,6 +113,7 @@ class RealSolver:
         if issubclass(type(input), Board):
             theGridSol = Gridded(input)
         elif isinstance(input, str):
+            assert os.path.exists(input), 'The input path does not exist.'
             theGridSol = Gridded.buildFromFile_Puzzle(input)
             # Currently, we only change the solution area if we have already calibrated it
 
@@ -210,7 +211,7 @@ class RealSolver:
 
         return thePercentage
 
-    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, verbose=False, planOnTrack=False):
+    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, planOnTrack=False, verbose=False):
         """
         @brief Process the input from the surveillance system.
                 It first obtain the measured pieces, which is categorized into the solution area pieces and the working area pieces.
@@ -220,6 +221,8 @@ class RealSolver:
             theImageMea: The input image (from the surveillance system).
             visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
             hTracker_BEV: The location of the hand in the BEV.
+            run_solver: Run the solver or not.
+            planOnTrack: Plan on the tracked board or not.
             verbose: If True, will display the detected measured pieces, from working or solution area.
 
         Returns:
