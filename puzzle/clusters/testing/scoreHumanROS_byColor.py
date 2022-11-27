@@ -41,7 +41,7 @@ from rospy_message_converter import message_converter, json_message_converter
 import rosgraph
 import subprocess
 import time
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32, Float64
 import json
 
 import argparse
@@ -96,6 +96,7 @@ if not rosgraph.is_master_online():
 # Init the node
 rospy.init_node("Test_cluster_info_publisher")
 cluster_info_pub = rospy.Publisher('cluster_info', String, queue_size=10)
+score_info_pub =  rospy.Publisher('score_info', Float64, queue_size=5) # If necessary, we can create some custom message type for this later.
 
 # ==[1] Read the source image and template.
 #
@@ -289,12 +290,13 @@ for idx, piece_id in enumerate(epBoard.pieces):
 
             # ROS publish
             cluster_info_pub.publish(json_str)
+            score_info_pub.publish(float(score))
 
             plt.imshow(epImage)
             plt.title(f"Step {idx}/Score: {score:.3f}")
             plt.pause(1)
 
-            plt.savefig(f'{opt.image}_cluster_Step_{idx}.png', dpi=300)
+            # plt.savefig(f'{opt.image}_cluster_Step_{idx}.png', dpi=300)
 
 plt.show()
 
