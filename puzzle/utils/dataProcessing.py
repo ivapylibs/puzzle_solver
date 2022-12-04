@@ -157,7 +157,7 @@ def closestNumber(num, basis=50, lower=True):
         lower: The direction.
 
     Returns:
-        The integar of the closest number.
+        The integer of the closest number.
 
     """
     if lower:

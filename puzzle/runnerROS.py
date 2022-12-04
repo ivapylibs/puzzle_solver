@@ -85,7 +85,7 @@ class RealSolverROS(RealSolver):
             verbose: If True, will display the detected measured pieces, from working or solution area.
         """
         # Save the plan
-        self.plan = self.process(theImageMea, visibleMask, hTracker_BEV, run_solver=run_solver, verbose=verbose, planOnTrack=planOnTrack)
+        self.plan = self.process(theImageMea, visibleMask, hTracker_BEV, run_solver=run_solver, planOnTrack=planOnTrack, verbose=verbose)
 
         # ROS support
         self.publish_ROS()
@@ -113,7 +113,6 @@ class RealSolverROS(RealSolver):
         for k, v in self.thePlanner.loc_history.items():
             loc_history_processed[k] = [x.tolist() for x in v]
 
-
         # Wrap the board into a dictionary
         info_dict ={
             'plan': plan_processed,
@@ -125,8 +124,6 @@ class RealSolverROS(RealSolver):
         self.puzzle_solver_info_pub.publish(convert_dict2ROS(info_dict))
         self.status_history_pub.publish(convert_dict2ROS(status_history_processed))
         self.loc_history_pub.publish(convert_dict2ROS(loc_history_processed))
-
-
 
         # Publish the board images
         self.bMeasImage_pub.pub(self.bMeasImage)

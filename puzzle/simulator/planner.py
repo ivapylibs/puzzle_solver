@@ -66,7 +66,7 @@ class Planner:
 
         # match: id to sol_id
         # It is always the updated one
-        # NOTE: meaboard - previous track board; match: previous calculated match
+        # NOTE: meaboard - previous track board (trackBoard); match: previous calculated match
         self.record = {'meaBoard': None, 'match': {}, 'rLoc_hand': None}
 
         # For saving the tracked board with solution board ID
@@ -154,10 +154,10 @@ class Planner:
         # Note: The matching with the last frame may help when pieces look different from the one in the solution board (due to light)
         # But it may also hurt for a while when a piece has been falsely associated with one in the solution board
 
-        # ============== Detect the match between the previous track board and the current meaBoard ========================
-        match_intra = {}    # store the association between the last track board and this meaboard
+        # ============== Detect the match between the current measured board and the trackBoard ========================
+        match_intra = {}    # store the association between the current measured board and the trackBoard
         if self.record['meaBoard'] is not None:
-            # Create a new manager for association between last measured board and the current measured board
+            # Create a new manager for association between the current measured board and the trackBoard
             self.theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
             self.theManager_intra.process(meaBoard)
 
@@ -166,9 +166,11 @@ class Planner:
                 # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
                 match_intra[match[0]]=match[1]
 
-        # ============== Update the trackboard(self.record["meaBoard"]) and tracked match(self.record["match"]) =====================
-        # ============== i.e. Updates the tracked pieces in the trackboard =====================
-        added_piece_ids = []         # A list of piece_ids in the current meaBoard that are already added to the updated tracking board
+        # ============== Update the trackBoard(self.record["meaBoard"]) and tracked match(self.record["match"]) =====================
+        # ============== i.e. Updates the tracked pieces in the trackBoard =====================
+
+        # Yunzhi: This is not necessary (Yiye's previous udpate)
+        # added_piece_ids = []         # A list of piece_ids in the current meaBoard that are already added to the updated tracking board
 
         for record_match in self.record['match'].items():
             findFlag = False
@@ -190,7 +192,7 @@ class Planner:
                         # The new meaBoard will always have pieces of tracking_life as 0
                         record_board_temp.addPiece(meaBoard.pieces[match[0]])
                         record_match_temp[record_board_temp.id_count - 1] = record_match[1]
-                        added_piece_ids.append(match[0])
+                        # added_piece_ids.append(match[0]) # Yunzhi: This is not necessary (Yiye's previous udpate)
                         findFlag = True
                         break
 
@@ -198,41 +200,48 @@ class Planner:
                     if match[0] in match_intra:
                         if match_intra[match[0]]==record_match[0]:
                             # Note: Only if all three associations agree, then update
+                            # i.e., record_match[0]: trackBoard ID, match[0]: current meaBoard ID
+                            # match_intra[match[0]]: the computed trackBoard ID by theManager_intra
 
                             del match_intra[match[0]]
                             # The new meaBoard will always have pieces of tracking_life as 0
                             record_board_temp.addPiece(meaBoard.pieces[match[0]])
                             record_match_temp[record_board_temp.id_count-1] = record_match[1]
-                            added_piece_ids.append(match[0])
+                            # added_piece_ids.append(match[0]) # Yunzhi: This is not necessary (Yiye's previous udpate)
                             findFlag = True
                             break
             
 
-            # Deal with the pieces who match one of the previously tracked pieces (record board),
-            # but are not assigned to the same solution-board piece as the tracked piece.
+            # Deal with the pieces in the meaBoard that match one of the previously tracked pieces (trackBoard),
+            # but are not assigned to the same solBoard piece as the tracked piece.
             if findFlag == False:
                 findFlag_2 = False
-                # e,g, ID 1 (meaBoard)->4 (tracked)->4 (solBoard)
+                # e.g, ID 1 (meaBoard)-> ID 4 (trackBoard) by match_intra & ID 4 (trackBoard) -> ID 4 (solBoard) by record_match,
+                # but ID 1 (meaBoard) is not assigned to ID 4 (solBoard) by match
                 if record_match[0] in match_intra.values():
+
+                    # Get the ID for pieces in meaBoard
                     key_new = list(match_intra.values()).index(record_match[0])
 
-                    # We only care about the cases where pieces do not move, then update them with the one in the tracked board
+                    # We only care about the cases where pieces do not move, then update them with the one in the trackBoard
                     if np.linalg.norm(meaBoard.pieces[key_new].rLoc.reshape(2,-1) - self.record['meaBoard'].pieces[record_match[0]].rLoc.reshape(2,-1)) < 50:
 
                         # The new meaBoard will always have pieces of tracking_life as 0
                         record_board_temp.addPiece(meaBoard.pieces[key_new])
                         record_match_temp[record_board_temp.id_count - 1] = record_match[1]
-                        added_piece_ids.append(key_new)
+                        # added_piece_ids.append(key_new) # Yunzhi: This is not necessary (Yiye's previous udpate)
                         findFlag_2 = True
                         del match_intra[key_new]
 
                 if findFlag_2 == False:
-                    # 2) If some pieces are only available on the record board, their status will be marked as TRACKED
+                    # 2) If some pieces are only available on the record board, their status will be marked as GONE or INVISIBLE (both are considered as TRACKED)
 
+                    # Updated tracking life
+                    # Todo: we have not enabled it for now, may need more experiments to see if it is useful
                     # self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
 
                     # # For puzzle piece state change idea
-                    # Check if most of the piece's part is visible in the current visibleMask
+                    # Check if most of the piece's part (we use a rough bounding box size for faster speed) is visible in the current visibleMask
                     mask_temp = np.zeros(visibleMask.shape,dtype='uint8')
                     mask_temp[self.record['meaBoard'].pieces[record_match[0]].rLoc[1]:self.record['meaBoard'].pieces[record_match[0]].rLoc[1]+self.record['meaBoard'].pieces[record_match[0]].y.size[1], \
                                 self.record['meaBoard'].pieces[record_match[0]].rLoc[0]:self.record['meaBoard'].pieces[record_match[0]].rLoc[0]+self.record['meaBoard'].pieces[record_match[0]].y.size[0]] \
@@ -246,18 +255,19 @@ class Planner:
                     else:
                         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
 
-                    # If their status has been TRACKED for a while but no update. They will be deleted from the record board
+                    # If their status has been TRACKED for a while but no update. They will be deleted from the record board.
+                    # Todo: we have not enabled it for now
                     if self.record['meaBoard'].pieces[record_match[0]].tracking_life < self.params.tracking_life_thresh:
                         record_board_temp.addPiece(self.record['meaBoard'].pieces[record_match[0]])
                         record_match_temp[record_board_temp.id_count-1] = record_match[1]
-                        added_piece_ids.append(record_match[0])
+                        # added_piece_ids.append(record_match[0]) # Yunzhi: This is not necessary (Yiye's previous udpate)
 
-        # ===================================== No go through the newly detected pieces whose assignment are found
+        # ===================================== Now go through the newly detected pieces whose assignment are found ========================
         for new_match in self.manager.pAssignments.items():
             findFlag = False
             for match in record_match_temp.items():
                 if new_match[1] == match[1]:
-                    # Some that have the false associations will be filtered out here
+                    # Some that have been dealt with in the previous process will be filtered out here
                     findFlag = True
                     break
 
@@ -271,16 +281,16 @@ class Planner:
                 # 3) If some pieces are only available on the new board, they will be added to the record board
 
                 if new_match[0] in match_intra:
-                    # 4) If some pieces can only be associated to the one in the record board, throw it away
+                    # 4) If some piece can be associated to the one in the record board, throw it away
                     pass
                 else:
                     record_board_temp.addPiece(meaBoard.pieces[new_match[0]])
                     record_match_temp[record_board_temp.id_count-1] = new_match[1]
-                    added_piece_ids.append(new_match[0])
+                    # added_piece_ids.append(new_match[0]) # Yunzhi: This is not necessary (Yiye's previous udpate)
 
         # Yunzhi: We revert Yiye's logic here to be more strict about what pieces to be loaded
         # # ===========================================================================================
-        # # NOTE: added by Yiye. The above will omit the pieces whose match is not found. S
+        # # NOTE: added by Yiye. The above will omit the pieces whose match is not found.
         # # So add below to go through the pieces whose assignment are not FOUND.
         # # Will aim to pass the test of the testing/realRunner02_dynamic.py. Not sure if it will influence others
         # # ===========================================================================================
@@ -364,8 +374,9 @@ class Planner:
 
     def adapt_simulator(self, meaBoard, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True):
         """
-        @brief Update the tracked board/history and generate the action plan for the robot.
-               Todo: To be compatible with the old version. Maybe integrated later.
+        @brief  Update the tracked board/history and generate the action plan for the robot.
+                Still with the old pick & place idea (not working on the real cases).
+                Todo: To be compatible with the old version. Maybe integrated later.
 
         Args:
             meaBoard: The measured board for the current view.

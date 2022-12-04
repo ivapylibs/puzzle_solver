@@ -107,7 +107,7 @@ class RealSolver:
             input: A board/path/raw image.
         """
 
-        # @note For our old random test cases, the solution board does not have to a grid board.
+        # @note For our old random test cases, the solution board does not have to be a grid board.
         # That's why we choose Arrangement class at first.
 
         if issubclass(type(input), Board):
@@ -115,10 +115,12 @@ class RealSolver:
         elif isinstance(input, str):
             assert os.path.exists(input), 'The input path does not exist.'
             theGridSol = Gridded.buildFromFile_Puzzle(input)
-            # Currently, we only change the solution area if we have already calibrated it
+            # Todo: Currently, we only change the solution area if we reads from a file of board instance. The other options may need updates.
 
-            self.params.solution_area = [closestNumber(theGridSol.boundingBox()[0][0], 30), closestNumber(theGridSol.boundingBox()[0][1],30), \
-                                         closestNumber(theGridSol.boundingBox()[1][0], 30, lower=False), closestNumber(theGridSol.boundingBox()[1][1], 30, lower=False)]
+            self.params.solution_area = [closestNumber(theGridSol.boundingBox()[0][0], 30),
+                                         closestNumber(theGridSol.boundingBox()[0][1], 30),
+                                         closestNumber(theGridSol.boundingBox()[1][0], 30, lower=False),
+                                         closestNumber(theGridSol.boundingBox()[1][1], 30, lower=False)]
 
             self.params.solution_area_center = np.array([(self.params.solution_area[0] + self.params.solution_area[2]) / 2, (self.params.solution_area[1] + self.params.solution_area[3]) / 2])
             self.params.solution_area_size = np.linalg.norm(self.params.solution_area_center-np.array([self.params.solution_area[0],self.params.solution_area[1]]))
@@ -230,7 +232,7 @@ class RealSolver:
         """
 
         # Todo: Move to somewhere else
-        # We will adopt the frame difference idea in the solution area to get the pieces
+        # We will adopt the frame difference idea in the solution area to get the pieces later, here we crop the solution area out first
         mask_working = np.ones(theImageMea.shape[:2],dtype='uint8')
         mask_working[self.params.solution_area[1]:self.params.solution_area[3], self.params.solution_area[0]:self.params.solution_area[2]] = 0
         mask_solution = 1 - mask_working
@@ -262,7 +264,6 @@ class RealSolver:
             for piece in self.theCalibrated.pieces.values():
                 theInterMea.addPiece(piece)
 
-
         theInterMea_all_img = theInterMea.toImage(theImage=np.zeros_like(theImageMea))
         
         # visualize
@@ -277,7 +278,7 @@ class RealSolver:
             cv2.destroyAllWindows()
 
 
-        # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
+        # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent. We have forced to reshape them inside planner.
         self.meaBoard = theInterMea
         plan = self.thePlanner.process(theInterMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
                                        COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=run_solver, planOnTrack=planOnTrack)
