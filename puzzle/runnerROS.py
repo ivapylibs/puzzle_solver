@@ -51,6 +51,9 @@ puzzle_solver_info_topic = "puzzle_solver_info"
 status_history_topic = "status_history"
 loc_history_topic = "loc_history"
 
+status_pulse_topic = "status_pulse"
+loc_pulse_topic = "loc_pulse"
+
 bMeasImage_topic = "bMeasImage"
 bTrackImage_topic = "bTrackImage"
 bTrackImage_SolID_topic = "bTrackImage_SolID"
@@ -67,6 +70,10 @@ class RealSolverROS(RealSolver):
         self.puzzle_solver_info_pub = rospy.Publisher(puzzle_solver_info_topic, String, queue_size=5)
         self.status_history_pub = rospy.Publisher(status_history_topic, String, queue_size=5)
         self.loc_history_pub = rospy.Publisher(loc_history_topic, String, queue_size=5)
+
+        # Only extract the last one
+        self.status_pulse_pub = rospy.Publisher(status_pulse_topic, String, queue_size=5)
+        self.loc_pulse_pub = rospy.Publisher(loc_pulse_topic, String, queue_size=5)
 
         self.bMeasImage_pub = Image_pub(topic_name=bMeasImage_topic)
         self.bTrackImage_pub = Image_pub(topic_name=bTrackImage_topic)
@@ -105,19 +112,29 @@ class RealSolverROS(RealSolver):
 
         # status_history  e.g., k: [PieceStatus(Enum), PieceStatus(Enum), ...]
         status_history_processed = {}
+        status_pulse_processed = {}
         for k, v in self.thePlanner.status_history.items():
             status_history_processed[k] = [x.value for x in v]
+            if len(v) > 0:
+                status_pulse_processed[k] = v[-1].value
+            else:
+                status_pulse_processed[k] = PieceStatus.UNKNOWN.value
 
         # loc_history  e.g., k: [array([x1, y1]), array([x2, y2]), ...]
         loc_history_processed = {}
+        loc_pulse_processed = {}
         for k, v in self.thePlanner.loc_history.items():
             loc_history_processed[k] = [x.tolist() for x in v]
+            if len(v) > 0:
+                loc_pulse_processed[k] = v[-1].tolist()
+            else:
+                loc_pulse_processed[k] = []
 
         # Wrap the board into a dictionary
         info_dict ={
             'plan': plan_processed,
             'solution_board_size': self.theManager.solution.size(),
-            'progress': self.progress(),
+            'progress': self.progress(USE_MEASURED=False), # Use the tracked board
         }
 
         # Publish the messages
@@ -125,7 +142,11 @@ class RealSolverROS(RealSolver):
         self.status_history_pub.publish(convert_dict2ROS(status_history_processed))
         self.loc_history_pub.publish(convert_dict2ROS(loc_history_processed))
 
-        # Publish the board images
+        # A temporal trial
+        self.status_pulse_pub.publish(convert_dict2ROS(status_pulse_processed))
+        self.loc_pulse_pub.publish(convert_dict2ROS(loc_pulse_processed))
+
+        # Publish the board images (mainly for demo for now)
         self.bMeasImage_pub.pub(self.bMeasImage)
         self.bTrackImage_pub.pub(self.bTrackImage)
         self.bTrackImage_SolID_pub.pub(self.bTrackImage_SolID)
