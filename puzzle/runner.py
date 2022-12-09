@@ -206,7 +206,8 @@ class RealSolver:
 
             val_list = [val for _, val in inPlace.items()]
 
-            # # Debug only
+            # Debug only
+            print(f"piece in-place info: {inPlace}")
             # print(val_list)
 
             thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(self.thePlanner.manager.solution.pieces))

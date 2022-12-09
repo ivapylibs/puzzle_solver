@@ -250,7 +250,13 @@ class Planner:
                     # print('RATIO:', ratio_visible)
 
                     # Todo: Not sure how to set up the threshold
-                    if ratio_visible > 0.99:
+                    # Currently, if the piece is visible in the visibleMask and not too close to the hand, then we consider it as GONE,
+                    # Otherwise, we consider it as INVISIBLE
+                    if ratio_visible > 0.99 and \
+                            (rLoc_hand is None or \
+                             (rLoc_hand is not None and \
+                            np.linalg.norm(self.record['meaBoard'].pieces[record_match[0]].rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.params.hand_radius+50)):
+
                         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.GONE
                     else:
                         self.record['meaBoard'].pieces[record_match[0]].status = PieceStatus.INVISIBLE
@@ -339,18 +345,21 @@ class Planner:
             self.displayBoard.addPiece(piece, ORIGINAL_ID=True)
 
         # # Debug only
+        # # 1) Hand location
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])
-        # # Current id to solution id
+
+        # # 2) Current id to solution id
         # print('Match in the new measured board:', self.manager.pAssignments)
 
         # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator), or the one used in SolBoard.
         # print('Match in the tracked record:', self.record['match'])
+
+        # # 3) ID from the tracked board
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
-        # # Debug only
-        # # We want to print the ID from the solution board.
+        # # 4) ID from the solution board.
         # for match in self.record['match'].items():
         #     print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
