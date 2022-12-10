@@ -437,6 +437,9 @@ class Planner:
             #     ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum() / mask_temp.sum()
             #     print("ratio_visible: ", ratio_visible)
 
+        print('\n')
+
+
         if RUN_SOLVER:
 
             # Solver plans for the measured board
