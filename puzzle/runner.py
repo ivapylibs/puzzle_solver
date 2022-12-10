@@ -197,12 +197,16 @@ class RealSolver:
             # Then we have some matched pieces id: location
             pLocs_sol = {}
             for match in self.thePlanner.record['match'].items():
-                pLocs_sol[match[1]] = pLocs[match[0]]
+
+                # When we work on tracked board, we need to remove those pieces whose statuses are GONE
+                if self.thePlanner.record['meaBoard'].pieces[match[0]].status != PieceStatus.GONE:
+                    pLocs_sol[match[1]] = pLocs[match[0]]
 
             # Check all the matched pieces
             # inPlace is just checking the top left corner for now. It is not 100% accurate.
             # Todo: We may add a solution board to the simulator to make it more concise
             inPlace = self.thePlanner.manager.solution.piecesInPlace(pLocs_sol, tauDist=self.params.tauDist)
+
 
             val_list = [val for _, val in inPlace.items()]
 
@@ -240,20 +244,21 @@ class RealSolver:
 
         theImageMea_solutionArea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_solution)
 
-        theImageMea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
+        theImageMea_work = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
 
 
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresholdLower=self.params.areaThresholdLower,
+        theMaskMea_work = preprocess_real_puzzle(theImageMea_work, areaThresholdLower=self.params.areaThresholdLower,
                                                 areaThresholdUpper=self.params.areaThresholdUpper,
                                             BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                             verbose=False)
 
         # Create an Interlocking instance.
-        theInterMea = Interlocking.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
-        theInterMea_work_img = theInterMea.toImage(theImage=np.zeros_like(theImageMea))
+        theInterMea_work = Interlocking.buildFrom_ImageAndMask(theImageMea_work, theMaskMea_work, self.params)
+        theInterMea_work_img = theInterMea_work.toImage(theImage=np.zeros_like(theImageMea))
 
-        # Only update when the hand is far away or not visible
+        theInterMea_all = copy.deepcopy(theInterMea_work)
+        # Only update when the hand is far away or not visible for the solution area
         if hTracker_BEV is None or \
                 np.linalg.norm(hTracker_BEV.reshape(2, -1) - self.params.solution_area_center.reshape(2, -1)) > self.params.hand_radius + self.params.solution_area_size + 50:
 
@@ -262,17 +267,18 @@ class RealSolver:
                                                                        option=0, verbose=verbose)
 
             # Combination of the pieces from the solution area and other working area
+            # In fact we usually have only one piece added here (frame difference idea)
             for piece in self.theCalibrated.pieces.values():
-                theInterMea.addPiece(piece)
+                theInterMea_all.addPiece(piece)
 
-        theInterMea_all_img = theInterMea.toImage(theImage=np.zeros_like(theImageMea))
+        theInterMea_all_img = theInterMea_all.toImage(theImage=np.zeros_like(theImageMea))
         
         # visualize
         if verbose:
             print("Showing the debug info of the puzzle solver before the planning. Press any key on the last window to continue...")
-            cv2.imshow("THe work space measured pieces", theImageMea[:,:,::-1])
-            cv2.imshow("THe solution space measured pieces", theImageMea_solutionArea[:,:,::-1])
-            cv2.imshow("The work space puzzle mask", theMaskMea)
+            cv2.imshow("The work space measured pieces", theImageMea_work[:,:,::-1])
+            cv2.imshow("The solution space measured pieces", theImageMea_solutionArea[:,:,::-1])
+            cv2.imshow("The work space puzzle mask", theMaskMea_work)
             cv2.imshow("The work space board", theInterMea_work_img[:,:,::-1])
             cv2.imshow("The all space board", theInterMea_all_img[:,:,::-1])
             cv2.waitKey()
@@ -280,8 +286,8 @@ class RealSolver:
 
 
         # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent. We have forced to reshape them inside planner.
-        self.meaBoard = theInterMea
-        plan = self.thePlanner.process(theInterMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
+        self.meaBoard = theInterMea_all
+        plan = self.thePlanner.process(theInterMea_all, rLoc_hand=hTracker_BEV, theImageMea=theImageMea, visibleMask=visibleMask,
                                        COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=run_solver, planOnTrack=planOnTrack)
 
         # with full size view
