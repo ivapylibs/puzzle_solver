@@ -33,6 +33,8 @@ from puzzle.piece.template import PieceStatus
 from puzzle.manager import Manager, ManagerParms
 from puzzle.piece.sift import Sift
 
+from puzzle.utils.shapeProcessing import bb_intersection_over_union
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -114,13 +116,14 @@ class Planner:
         # plt.plot()
         return meaBoard
 
-    def adapt(self, meaBoard, visibleMask, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, PLAN_WITH_TRACKBOARD=True):
+    def adapt(self, meaBoard, visibleMask, theImageMea, rLoc_hand=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, PLAN_WITH_TRACKBOARD=True):
         """
         @brief Update the tracked board/history and generate the action plan for the robot.
 
         Args:
             meaBoard: The measured board for the current view. Contains pieces at all the working area (include solution area)
             visibleMask: The mask image for the visible area.
+            theImageMea: The original processed RGB image from the surveillance system.
             rLoc_hand: The location of the hand.
             COMPLETE_PLAN: Whether to generate the complete plan.
             SAVED_PLAN: Use the saved plan (self.plan) or not.
@@ -129,6 +132,10 @@ class Planner:
         Returns:
             plan: The action plan.
         """
+
+        # The idea of checking the meaBoard_ori is obsolete
+        # meaBoard_ori = deepcopy(meaBoard)
+
         # Todo: Not sure if this hard threshold is a good idea or not.
         # Remove the measured pieces if they are too close to the hand.
         # Only meaningful when we can see a hand.
@@ -156,6 +163,7 @@ class Planner:
 
         # ============== Detect the match between the current measured board and the trackBoard ========================
         match_intra = {}    # store the association between the current measured board and the trackBoard
+        match_intra_copy = {}  # Debug only
         if self.record['meaBoard'] is not None:
             # Create a new manager for association between the current measured board and the trackBoard
             self.theManager_intra = Manager(self.record['meaBoard'], ManagerParms(matcher=Sift()))
@@ -166,6 +174,7 @@ class Planner:
                 # if np.linalg.norm(meaBoard.pieces[match[0]].rLoc.reshape(2, -1) - self.record['meaBoard'].pieces[match[1]].rLoc.reshape(2, -1)) < 50:
                 match_intra[match[0]]=match[1]
 
+            match_intra_copy = deepcopy(match_intra)  # For debug only
         # ============== Update the trackBoard(self.record["meaBoard"]) and tracked match(self.record["match"]) =====================
         # ============== i.e. Updates the tracked pieces in the trackBoard =====================
 
@@ -179,7 +188,7 @@ class Planner:
             # in which case the two pieces are treated as the same one.
             for match in self.manager.pAssignments.items():
                 if record_match[1] == match[1]:
-                    # 1) If some pieces are available on both boards, those pieces will have an updated status
+                    # 1) If some pieces are available on both boards (measured & tracked), those pieces will have an updated status
 
                     # Note: If the piece is put into the solution area, then we do not care if it is well associated with the tracked board or not
                     # Since they should lie on the nearby area, light effect is not so big
@@ -210,7 +219,6 @@ class Planner:
                             # added_piece_ids.append(match[0]) # Yunzhi: This is not necessary (Yiye's previous udpate)
                             findFlag = True
                             break
-            
 
             # Deal with the pieces in the meaBoard that match one of the previously tracked pieces (trackBoard),
             # but are not assigned to the same solBoard piece as the tracked piece.
@@ -234,14 +242,17 @@ class Planner:
                         del match_intra[key_new]
 
                 if findFlag_2 == False:
-                    # 2) If some pieces are only available on the record board, their status will be marked as GONE or INVISIBLE (both are considered as TRACKED)
+                    # 2) If some pieces are only available on the tracked board, their statuses will be marked as GONE or INVISIBLE (both are considered as TRACKED)
 
                     # Updated tracking life
                     # Todo: we have not enabled it for now, may need more experiments to see if it is useful
                     # self.record['meaBoard'].pieces[record_match[0]].tracking_life += 1
 
                     # # For puzzle piece state change idea
-                    # Check if most of the piece's part (we use a rough bounding box size for faster speed) is visible in the current visibleMask
+                    # Check if most of the piece's region (we use a rough bounding box size for faster speed) is visible in the current visibleMask
+                    # which means we can see the area
+                    # Todo: A corner case is that the piece cannot be well associated to the solution board but can be measured
+                    # However, if we enable it, we may have trouble when a blank region is mistakenly considered as a piece
                     mask_temp = np.zeros(visibleMask.shape,dtype='uint8')
                     mask_temp[self.record['meaBoard'].pieces[record_match[0]].rLoc[1]:self.record['meaBoard'].pieces[record_match[0]].rLoc[1]+self.record['meaBoard'].pieces[record_match[0]].y.size[1], \
                                 self.record['meaBoard'].pieces[record_match[0]].rLoc[0]:self.record['meaBoard'].pieces[record_match[0]].rLoc[0]+self.record['meaBoard'].pieces[record_match[0]].y.size[0]] \
@@ -249,10 +260,48 @@ class Planner:
                     ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum()/mask_temp.sum()
                     # print('RATIO:', ratio_visible)
 
+                    # Check if we can see some piece inside the ROI
+                    # Todo: This is a strong prior. May not work in other cases.
+                    # 1) Check if the region is most black.
+                    unknownPieceFlag = False
+
+                    if cv2.countNonZero(cv2.threshold(
+                        cv2.cvtColor(cv2.bitwise_and(theImageMea, theImageMea, mask=mask_temp).astype('float32'),
+                                     cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1])/mask_temp.sum() > 0.2:
+                        unknownPieceFlag = True
+
+                    # Debug only
+                    # aa = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_temp)
+                    # bb = cv2.cvtColor(aa, cv2.COLOR_BGR2GRAY)
+                    # cc = cv2.threshold(bb, 0, 255, cv2.THRESH_BINARY)[1]
+                    #
+                    # cv2.imshow('cc', cc)
+                    # cv2.waitKey()
+
+                    # # 2) Check the original measured board. There might be a piece that cannot be well associated to the solution board but can be measured
+                    # A corner case is that if pieces are connected to each other, we will not be able to tell if there are pieces according to the measured board
+                    # So this idea is not working
+                    #
+                    # unknownPieceFlag = False
+                    # target_bb = [self.record['meaBoard'].pieces[record_match[0]].rLoc[0],
+                    #              self.record['meaBoard'].pieces[record_match[0]].rLoc[1],
+                    #              self.record['meaBoard'].pieces[record_match[0]].rLoc[0] +
+                    #              self.record['meaBoard'].pieces[record_match[0]].y.size[0],
+                    #              self.record['meaBoard'].pieces[record_match[0]].rLoc[1] +
+                    #              self.record['meaBoard'].pieces[record_match[0]].y.size[1]]
+                    # for piece in meaBoard_ori.pieces.values():
+                    #     query_bb = [piece.rLoc[0], piece.rLoc[1], piece.rLoc[0] + piece.y.size[0],
+                    #                 piece.rLoc[1] + piece.y.size[1]]
+                    #
+                    #     if bb_intersection_over_union(query_bb, target_bb) > 0.1:
+                    #         unknownPieceFlag = True
+                    #         break
+
+
                     # Todo: Not sure how to set up the threshold
-                    # Currently, if the piece is visible in the visibleMask and not too close to the hand, then we consider it as GONE,
+                    # Currently, if the region of the piece in the tracked board is visible in the visibleMask and not too close to the hand, then we consider it as GONE,
                     # Otherwise, we consider it as INVISIBLE
-                    if ratio_visible > 0.99 and \
+                    if unknownPieceFlag is False and ratio_visible > 0.99 and \
                             (rLoc_hand is None or \
                              (rLoc_hand is not None and \
                             np.linalg.norm(self.record['meaBoard'].pieces[record_match[0]].rLoc.reshape(2, -1) - rLoc_hand.reshape(2, -1)) > self.params.hand_radius+50)):
@@ -322,6 +371,10 @@ class Planner:
         # # Yiye Update ends here.
         # # ===========================================================================================
 
+        # Debug only
+        # The tracked board before the update
+        record_match_copy = deepcopy(self.record['match'])
+
         # Update
         self.record['meaBoard'] = record_board_temp
         self.record['match'] = record_match_temp
@@ -349,19 +402,40 @@ class Planner:
         # if self.record['rLoc_hand'] is not None:
         #     print('Current hand location:', self.record['rLoc_hand'])
 
-        # # 2) Current id to solution id
-        # print('Match in the new measured board:', self.manager.pAssignments)
+        # 2) Association: Measured id to solution id
+        print('Association between the measured board and the solution board:', self.manager.pAssignments)
 
-        # # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator), or the one used in SolBoard.
-        # print('Match in the tracked record:', self.record['match'])
+        # Note that the printed tracking id is not the one used in meaBoard, or the one used in DisplayBoard (simulator), or the one used in SolBoard.
+        # tracked id to solution id
+        print('Association between the tracked board and the solution board (before update):', record_match_copy)
 
-        # # 3) ID from the tracked board
+        # Measured id to tracked id
+        print('Association between the measured board and the tracked board:', match_intra_copy)
+
+        # tracked id to solution id
+        print('Association between the tracked board and the solution board (after update):', self.record['match'])
+
+        # # 3) Status info: ID from the tracked board
         # for match in self.record['match'].items():
         #     print(f"ID{match[0]}: {self.record['meaBoard'].pieces[match[0]].status}")
 
-        # # 4) ID from the solution board.
-        # for match in self.record['match'].items():
-        #     print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
+        # 4) Status info: ID from the solution board.
+        for match in self.record['match'].items():
+            print(f"ID{match[1]}: {self.record['meaBoard'].pieces[match[0]].status}")
+
+            # Re-compute and print the ratio_visible
+            # if self.record['meaBoard'].pieces[match[0]].status != PieceStatus.MEASURED:
+            #
+            #     mask_temp = np.zeros(visibleMask.shape, dtype='uint8')
+            #     mask_temp[self.record['meaBoard'].pieces[match[0]].rLoc[1]:
+            #               self.record['meaBoard'].pieces[match[0]].rLoc[1] +
+            #               self.record['meaBoard'].pieces[match[0]].y.size[1], \
+            #     self.record['meaBoard'].pieces[match[0]].rLoc[0]:
+            #     self.record['meaBoard'].pieces[match[0]].rLoc[0] +
+            #     self.record['meaBoard'].pieces[match[0]].y.size[0]] \
+            #         = (self.record['meaBoard'].pieces[match[0]].y.mask / 255).astype('uint8')
+            #     ratio_visible = (visibleMask.astype('uint8') + mask_temp == 2).sum() / mask_temp.sum()
+            #     print("ratio_visible: ", ratio_visible)
 
         if RUN_SOLVER:
 
@@ -527,7 +601,7 @@ class Planner:
         else:
             return None
 
-    def process(self, input, rLoc_hand=None, visibleMask=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, planOnTrack=False):
+    def process(self, input, rLoc_hand=None, visibleMask=None, theImageMea=None, COMPLETE_PLAN=True, SAVED_PLAN=True, RUN_SOLVER=True, planOnTrack=False):
         """
         @brief  Draft the action plan given the measured board.
 
@@ -537,6 +611,7 @@ class Planner:
             input:          A measured board or RGB image.
             rLoc_hand:      The location of the hand.
             visibleMask:    The mask of the visible area on the table (puzzle included).
+            theImageMea:    The original processed RGB image from the surveillance system.
             COMPLETE_PLAN:  Whether to plan the whole sequence.
             SAVED_PLAN:     Use the saved plan (self.plan) or not. NOTE: this option overwrite the COMPLETE_PLAN option. 
                             (i.e. If this is True, then the COMPLETE_PLAN will be set to true)
@@ -556,7 +631,7 @@ class Planner:
         # Todo: May need double check the unit test
         if visibleMask is not None:
             # We have the option to not plan anything but just update tracked board
-            plan = self.adapt(meaBoard, rLoc_hand=rLoc_hand, visibleMask=visibleMask, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER, PLAN_WITH_TRACKBOARD=planOnTrack)
+            plan = self.adapt(meaBoard, visibleMask, theImageMea=theImageMea, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER, PLAN_WITH_TRACKBOARD=planOnTrack)
         else:
             # We have the option to not plan anything but just update tracked board
             plan = self.adapt_simulator(meaBoard, rLoc_hand=rLoc_hand, COMPLETE_PLAN=COMPLETE_PLAN, SAVED_PLAN=SAVED_PLAN, RUN_SOLVER=RUN_SOLVER)
