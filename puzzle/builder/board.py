@@ -312,7 +312,7 @@ class Board:
 
     def pieceLocations(self, isCenter=False):
         """
-        @brief      Returns list/array of puzzle piece locations.
+        @brief      Returns a dict of puzzle piece locations.
 
         Args:
 	        isCenter: The flag indicating whether the given location is for the center.
