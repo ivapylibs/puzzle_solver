@@ -122,12 +122,17 @@ class ByColor(Board):
             The score of the clustering result.
         """
 
+        # Does not matter if the id has the exact same value as the true label or not
+
         if method == 'label':
             labels_pred = []
             labels_true = []
+
+            # We only compare the overlapping pieces from both the true label and the predicted label
             for k, v in cluster_id_pred_dict.items():
-                labels_pred.append(v)
-                labels_true.append(self.feaLabel_dict[k])
+                if k in self.feaLabel_dict:
+                    labels_pred.append(v)
+                    labels_true.append(self.feaLabel_dict[k])
 
             rand_score = metrics.rand_score(labels_true, labels_pred)
 

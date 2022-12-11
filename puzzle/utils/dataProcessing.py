@@ -23,6 +23,8 @@ from std_msgs.msg import String
 import json
 from rospy_message_converter import message_converter, json_message_converter
 
+from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
 
 # ====================== puzzle.utils.dataProcessing ======================
 #
@@ -202,6 +204,39 @@ def partition_even(data_list, partition_num, order="ascend"):
 
     return labels, part_results
 
+def kmeans_id_2d(dict_id_2d, kmeans_num):
+    """
+    @brief  Kmeans clustering for a dict of id: 2D data.
+
+    Args:
+        dict_id_2d: The dictionary of id: 2D data.
+        kmeans_num: The number of clusters.
+
+    Returns:
+        dict_id_label: The updated dictionary of 2D data.
+    """
+
+    kmeans_model = KMeans(n_clusters=kmeans_num).fit(list(dict_id_2d.values()))
+    dict_id_label = dict(zip(dict_id_2d.keys(), kmeans_model.labels_))
+
+    return dict_id_label
+
+def agglomerativeclustering_id_2d(dict_id_2d):
+    """
+    @brief  Agglomerative clustering for a dict of id: 2D data.
+
+    Args:
+        dict_id_2d: The dictionary of id: 2D data.
+
+    Returns:
+        dict_id_label: The updated dictionary of 2D data.
+    """
+
+    clustering = AgglomerativeClustering().fit(list(dict_id_2d.values()))
+    dict_id_label = dict(zip(dict_id_2d.keys(), clustering.labels_))
+
+    return dict_id_label
+
 
 def convert_serializable(input):
     """
@@ -255,5 +290,14 @@ def convert_ROS2dict(message):
 # ====================== puzzle.utils.dataProcessing ======================
 
 if __name__ == "__main__":
-    data = np.array([4, 11, 14, 3, 32, 35])
-    print(partition_even(data, 3, order="ascend"))
+    # # Test partition_even
+    # data = np.array([4, 11, 14, 3, 32, 35])
+    # print(partition_even(data, 3, order="ascend"))
+
+    # # Test kmeans_id_2d
+    # dict_id_2d = {0: [0, 0], 1: [1, 1], 2: [0.4, 0.4], 3: [3, 3], 4: [4, 4], 5: [5, 5], 6: [0.6, 0.6], 7: [7, 7], 8: [8, 8], 9: [0.9, 0.9]}
+    # print(kmeans_id_2d(dict_id_2d, 3))
+
+    # Test agglomerativeclustering_id_2d
+    dict_id_2d = {0: [0, 0], 1: [1, 1], 2: [0.4, 0.4], 3: [3, 3], 4: [4, 4], 5: [5, 5], 6: [0.6, 0.6], 7: [7, 7], 8: [8, 8], 9: [0.9, 0.9]}
+    print(agglomerativeclustering_id_2d(dict_id_2d))

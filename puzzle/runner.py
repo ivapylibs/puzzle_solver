@@ -26,18 +26,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 
+from puzzle.piece.template import Template, PieceStatus
+from puzzle.piece.sift import Sift
 from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
 from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.clusters.byColor import ByColor, ParamColorCluster
 from puzzle.manager import Manager, ManagerParms
-from puzzle.piece.sift import Sift
-from puzzle.utils.dataProcessing import closestNumber
+from puzzle.utils.dataProcessing import closestNumber, kmeans_id_2d, agglomerativeclustering_id_2d
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
-from puzzle.piece.template import Template, PieceStatus
 
 
 # ===== Helper Elements
@@ -45,18 +46,29 @@ from puzzle.piece.template import Template, PieceStatus
 
 @dataclass
 class ParamRunner(ParamPlanner):
+    # Params to filter out the pieces
     areaThresholdLower: int = 1000
     areaThresholdUpper: int = 10000
     lengthThresholdLower: int = 1000
     BoudingboxThresh: tuple = (10, 200)
+
+    # Params for basic puzzle info
     pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.MEASURED
-    tauDist: int = 100
+
+    # Other params
+    tauDist: int = 100 # For in-place check
     hand_radius: int = 200
     tracking_life_thresh: int = 15
     solution_area: np.array = np.array([0,0,0,0])
     solution_area_center: np.array = np.array([0,0])
     solution_area_size: float = 0.0
+
+    # Params for clustering (currently all for byColor)
+    cluster_mode: str = 'number' # 'number' or 'threshold'
+    cluster_number: int = 4
+    cluster_threshold: float = 0.5
+    score_method: str = 'label' # 'label' or 'histogram'
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -79,9 +91,11 @@ class RealSolver:
 
         # Mainly for calibration of the solution board
         self.theCalibrated = Board()
-
-        # For solution board calibration & solution area
         self.thePrevImage = None
+
+        # Clustering
+        self.theClusterBoard = None
+
 
     def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1, verbose=False):
         """
@@ -135,15 +149,11 @@ class RealSolver:
 
         # For theManager & theSolver
         self.theManager.solution = theGridSol
+        self.theSolver.desired = theGridSol
 
         # # Debug only
         # cv2.imshow('Debug', self.theManager.solution.toImage())
         # cv2.waitKey()
-
-        self.theSolver.desired = theGridSol
-
-        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
-                                                          ID_DISPLAY=True)
 
         # For saving the status history
         self.thePlanner.status_history = dict()
@@ -151,6 +161,70 @@ class RealSolver:
         for i in range(self.theManager.solution.size()):
             self.thePlanner.status_history[i] = []
             self.thePlanner.loc_history[i] = []
+
+        # For debug
+        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
+                                                          ID_DISPLAY=True)
+
+    def setClusterBoard(self, target_board=None, mode='solution'):
+        """
+        @brief Set up the cluster board.
+               Two ways to support clustering stuff:
+               1) Use the solution board as the cluster board. You can track the progress in this way.
+               2) Use any board. But only give a one-time suggestion.
+
+        Args:
+            mode: 'solution' or 'arbitrary', default is 'solution'.
+            target_board: the reference board for clustering. Can be any board at any time (does not have to be the solution one)
+
+        Returns:
+
+        """
+
+        if mode == 'solution':
+            target_board = self.theManager.solution
+        elif mode == 'arbitrary':
+            assert target_board is not None, 'Please provide a board for clustering.'
+        else:
+            raise ValueError('The mode should be "solution" or "arbitrary".')
+
+        if self.params.cluster_mode == 'number':
+            self.theClusterBoard = ByColor(target_board, theParams=ParamColorCluster(cluster_num=self.params.cluster_number,
+                                                                           cluster_mode='number'))
+        elif self.params.cluster_mode == 'threshold':
+            self.theClusterBoard = ByColor(target_board, theParams=ParamColorCluster(tauDist=self.params.cluster_threshold,
+                                                                           cluster_mode='threshold'))
+        else:
+            raise ValueError('Invalid cluster mode.')
+
+        self.theClusterBoard.process()
+
+        # Initialize the cluster id
+        for k, v in self.theClusterBoard.feaLabel_dict.items():
+            self.theClusterBoard.pieces[k].cluster_id = v
+
+    def clusterScore(self):
+        """
+        @brief Compute the clustering score of the current tracked board.
+
+        Returns:
+            The clustering score.
+        """
+        assert self.theClusterBoard is not None, 'Please set up the cluster board first.'
+
+        # We only consider the pieces whose statuses are not GONE
+        piece_loc_dict = {}
+        for piece_id, piece in self.thePlanner.record['meaBoard'].pieces.items():
+            if piece.status != PieceStatus.GONE:
+                piece_loc_dict[piece_id] = piece.rLoc
+
+        # Maybe incomplete compared to the reference
+        # Hierarchical clustering based on 2d location
+        current_cluster_dict = agglomerativeclustering_id_2d(piece_loc_dict)
+
+        score = self.theClusterBoard.score(current_cluster_dict, method=self.params.score_method)
+
+        return score
 
     def progress(self, USE_MEASURED=True):
         """
