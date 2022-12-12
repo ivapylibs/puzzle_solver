@@ -66,9 +66,9 @@ class ParamRunner(ParamPlanner):
 
     # Params for clustering (currently all for byColor)
     cluster_mode: str = 'number' # 'number' or 'threshold'
-    cluster_number: int = 4
-    cluster_threshold: float = 0.5
-    score_method: str = 'label' # 'label' or 'histogram'
+    cluster_number: int = 3 # For number mode
+    cluster_threshold: float = 0.5 # For threshold mode
+    score_method: str = 'label' # 'label' or 'histogram' criteria for clustering
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -88,6 +88,8 @@ class RealSolver:
         self.bMeasImage = None
         self.bTrackImage = None
         self.bTrackImage_SolID = None
+        self.bSolImage = None
+        self.bClusterImage = None
 
         # Mainly for calibration of the solution board
         self.theCalibrated = Board()
@@ -166,6 +168,7 @@ class RealSolver:
         self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
                                                           ID_DISPLAY=True)
 
+
     def setClusterBoard(self, target_board=None, mode='solution'):
         """
         @brief Set up the cluster board.
@@ -203,6 +206,9 @@ class RealSolver:
         for k, v in self.theClusterBoard.feaLabel_dict.items():
             self.theClusterBoard.pieces[k].cluster_id = v
 
+        self.bClusterImage = self.theClusterBoard.toImage(theImage=np.zeros_like(self.bSolImage), BOUNDING_BOX=False,
+                                                                ID_DISPLAY=True, ID_DISPLAY_OPTION=1)
+
     def clusterScore(self):
         """
         @brief Compute the clustering score of the current tracked board.
@@ -219,12 +225,16 @@ class RealSolver:
                 piece_loc_dict[piece_id] = piece.rLoc
 
         # Maybe incomplete compared to the reference
-        # Hierarchical clustering based on 2d location
-        current_cluster_dict = agglomerativeclustering_id_2d(piece_loc_dict)
+        # Hierarchical clustering based on the 2d locations of the tracked board
+        # current_cluster_dict = agglomerativeclustering_id_2d(piece_loc_dict, self.params.cluster_number)
+        current_cluster_dict = kmeans_id_2d(piece_loc_dict, self.params.cluster_number)
 
+        # Debug only
+        print(f"Cluster info: {current_cluster_dict}")
+        print(f"Reference info: {self.theClusterBoard.feaLabel_dict}")
         score = self.theClusterBoard.score(current_cluster_dict, method=self.params.score_method)
 
-        return score
+        return '{:.1%}'.format(score)
 
     def progress(self, USE_MEASURED=True):
         """

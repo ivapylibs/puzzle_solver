@@ -221,7 +221,7 @@ def kmeans_id_2d(dict_id_2d, kmeans_num):
 
     return dict_id_label
 
-def agglomerativeclustering_id_2d(dict_id_2d):
+def agglomerativeclustering_id_2d(dict_id_2d, cluster_num):
     """
     @brief  Agglomerative clustering for a dict of id: 2D data.
 
@@ -232,7 +232,7 @@ def agglomerativeclustering_id_2d(dict_id_2d):
         dict_id_label: The updated dictionary of 2D data.
     """
 
-    clustering = AgglomerativeClustering().fit(list(dict_id_2d.values()))
+    clustering = AgglomerativeClustering(n_clusters=cluster_num).fit(list(dict_id_2d.values()))
     dict_id_label = dict(zip(dict_id_2d.keys(), clustering.labels_))
 
     return dict_id_label

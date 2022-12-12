@@ -135,6 +135,7 @@ class RealSolverROS(RealSolver):
             'plan': plan_processed,
             'solution_board_size': self.theManager.solution.size(),
             'progress': self.progress(USE_MEASURED=False), # Use the tracked board
+            'cluster_score': self.clusterScore(),
         }
 
         # Publish the messages
