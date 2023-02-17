@@ -16,5 +16,9 @@ setup(
         "scikit-learn",
         "similaritymeasures",
         "pygame",
+        "Lie @ git+https://github.com/ivapylibs/Lie.git",
+        "improcessor @ git+https://github.com/ivapylibs/improcessor.git",
+        "trackpointer @ git+https://github.com/ivapylibs/trackpointer.git",
+        "detector @ git+https://github.com/ivapylibs/detector.git",
     ],
 )
