@@ -1,6 +1,6 @@
 # ============================== puzzle.board =============================
 #
-# @class    puzzle.builder.board
+# @class    puzzle.board
 #
 # @brief    A base representation for a puzzle board, which is basically
 #           a collection of pieces.  Gets used in many different ways.
@@ -26,22 +26,21 @@
 # ============================== puzzle.board =============================
 
 
-# ============================== Dependencies =============================
+#============================== Dependencies =============================
 
-# ===== Environment / Dependencies
+#===== Environment / Dependencies
 #
-
 import cv2
 from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.distance import cdist
 
-from puzzle.piece.template import Template
+from puzzle.piece import Template
 
 
 #
-# ============================== puzzle.board =============================
+#============================== puzzle.board =============================
 #
 
 class Board:
@@ -97,6 +96,11 @@ class Board:
             piece_copy.id = self.id_count
             self.pieces[self.id_count] = piece_copy
             self.id_count += 1
+
+    def addPieces(self, pieces):
+      for piece in pieces:
+        self.addPiece(piece)
+
 
     def rmPiece(self, id):
         """
