@@ -7,11 +7,17 @@
 #================================ basic01 ================================
 
 #
-# @file     basic01_parser.py
+# @file     basic01.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/01  [created]
+# @author   Patricio A. Vela,       pvela@gatech.edu
 #
+# @date     2021/08/01  [created]
+# @date     2023/09/08  [modified]
+#
+#
+# NOTES:
+#   80 columns or more.
 #================================ basic01 ================================
 
 
@@ -41,15 +47,21 @@ thickness = -1
 
 theImage = cv2.circle(theImage, center_coordinates, radius, color, thickness)
 
-#==[2] Create mask
+#==[2] Create mask: can be tight or bbox. The code should have tight mask.
 #
 theMask = np.full((100, 100), False, dtype=bool)
-theMask[15:35, 15:35] = True
-theMask[40:70, 40:70] = True
+if True:
+  theMask = np.any(theImage,2)              # Tight.
+else:
+  theMask[15:36, 15:36] = True              # Bbox. Just to have option to reproduce
+  theMask[40:71, 40:71] = True              #   original test script.  Not best choice.
+
 
 #==[3] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = boardMeasure()
+boardOpts = CfgBoardMeasure()
+
+theLayer = boardMeasure(params=boardOpts)
 theLayer.measure(theImage, theMask)
 
 theBoard = theLayer.bMeas
@@ -58,7 +70,7 @@ theBoard = theLayer.bMeas
 #
 print('Should see two circle pieces.')
 plt.imshow(theImage)
-plt.show()
+#plt.show()
 
 #==[5] Display the resulting image. Should see two circle pieces in a cropped region.
 #

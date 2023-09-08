@@ -39,8 +39,9 @@ from puzzle.board import Board
 from puzzle.piece import Piece, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
+from camera.utils import display
 
-#
+
 #---------------------------------------------------------------------------
 #==================== Configuration Node : boardMeasure ====================
 #---------------------------------------------------------------------------
@@ -64,6 +65,8 @@ class CfgBoardMeasure(CfgCentMulti):
 
     super().__init__(init_dict, key_list, new_allowed)
 
+    self.imagePatch = None
+
   #========================= get_default_settings ========================
   #
   # @brief    Recover the default settings in a dictionary.
@@ -77,8 +80,8 @@ class CfgBoardMeasure(CfgCentMulti):
                               default settings.
     '''
     default_dict = CfgCentMulti.get_default_settings()
-    default_dict.update(dict(\
-          lengthThresholdLower = 1000, \
+    default_dict.update(dict(measProps = True,  #override
+          lengthThresholdLower = 1000,  \
           pieceBuilder = 'Template', pieceStatus = PieceStatus.MEASURED.value))
 
     return default_dict
@@ -100,19 +103,22 @@ class CfgBoardMeasure(CfgCentMulti):
 
 class boardMeasure(centroidMulti):
 
-  def __init__(self, theParams=CfgBoardMeasure()):
+  #============================== __init__ =============================
+  #
+  def __init__(self, params=CfgBoardMeasure()):
     """!
     @brief  Constructor for the puzzle piece layer parsing class.
 
     @param[in]  theParams   The parameters/config settings for the track pointer.
     """
 
-    super(boardMeasure, self).__init__(None, theParams)
+    super(boardMeasure, self).__init__(None, params)
 
     self.bMeas = Board()  # @< The measured board.
-    self.pieceConstructor = Piece.getBuilderFromString(theParams.pieceBuilder)
+    self.pieceConstructor = Piece.getBuilderFromString(params.pieceBuilder)
 
-
+  #============================== getState =============================
+  #
   def getState(self):
     """!
     @brief  Return the track-pointer state. Override the original one.
@@ -123,6 +129,8 @@ class boardMeasure(centroidMulti):
 
     return tstate
 
+  #============================== measure ==============================
+  #
   def measure(self, I, M):
     """!
     @brief  Process the passed imagery to recover puzzle pieces and
@@ -135,32 +143,85 @@ class boardMeasure(centroidMulti):
     # 1] Extract pieces based on disconnected component regions
     #    then instantiate puzzle piece instances from regions.
     #
-    regions = self.mask2regions(I, M)
-    pieces  = self.regions2pieces(regions)
+    super(boardMeasure, self).measure(M)
 
-    # 3] Package into a board.
-    #
-    self.bMeas.clear()
-    self.bMeas.addPieces(pieces)
+    self._regions2board(I)
 
-    # Add the pieces one by one. So the label can be managed.
-    # MOVE THIS TO BOARD FUNCTION addPieces.
+    # Override since some regions might be too small or large. Check again.
+    # Also regenerate the list of "track points."
+    self.haveMeas = len(self.bMeas.pieces) > 0  
 
-    self.haveMeas = len(self.bMeas.pieces) > 0
 
     if self.haveMeas:
       #self.tpt = self.bMeas.getPieceLocations()
       # MOVE THIS TO BOARD FUNCTION getPieceLocations() . ALREADY a pieceLocations.
+      # The function returns a dict. Ugly but possibly sensible given the implementation.
+      # Yucky though.  
+      # @todo   Consider how to implement some form of getPieceLocations or maybe
+      #         should be getPieceTrackpoint.  Who knows.  Moving on.
       thePieces = self.bMeas.pieceLocations()
-      print('The pieces ....')
-      print(thePieces)
-      print('---------------')
       self.tpt = []
       for id, loc in thePieces.items():
         self.tpt.append(loc)
       self.tpt = np.array(self.tpt).reshape(-1, 2).T
+      #DEBUG
+      #print(self.tpt)
 
 
+  #=========================== _regions2board ==========================
+  #
+  def _regions2board(self, I):
+    '''!
+    @brief  Extract piece information from identified regions. Add to
+            board measurement.
+
+    The process packages up the region mask, the region image data, the
+    centroid, and the puzzle piece status.  These get added to the board
+    measurement.
+    '''
+
+    #--[0] Pre-processing. Reshape image for faster recovery of 
+    #       content.
+    self.bMeas.clear()  # Clear board.
+
+    imdims = np.shape(I)
+    vI = I.reshape(-1, imdims[2])        # Vectorized image.
+
+    for ri in self.trackProps:
+      #--[1] Extract the color image patch.
+      #
+      pMask  = ri.image
+      indI   = np.ravel_multi_index( ri.coords.T, imdims[0:2] ) 
+      pImage = np.zeros( [ri.area_bbox, imdims[2]] )        # Rectangle.
+      pImage[np.ndarray.flatten(pMask),:] = vI[indI, :]     # Pixels within rectangle.
+      pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
+     
+      pCent  = np.round(ri.centroid).astype(int)
+      pStat  = self.tparams.pieceStatus
+
+      thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, pCent, pStat)
+
+      #thePiece = self.pieceConstructor.buildFromPropsAndImage(ri, pImage, pStat)
+      # @todo   Maybe should just work directly from region props info plus cropped image.
+      #         Let builder extract what it needs to.
+      # @todo   Revisit once working.
+
+      self.bMeas.addPiece(thePiece)
+
+      #DEBUG
+      #display.rgb_cv(pImage)
+      #display.binary_cv(ri.image)
+      #display.wait_cv()
+      # @todo   Appears to miss outer pixel boundary during piece plotting. But here
+      #         that is not the case.  Something happens elsewhere. Maybe in the
+      #         plot/display or place in image routine.  Need to double check code.
+      #         09/08: Confirmed that place in image is weird. Push to later.
+
+
+  #xxxxxxxxxxxxxxxxxxxxxxx findCorrectedContours xxxxxxxxxxxxxxxxxxxxxxx
+  #
+  # MOST LIKELY NO LONGER NEEDED. KEEP UNTIL NEW IMPLEMENTATION DONE.
+  #
   def findCorrectedContours(self, mask, FILTER=True):
     """
     @brief Find the right contours given a binary mask image.
@@ -197,14 +258,15 @@ class boardMeasure(centroidMulti):
         else:
           keep.append(i)
 
-      print('KKKK')
-      print(keep)
-      print(cnts)
+      #DEBUG
+      #print('KKKK')
+      #print(keep)
+      #print(cnts)
       cnts = np.array(cnts)
       cnts = cnts[keep]
-      print('CCCC')
-      print(cnts)
-      print('----')
+      #print('CCCC')
+      #print(cnts)
+      #print('----')
     else:
       cnts = np.array(cnts)
 
@@ -243,11 +305,16 @@ class boardMeasure(centroidMulti):
               desired_cnts.append(c)
             desired_cnts.append(c)
     
-    print("DCDCDCDCDCDC")
-    print(desired_cnts)
-    print('RRRRRRRRRRRR')
+    #DEBUG
+    #print("DCDCDCDCDCDC")
+    #print(desired_cnts)
+    #print('RRRRRRRRRRRR')
     return desired_cnts
 
+  #xxxxxxxxxxxxxxxxxxxxxxxxxxxx mask2regions xxxxxxxxxxxxxxxxxxxxxxxxxxx
+  #
+  # To be deprecated.  Seems to use an inefficient OpenCV scheme.
+  # Replicating functionality elsewhere as I decipher the code.
   def mask2regions(self, I, M, verbose=False):
     """
     @brief Convert the selection mask into a bunch of regions.
@@ -328,6 +395,17 @@ class boardMeasure(centroidMulti):
 
     return regions
 
+  #xxxxxxxxxxxxxxxxxxxxxxxxxxx regions2pieces xxxxxxxxxxxxxxxxxxxxxxxxxx
+  #
+  # to be deprecated.  Appears to use weird OpenCV implementation.
+  # the process seems contorted relative to how Matlab would do it.
+  # Shifting gears to skimage until can figure out OpenCV equivalent
+  # that isn't contour-based, or that better utilizes the contour-based
+  # approach.
+  #
+  # The process is more sensible when based on pixel regions (not
+  # boundaries).
+  #
   def regions2pieces(self, regions):
       """!
       @brief Convert the region information into puzzle pieces.

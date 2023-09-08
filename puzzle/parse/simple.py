@@ -23,9 +23,10 @@
 
 # ===== Environment / Dependencies
 #
+import camera.utils.display as display
 import perceiver.simple as PerceiverSimple
 
-from puzzle.builder.board import Board
+from puzzle.board import Board
 
 
 #
@@ -33,8 +34,8 @@ from puzzle.builder.board import Board
 #
 class Simple(PerceiverSimple.simple):
 
-    def __init__(self, theDetector, theTracker, theParams=[]):
-        """
+    def __init__(self, theParams=None, theDetector=None, theTracker=None):
+        """!
         @brief  Constructor for the simple puzzler parser. Lacks a filter.
 
         Args:
@@ -43,23 +44,25 @@ class Simple(PerceiverSimple.simple):
             theParams: The parameters.
         """
 
-        super(Simple, self).__init__(theDetector, theTracker, [], theParams)
-        self.board = Board()
-        self.Mask = []
+        super(Simple, self).__init__(theParams, theDetector, theTracker, None)
 
+        self.board = Board()
+        self.Mask  = None
+
+    #============================= measure =============================
+    #
     def measure(self, I, M=None):
-        """
+        """!
         @brief Process data from mask layer and image.
 
-        Args:
-            I: The puzzle image source.
-            M: The puzzle template mask.
+        @param[in]  I   Puzzle image source.
+        @param[in]  M   Puzzle template mask.
         """
 
         self.I = I
         self.Mask = M
 
-        # --[1] Parse image and mask to get distinct candidate puzzle objects
+        #--[1] Parse image and mask to get distinct candidate puzzle objects
         #      from it. Generates mask or revises existing mask.
         #
         # @note Is process the right thing to call. Why not measure? Is it
@@ -71,6 +74,10 @@ class Simple(PerceiverSimple.simple):
             self.detector.process(I)
 
         detState = self.detector.getState()
+
+        #DEBUG
+        #display.binary_cv(detState.x)
+        #display.wait_cv()
 
         # --[2] Parse detector output to reconstitute recognized puzzle
         #      pieces into a board.

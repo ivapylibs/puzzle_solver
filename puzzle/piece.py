@@ -1,11 +1,10 @@
-# ========================= puzzle.piece.template =========================
+#============================= puzzle.piece.template =============================
 #
-# @brief    The base class for puzzle piece specification or description
-#           encapsulation. This simply stores the template image and
-#           related data for a puzzle piece in its canonical
-#           orientation.
+# @brief    The base class for puzzle piece specification or description encapsulation. 
+#           This simply stores the template image and related data for a puzzle piece in
+#           its canonical orientation.
 #
-# ========================= puzzle.piece.template =========================
+#============================= puzzle.piece.template =============================
 #
 # @file     template.py
 #
@@ -14,8 +13,11 @@
 # @date     2021/07/24 [created]
 #           2021/07/28 [modified]
 #
+# NOTES:
+#   95 columns.
+#   indent is 4 spaces.
 #
-# ========================= puzzle.piece.template =========================
+#============================= puzzle.piece.template =============================
 
 # ===== Environment / Dependencies
 #
@@ -29,6 +31,7 @@ import numpy as np
 
 from puzzle.utils.imageProcessing import rotate_im
 
+import camera.utils as display
 
 # ===== Helper Elements
 #
@@ -65,13 +68,19 @@ class PuzzleTemplate:
 
 
 #
-# ========================= puzzle.piece.template =========================
+#==================================== Template ===================================
 #
 
 class Template:
+    '''!
+    @brief  What is this??
 
+    '''
+
+    #================================ __init__ ===============================
+    #
     def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
-        """
+        """!
         @brief  Constructor for template class.
 
         Args:
@@ -229,6 +238,9 @@ class Template:
 
         return theMask
 
+    #============================= placeInImage ============================
+    #
+    #
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
         """
         @brief  Insert the puzzle piece into the image in the original location.
@@ -239,9 +251,16 @@ class Template:
             CONTOUR_DISPLAY: The flag indicating whether to display the contours.
         """
 
+        # @todo Very weird. Not sure what is going on.  Uses resized image. Yucky.
+
         # Remap coordinates from own image sprite coordinates to bigger
         # image coordinates. 2*N
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+        #DEBUG
+        #print(np.array(offset))
+        #print(np.array(self.rLoc))
+        #print(self.y.rcoords)
+        #print(rcoords)
 
         # Dump color/appearance information into the image (It will override the original image).
         # If rcoords is outside the image, they will not be displayed
@@ -762,3 +781,7 @@ class Piece:
       return Regular
     else:
       return Template
+
+
+#
+#============================= puzzle.piece.template =============================

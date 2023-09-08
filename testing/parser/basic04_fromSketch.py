@@ -26,19 +26,21 @@
 #
 
 import os
-
 import cv2
+import numpy as np
+
 import improcessor.basic as improcessor
+import camera.utils.display as display
 
-from puzzle.parser.fromSketch import FromSketch
+from puzzle.parse.fromSketch import FromSketch
 
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
+#fpath = os.path.realpath(__file__)
+#cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read a sketch image that needs to be processed.
 #
 
-theImage = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theImage = cv2.imread('../data/puzzle_15p_123rf.png')
 
 # ==[2] Instantiate inImage detector with an image processor that does
 #      the thresholding.
@@ -46,10 +48,14 @@ theImage = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
+                           cv2.Canny, (100, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
+
+# Why is this approach taken and not one based on region labels?
+# Seems really weird. Region props gives the full pixel listing of the regions.
+# Ignoring for now, but may need to revisit.
 
 # ==[3] Apply and visualize.
 #
@@ -58,8 +64,9 @@ theDet.process(theImage)
 # ==[4] Visualize the output
 #
 print("Creating window: should see a processed mask.")
-cv2.imshow('Output', theDet.getState().x.astype('uint8'))
-cv2.waitKey()
+display.rgb_cv(theImage,window_name='Input')
+display.binary_cv(theDet.getState().x, window_name='Output')
+display.wait_cv()
 
 #
 # ============================ basic04_fromSketch ============================
