@@ -1,4 +1,4 @@
-# ============================== puzzle.board =============================
+#=============================== puzzle.board ==============================
 #
 # @class    puzzle.board
 #
@@ -23,7 +23,10 @@
 #           2022/07/03 [modified]
 #
 #
-# ============================== puzzle.board =============================
+# NOTES:
+#   4 space indent.
+#   100 columns.
+#============================== puzzle.board =============================
 
 
 #============================== Dependencies =============================
@@ -40,10 +43,15 @@ from puzzle.piece import Template
 
 
 #
-#============================== puzzle.board =============================
+#---------------------------------------------------------------------------
+#================================== Board ==================================
+#---------------------------------------------------------------------------
 #
 
 class Board:
+    """!
+    @brief  Class description for a board, which is a locality sensitive bag.
+    """
 
     def __init__(self, *argv):
         """
@@ -79,6 +87,8 @@ class Board:
         elif len(argv) > 2:
             raise TypeError('Too many inputs.')
 
+    #============================= addPiece ============================
+    #
     def addPiece(self, piece, ORIGINAL_ID=False):
         """
         @brief  Add puzzle piece instance to the board.
@@ -86,7 +96,6 @@ class Board:
         Args:
             piece: A puzzle piece instance.
         """
-
         # Do not directly modify piece
         piece_copy = deepcopy(piece)
 
@@ -97,11 +106,15 @@ class Board:
             self.pieces[self.id_count] = piece_copy
             self.id_count += 1
 
+    #============================ addPieces ============================
+    #
     def addPieces(self, pieces):
       for piece in pieces:
         self.addPiece(piece)
 
 
+    #============================= rmPiece =============================
+    #
     def rmPiece(self, id):
         """
         @brief Remove puzzle piece instance from the board
@@ -121,6 +134,8 @@ class Board:
         else:
             raise RuntimeError('Cannot find the target')
     
+    #============================= getPiece ============================
+    #
     def getPiece(self, id)->Template:
         """Get a puzzle piece instance given the id
 
@@ -130,6 +145,8 @@ class Board:
         assert id in self.pieces.keys(), "The required piece is not in the board."
         return self.pieces[id]
 
+    #============================== clear ==============================
+    #
     def clear(self):
         """
         @brief Clear all the puzzle pieces from the board.
@@ -172,17 +189,17 @@ class Board:
     #
     #     return theBoard
 
+    #=========================== testAdjacent ==========================
+    #
     def testAdjacent(self, id_A, id_B, tauAdj):
-        """
+        """!
         @brief  Check if two puzzle pieces are adjacent or not
 
-        Args:
-            id_A: The id of the puzzle piece A.
-            id_B: The id of the puzzle piece B.
-            tauAdj: The threshold of the distance.
+        @param[in]  id_A    Id of puzzle piece A.
+        @param[in]  id_B    Id of puzzle piece B.
+        @param[in]  tauAdj  Distance threshold for concluding adjacency.
 
-        Returns:
-            theFlag: The flag indicating whether two puzzle pieces are adjacent or not.
+        @param[out] adjFlag Flag indicating adjacency of the two pieces. 
         """
 
         # Based on the nearest points on the contours
@@ -249,25 +266,23 @@ class Board:
 
         return theFlag
 
+    #=============================== size ==============================
+    #
     def size(self):
+        """!
+        @brief  Number of pieces on the board.
+
+        @param[out] nPieces Number of pieces on the board.
         """
-        @brief  Return the number of pieces on the board.
+        return len(self.pieces)
 
-        Returns:
-            nPieces: The number of pieces on the board.
-        """
-
-        nPieces = len(self.pieces)
-
-        return nPieces
-
+    #============================= extents =============================
     def extents(self):
-        """
-        @brief  Iterate through the puzzle pieces to figure out the tight
-                bounding box extents of the board.
+        """!
+        @brief  Iterate through puzzle pieces to get tight bounding box 
+                extents of the board.
 
-        Returns:
-            lengths: The bounding box side lengths. [x,y]
+        @param[out] lengths Bounding box side lengths. [x,y]
         """
 
         # [[min x, min y], [max x, max y]]
@@ -275,18 +290,17 @@ class Board:
 
         if bbox is not None:
             lengths = bbox[1] - bbox[0]
-
             return lengths
         else:
             return None
 
+    #=========================== boundingBox ===========================
+    #
     def boundingBox(self):
-        """
-        @brief  Iterate through the puzzle pieces to figure out the tight
-                bounding box of the board.
+        """!
+        @brief  Iterate through pieces to get tight bounding box.
 
-        Returns:
-            bbox: The bounding box coordinates. [[min x, min y], [max x, max y]]
+        @param[out] bbox    Bounding box coordinates: [[min x, min y], [max x, max y]]
         """
 
         if self.size() == 0:
@@ -311,18 +325,17 @@ class Board:
 
             return bbox
 
+    #=============================== pieceLocations ==============================
+    #
     def pieceLocations(self, isCenter=False):
-        """
+        """!
         @brief      Returns list/array of puzzle piece locations.
 
-        Args:
-	        isCenter: The flag indicating whether the given location is for the center.
-                        Otherwise, the returned is the upper left corner locations.
+        @param[in]  isCenter    Flag indicating whether the given location is for center.
+                                Otherwise, location returned is the upper left corner.
 
-        Returns:
-            pLocs: A dict of puzzle piece id & location.
+        @param[out] pLocs       A dict of puzzle piece id & location.
         """
-
         pLocs = {}
         for key in self.pieces:
             piece = self.pieces[key]
@@ -334,11 +347,13 @@ class Board:
 
         return pLocs
 
+    #============================= toImage =============================
+    #
     def toImage(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
                 ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
-        """
-        @brief  Uses puzzle piece locations to create an image for
-                visualizing them.  If given an image, then will place in it.
+        """!
+        @brief  Uses puzzle piece locations to create an image for visualizing them.  If given
+                an image, then will place in it.
                 Recommended to provide theImage & BOUNDING_BOX option off.
                 Currently, we have four cases:
                 - Image provided & BOUNDING_BOX off -> An exact region is visible
@@ -346,16 +361,15 @@ class Board:
                 - Image not provided & BOUNDING_BOX off -> May have some trouble if some region is out of the bounds (e.g., -2) then they will be shown on the other boundary.
                 - Image not provided & BOUNDING_BOX on -> A bounding box region is visible.
 
-        Args:
-            theImage: The image to insert pieces into.
-            ID_DISPLAY: The flag indicating displaying ID or not.
-            COLOR: The background color.
-            ID_COLOR: The ID color.
-            CONTOUR_DISPLAY: The flag indicating drawing contour or not.
-            BOUNDING_BOX: The flag indicating outputting a bounding box area (with the updated (0,0)) or not (with the original (0,0)).
+        @param[in]  theImage            Image to insert pieces into.
+        @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
+        @param[in]  COLOR               Background color.
+        @param[in]  ID_COLOR            ID color.
+        @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
+        @param[in]  BOUNDING_BOX        Flag indicating outputting a bounding box area 
+                                        (with updated (0,0)) or not (with original (0,0)).
 
-        Returns:
-            theImage: The rendered image.
+        @param[out] theImage            Rendered image.
         """
 
         if theImage is not None:
@@ -459,17 +473,19 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
-    def display(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, BOUNDING_BOX=True):
-        """
-        @brief  Display the puzzle board as an image.
+    #============================= display =============================
+    #
+    def display_mp(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, 
+                                                                   BOUNDING_BOX=True):
+        """!
+        @brief  Display the puzzle board as an image using matplot library.
 
-        Args:
-            fh: The figure handle if available.
-            ID_DISPLAY: The flag indicating displaying ID or not.
-            CONTOUR_DISPLAY: The flag indicating drawing contour or not.
+        @param[in]  theImage
+        @param[in]  fh                  Figure handle if available.
+        @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
+        @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
 
-        Returns:
-            fh: The figure handle.
+        @param[out] fh                  Figure handle.
         """
 
         if fh:
@@ -478,12 +494,331 @@ class Board:
         else:
             fh = plt.figure()
 
-        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, 
+                                CONTOUR_DISPLAY=CONTOUR_DISPLAY,
                                 BOUNDING_BOX=BOUNDING_BOX)
 
         plt.imshow(theImage)
 
         return fh
 
+
 #
-# ============================== puzzle.board =============================
+#---------------------------------------------------------------------------
+#============================= Correspondences =============================
+#---------------------------------------------------------------------------
+#
+
+#===== Environment / Dependencies
+#
+from dataclasses import dataclass
+
+from scipy.optimize import linear_sum_assignment
+
+from puzzle.parser.fromLayer import FromLayer
+from puzzle.pieces.matchDifferent import MatchDifferent
+from puzzle.pieces.matchSimilar import MatchSimilar
+from puzzle.pieces.moments import Moments
+
+# ===== Helper Elements
+#
+# DEFINE ENUMERATED TYPE HERE FOR scoreType.
+SCORE_DIFFERENCE = 0
+SCORE_SIMILAR = 1
+
+
+@dataclass
+class CorrespondenceParms:
+    matcher: any = Moments(20)
+
+class Correspondences(None):
+
+    def __init__(self, theParams=CorrespondenceParms, initBoard = None):
+        """!
+        @brief  Constructor for the board matcher class.
+
+        @param[in]
+            solution: A solution/calibrated board instance.
+            theParams: Any additional parameters in a structure.
+        """
+
+        self.bPrior = initBoard             # @< The previous/prior board measurement.
+
+        self.pAssignments = {}              # @< Assignments: meas to last.
+        self.pAssignments_rotation = {}     # @< Assignments: meas to last rotation angles (degree).
+
+        self.matcher = theParams.matcher    # @< Puzzle piece matcher instance.
+
+        self.skipList = []                  # @< Set up by simulator. Skip some pieces in clutter.
+
+        self.scoreType = None               # @< Puzzle piece comparator type.
+        if isinstance(self.matcher, MatchDifferent):
+            self.scoreType = SCORE_DIFFERENCE  
+        elif isinstance(self.matcher, MatchSimilar):
+            self.scoreType = SCORE_SIMILAR
+        else:
+            raise TypeError('The matcher is of wrong input.')
+
+        # Save for debug
+        self.scoreTable_shape = None
+
+    #============================= correspond ============================
+    #
+    #
+    def correspond(self, measBoard):
+        """!
+        @brief Get correspondences based on the input.
+
+        @param[in] measBoard    Measured board.
+        """
+
+        self.bMeas = measBoard
+
+        # Compare with previous board and generate associations
+        self.matchPieces()
+
+        # Generate a new board for association, filtered by the matcher threshold
+        pFilteredAssignments = {}
+        for assignment in self.pAssignments.items():
+            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
+
+            # Some matchers calculate the rotation as well
+            # from mea to sol (counter-clockwise)
+            if isinstance(ret, tuple):
+                if ret[0]:
+                    self.pAssignments_rotation[assignment[0]]=ret[1]
+
+                    pFilteredAssignments[assignment[0]] = assignment[1]
+            else:
+                if ret:
+                    self.pAssignments_rotation[assignment[0]] = \
+                        self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
+
+                    pFilteredAssignments[assignment[0]] = assignment[1]
+
+            #DEBUG 
+            #print(ret)
+
+        # pAssignments refers to the id of the puzzle piece
+        # print(pFilteredAssignments)
+        self.pAssignments = pFilteredAssignments
+
+    #=========================== matchPieces ===========================
+    #
+    def matchPieces(self):
+        """!
+        @brief  Match all the measured puzzle pieces with previous board in a pairwise manner
+                to get meas to sol.
+        """
+
+        scoreTable_shape = np.zeros((self.bMeas.size(), self.solution.size()))
+        scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
+        scoreTable_edge_color = np.zeros((self.bMeas.size(), self.solution.size(), 4))
+
+        for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
+            for idx_y, SolPiece in enumerate(self.solution.pieces):
+
+                # @todo Does not support two scoreTables. Currently using sift features (one table).
+                if idx_y in self.skipList:
+                    if self.scoreType == SCORE_DIFFERENCE:
+                        scoreTable_shape[idx_x][idx_y] = 1e18
+                    else:
+                        scoreTable_shape[idx_x][idx_y] = -100
+                    continue
+
+                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
+                #DEBUG 
+                # if idx_x==11 and (idx_y==2):
+                #     ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
+                #     print('s')
+                if type(ret) is tuple and len(ret) > 0:
+                    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
+                    scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
+                    scoreTable_edge_color[idx_x][idx_y] = ret[1]
+                else:
+                    scoreTable_shape[idx_x][idx_y] = ret
+
+        # Save for debug
+        self.scoreTable_shape = scoreTable_shape.copy()
+
+        # The measured piece will be assigned a solution piece
+        # Some measured piece may not have a match according to the threshold.
+        # self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+
+        self.pAssignments = self.hungarianAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+
+
+    #======================= hungarianAssignment =======================
+    #
+    def hungarianAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
+        """!
+        @brief  Run Hungarian Assignment for the score table.
+
+        Args:
+            scoreTable_shape:  The score table for the pairwise comparison (shape).
+            scoreTable_color:  The score table for the pairwise comparison (color).
+            scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
+
+        Returns:
+            matched_id: The matched pair dict.
+        """
+
+        # Todo: Currently we only use scoreTable_shape
+        pieceKeysList_bMeas    = list(self.bMeas.pieces.keys())
+        pieceKeysList_solution = list(self.bPrior.pieces.keys())
+
+        matched_id = {}
+
+        if self.scoreType == SCORE_DIFFERENCE:
+            row_ind, col_ind = linear_sum_assignment(scoreTable_shape)
+        else:
+            row_ind, col_ind = linear_sum_assignment(scoreTable_shape, maximize=True)
+
+        for i, idx in enumerate(col_ind):
+            matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
+
+        return matched_id
+
+    #========================= greedyAssignment ========================
+    #
+    def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
+        """!
+        @brief  Run the greedyAssignment for the score table.
+
+        Args:
+            scoreTable_shape:  The score table for the pairwise comparison (shape).
+            scoreTable_color:  The score table for the pairwise comparison (color).
+            scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
+
+        Returns:
+            matched_id: The matched pair dict.
+        """
+
+        pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
+        pieceKeysList_solution = list(self.solution.pieces.keys())
+
+        # Single feature
+        if np.count_nonzero(scoreTable_color) == 0:
+            # @note Yunzhi: Only focus on the difference in the scoreTable_shape
+            matched_id = {}
+
+            if scoreTable_shape.shape[1] == 0:
+                return matched_id
+            for i in range(scoreTable_shape.shape[0]):
+                if self.scoreType == SCORE_DIFFERENCE:
+                    j = scoreTable_shape[i].argmin()
+                    # Todo: The threshold needs to be decided by the feature method
+                    if scoreTable_shape[i][j] < 1e16:
+                        scoreTable_shape[:, j] = 1e18
+                        matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
+                else:
+                    j = scoreTable_shape[i].argmax()
+                    # Todo: The threshold needs to be decided by the feature method
+                    if scoreTable_shape[i][j] > 2:
+                        scoreTable_shape[:, j] = -100
+
+                        matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
+        else:
+            # @note Yunzhi: Currently, it is hard-coded for edge feature
+            # It cannot work very well especially in real scenario.
+
+            # Shape + Color feature
+
+            def getKeepList(score_list, diff_thresh=150):
+
+                # Create new lists by removing the first element or the last element
+                # score_list_cmp_1 = np.delete(score_list, -1) # incremental change
+
+                score_list_cmp_1 = np.ones_like(score_list) * score_list[0]  # absolute change with the first element
+                score_list_cmp_1 = np.delete(score_list_cmp_1, -1)
+
+                score_list_cmp_2 = np.delete(score_list, 0)
+
+                score_diff_list = score_list_cmp_2 - score_list_cmp_1
+
+                keep = [0]
+                for idx, score_diff in enumerate(score_diff_list):
+                    if not np.isnan(score_diff) and score_diff < diff_thresh:
+                        keep.append(idx + 1)
+                    else:
+                        break
+
+                return keep
+
+            matched_id = {}
+            if scoreTable_shape.shape[1] == 0:
+                return matched_id
+            for i in range(scoreTable_shape.shape[0]):
+                # j = scoreTable_shape[i].argmin()
+
+                shape_list = scoreTable_shape[i]
+                ind_shape_sort = np.argsort(shape_list, axis=0)
+                shape_sort_list = np.sort(shape_list, axis=0)
+
+                # Update ind_shape_sort and shape_sort_list in a small range since
+                # distance between shape features may be similar, we want to keep all of them
+                keep_list = getKeepList(shape_sort_list)
+                ind_shape_sort = ind_shape_sort[keep_list]  # ind in shape_list (complete)
+
+                # Not used for now
+                shape_sort_list = shape_sort_list[keep_list]
+
+                if ind_shape_sort.size == 1:
+                    # Todo: The threshold needs to be decided by the feature method
+                    j = ind_shape_sort[0]
+                else:
+
+                    color_list = scoreTable_color[i][ind_shape_sort]
+                    ind_color_sort = np.argsort(color_list, axis=0)  # ind in color_list (not complete)
+                    color_sort_list = np.sort(color_list, axis=0)
+
+                    # Update ind_shape_sort and shape_sort_list in a small range since
+                    # distance between shape features may be similar, we want to keep all of them
+
+                    keep_list = getKeepList(color_sort_list, 10)
+                    ind_color_sort = ind_color_sort[keep_list]  # ind in color_list (not complete)
+
+                    color_sort_list = color_sort_list[keep_list]
+
+                    if ind_color_sort.size == 1:
+                        # Todo: The threshold needs to be decided by the feature method
+                        j = ind_shape_sort[ind_color_sort[0]]
+                    else:
+                        # Check color_sort_list, find the one with lowest edge score for now
+                        edge_color_list = scoreTable_edge_color[i][ind_shape_sort[ind_color_sort]]
+                        ind_edge_color = np.where(edge_color_list == np.amin(edge_color_list))
+
+                        j = ind_shape_sort[ind_color_sort[ind_edge_color[0]]][0]
+
+                    # # Check scoreTable_color, find the lowest for now
+                    # # The index of the lowest score in the scoreTable_color[i][ind_shape_sort]
+                    # j = scoreTable_color[i][ind_shape_sort].argmin()
+                    # # The final index based on scoreTable_shape and scoreTable_color
+                    # j = ind_shape_sort[j]
+
+                if scoreTable_shape[i][j] < 1e16:
+                    scoreTable_shape[:, j] = 1e18
+                    matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[j]
+
+        return matched_id
+
+    #============================= process =============================
+    #
+    def process(self, bMeas):
+        """
+        @brief  Run correspondence pipeline to preserve identity of puzzle pieces.
+
+        @param[in]  bMeas   Measured board.
+        """
+
+        # Reset
+        self.pAssignments = {}
+        self.pAssignments_rotation = {}
+
+        self.correspond(bMeas)
+
+
+
+
+#
+#============================== puzzle.board ==============================

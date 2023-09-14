@@ -1,14 +1,18 @@
-# ========================= puzzle.piece.matcher =========================
+#========================== puzzle.piece.matcher =========================
 #
-# @brief    Derived class from puzzle piece template that adds
-#           operations for comparing puzzle pieces and performing puzzle
-#           solving.  This class is a base-type class and most of the
-#           member functions will do nothing and require overloading.
-#           The ones that don't should be for some generic
-#           functionality.
+# @brief    Class for comparing puzzle pieces in support of puzzle solving and
+#           puzzle piece association.  The base-type class and most of its member
+#           functions will do nothing. They require overloading.  The ones that 
+#           don't should be for some generic functionality.
 #
-# ========================= puzzle.piece.matcher =========================
+# Sub-classes of this derived class branch use difference or similarity scores for 
+# determining whether two puzzle pieces match.  Difference scores are interpreted as smaller
+# values being more likely to be a match and bigger being less likely to be a match.  Similarity
+# scores are interpreted as bigger value being more likely to be a match and smaller being less
+# likely to be a match.
 #
+#========================== puzzle.piece.matcher =========================
+
 # @file     matcher.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
@@ -17,14 +21,16 @@
 #           2021/07/31 [modified]
 #
 #
-# ========================= puzzle.piece.matcher =========================
+#========================== puzzle.piece.matcher =========================
 
-# ===== Environment / Dependencies
+#====== Environment / Dependencies
 #
 # from puzzle.piece.template import template
 
 #
-# ========================= puzzle.piece.matcher =========================
+#---------------------------------------------------------------------------
+#================================= Matcher =================================
+#---------------------------------------------------------------------------
 #
 class Matcher:
 
@@ -40,33 +46,38 @@ class Matcher:
 
         self.tau = tau  # @< Threshold to use when comparing, if given.
 
-    def process(self, piece):
+
+    def extractFeature(piece):
         """
-        @brief  Process the raw puzzle piece data to obtain the encoded
-                description of the piece. Use to recognize the piece given
-                new measurements in the future.
+        @brief  Process raw puzzle piece data to obtain encoded description of piece. 
+                Use to recognize/associate the piece given new measurements.
                 This member function should be overloaded.
 
-        Args:
-            piece: A template instance saving a piece's info.
+        @param[in]  piece   Template instance saving a piece's info.
+
+        @param[out] "Feature" vector.
         """
         raise NotImplementedError
 
+    #============================== score ==============================
+    #
     def score(self, piece_A, piece_B):
         """
-        @brief  Compute the score between two passed puzzle piece data.
-                This member function should be overloaded. Currently returns false
-                so that all comparisons fail.
+        @brief Compute the score between two passed puzzle piece data.
 
-        Args:
-            piece_A: A template instance saving a piece's info.
-            piece_B: A template instance saving a piece's info.
+        @param[in] piece_A      Template instance saving a piece's info.
+        @param[in] piece_B      Template instance saving a piece's info.
 
-        Returns:
-          Score.
+        @param[out] Distance of the feature vectors. (Overload if not proper).
         """
-        raise NotImplementedError
 
+        cent_A = self.extractFeature(piece_A)
+        cent_B = self.extractFeature(piece_B)
+
+        return np.norm(cent_A - cent_B)
+
+    #============================= compare =============================
+    #
     def compare(self, piece_A, piece_B):
         """
         @brief  Compare between two passed puzzle piece data.
@@ -82,5 +93,83 @@ class Matcher:
         """
 
         raise NotImplementedError
+
+#
+#---------------------------------------------------------------------------
+#============================== MatchDifferent =============================
+#---------------------------------------------------------------------------
+#
+
+class MatchDifferent(Matcher):
+    """!
+    @brief  The puzzle piece matching scores are based on differences. Lower is better.
+    """
+
+    #============================= __init__ ============================
+    #
+    def __init__(self, tau=-float('inf')):
+        """!
+        @brief Constructor for the puzzle piece matchDifferent class.
+
+        @param[in]  tau     Threshold param to determine difference.
+        """
+        super(MatchDifferent, self).__init__(tau)
+
+
+    #============================= compare =============================
+    #
+    def compare(self, piece_A, piece_B):
+        """!
+        @brief Compare two puzzle pieces.
+
+        @param[in]  piece_A     First puzzle piece.
+        @param[in]  piece_B     Second puzzle piece.
+
+        @param[out] Binary indicator of similarity = not different (True = similar).
+        """
+
+        # score is to calculate the similarity while it will call the feature extraction process
+        # inside
+        diffScore = self.score(piece_A, piece_B)
+
+        return diffScore < self.tau
+
+#
+#---------------------------------------------------------------------------
+#======================== puzzle.piece.matchSimilar ========================
+#---------------------------------------------------------------------------
+#
+class MatchSimilar(Matcher):
+
+    #============================= __init__ ============================
+    #
+    def __init__(self, tau=float('inf')):
+        """
+        @brief  Constructor for the puzzle piece matchSimilar class.
+
+        @param[in]  tau     Threshold param to determine similarity.
+        """
+
+        super(MatchSimilar, self).__init__(tau)
+
+    #============================= compare =============================
+    #
+    def compare(self, piece_A, piece_B):
+        """
+        @brief  Compare between two passed puzzle piece data.
+
+        @param[in]  piece_A     First puzzle piece.
+        @param[in]  piece_B     Second puzzle piece.
+
+        @param[out] Binary indicator of similarity (True = similar).
+        """
+
+        # score is to calculate the similarity while it will call the feature extraction process
+        # inside
+        simScore = self.score(piece_A, piece_B)
+
+        return simScore > self.tau
+
+
 #
 # ========================= puzzle.piece.matcher =========================
