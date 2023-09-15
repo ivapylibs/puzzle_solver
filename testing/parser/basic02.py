@@ -35,14 +35,13 @@ from puzzle.parser import boardMeasure, CfgBoardMeasure
 #==[1] Load image and mask
 #
 theImage = cv2.imread('../data/shapes_color_six_image.png')
-theMask = cv2.imread('../data/shapes_color_six_binary.png', cv2.IMREAD_GRAYSCALE)
+theMask  = cv2.imread('../data/shapes_color_six_binary.png', cv2.IMREAD_GRAYSCALE)
 
 #==[2] Instantiate board measure object. 
 #      Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = boardMeasure()
 theLayer.measure(theImage, theMask)
-
 
 #==[3] Display the original image. Should see some puzzle pieces.
 #      Display the board image. Should see some puzzle pieces in a cropped region.
@@ -52,7 +51,7 @@ plt.imshow(theImage)
 
 print('Should see the same puzzle pieces in a cropped region.')
 theBoard = theLayer.bMeas
-fh = theBoard.display()
+fh = theBoard.display_mp()
 plt.show()
 
 #

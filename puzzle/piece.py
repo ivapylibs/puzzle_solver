@@ -162,6 +162,8 @@ class Template:
 
         return theta
 
+    #=========================== setPlacement ==========================
+    #
     def setPlacement(self, r, offset=False, isCenter=False):
         """
         @brief  Provide pixel placement location information.

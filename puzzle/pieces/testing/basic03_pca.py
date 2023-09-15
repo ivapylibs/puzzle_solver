@@ -19,8 +19,8 @@
 # ==[0] Prep environment
 import numpy as np
 
-from puzzle.piece.pca import PCA
-from puzzle.piece.template import Template
+from puzzle.pieces.matchDifferent import PCA
+from puzzle.piece import Template
 
 # ==[1] Create raw puzzle piece data.
 #

@@ -4,6 +4,7 @@
 # @brief    Test script for the most basic functionality of edge matcher
 #           for regular puzzle pieces. (60p img)
 #
+# NOTE: 09/15: BROKEN CODE. NEED TO FIX.
 # ============================ basic05_edge ===========================
 
 #
@@ -23,12 +24,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import similaritymeasures
 
-from puzzle.builder.board import Board
-from puzzle.builder.gridded import Gridded, ParamGrid
-from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
-from puzzle.parser.fromSketch import FromSketch
-from puzzle.piece.edge import Edge
-from puzzle.piece.regular import Regular
+from puzzle.board import Board
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.parser import boardMeasure, CfgBoardMeasure
+from puzzle.parse.fromSketch import FromSketch
+from puzzle.pieces.edge import Edge
+from puzzle.piece import Regular
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -36,10 +37,10 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+theImageSol = cv2.imread('../../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
+theMaskSol_src = cv2.imread('../../../testing/data/puzzle_60p_AdSt408534841.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 # ==[1.1] Create an improcessor to obtain the mask.
@@ -56,7 +57,9 @@ theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
+puzzParm = CfgBoardMeasure()
+puzzParm.minArea = 5000
+theLayer = boardMeasure(puzzParm)
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
@@ -66,9 +69,14 @@ theBoardSol = theLayer.getState()
 
 print('Running through test cases. Will take a bit.')
 
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol,
-                                         theParams=ParamGrid(areaThresholdLower=5000, pieceConstructor=Regular,
-                                                             reorder=True))
+theParams = CfgGridded()
+theParams.minArea = 5000
+theParams.pieceConstructor = 'Regular'
+theParams.reorder = True
+
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams)
+                                         
+
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 

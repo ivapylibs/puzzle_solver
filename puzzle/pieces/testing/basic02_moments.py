@@ -19,8 +19,8 @@
 # ==[0] Prep environment
 import numpy as np
 
-from puzzle.piece.moments import Moments
-from puzzle.piece.template import Template
+from puzzle.pieces.matchDifferent import Moments
+from puzzle.piece import Template
 
 # ==[1] Create raw puzzle piece data.
 #

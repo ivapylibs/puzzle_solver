@@ -412,9 +412,14 @@ class Board:
                         pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0] + abs(enlarge[0]),
                                int(piece.rLoc[1] + np.mean(y)) + char_size[1] + abs(enlarge[1]))
 
-                        font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
+                        font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 30
                         cv2.putText(theImage_enlarged, str(piece.id), pos, font,
-                                    font_scale, ID_COLOR, 2, cv2.LINE_AA)
+                                    font_scale, ID_COLOR, 1, cv2.LINE_AA)
+                        #
+                        # @todo Text display should be a configuration setting.
+                        #
+                        #DEBUG
+                        #print(font_scale)
 
                 theImage = theImage_enlarged[abs(enlarge[0]):abs(enlarge[0]) + theImage.shape[0],
                            abs(enlarge[1]):abs(enlarge[1]) + theImage.shape[1], :]
@@ -475,8 +480,8 @@ class Board:
 
     #============================= display =============================
     #
-    def display_mp(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=True, 
-                                                                   BOUNDING_BOX=True):
+    def display_mp(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
+                                                                   BOUNDING_BOX=False):
         """!
         @brief  Display the puzzle board as an image using matplot library.
 
@@ -515,10 +520,9 @@ from dataclasses import dataclass
 
 from scipy.optimize import linear_sum_assignment
 
-from puzzle.parser.fromLayer import FromLayer
-from puzzle.pieces.matchDifferent import MatchDifferent
-from puzzle.pieces.matchSimilar import MatchSimilar
-from puzzle.pieces.moments import Moments
+from puzzle.pieces.matcher import MatchDifferent
+from puzzle.pieces.matcher import MatchSimilar
+from puzzle.pieces.matchDifferent import Moments
 
 # ===== Helper Elements
 #
@@ -531,7 +535,7 @@ SCORE_SIMILAR = 1
 class CorrespondenceParms:
     matcher: any = Moments(20)
 
-class Correspondences(None):
+class Correspondences:
 
     def __init__(self, theParams=CorrespondenceParms, initBoard = None):
         """!

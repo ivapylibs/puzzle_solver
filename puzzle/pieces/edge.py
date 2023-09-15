@@ -18,8 +18,8 @@
 import cv2
 import numpy as np
 
-from puzzle.piece.matchDifferent import MatchDifferent
-from puzzle.piece.regular import Regular
+from puzzle.pieces.matcher import MatchDifferent
+from puzzle.piece import Regular
 
 
 #

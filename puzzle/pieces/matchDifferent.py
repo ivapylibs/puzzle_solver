@@ -24,8 +24,8 @@
 import numpy as np
 import cv2
 import math
-from puzzle.piece.matcher import MatchDifferent
-from puzzle.piece.template import Template
+from puzzle.pieces.matcher import MatchDifferent
+from puzzle.piece import Template
 
 #
 #---------------------------------------------------------------------------
@@ -46,6 +46,9 @@ class Distance(MatchDifferent):
 
   #========================== extractFeature =========================
   #
+  # @todo   Should it really be a static method? Might there ever be a need for configuration
+  #         specifications that would dictate being a member function???
+  @staticmethod
   def extractFeature(piece):
     """
     @brief Get the puzzle centroid value.
@@ -81,6 +84,7 @@ class Histogram(MatchDifferent):
 
   #========================== extractFeature =========================
   #
+  @staticmethod
   def extractFeature(piece): 
     """
     @brief Compute histogram from the raw puzzle data.
@@ -152,6 +156,7 @@ class Moments(MatchDifferent):
 
   #========================== extractFeature =========================
   #
+  @staticmethod
   def extractFeature(piece):
     """
     @brief  Compute moments from the raw puzzle data.
@@ -190,6 +195,7 @@ class Moments(MatchDifferent):
     @param[out] Distance of the feature vectors. (Overload if not proper).
     """
 
+    print(piece_A)
     huMoments_A = self.extractFeature(piece_A)
     huMoments_B = self.extractFeature(piece_B)
 
@@ -221,6 +227,7 @@ class PCA(MatchDifferent):
 
   #========================== extractFeature =========================
   #
+  @staticmethod
   def extractFeature(piece):
     """
     @brief Get the puzzle centroid value.

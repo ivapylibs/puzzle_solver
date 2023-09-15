@@ -4,6 +4,8 @@
 # @brief    Test script for the most basic functionality of regular
 #           puzzle piece class. (regular piece with 4 edges)
 #
+#
+# @note 09/15: DOES NOT RUN. THERE ARE ISSUES. CODE IS BROKEN.
 # ============================ basic04_regular ===========================
 
 #
@@ -19,22 +21,24 @@ import os
 
 import cv2
 import improcessor.basic as improcessor
+
 # ==[0] Prep environment
+
 import matplotlib.pyplot as plt
 
-from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
-from puzzle.parser.fromSketch import FromSketch
-from puzzle.piece.regular import Regular
+from puzzle.parser import boardMeasure, CfgBoardMeasure
+from puzzle.parse.fromSketch import FromSketch
+from puzzle.piece import Regular
 
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
+#fpath = os.path.realpath(__file__)
+#cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+theImageSol = cv2.imread('../../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
+theMaskSol_src = cv2.imread('../../../testing/data/puzzle_15p_123rf.png')
 
 # ==[1.1] Create an improcessor to obtain the mask.
 #
@@ -50,7 +54,10 @@ theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
-theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
+puzzParm = CfgBoardMeasure()
+puzzParm.minArea = 5000
+
+theLayer = boardMeasure(puzzParm)
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()

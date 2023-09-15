@@ -20,7 +20,9 @@
 #           Patricio A. Vela,       pvela@gatech.edu
 # @date     2023/09/01 [copied from puzzle.parser.fromLayer master branch]
 #
-# NOTE:90 columns.
+# NOTE:
+#   90 columns.
+#   indent is 2 spaces.
 #
 #============================== puzzle.parser ==============================
 
@@ -41,6 +43,7 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 from camera.utils import display
 
+import perceiver.simple as PerceiverSimple 
 
 #---------------------------------------------------------------------------
 #==================== Configuration Node : boardMeasure ====================
@@ -65,7 +68,6 @@ class CfgBoardMeasure(CfgCentMulti):
 
     super().__init__(init_dict, key_list, new_allowed)
 
-    self.imagePatch = None
 
   #========================= get_default_settings ========================
   #
@@ -100,6 +102,7 @@ class CfgBoardMeasure(CfgCentMulti):
 #---------------------------------------------------------------------------
 #=============================== boardMeasure ==============================
 #---------------------------------------------------------------------------
+#
 
 class boardMeasure(centroidMulti):
 
@@ -188,17 +191,25 @@ class boardMeasure(centroidMulti):
     vI = I.reshape(-1, imdims[2])        # Vectorized image.
 
     for ri in self.trackProps:
-      #--[1] Extract the color image patch.
+      #--[1] Region label process recovers bounding box mask.
       #
       pMask  = ri.image
+
+      #--[2] Extract the color image patch from vectorized image based on 
+      #      bounding box mask and region pixel coords.
+      #
       indI   = np.ravel_multi_index( ri.coords.T, imdims[0:2] ) 
       pImage = np.zeros( [ri.area_bbox, imdims[2]] )        # Rectangle.
       pImage[np.ndarray.flatten(pMask),:] = vI[indI, :]     # Pixels within rectangle.
       pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
      
-      pCent  = np.round(ri.centroid).astype(int)
+      #--[3] Collect other information.
+      #
+      pCent  = np.round(ri.centroid).astype(int)[::-1]      # (x,y) coords.
       pStat  = self.tparams.pieceStatus
 
+      #--[4] Instantiate piece and add to measured board.
+      #
       thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, pCent, pStat)
 
       #thePiece = self.pieceConstructor.buildFromPropsAndImage(ri, pImage, pStat)
@@ -216,6 +227,7 @@ class boardMeasure(centroidMulti):
       #         that is not the case.  Something happens elsewhere. Maybe in the
       #         plot/display or place in image routine.  Need to double check code.
       #         09/08: Confirmed that place in image is weird. Push to later.
+      #         09/15: There are weird adjustments to image size. Badly commented.
 
 
   #xxxxxxxxxxxxxxxxxxxxxxx findCorrectedContours xxxxxxxxxxxxxxxxxxxxxxx
@@ -436,6 +448,146 @@ class boardMeasure(centroidMulti):
     @param[in] M    Mask.
     """
     self.measure(I, M)
+
+
+#
+#---------------------------------------------------------------------------
+#============================== boardPerceive ==============================
+#---------------------------------------------------------------------------
+#
+
+#
+# @todo Missing algorithm configuration node for the Perceiver.
+# @todo What would the configuration node even have?
+#
+# @note Moved from earlier version in parser/simple.py
+#
+
+class boardPerceive(PerceiverSimple.simple):
+  """!  
+  @brief  A simple perceiver for recovering puzzle pieces from a
+          layer mask and an image. If desired, can do piece association.
+
+  Being a perceiver, there is flexibility in the implementation.
+  There will be many ways to instantiate a simple puzzle perceiver.
+
+  @todo   Create complete implementation with track filter.
+  """
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, theParams=None, theDetector=None, theTracker=None, theFilter=None):
+    """!
+    @brief  Constructor for the simple puzzler parser. 
+
+    @note   Lacks filter implementation.
+
+    @param[in]  theParams       Perceiver parameters.
+    @param[in]  theDetector     Detector instance.
+    @param[in]  theTracker      Tracker instance.
+    @param[in]  theFilter       Filter instance (puzzle piece data association).
+        """
+
+    super(boardPerceive, self).__init__(theParams, theDetector, theTracker, theFilter)
+
+    self.board = Board()
+    self.Mask  = None
+
+  #============================= measure =============================
+  #
+  def measure(self, I, M=None):
+    """!
+    @brief Process data from mask layer and image.
+
+    @param[in]  I   Puzzle image source.
+    @param[in]  M   Puzzle template mask.
+    """
+
+    self.I = I
+    self.Mask = M
+
+    #--[1] Parse image and mask to get distinct candidate puzzle objects
+    #      from it. Generates mask or revises existing mask.
+    #
+    # @note Is process the right thing to call. Why not measure? Is it
+    #       because this is a perceiver? I think so. We are decoupling
+    #       the individual steps in this implementation.
+    if self.Mask is not None:
+      self.detector.process(I, self.Mask)
+    else:
+      self.detector.process(I)
+
+    detState = self.detector.getState()
+
+    #DEBUG
+    #display.binary_cv(detState.x)
+    #display.wait_cv()
+
+    #--[2] Parse detector output to reconstitute recognized puzzle
+    #      pieces into a board.
+
+    # Here detState.x is a mask
+    self.tracker.process(I, detState.x)
+
+    self.board = self.tracker.getState()
+
+    if self.board.size() > 0:
+      self.haveObs = True
+      self.haveState = True
+      self.haveRun = True
+
+  #============================= process =============================
+  #
+  def process(self, I, M=None):
+    """
+    @brief  Process the passed imagery.
+
+    Args:
+      I:  The puzzle image source.
+      M:  The puzzle template mask.
+    """
+
+    self.predict()
+    self.measure(I, M)
+    self.correct()
+    self.adapt()
+
+    #======================== buildBasicPipelne ========================
+    #
+    @staticmethod
+    def buildBasicPipeline():
+      """
+      @brief      Creates a simple puzzle parser employing a very basic
+                  (practically trivial) processing pipeline for
+      """
+
+      # @note   IGNORE THIS MEMBER FUNCTION.  It belongs elsewhere but that
+      # file is not yet created for fully known at this moment.
+      #
+      # @todo   Figure out where to place this static factory method so that
+      # test and puzzle solver code is easy to implement. It is really a
+      # wrapper for a data processing scheme that leads to a (I, LM)
+      # pairing.  We may not need it in the end since other processes will
+      # do the equivalent.
+
+      # @note The preference over the above, for the moment is to create a
+      # set of static methods here that perform simple image processing
+      # operations to extract the mask.  Options include:
+      #
+      # imageToMask_Threshold
+      # imageToMask_GrowSelection
+      #
+      # These should work for most of the basic images to be used for
+      # testing purposes.
+      #
+      # If needed, some outer class can be made to automatically implement
+      # these, then pass on the image and mask.  Otherwise, just rely on the
+      # calling scope to properly implement.  Calling scope makes sense
+      # since immediate anticipated use is for test scripts more so than
+      # actual operation and final solution.
+      #
+
+      pass
 
 #
 #============================== puzzle.parser ==============================

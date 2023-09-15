@@ -32,17 +32,60 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from puzzle.builder.adjacent import Adjacent, ParamAdj
+from puzzle.builder.adjacent import Adjacent, CfgAdjacent
 from puzzle.builder.arrangement import Arrangement
-from puzzle.builder.board import Board
+from puzzle.board import Board
 
 
 # ===== Helper Elements
 #
 
-@dataclass
-class ParamInter(ParamAdj):
-    tauInter: float = 35
+#@dataclass
+#class ParamInter(ParamAdj):
+#    tauInter: float = 35
+#
+# DELETE WHEN CODE RUNS. BROKEN IN MANY PLACE RIGHT NOW.
+
+#---------------------------------------------------------------------------
+#==================== Configuration Node : Interlocking ====================
+#---------------------------------------------------------------------------
+#
+
+class CfgInterlocking(CfgAdjacent):
+  '''!
+  @brief  Configuration setting specifier for centroidMulti.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgInterlocking.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = super(CfgInterlocking,CfgInterlocking).get_default_settings()
+    default_dict.update(dict(tauInter = 35))
+
+    return default_dict
+
 
 
 #
@@ -56,7 +99,7 @@ class Interlocking(Adjacent):
     # @brief  Constructor for the puzzle.builder.adjacent class.
     #
     #
-    def __init__(self, theBoard=[], theParams=ParamInter):
+    def __init__(self, theBoard=[], theParams=CfgInterlocking):
         """
         @brief  Constructor for the puzzle.builder.adjacent class.
 
@@ -123,13 +166,19 @@ class Interlocking(Adjacent):
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
-        if hasattr(data, 'tauInter'):
-            theParams = ParamInter(tauAdj=data.tauInter)
+        if hasattr(data, 'tauAdj'):     # ARGH!! DELETE LIKE OTHERS WHEN WORKING,.
+            theParams = CfgAdjacent()   # HAS TO DO WITH BAD SAVE/LOAD. MOVE TO HDF5
+            theParams.tauAdj = data.tauAdj
 
-        if hasattr(theParams, 'tauInter'):
-            thePuzzle = Interlocking(aPuzzle, theParams)
-        else:
-            thePuzzle = Interlocking(aPuzzle)
+        if hasattr(data, 'tauInter'):       # ARGH!! DELETE LIKE OTHERS WHEN WORKING,.
+            theParams = CfgInterlocking()   # HAS TO DO WITH BAD SAVE/LOAD. MOVE TO HDF5
+            theParams.tauAdj = data.tauInter
+
+        thePuzzle = Interlocking(aPuzzle, theParams)
+        #if hasattr(theParams, 'tauInter'):
+        #    thePuzzle = Interlocking(aPuzzle, theParams)
+        #else:
+        #    thePuzzle = Interlocking(aPuzzle)
 
         return thePuzzle
 
