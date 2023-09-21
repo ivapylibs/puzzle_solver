@@ -146,6 +146,7 @@ class boardMeasure(centroidMulti):
     # 1] Extract pieces based on disconnected component regions
     #    then instantiate puzzle piece instances from regions.
     #
+    self.bMeas = Board()                # Get a new measured board.
     super(boardMeasure, self).measure(M)
 
     self._regions2board(I)
@@ -153,7 +154,6 @@ class boardMeasure(centroidMulti):
     # Override since some regions might be too small or large. Check again.
     # Also regenerate the list of "track points."
     self.haveMeas = len(self.bMeas.pieces) > 0  
-
 
     if self.haveMeas:
       #self.tpt = self.bMeas.getPieceLocations()
@@ -535,8 +535,24 @@ class boardPerceive(PerceiverSimple.simple):
       self.haveObs = True
       self.haveState = True
       self.haveRun = True
+    else:
+      self.haveState = False
 
-  #============================= process =============================
+  #============================== correct ==============================
+  #
+  def correct(self):
+    """!
+    @brief  Preserve temporal consistency of track labels via data association. 
+
+    """
+
+    if self.haveState:
+      self.filter.process(self.tracker.getState())
+      # IAMHERE
+
+
+
+  #============================== process ==============================
   #
   def process(self, I, M=None):
     """

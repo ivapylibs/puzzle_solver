@@ -27,11 +27,51 @@ import math
 from puzzle.pieces.matcher import MatchDifferent
 from puzzle.piece import Template
 
+from detector.Configuration import AlgConfig
+
 #
 #---------------------------------------------------------------------------
 #================================= Distance ================================
 #---------------------------------------------------------------------------
 #
+
+class CfgDistance(AlgConfig):
+  '''!
+  @brief  Configuration setting specifier for Moments class.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgDistance.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = dict( farDist = float('inf') ) 
+    return default_dict
+
+
+
+
 class Distance(MatchDifferent):
 
   #============================= __init__ ============================
@@ -42,7 +82,7 @@ class Distance(MatchDifferent):
 
     @param[in]  tau     Threshold param to determine difference.
     """
-    super(Histogram, self).__init__(tau)
+    super(Distance, self).__init__(tau)
 
   #========================== extractFeature =========================
   #
@@ -59,9 +99,19 @@ class Distance(MatchDifferent):
     """
 
     if issubclass(type(piece), Template):
-      return piece.y.XXXcentroidXXX
+      return piece.rLoc
     else:
       raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
+
+
+  #========================== buildFromConfig ==========================
+  #
+  @staticmethod
+  def buildFromConfig(matchConfig):
+
+    matcher = Distance(matchConfig.farDist)
+    return matcher
+
 
 #
 #---------------------------------------------------------------------------
@@ -137,6 +187,44 @@ class Histogram(MatchDifferent):
 #================================= Moments =================================
 #---------------------------------------------------------------------------
 #
+
+class CfgMoments(AlgConfig):
+  '''!
+  @brief  Configuration setting specifier for Moments class.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgMoments.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = dict(num = 20)
+
+    return default_dict
+
+
+
 
 class Moments(MatchDifferent):
   """! 

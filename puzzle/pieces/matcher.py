@@ -27,6 +27,8 @@
 #
 # from puzzle.piece.template import template
 
+import numpy as np
+
 #
 #---------------------------------------------------------------------------
 #================================= Matcher =================================
@@ -74,7 +76,7 @@ class Matcher:
         cent_A = self.extractFeature(piece_A)
         cent_B = self.extractFeature(piece_B)
 
-        return np.norm(cent_A - cent_B)
+        return np.linalg.norm(cent_A - cent_B)
 
     #============================= compare =============================
     #

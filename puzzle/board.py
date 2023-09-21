@@ -41,6 +41,17 @@ from scipy.spatial.distance import cdist
 
 from puzzle.piece import Template
 
+#===== Environment / Dependencies [Correspondences]
+#
+from dataclasses import dataclass
+
+from scipy.optimize import linear_sum_assignment
+
+from detector.Configuration import AlgConfig
+from puzzle.pieces.matcher import MatchDifferent
+from puzzle.pieces.matcher import MatchSimilar
+import puzzle.pieces.matchDifferent as diffScore
+
 
 #
 #---------------------------------------------------------------------------
@@ -508,21 +519,14 @@ class Board:
         return fh
 
 
-#
 #---------------------------------------------------------------------------
-#============================= Correspondences =============================
+#=================== Configuration Node : Correspondences ==================
 #---------------------------------------------------------------------------
 #
 
-#===== Environment / Dependencies
-#
-from dataclasses import dataclass
-
-from scipy.optimize import linear_sum_assignment
-
-from puzzle.pieces.matcher import MatchDifferent
-from puzzle.pieces.matcher import MatchSimilar
-from puzzle.pieces.matchDifferent import Moments
+@dataclass
+class CorrespondenceParms:
+    matcher: any = diffScore.Moments(20)
 
 # ===== Helper Elements
 #
@@ -530,10 +534,59 @@ from puzzle.pieces.matchDifferent import Moments
 SCORE_DIFFERENCE = 0
 SCORE_SIMILAR = 1
 
+class CfgCorrespondences(AlgConfig):
+  '''!
+  @brief  Configuration setting specifier for Correspondences class.
+  '''
 
-@dataclass
-class CorrespondenceParms:
-    matcher: any = Moments(20)
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgCorrespondences.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = dict(matcher = 'Moments',  
+                   matchParams = diffScore.CfgMoments.get_default_settings())
+
+    return default_dict
+
+  #============================= buildNearest ============================
+  #
+  #
+  def buildNearest():
+    matchCfg = CfgCorrespondences();
+    matchCfg.matcher = 'Distance'
+    matchCfg.matchParams = None      # None means to use default settings.
+    return matchCfg
+
+#
+#---------------------------------------------------------------------------
+#============================= Correspondences =============================
+#---------------------------------------------------------------------------
+#
+
+
+
 
 class Correspondences:
 
@@ -546,12 +599,13 @@ class Correspondences:
             theParams: Any additional parameters in a structure.
         """
 
-        self.bPrior = initBoard             # @< The previous/prior board measurement.
+        self.boardPrior = initBoard         # @< The previous/prior board estimate (after prediction).
+        self.boardPosterior = []            # @< The posterior board estimate (after correction).
 
         self.pAssignments = {}              # @< Assignments: meas to last.
         self.pAssignments_rotation = {}     # @< Assignments: meas to last rotation angles (degree).
 
-        self.matcher = theParams.matcher    # @< Puzzle piece matcher instance.
+        self.matcher = Correspondences.buildMatcher(theParams.matcher, theParams.matchParams)
 
         self.skipList = []                  # @< Set up by simulator. Skip some pieces in clutter.
 
@@ -584,7 +638,7 @@ class Correspondences:
         # Generate a new board for association, filtered by the matcher threshold
         pFilteredAssignments = {}
         for assignment in self.pAssignments.items():
-            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.solution.pieces[assignment[1]])
+            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.boardPrior.pieces[assignment[1]])
 
             # Some matchers calculate the rotation as well
             # from mea to sol (counter-clockwise)
@@ -596,7 +650,7 @@ class Correspondences:
             else:
                 if ret:
                     self.pAssignments_rotation[assignment[0]] = \
-                        self.bMeas.pieces[assignment[0]].theta-self.solution.pieces[assignment[1]].theta
+                        self.bMeas.pieces[assignment[0]].theta-self.boardPrior.pieces[assignment[1]].theta
 
                     pFilteredAssignments[assignment[0]] = assignment[1]
 
@@ -606,70 +660,73 @@ class Correspondences:
         # pAssignments refers to the id of the puzzle piece
         # print(pFilteredAssignments)
         self.pAssignments = pFilteredAssignments
+        print(self.pAssignments)
 
     #=========================== matchPieces ===========================
     #
     def matchPieces(self):
         """!
-        @brief  Match all the measured puzzle pieces with previous board in a pairwise manner
-                to get meas to sol.
+        @brief  Match all the measured puzzle pieces with board prior in a pairwise manner
+                to get meas to prior. Only gets matches, does not act on them.
         """
 
-        scoreTable_shape = np.zeros((self.bMeas.size(), self.solution.size()))
-        scoreTable_color = np.zeros((self.bMeas.size(), self.solution.size()))
-        scoreTable_edge_color = np.zeros((self.bMeas.size(), self.solution.size(), 4))
+        # @todo Removed the multiple score tables (via commenting).  Best for this to be
+        #       is a multi-objective Matching class that takes care of everything properly.
+        #       Don't have the Correspondences class assume this responsibility because
+        #       it negatively impacts abstraction capabilities. Delete code when revisions
+        #       confirmed to work.
+        # @note Moving to a single score table.
+        #
+        #scoreTable_shape = np.zeros((self.bMeas.size(), self.boardPrior.size()))
+        #scoreTable_color = np.zeros((self.bMeas.size(), self.boardPrior.size()))
+        #scoreTable_edge_color = np.zeros((self.bMeas.size(), self.boardPrior.size(), 4))
+
+        scoreTable = np.zeros((self.bMeas.size(), self.boardPrior.size()))
 
         for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
-            for idx_y, SolPiece in enumerate(self.solution.pieces):
+            for idx_y, SolPiece in enumerate(self.boardPrior.pieces):
+            
+                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.boardPrior.pieces[SolPiece])
+                scoreTable[idx_x][idx_y] = ret
 
-                # @todo Does not support two scoreTables. Currently using sift features (one table).
-                if idx_y in self.skipList:
-                    if self.scoreType == SCORE_DIFFERENCE:
-                        scoreTable_shape[idx_x][idx_y] = 1e18
-                    else:
-                        scoreTable_shape[idx_x][idx_y] = -100
-                    continue
+                # If above craps out during operation due to multiple return values, it is because the scoring
+                # method is improper.
 
-                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
                 #DEBUG 
-                # if idx_x==11 and (idx_y==2):
-                #     ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.solution.pieces[SolPiece])
-                #     print('s')
-                if type(ret) is tuple and len(ret) > 0:
-                    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
-                    scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
-                    scoreTable_edge_color[idx_x][idx_y] = ret[1]
-                else:
-                    scoreTable_shape[idx_x][idx_y] = ret
+                print( (self.bMeas.pieces[MeaPiece].rLoc, self.boardPrior.pieces[SolPiece].rLoc) )
+
+                #if type(ret) is tuple and len(ret) > 0:
+                #    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
+                #    scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
+                #    scoreTable_edge_color[idx_x][idx_y] = ret[1]
+                #else:
+                #    scoreTable_shape[idx_x][idx_y] = ret
 
         # Save for debug
-        self.scoreTable_shape = scoreTable_shape.copy()
+        self.scoreTable = scoreTable.copy()
+        print(self.scoreTable)
 
         # The measured piece will be assigned a solution piece
         # Some measured piece may not have a match according to the threshold.
         # self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
-
-        self.pAssignments = self.hungarianAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+        self.pAssignments = self.hungarianAssignment(scoreTable)
 
 
     #======================= hungarianAssignment =======================
     #
-    def hungarianAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
+    def hungarianAssignment(self, scoreTable):
         """!
         @brief  Run Hungarian Assignment for the score table.
 
-        Args:
-            scoreTable_shape:  The score table for the pairwise comparison (shape).
-            scoreTable_color:  The score table for the pairwise comparison (color).
-            scoreTable_edge_color: The score table for the pairwise comparison (edge_color).
 
-        Returns:
-            matched_id: The matched pair dict.
+        @param[in]  scoreTAble  Score table for the pairwise comparison.
+
+        @param[out] matched_id  Matched pair dict.
         """
 
         # Todo: Currently we only use scoreTable_shape
         pieceKeysList_bMeas    = list(self.bMeas.pieces.keys())
-        pieceKeysList_solution = list(self.bPrior.pieces.keys())
+        pieceKeysList_solution = list(self.boardPrior.pieces.keys())
 
         matched_id = {}
 
@@ -682,6 +739,9 @@ class Correspondences:
             matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
 
         return matched_id
+        # @todo     What is best way to return result? Dict permits non-assignment. Maybe good.
+        #           That way can establish measured, missing, estimated boards.
+
 
     #========================= greedyAssignment ========================
     #
@@ -699,7 +759,7 @@ class Correspondences:
         """
 
         pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
-        pieceKeysList_solution = list(self.solution.pieces.keys())
+        pieceKeysList_solution = list(self.boardPrior.pieces.keys())
 
         # Single feature
         if np.count_nonzero(scoreTable_color) == 0:
@@ -819,9 +879,32 @@ class Correspondences:
         self.pAssignments = {}
         self.pAssignments_rotation = {}
 
-        self.correspond(bMeas)
+        if (self.boardPrior is None):
+          self.boardPrior = bMeas
+          print('Setting to measured board since there is no prior.')
+        else:
+          print('Generating correspondences.')
+          self.correspond(bMeas)
+
+    #============================ buildMatcher ===========================
+    #
+    @staticmethod
+    def buildMatcher(typeStr, matchConfig = None):
+
+      if (typeStr == 'Moments'):
+        theConfig = diffScore.CfgMoments()
+        matchType = diffScore.Moments
+      elif (typeStr == 'Distance'):
+        theConfig = diffScore.CfgDistance()
+        matchType = diffScore.Distance
 
 
+      if (matchConfig is not None):
+        theConfig.merge_from_other_cfg(matchConfig)
+
+      theMatcher = matchType.buildFromConfig(theConfig)
+
+      return theMatcher
 
 
 #
