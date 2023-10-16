@@ -586,9 +586,14 @@ class CfgCorrespondences(AlgConfig):
 #
 
 
-
-
 class Correspondences:
+    """!
+    @brief    Class that compares two boards and generates correspondences across them.
+   
+    The comparison technique and properties are completely up to the programmer/engineer
+    to establish.  This class simply structures and faclitates the implementation.  There
+    is an implicit static assumption underlying the elements temporal evolution.
+    """
 
     def __init__(self, theParams=CorrespondenceParms, initBoard = None):
         """!
@@ -633,33 +638,51 @@ class Correspondences:
         self.bMeas = measBoard
 
         # Compare with previous board and generate associations
+        # Associations are stored in member variable (pAssignments).
         self.matchPieces()
 
-        # Generate a new board for association, filtered by the matcher threshold
+        # IAMHERE
+
+        # Generate a new board for association, filtered by the matcher threshold At this point,
+        # the associations are candidate associations.  They are not locked in.  If the matcher
+        # comparator indicates that the two associated elements are the same, then the
+        # assignment is preserved.  Otherwise, it is effectively tossed out.
+        #
+        # @todo This seems weird, since a variant of the Hungarian should permit the same
+        #       outcome more natively.  The variant should have some sort of threshold
+        #       for association.  Thus, not only does it seek the best match but it seeks the
+        #       best passing match, where there is usually a garbage match score that must
+        #       be beat for the association to occur.  Need more in depth review to see if
+        #       this is the case.
+        #
         pFilteredAssignments = {}
         for assignment in self.pAssignments.items():
             ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.boardPrior.pieces[assignment[1]])
 
-            # Some matchers calculate the rotation as well
-            # from mea to sol (counter-clockwise)
+            # @todo PAV[10/16] Need to remove this part.  A different process should try to 
+            #       decode or act on the rigid body displacement information.  Maybe even the
+            #       update function.  This is part of the tracker to work out, not part of the
+            #       assignment system though it might need or benefit from the displacement
+            #       information.
+            #
+            # Some matchers calculate the rotation as well from mea to sol (counter-clockwise)
             if isinstance(ret, tuple):
                 if ret[0]:
                     self.pAssignments_rotation[assignment[0]]=ret[1]
-
                     pFilteredAssignments[assignment[0]] = assignment[1]
             else:
                 if ret:
                     self.pAssignments_rotation[assignment[0]] = \
-                        self.bMeas.pieces[assignment[0]].theta-self.boardPrior.pieces[assignment[1]].theta
+                                        self.bMeas.pieces[assignment[0]].theta \
+                                        - self.boardPrior.pieces[assignment[1]].theta
 
                     pFilteredAssignments[assignment[0]] = assignment[1]
 
-            #DEBUG 
-            #print(ret)
 
         # pAssignments refers to the id of the puzzle piece
-        # print(pFilteredAssignments)
+        #
         self.pAssignments = pFilteredAssignments
+        print("pAssignments ----")
         print(self.pAssignments)
 
     #=========================== matchPieces ===========================
@@ -668,10 +691,14 @@ class Correspondences:
         """!
         @brief  Match all the measured puzzle pieces with board prior in a pairwise manner
                 to get meas to prior. Only gets matches, does not act on them.
+
+
+        The matching outcome is internally stored in member variable (pAssignments).
+        
         """
 
-        # @todo Removed the multiple score tables (via commenting).  Best for this to be
-        #       is a multi-objective Matching class that takes care of everything properly.
+        # @todo Removed the multiple score tables (via commenting).  Best for there to be
+        #       a multi-objective Matching class that takes care of everything properly.
         #       Don't have the Correspondences class assume this responsibility because
         #       it negatively impacts abstraction capabilities. Delete code when revisions
         #       confirmed to work.
@@ -684,6 +711,9 @@ class Correspondences:
         scoreTable = np.zeros((self.bMeas.size(), self.boardPrior.size()))
 
         for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
+            if self.bMeas.pieces[MeaPiece].featVec is None: # @todo Is this proper?
+                self.bMeas.pieces[MeaPiece].genFeature(self.matcher)
+
             for idx_y, SolPiece in enumerate(self.boardPrior.pieces):
             
                 ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.boardPrior.pieces[SolPiece])
@@ -731,9 +761,9 @@ class Correspondences:
         matched_id = {}
 
         if self.scoreType == SCORE_DIFFERENCE:
-            row_ind, col_ind = linear_sum_assignment(scoreTable_shape)
+            row_ind, col_ind = linear_sum_assignment(scoreTable)
         else:
-            row_ind, col_ind = linear_sum_assignment(scoreTable_shape, maximize=True)
+            row_ind, col_ind = linear_sum_assignment(scoreTable, maximize=True)
 
         for i, idx in enumerate(col_ind):
             matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
@@ -866,10 +896,49 @@ class Correspondences:
 
         return matched_id
 
+    #============================= correct =============================
+    #
+    def correct(self):
+        """!
+        @brief    Perform correspondence correction if sensible.
+  
+        If the correspondences rely on information that evolves in time 
+        and should be filtered or updated, this is where that gets 
+        implemented.
+        """
+  
+        # @todo   Perform feature correction here.  Make sense for position
+        #         type updates to go here. Not in adaptation.
+  
+        # @todo   Where it is unclear to place is appearance based updating.
+        #         Is that a correction or an adaptation?  Is the appearance
+        #         fundamentally a state property or some other property?
+        #         Not resolving now, but leaving for later.
+  
+        #for assignment in self.pAssignments.items():
+        #    self.boardPrior.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+            
+        pass
+
+    #============================== adapt ==============================
+    #
+    def adapt(self):
+      """!
+      @brief    Perform adaptation based on correspondence as applicable.
+
+      If something special in the matching model depends on an underlying 
+      representation that is evolving over time and needs adaptation, then 
+      this is the place to implement.  Adaptation differs from correction
+      in that it may represent meta-parameters that support correspondence.
+      These meta-parameters may need adjustment also.
+      """
+
+      pass
+
     #============================= process =============================
     #
     def process(self, bMeas):
-        """
+        """!
         @brief  Run correspondence pipeline to preserve identity of puzzle pieces.
 
         @param[in]  bMeas   Measured board.
@@ -885,6 +954,9 @@ class Correspondences:
         else:
           print('Generating correspondences.')
           self.correspond(bMeas)
+
+        self.correct()
+        self.adapt()
 
     #============================ buildMatcher ===========================
     #

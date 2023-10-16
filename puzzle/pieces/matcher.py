@@ -73,8 +73,8 @@ class Matcher:
         @param[out] Distance of the feature vectors. (Overload if not proper).
         """
 
-        cent_A = self.extractFeature(piece_A)
-        cent_B = self.extractFeature(piece_B)
+        cent_A = piece_A.getFeature(self) 
+        cent_B = piece_B.getFeature(self)
 
         return np.linalg.norm(cent_A - cent_B)
 

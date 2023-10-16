@@ -91,14 +91,19 @@ class Template:
             pieceStatus: The status of the puzzle pieces, including UNKNOWN, MEASURED, TRACKED, and INHAND.
         """
 
-        self.y = y # @< A PuzzleTemplate instance.
-        self.rLoc = np.array(r)  # @< The default location is the top left corner.
-        self.id = id    # @< Mainly for display and user operation.
-        self.status = pieceStatus  # @< To save the status of the puzzle pieces, for tracking purpose.
-        self.theta = theta  # @< Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright.
+        self.y = y                  # @< A PuzzleTemplate instance.
+        self.rLoc = np.array(r)     # @< The default location is the top left corner.
+        self.id = id                # @< Mainly for display and user operation.
+        self.status = pieceStatus   # @< To save the status of the puzzle pieces, for tracking purpose.
+        self.theta = theta          # @< Should be set up later by the alignment function. For
+                                    # regular piece, which means the angle to rotate to its upright.
 
-        self.tracking_life = 0 # @< For saving the life count, only useful in the tracking function
+        self.tracking_life = 0      # @< Save life count, only useful in the tracking function
 
+        self.featVec = None         # @< If assigned, feature descriptor vector of puzzle piece.
+
+    #================================== size =================================
+    #
     def size(self):
         """
         @brief  Return the dimensions of the puzzle piece image.
@@ -109,60 +114,7 @@ class Template:
 
         return self.y.size
 
-    @staticmethod
-    def getEig(img):
-        """
-        @brief  To find the major and minor axes of a blob and then return the aligned rotation.
-                See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
-                PCA is our default method which does not perform very well.
-
-        Args:
-            img: A contour image.
-
-        Returns:
-            theta: The aligned angle (degree).
-        """
-
-        # @note Currently, we use the image center
-
-        y, x = np.nonzero(img)
-        # x = x - np.mean(x)
-        # y = y - np.mean(y)
-        #
-        x = x - np.mean(img.shape[1] / 2)
-        y = y - np.mean(img.shape[0] / 2)
-
-        coords = np.vstack([x, y])
-        cov = np.cov(coords)
-        evals, evecs = np.linalg.eig(cov)
-        sort_indices = np.argsort(evals)[::-1]
-        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-        v2 = evecs[:, sort_indices[1]]
-
-        dict = {
-            'x': x,
-            'y': y,
-            'v1': v1,
-            'v2': v2,
-        }
-
-        theta = np.rad2deg(np.arctan2(dict['v1'][1], dict['v1'][0]))
-
-        # # Debug only
-        #
-        # scale = 20
-        # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
-        #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
-        # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
-        #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
-        # plt.plot(x, y, 'k.')
-        # plt.axis('equal')
-        # plt.gca().invert_yaxis()  # Match the image system with origin at top left
-        # plt.show()
-
-        return theta
-
-    #=========================== setPlacement ==========================
+    #============================== setPlacement =============================
     #
     def setPlacement(self, r, offset=False, isCenter=False):
         """
@@ -185,6 +137,8 @@ class Template:
             else:
                 self.rLoc = np.array(r)
 
+    #================================ getMask ================================
+    #
     def getMask(self, theMask, offset=[0, 0]):
         """
         @brief Get an updated mask of the target.
@@ -240,8 +194,33 @@ class Template:
 
         return theMask
 
-    #============================= placeInImage ============================
+    #=============================== genFeature ==============================
     #
+    def genFeature(self, theMatcher):
+
+        self.featVec = theMatcher.extractFeature(self)
+
+    #=============================== getFeature ==============================
+    #
+    def getFeature(self, theMatcher = None):
+        """!
+        @brief  Get the feature vector of the puzzle piece. Assign if not defined
+                based on passed matcher.
+
+        @param[in] theMatcher   Optional but recommended argument that specifies
+                                the feature matching implementation.
+        """
+
+        if self.featVec is not None:
+            return self.featVec 
+        else:
+            if theMatcher is None:
+                return None
+            else:
+                self.genFeature(theMatcher)
+                return self.featVec
+
+    #============================== placeInImage =============================
     #
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
         """
@@ -275,6 +254,8 @@ class Template:
             rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + rcoords
             theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
 
+    #============================= placeInImageAt ============================
+    #
     def placeInImageAt(self, theImage, rc, theta=None, isCenter=False, CONTOUR_DISPLAY=True):
         """
         @brief  Insert the puzzle piece into the image at the given location.
@@ -309,6 +290,8 @@ class Template:
             rcoords = rc.reshape(-1, 1) + rcoords
             theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
 
+    #================================ toImage ================================
+    #
     def toImage(self):
         """
         @brief  Return the puzzle piece image (cropped).
@@ -322,6 +305,8 @@ class Template:
 
         return theImage
 
+    #================================ display ================================
+    #
     def display(self, fh=None):
         """
         @brief  Display the puzzle piece contents in an image window.
@@ -349,6 +334,8 @@ class Template:
 
         return fh
 
+    #========================= buildFromMaskAndImage =========================
+    #
     @staticmethod
     def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
@@ -412,6 +399,8 @@ class Template:
 
         return thePiece
 
+    #============================== rotatePiece ==============================
+    #
     def rotatePiece(self, theta):
         """
         @brief Rotate the puzzle template instance by the given angle.
@@ -478,6 +467,63 @@ class Template:
 
         return thePiece
 
+    #================================= getEig ================================
+    #
+    @staticmethod
+    def getEig(img):
+        """
+        @brief  To find the major and minor axes of a blob and then return the aligned rotation.
+                See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+                PCA is our default method which does not perform very well.
+
+        Args:
+            img: A contour image.
+
+        Returns:
+            theta: The aligned angle (degree).
+        """
+
+        # @note Currently, we use the image center
+
+        y, x = np.nonzero(img)
+        # x = x - np.mean(x)
+        # y = y - np.mean(y)
+        #
+        x = x - np.mean(img.shape[1] / 2)
+        y = y - np.mean(img.shape[0] / 2)
+
+        coords = np.vstack([x, y])
+        cov = np.cov(coords)
+        evals, evecs = np.linalg.eig(cov)
+        sort_indices = np.argsort(evals)[::-1]
+        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
+        v2 = evecs[:, sort_indices[1]]
+
+        dict = {
+            'x': x,
+            'y': y,
+            'v1': v1,
+            'v2': v2,
+        }
+
+        theta = np.rad2deg(np.arctan2(dict['v1'][1], dict['v1'][0]))
+
+        # # Debug only
+        #
+        # scale = 20
+        # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
+        #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
+        # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
+        #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
+        # plt.plot(x, y, 'k.')
+        # plt.axis('equal')
+        # plt.gca().invert_yaxis()  # Match the image system with origin at top left
+        # plt.show()
+
+        return theta
+
+    #============================== buildSquare ==============================
+    #
     @staticmethod
     def buildSquare(size, color, rLoc=None):
         """
@@ -524,6 +570,8 @@ class Template:
 
         return thePiece
 
+    #============================== buildSphere ==============================
+    #
     @staticmethod
     def buildSphere(radius, color, rLoc=None):
         """

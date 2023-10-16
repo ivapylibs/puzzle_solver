@@ -176,8 +176,8 @@ class Histogram(MatchDifferent):
     @param[out] Distance of the feature vectors. (Overload if not proper).
     """
 
-    hist_A = self.extractFeature(piece_A)
-    hist_B = self.extractFeature(piece_B)
+    hist_A = piece_A.getFeature(self)
+    hist_B = piece_B.getFeature(self) 
 
     # Range from 0-1, smaller means closer
     return  cv2.compareHist(hist_A, hist_B, cv2.HISTCMP_BHATTACHARYYA)
@@ -283,9 +283,8 @@ class Moments(MatchDifferent):
     @param[out] Distance of the feature vectors. (Overload if not proper).
     """
 
-    print(piece_A)
-    huMoments_A = self.extractFeature(piece_A)
-    huMoments_B = self.extractFeature(piece_B)
+    huMoments_A = piece_A.getFeature(self)
+    huMoments_B = piece_B.getFeature(self)
 
     distance = np.sum(np.abs(huMoments_B - huMoments_A))
 
@@ -344,8 +343,8 @@ class PCA(MatchDifferent):
     @param[out] The degree distance between passed puzzle piece data and stored puzzle piece. (counter-clockwise)
     """
 
-    theta_A = self.extractFeature(piece_A)
-    theta_B = self.extractFeature(piece_B)
+    theta_A = piece_A.getFeature(self)
+    theta_B = piece_B.getFeature(self) 
 
     return np.rad2deg(theta_B - theta_A)
 
