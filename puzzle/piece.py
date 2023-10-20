@@ -41,31 +41,33 @@ class PieceStatus(Enum):
     @brief PieceStatus used to keep track of the status of pieces.
     """
 
-    UNKNOWN = 0 # @< The default status.
-    MEASURED = 1  # @< The initial status in the current measured board (visible).
-    TRACKED = 2 # @< Not present in the current measured board (including INVISIBLE & GONE).
-    INHAND = 3
+    UNKNOWN  = 0    # @< The default status.
+    MEASURED = 1    # @< The initial status in the current measured board (visible).
+    TRACKED  = 2    # @< Not present in the current measured board (including INVISIBLE & GONE).
+    INHAND   = 3    # @< Presumably in player's/worker's hand.
 
-    INVISIBLE=4 # @< A subset of TRACKED, which is occluded.
-    GONE=5 # @< A subset of TRACKED, which is not occluded. Be careful that this status may be inaccurate when piece extraction fails.
+    INVISIBLE = 4   # @< A subset of TRACKED, which is occluded.
+    GONE = 5        # @< A subset of TRACKED, which is not occluded. Be careful that this status
+                    #       may be inaccurate when piece extraction fails.
 
 
 
+#
+#================================= PuzzleTemplate ================================
+#
 @dataclass
 class PuzzleTemplate:
-    size: np.ndarray = np.array([])  # @< Tight bbox size of puzzle piece image.
-    rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
-    appear: np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
-    image: np.ndarray = np.array([], dtype='uint8')  # @< Template RGB image with BG default fill.
-    mask: np.ndarray = np.array([], dtype='uint8')  # @< Template binary mask image.
-    contour: np.ndarray = np.array([], dtype='uint8')  # @< Template binary contour image.
-    contour_pts: np.ndarray = np.array([])  # @< Template contour points.
+    """!
+    @brief  Data class containing puzzle piece information.
+    """
 
-    # Feature related
-    kpFea: tuple = ()  # @< The processed keypoint feature.
-    colorFea: np.ndarray = np.array([])  # @< The processed color feature.
-    shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
-
+    size:           np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
+    rcoords:        np.ndarray = np.array([])   # @< Puzzle piece linear image coordinates.
+    appear:         np.ndarray = np.array([])   # @< Puzzle piece color/appearance.
+    image:          np.ndarray = np.array([], dtype='uint8')    # @< Image w/ BG default fill.
+    mask:           np.ndarray = np.array([], dtype='uint8')    # @< Binary mask image.
+    contour:        np.ndarray = np.array([], dtype='uint8')    # @< Binary contour image.
+    contour_pts:    np.ndarray = np.array([])   # @< Template contour points.
 
 #
 #==================================== Template ===================================
@@ -73,7 +75,12 @@ class PuzzleTemplate:
 
 class Template:
     '''!
-    @brief  What is this??
+    @brief  Stores and encapsulates a template instance of a visual puzzle piece.
+
+
+    The language here is general, but the fact that it lives in the puzzle.piece namespace
+    indicates that this class is strictly associated to puzzle pieces.  As the base class,
+    it probably implements the simplest, no frills version of a template puzzle piece.
 
     '''
 
@@ -93,14 +100,21 @@ class Template:
 
         self.y = y                  # @< A PuzzleTemplate instance.
         self.rLoc = np.array(r)     # @< The default location is the top left corner.
-        self.id = id                # @< Mainly for display and user operation.
-        self.status = pieceStatus   # @< To save the status of the puzzle pieces, for tracking purpose.
-        self.theta = theta          # @< Should be set up later by the alignment function. For
+        # @todo Why is the location stored here when PuzzleTemplate has it too?
+        # @todo What benefit occurs from the duplicate given that there is potentialy for
+        #       mismatch? Is mismatch useful?
+        # @todo Good news is that only location is included outside of PuzzleTemplate
+        #       which means that update can take care of it as needed without getting
+        #       too complex. Just gotta work out what will be needed.
+        #
+
+        self.id = id                # @< Unique ID for piece (assist with data association).
+        self.status = pieceStatus   # @< Status of the puzzle pieces, for tracking purpose.
+        self.theta  = theta         # @< Should be set up later by the alignment function. For
                                     # regular piece, which means the angle to rotate to its upright.
 
-        self.tracking_life = 0      # @< Save life count, only useful in the tracking function
-
-        self.featVec = None         # @< If assigned, feature descriptor vector of puzzle piece.
+        self.lifespan = 0           # @< Save life count, only useful in the tracking function.
+        self.featVec  = None        # @< If assigned, feature descriptor vector of puzzle piece.
 
     #================================== size =================================
     #
@@ -116,26 +130,71 @@ class Template:
 
     #============================== setPlacement =============================
     #
-    def setPlacement(self, r, offset=False, isCenter=False):
+    def setPlacement(self, r, isOffset=False, isCenter=False):
         """
         @brief  Provide pixel placement location information.
 
-        Args:
-            r: Location of its frame origin.
-            offset: Boolean indicating whether it sets the offset or not.
-            isCenter: Boolean indicating r is center or not.
+        @param[in]  r           Location of puzzle piece "frame origin."
+        @param[in]  isOffset    Boolean flag indicating whether placement is an offset (= Delta r).
+        @param[in]  isCenter    Boolean flag indicating if r is center reference.
         """
 
-        if isCenter:
-            if offset:
-                self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size / 2))
-            else:
-                self.rLoc = np.array(r - np.ceil(self.y.size / 2))
+        if isOffset:
+            self.rLoc = np.array(self.rLoc + r)
         else:
-            if offset:
-                self.rLoc = np.array(self.rLoc + r)
+            if isCenter:
+                self.rLoc = np.array(r - np.ceil(self.y.size / 2))
             else:
                 self.rLoc = np.array(r)
+
+    #    if isCenter:        # Specifying center and not top-left corner.
+    #        if isOffset:
+    #            self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size / 2))
+    #        else:
+    #            self.rLoc = np.array(r - np.ceil(self.y.size / 2))
+    #    else:
+    #        if isOffset:
+    #            self.rLoc = np.array(self.rLoc + r)
+    #        else:
+    #            self.rLoc = np.array(r)
+
+    #================================ displace ===============================
+    #
+    def displace(self, dr):
+        """
+        @brief  Displace puzzle piece.
+
+        @param[in]  dr          Displacement to apply.
+        @param[in]  isCenter    Boolean flag indicating if r is center reference.
+        """
+
+        self.setPlacement(dr, True, False)
+
+    #=============================== genFeature ==============================
+    #
+    def genFeature(self, theMatcher):
+
+        self.featVec = theMatcher.extractFeature(self)
+
+    #=============================== getFeature ==============================
+    #
+    def getFeature(self, theMatcher = None):
+        """!
+        @brief  Get the feature vector of the puzzle piece. Assign if not defined
+                based on passed matcher.
+
+        @param[in] theMatcher   Optional but recommended argument that specifies
+                                the feature matching implementation.
+        """
+
+        if self.featVec is not None:
+            return self.featVec 
+        else:
+            if theMatcher is None:
+                return None
+            else:
+                self.genFeature(theMatcher)
+                return self.featVec
 
     #================================ getMask ================================
     #
@@ -143,9 +202,8 @@ class Template:
         """
         @brief Get an updated mask of the target.
 
-        Args:
-            theMask: The original mask of the target.
-            offset: The movement.
+        @param[in] theMask  Original mask of the target.
+        @param[in] offset   Movement.
 
         Returns:
             theMask: The updated mask of the target.
@@ -193,32 +251,6 @@ class Template:
             theMask[:, :] = theMask_enlarged[:theMask.shape[0], :theMask.shape[1]]
 
         return theMask
-
-    #=============================== genFeature ==============================
-    #
-    def genFeature(self, theMatcher):
-
-        self.featVec = theMatcher.extractFeature(self)
-
-    #=============================== getFeature ==============================
-    #
-    def getFeature(self, theMatcher = None):
-        """!
-        @brief  Get the feature vector of the puzzle piece. Assign if not defined
-                based on passed matcher.
-
-        @param[in] theMatcher   Optional but recommended argument that specifies
-                                the feature matching implementation.
-        """
-
-        if self.featVec is not None:
-            return self.featVec 
-        else:
-            if theMatcher is None:
-                return None
-            else:
-                self.genFeature(theMatcher)
-                return self.featVec
 
     #============================== placeInImage =============================
     #
@@ -399,6 +431,28 @@ class Template:
 
         return thePiece
 
+    #================================= update ================================
+    #
+    def update(self, matchedPiece):
+        """!
+        @brief  Update template board puzzle piece based on association.
+
+        @param[in]  matchedPiece    Latest matched measurement of a piece.
+        """
+
+        # Should update self (own properties) and (feature vector properties).
+        # How to do this has high variation, especially given that the feature
+        # vector derives from the piece properties.  Updating the piece properties
+        # may require non-trivial updates to the feature vector.  The degrees
+        # of freedom here are "high."
+        #
+        # What is right way to code?  Try to dump many options into the base
+        # template, or use sub-classes?   More complex case is to perform a
+        # mix of the two.
+        #
+        self.featVec = matchedPiece.featVec
+
+
     #============================== rotatePiece ==============================
     #
     def rotatePiece(self, theta):
@@ -463,7 +517,8 @@ class Template:
         thePiece.theta = self.theta + theta
 
         # Reset kpFea while colorFea & shapeFea is associated to the corrected case
-        thePiece.y.kpFea = ()
+        #thePiece.y.kpFea = ()
+        # @todo Remove kpFea, colorFea, and shapeFea code.
 
         return thePiece
 

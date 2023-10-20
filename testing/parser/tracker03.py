@@ -90,6 +90,7 @@ for i in range(15):
 
   plt.cla()
   boardPer.tracker.bMeas.display_mp(outImage, fh, ID_DISPLAY=True)
+  print(boardPer.tracker.bMeas)
   plt.pause(0.2)
 
 #IAMHERE

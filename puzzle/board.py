@@ -604,9 +604,7 @@ class Correspondences:
             theParams: Any additional parameters in a structure.
         """
 
-        self.boardPrior = initBoard         # @< The previous/prior board estimate (after prediction).
-        self.boardPosterior = []            # @< The posterior board estimate (after correction).
-
+        self.boardEstimate  = initBoard     # @< The board estimate (prior & posterior).
         self.pAssignments = {}              # @< Assignments: meas to last.
         self.pAssignments_rotation = {}     # @< Assignments: meas to last rotation angles (degree).
 
@@ -657,7 +655,7 @@ class Correspondences:
         #
         pFilteredAssignments = {}
         for assignment in self.pAssignments.items():
-            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.boardPrior.pieces[assignment[1]])
+            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.boardEstimate.pieces[assignment[1]])
 
             # @todo PAV[10/16] Need to remove this part.  A different process should try to 
             #       decode or act on the rigid body displacement information.  Maybe even the
@@ -674,7 +672,7 @@ class Correspondences:
                 if ret:
                     self.pAssignments_rotation[assignment[0]] = \
                                         self.bMeas.pieces[assignment[0]].theta \
-                                        - self.boardPrior.pieces[assignment[1]].theta
+                                        - self.boardEstimate.pieces[assignment[1]].theta
 
                     pFilteredAssignments[assignment[0]] = assignment[1]
 
@@ -704,26 +702,26 @@ class Correspondences:
         #       confirmed to work.
         # @note Moving to a single score table.
         #
-        #scoreTable_shape = np.zeros((self.bMeas.size(), self.boardPrior.size()))
-        #scoreTable_color = np.zeros((self.bMeas.size(), self.boardPrior.size()))
-        #scoreTable_edge_color = np.zeros((self.bMeas.size(), self.boardPrior.size(), 4))
+        #scoreTable_shape = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
+        #scoreTable_color = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
+        #scoreTable_edge_color = np.zeros((self.bMeas.size(), self.boardEstimate.size(), 4))
 
-        scoreTable = np.zeros((self.bMeas.size(), self.boardPrior.size()))
+        scoreTable = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
 
         for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
             if self.bMeas.pieces[MeaPiece].featVec is None: # @todo Is this proper?
                 self.bMeas.pieces[MeaPiece].genFeature(self.matcher)
 
-            for idx_y, SolPiece in enumerate(self.boardPrior.pieces):
+            for idx_y, SolPiece in enumerate(self.boardEstimate.pieces):
             
-                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.boardPrior.pieces[SolPiece])
+                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.boardEstimate.pieces[SolPiece])
                 scoreTable[idx_x][idx_y] = ret
 
                 # If above craps out during operation due to multiple return values, it is because the scoring
                 # method is improper.
 
                 #DEBUG 
-                print( (self.bMeas.pieces[MeaPiece].rLoc, self.boardPrior.pieces[SolPiece].rLoc) )
+                print( (self.bMeas.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
 
                 #if type(ret) is tuple and len(ret) > 0:
                 #    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
@@ -756,7 +754,7 @@ class Correspondences:
 
         # Todo: Currently we only use scoreTable_shape
         pieceKeysList_bMeas    = list(self.bMeas.pieces.keys())
-        pieceKeysList_solution = list(self.boardPrior.pieces.keys())
+        pieceKeysList_solution = list(self.boardEstimate.pieces.keys())
 
         matched_id = {}
 
@@ -789,7 +787,7 @@ class Correspondences:
         """
 
         pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
-        pieceKeysList_solution = list(self.boardPrior.pieces.keys())
+        pieceKeysList_solution = list(self.boardEstimate.pieces.keys())
 
         # Single feature
         if np.count_nonzero(scoreTable_color) == 0:
@@ -915,9 +913,15 @@ class Correspondences:
         #         fundamentally a state property or some other property?
         #         Not resolving now, but leaving for later.
   
-        #for assignment in self.pAssignments.items():
-        #    self.boardPrior.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+        for assignment in self.pAssignments.items():
+            self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
             
+        #IAMHERE. HOW TO PROCEED.
+        #THE RELABEL ALSO NEEDS TO DAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
+        #DON'T COMMIT TO BOARD.  SHOULD NOT OVERLAP WITH BOARD LABELS.
+        #THAT MEANS SHOULD START AT SOME SPECIFIC NUMBER.
+        self.bMeas.relabel(self.pAssignments.items)
+
         pass
 
     #============================== adapt ==============================
@@ -948,8 +952,8 @@ class Correspondences:
         self.pAssignments = {}
         self.pAssignments_rotation = {}
 
-        if (self.boardPrior is None):
-          self.boardPrior = bMeas
+        if (self.boardEstimate is None):
+          self.boardEstimate = bMeas
           print('Setting to measured board since there is no prior.')
         else:
           print('Generating correspondences.')
