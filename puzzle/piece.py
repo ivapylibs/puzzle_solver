@@ -44,8 +44,8 @@ class PieceStatus(Enum):
     UNKNOWN  = 0    # @< The default status.
     MEASURED = 1    # @< The initial status in the current measured board (visible).
     TRACKED  = 2    # @< Not present in the current measured board (including INVISIBLE & GONE).
-    INHAND   = 3    # @< Presumably in player's/worker's hand.
 
+    INHAND   = 3    # @< Presumably in player's/worker's hand.
     INVISIBLE = 4   # @< A subset of TRACKED, which is occluded.
     GONE = 5        # @< A subset of TRACKED, which is not occluded. Be careful that this status
                     #       may be inaccurate when piece extraction fails.
@@ -195,6 +195,12 @@ class Template:
             else:
                 self.genFeature(theMatcher)
                 return self.featVec
+
+    #=============================== setStatus ===============================
+    #
+    def setStatus(self, theStatus):
+
+        self.status = theStatus
 
     #================================ getMask ================================
     #
@@ -872,7 +878,7 @@ class Regular(Template):
 
         return theRegular
 #
-# ================================ puzzle.piece.regular ================================
+#============================== puzzle.piece.regular =============================
 
 
 class Piece:

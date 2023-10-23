@@ -277,6 +277,79 @@ class Board:
 
         return theFlag
 
+    #============================= relabel =============================
+    #
+    def relabel(self, newLabels, idContinue):
+        """!
+        @brief  Relabel the puzzle piece IDs in the board using new label reassignments
+                and adjust IDs for those without reassignment.
+
+        The relabel operation is to preserve label consistency over time for a board.  
+        That way, when plotting or displaying the board, the display is sensible amongst other
+        reasons.  The use of iContinue is to prevent an unassigned piece from displaying
+        its original label that might duplicate a label reassignment or even be associated
+        to a previously seen, but currently not seen, piece.  Over the long term, we want
+        the IDs to be unique, at least for the known pieces.  
+
+        The current approach does not care to handle birth/death outcomes that result in
+        a new piece being assigned an ID matching that of a previously new/birthed piece that
+        then disappeared/died.
+
+
+        @param[in]  newLabels   Should be board index to new ID tuple list. (or array??)
+        @param[in]  idContinue  Index to continue from for unmatched pieces.
+
+        """
+
+        #IAMHERE: POP UP TO correct.
+
+        # [1] Relabel the known pieces.
+        #
+        for pairs in newLabels.items():
+            print("Assign piece number" + pair[0] + " to ID" + pair[1])
+            self.pieces[pair[0]].id = pair[1]
+
+            # @note For now doing naive assignment.  Not sure if good idea to assume that
+            #       assignment id is same as association numbers due to potential for
+            #       birth/death in other instances.  
+            #       Does that concept apply to puzzle pieces placed in solution area?
+            #
+            # @todo Eventually modify outer code to extract the true ID.
+
+            # DELETE BELOW WHEN DONE.
+            # self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+
+        # [2] Get un-matched pieces and assign new IDs
+
+        # @todo Currently the code is pseudo-code.  Need to convert to actual python code.
+        iUnlabeled = (set of 1 ... size) differenced by iLabeled
+        idSet = idContinue
+        for i in iUnlabeled:
+          self.pieces[i].id = idSet
+          idSet = idSet + 1
+
+      
+    #=========================== markMissing ===========================
+    #
+    def markMissing(self, indSetMeasured):
+        """!
+        @brief  Given set of indices to measured pieces, mark remaining as unmeasured.
+
+        @param[in] indSetMeasured   Index set indicating measured pieces.
+
+        """
+
+        #IAMHERE: POP UP TO correct.
+        indUnlabeled = set(range(1, self.size()+1)) - indSetMeasured 
+        for i in indUnlabeled:
+          self.pieces[i].status = PieceStatus.MISSING
+
+        # @todo What is proper status for these pieces?  Shouldn't it agree with
+        #       the puzzle piece status enumerations?? Need to resolve.
+        #
+        # TODO: Resolve status assignment here.  Maybe send as argument?
+        #
+
     #=============================== size ==============================
     #
     def size(self):
@@ -565,7 +638,7 @@ class CfgCorrespondences(AlgConfig):
     @param[out] default_dict  Dictionary populated with minimal set of
                               default settings.
     '''
-    default_dict = dict(matcher = 'Moments',  
+    default_dict = dict(doUpdate = True, matcher = 'Moments',  
                    matchParams = diffScore.CfgMoments.get_default_settings())
 
     return default_dict
@@ -604,6 +677,7 @@ class Correspondences:
             theParams: Any additional parameters in a structure.
         """
 
+        self.params = theParams             # @< Runtime parameters.
         self.boardEstimate  = initBoard     # @< The board estimate (prior & posterior).
         self.pAssignments = {}              # @< Assignments: meas to last.
         self.pAssignments_rotation = {}     # @< Assignments: meas to last rotation angles (degree).
@@ -638,8 +712,6 @@ class Correspondences:
         # Compare with previous board and generate associations
         # Associations are stored in member variable (pAssignments).
         self.matchPieces()
-
-        # IAMHERE
 
         # Generate a new board for association, filtered by the matcher threshold At this point,
         # the associations are candidate associations.  They are not locked in.  If the matcher
@@ -902,7 +974,11 @@ class Correspondences:
   
         If the correspondences rely on information that evolves in time 
         and should be filtered or updated, this is where that gets 
-        implemented.
+        implemented.  Actions to occur here:
+
+        1. Update puzzle piece information (raw and feature).
+        2. Relabel the measured board to reflect association with known pieces.
+        3. Relabel status of estimated board to reflect status of (not) measured pieces.
         """
   
         # @todo   Perform feature correction here.  Make sense for position
@@ -912,15 +988,35 @@ class Correspondences:
         #         Is that a correction or an adaptation?  Is the appearance
         #         fundamentally a state property or some other property?
         #         Not resolving now, but leaving for later.
+
+        # @todo   To what degree should some of these changes be in the measure routine?
+        #         Actually, the correspondence doesn't have that.  A filter generally has
+        #         predict, correct, adapt, and that's it.  Thus the process routine
+        #         would implement the predict, trigger a correspondence action, then correct
+        #         and adapt.  Putting in correct seems reasonable since it performs corrections
+        #         once the associations are known (predictions already made).  
+        #         Here it is not possible to run each routing individually since process also
+        #         includes association.
+        #
   
-        for assignment in self.pAssignments.items():
-            self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+        if (self.theParams.doUpdate)
+            for assignment in self.pAssignments.items():
+                self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
             
         #IAMHERE. HOW TO PROCEED.
-        #THE RELABEL ALSO NEEDS TO DAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
+        #THE RELABEL ALSO NEEDS TO DEAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
         #DON'T COMMIT TO BOARD.  SHOULD NOT OVERLAP WITH BOARD LABELS.
         #THAT MEANS SHOULD START AT SOME SPECIFIC NUMBER.
-        self.bMeas.relabel(self.pAssignments.items)
+        # 10/23 : Adding second argument that is the source board size + 1
+        #           so that unmatched are given "new" labels vis-a-vis the
+        #           source board.
+        # @todo Need to work out labeling of visible/not visible, which for correspondences
+        #       really means associated or not associated, so that track misses can be
+        #       established.  That has more to do with the boardEstimate.
+        self.bMeas.relabel(self.pAssignments.items, self.boardEstimate.size()+1)
+        self.boardEstimate.markMissing(self.pAssignments)
+        # @todo Can we just get the first element of each tuple?  So much easier.
+        #       The markMissing can deal with the index set difference.
 
         pass
 
