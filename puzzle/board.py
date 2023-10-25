@@ -40,6 +40,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 
 from puzzle.piece import Template
+from puzzle.piece import PieceStatus
 
 #===== Environment / Dependencies [Correspondences]
 #
@@ -305,9 +306,12 @@ class Board:
 
         # [1] Relabel the known pieces.
         #
-        for pairs in newLabels.items():
-            print("Assign piece number" + pair[0] + " to ID" + pair[1])
+        print(newLabels)
+        iLabeled = set()
+        for pair in newLabels:
+            print("Assign piece number" + str(pair[0]) + " to ID" + str(pair[1]))
             self.pieces[pair[0]].id = pair[1]
+            iLabeled.add(pair[0])
 
             # @note For now doing naive assignment.  Not sure if good idea to assume that
             #       assignment id is same as association numbers due to potential for
@@ -322,7 +326,9 @@ class Board:
         # [2] Get un-matched pieces and assign new IDs
 
         # @todo Currently the code is pseudo-code.  Need to convert to actual python code.
-        iUnlabeled = (set of 1 ... size) differenced by iLabeled
+        
+        iUnlabeled = set(range(self.size())).difference( iLabeled )
+        print(iUnlabeled)
         idSet = idContinue
         for i in iUnlabeled:
           self.pieces[i].id = idSet
@@ -340,10 +346,15 @@ class Board:
         """
 
         #IAMHERE: POP UP TO correct.
-        indUnlabeled = set(range(1, self.size()+1)) - indSetMeasured 
+        indUnlabeled = set(range(self.size())).difference(indSetMeasured) 
+        print(indUnlabeled)
         for i in indUnlabeled:
-          self.pieces[i].status = PieceStatus.MISSING
+          self.pieces[i].status = PieceStatus.GONE
 
+        #IAMHERE 10/25
+        # @todo I don't think that the piece status is being set correctly.
+        #       Has to do with which piece gets the association.
+        #
         # @todo What is proper status for these pieces?  Shouldn't it agree with
         #       the puzzle piece status enumerations?? Need to resolve.
         #
@@ -679,6 +690,7 @@ class Correspondences:
 
         self.params = theParams             # @< Runtime parameters.
         self.boardEstimate  = initBoard     # @< The board estimate (prior & posterior).
+        self.boardMeasurement = None        # @< The most recently measured board.
         self.pAssignments = {}              # @< Assignments: meas to last.
         self.pAssignments_rotation = {}     # @< Assignments: meas to last rotation angles (degree).
 
@@ -700,60 +712,73 @@ class Correspondences:
     #============================= correspond ============================
     #
     #
-    def correspond(self, measBoard):
+    def correspond(self):
         """!
-        @brief Get correspondences based on the input.
+        @brief Get correspondences based on the most recent measurement (contained).
 
-        @param[in] measBoard    Measured board.
         """
 
-        self.bMeas = measBoard
+        if (self.boardEstimate is None):
+          print('Setting to measured board since there is no prior. Trivial correspondence.')
 
-        # Compare with previous board and generate associations
-        # Associations are stored in member variable (pAssignments).
-        self.matchPieces()
+          self.boardEstimate = self.boardMeasurement
 
-        # Generate a new board for association, filtered by the matcher threshold At this point,
-        # the associations are candidate associations.  They are not locked in.  If the matcher
-        # comparator indicates that the two associated elements are the same, then the
-        # assignment is preserved.  Otherwise, it is effectively tossed out.
-        #
-        # @todo This seems weird, since a variant of the Hungarian should permit the same
-        #       outcome more natively.  The variant should have some sort of threshold
-        #       for association.  Thus, not only does it seek the best match but it seeks the
-        #       best passing match, where there is usually a garbage match score that must
-        #       be beat for the association to occur.  Need more in depth review to see if
-        #       this is the case.
-        #
-        pFilteredAssignments = {}
-        for assignment in self.pAssignments.items():
-            ret = self.matcher.compare(self.bMeas.pieces[assignment[0]], self.boardEstimate.pieces[assignment[1]])
+          keyList = self.boardMeasurement.pieces.keys()
+          matched_id = {}
 
-            # @todo PAV[10/16] Need to remove this part.  A different process should try to 
-            #       decode or act on the rigid body displacement information.  Maybe even the
-            #       update function.  This is part of the tracker to work out, not part of the
-            #       assignment system though it might need or benefit from the displacement
-            #       information.
-            #
-            # Some matchers calculate the rotation as well from mea to sol (counter-clockwise)
-            if isinstance(ret, tuple):
-                if ret[0]:
-                    self.pAssignments_rotation[assignment[0]]=ret[1]
-                    pFilteredAssignments[assignment[0]] = assignment[1]
-            else:
-                if ret:
-                    self.pAssignments_rotation[assignment[0]] = \
-                                        self.bMeas.pieces[assignment[0]].theta \
-                                        - self.boardEstimate.pieces[assignment[1]].theta
+          for i in keyList:
+            matched_id[i] = i
 
-                    pFilteredAssignments[assignment[0]] = assignment[1]
+          self.pAssignments = matched_id
 
+        else:
+          print('Generating correspondences.')
 
-        # pAssignments refers to the id of the puzzle piece
-        #
-        self.pAssignments = pFilteredAssignments
-        print("pAssignments ----")
-        print(self.pAssignments)
+          # Compare with previous board and generate associations
+          # Associations are stored in member variable (pAssignments).
+          self.matchPieces()
+
+          # Generate a new board for association, filtered by the matcher threshold At this point,
+          # the associations are candidate associations.  They are not locked in.  If the matcher
+          # comparator indicates that the two associated elements are the same, then the
+          # assignment is preserved.  Otherwise, it is effectively tossed out.
+          #
+          # @todo This seems weird, since a variant of the Hungarian should permit the same
+          #       outcome more natively.  The variant should have some sort of threshold
+          #       for association.  Thus, not only does it seek the best match but it seeks the
+          #       best passing match, where there is usually a garbage match score that must
+          #       be beat for the association to occur.  Need more in depth review to see if
+          #       this is the case.
+          #
+          pFilteredAssignments = {}
+          for assignment in self.pAssignments.items():
+              ret = self.matcher.compare(self.boardMeasurement.pieces[assignment[0]], self.boardEstimate.pieces[assignment[1]])
+  
+              # @todo PAV[10/16] Need to remove this part.  A different process should try to 
+              #       decode or act on the rigid body displacement information.  Maybe even the
+              #       update function.  This is part of the tracker to work out, not part of the
+              #       assignment system though it might need or benefit from the displacement
+              #       information.
+              #
+              # Some matchers calculate the rotation as well from mea to sol (counter-clockwise)
+              if isinstance(ret, tuple):
+                  if ret[0]:
+                      self.pAssignments_rotation[assignment[0]]=ret[1]
+                      pFilteredAssignments[assignment[0]] = assignment[1]
+              else:
+                  if ret:
+                      self.pAssignments_rotation[assignment[0]] = \
+                                          self.boardMeasurement.pieces[assignment[0]].theta \
+                                          - self.boardEstimate.pieces[assignment[1]].theta
+  
+                      pFilteredAssignments[assignment[0]] = assignment[1]
+  
+  
+          # pAssignments refers to the id of the puzzle piece
+          #
+          self.pAssignments = pFilteredAssignments
+          print("pAssignments ----")
+          print(self.pAssignments)
 
     #=========================== matchPieces ===========================
     #
@@ -774,26 +799,26 @@ class Correspondences:
         #       confirmed to work.
         # @note Moving to a single score table.
         #
-        #scoreTable_shape = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
-        #scoreTable_color = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
-        #scoreTable_edge_color = np.zeros((self.bMeas.size(), self.boardEstimate.size(), 4))
+        #scoreTable_shape = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size()))
+        #scoreTable_color = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size()))
+        #scoreTable_edge_color = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size(), 4))
 
-        scoreTable = np.zeros((self.bMeas.size(), self.boardEstimate.size()))
+        scoreTable = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size()))
 
-        for idx_x, MeaPiece in enumerate(self.bMeas.pieces):
-            if self.bMeas.pieces[MeaPiece].featVec is None: # @todo Is this proper?
-                self.bMeas.pieces[MeaPiece].genFeature(self.matcher)
+        for idx_x, MeaPiece in enumerate(self.boardMeasurement.pieces):
+            if self.boardMeasurement.pieces[MeaPiece].featVec is None: # @todo Is this proper?
+                self.boardMeasurement.pieces[MeaPiece].genFeature(self.matcher)
 
             for idx_y, SolPiece in enumerate(self.boardEstimate.pieces):
             
-                ret = self.matcher.score(self.bMeas.pieces[MeaPiece], self.boardEstimate.pieces[SolPiece])
+                ret = self.matcher.score(self.boardMeasurement.pieces[MeaPiece], self.boardEstimate.pieces[SolPiece])
                 scoreTable[idx_x][idx_y] = ret
 
                 # If above craps out during operation due to multiple return values, it is because the scoring
                 # method is improper.
 
                 #DEBUG 
-                print( (self.bMeas.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
+                print( (self.boardMeasurement.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
 
                 #if type(ret) is tuple and len(ret) > 0:
                 #    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
@@ -825,7 +850,7 @@ class Correspondences:
         """
 
         # Todo: Currently we only use scoreTable_shape
-        pieceKeysList_bMeas    = list(self.bMeas.pieces.keys())
+        pieceKeysList_bMeas    = list(self.boardMeasurement.pieces.keys())
         pieceKeysList_solution = list(self.boardEstimate.pieces.keys())
 
         matched_id = {}
@@ -858,7 +883,7 @@ class Correspondences:
             matched_id: The matched pair dict.
         """
 
-        pieceKeysList_bMeas = list(self.bMeas.pieces.keys())
+        pieceKeysList_bMeas = list(self.boardMeasurement.pieces.keys())
         pieceKeysList_solution = list(self.boardEstimate.pieces.keys())
 
         # Single feature
@@ -999,9 +1024,9 @@ class Correspondences:
         #         includes association.
         #
   
-        if (self.theParams.doUpdate)
+        if self.params.doUpdate:
             for assignment in self.pAssignments.items():
-                self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+                self.boardEstimate.pieces[assignment[1]].update(self.boardMeasurement.pieces[assignment[0]])
             
         #IAMHERE. HOW TO PROCEED.
         #THE RELABEL ALSO NEEDS TO DEAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
@@ -1013,8 +1038,14 @@ class Correspondences:
         # @todo Need to work out labeling of visible/not visible, which for correspondences
         #       really means associated or not associated, so that track misses can be
         #       established.  That has more to do with the boardEstimate.
-        self.bMeas.relabel(self.pAssignments.items, self.boardEstimate.size()+1)
+        print(self.boardMeasurement)
+        print(self.boardEstimate)
+        self.boardMeasurement.relabel(self.pAssignments.items(), self.boardEstimate.size()+1)
         self.boardEstimate.markMissing(self.pAssignments)
+        # @todo Seems like this should be more like markStatus for the piece so that
+        #       those with and w/out assignments get proper status label.
+        #       How does it get more complex as we go though?
+        #
         # @todo Can we just get the first element of each tuple?  So much easier.
         #       The markMissing can deal with the index set difference.
 
@@ -1048,12 +1079,8 @@ class Correspondences:
         self.pAssignments = {}
         self.pAssignments_rotation = {}
 
-        if (self.boardEstimate is None):
-          self.boardEstimate = bMeas
-          print('Setting to measured board since there is no prior.')
-        else:
-          print('Generating correspondences.')
-          self.correspond(bMeas)
+        self.boardMeasurement = bMeas
+        self.correspond()
 
         self.correct()
         self.adapt()

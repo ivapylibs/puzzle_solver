@@ -41,8 +41,8 @@ from puzzle.piece import Template
 
 #==[1] Create a start image.
 #
-squarePiece = Template.buildSquare(20, color=(160, 160, 0), rLoc=(80, 40))
-spherePiece = Template.buildSphere(10, color=(0, 255, 0), rLoc=(80, 140))
+squarePiece = Template.buildSquare(20, color=(160, 160, 0), rLoc=(60, 40))
+spherePiece = Template.buildSphere(10, color=(0, 255, 0), rLoc=(70, 140))
 
 bigImage = np.zeros((200, 200, 3)).astype('uint8')
 
@@ -76,13 +76,16 @@ boardPer   = boardPerceive(None, binDet, theLayer, theTracker)
 shiftSq = np.array([5, 5])
 shiftSp = np.array([0, -5])
 
-for i in range(15):
+for i in range(25):
   bigImage = np.zeros((200, 200, 3)).astype('uint8')
   squarePiece.setPlacement(shiftSq, True) 
   spherePiece.setPlacement(shiftSp, True) 
 
-  squarePiece.placeInImage(bigImage)
-  spherePiece.placeInImage(bigImage)
+  if (i < 20):
+    squarePiece.placeInImage(bigImage)
+
+  if (i < 13) or (i > 17):
+    spherePiece.placeInImage(bigImage)
 
   boardPer.process(bigImage)
 
