@@ -66,7 +66,7 @@ class Board:
     """
 
     def __init__(self, *argv):
-        """
+        """!
         @brief  Constructor for puzzle board. Can pass contents at
                 instantiation time or delay until later.
 
@@ -77,36 +77,37 @@ class Board:
         # Note that Python 3.7+ has preserved the order of the element in the dict
         # No need to use OrderedDict
         # https://stackoverflow.com/a/40007169
-        self.pieces = {}  # @< The puzzle pieces.
-
-        self.id_count = 0
+        self.pieces = {}                # @< The puzzle pieces.
+        self.id_count = 0               # @< Internal ID count for pieces (affects new ID assignments)
 
         if len(argv) == 1:
             if issubclass(type(argv[0]), Board):
-                self.pieces = argv[0].pieces
+                self.pieces   = argv[0].pieces
                 self.id_count = argv[0].id_count
             elif isinstance(argv[0], np.ndarray):
-                self.pieces = argv[0]
+                self.pieces   = argv[0]
                 self.id_count = len(self.pieces)
             else:
                 raise TypeError('Unknown input.')
+
         elif len(argv) == 2:
             if isinstance(argv[0], np.ndarray) and isinstance(argv[1], int):
-                self.pieces = argv[0]
+                self.pieces   = argv[0]
                 self.id_count = argv[1]
             else:
                 raise TypeError('Unknown input.')
+
         elif len(argv) > 2:
             raise TypeError('Too many inputs.')
 
     #============================= addPiece ============================
     #
     def addPiece(self, piece, ORIGINAL_ID=False):
-        """
+        """!
         @brief  Add puzzle piece instance to the board.
 
-        Args:
-            piece: A puzzle piece instance.
+        @param[in]  piece           Puzzle piece instance.
+        @param[in]  ORIGINAL_ID     Flag indicating where to keep piece ID or re-assign.
         """
         # Do not directly modify piece
         piece_copy = deepcopy(piece)
@@ -114,13 +115,17 @@ class Board:
         if ORIGINAL_ID:
             self.pieces[piece_copy.id] = piece_copy
         else:
-            piece_copy.id = self.id_count
+            piece_copy.id = self.id_count+1
             self.pieces[self.id_count] = piece_copy
             self.id_count += 1
 
     #============================ addPieces ============================
     #
     def addPieces(self, pieces):
+      """!
+      @brief    Add puzzle piece to board.
+      """
+
       for piece in pieces:
         self.addPiece(piece)
 
@@ -129,10 +134,10 @@ class Board:
     #
     def rmPiece(self, id):
         """
-        @brief Remove puzzle piece instance from the board
+        @brief Remove puzzle piece instance from board
 
-        Args:
-            id: The puzzle piece id (for display)
+        @param[in]  id  ID label of piece to remove.
+
         """
 
         rm_id = None
@@ -149,10 +154,10 @@ class Board:
     #============================= getPiece ============================
     #
     def getPiece(self, id)->Template:
-        """Get a puzzle piece instance given the id
+        """!
+        @brief  Get puzzle piece instance based on id
 
-        Args:
-            id (int): The puzzle piece id
+        @param[out] thePiece    Returns the puzzle piece matcing the ID (if exists)
         """
         assert id in self.pieces.keys(), "The required piece is not in the board."
         return self.pieces[id]
@@ -296,8 +301,10 @@ class Board:
         a new piece being assigned an ID matching that of a previously new/birthed piece that
         then disappeared/died.
 
+        It is up to the calling context to ensure that the new ID labels are correct, and that
+        the pieces missing labels should be given new IDs starting from idContinue.
 
-        @param[in]  newLabels   Should be board index to new ID tuple list. (or array??)
+        @param[in]  newLabels   Should be board index to new ID tuple list.
         @param[in]  idContinue  Index to continue from for unmatched pieces.
 
         """
@@ -306,10 +313,10 @@ class Board:
 
         # [1] Relabel the known pieces.
         #
-        print(newLabels)
         iLabeled = set()
         for pair in newLabels:
-            print("Assign piece number" + str(pair[0]) + " to ID" + str(pair[1]))
+            #DEBUG
+            #print("Assign piece number" + str(pair[0]) + "of " + str(self.size()) + " to ID" + str(pair[1]))
             self.pieces[pair[0]].id = pair[1]
             iLabeled.add(pair[0])
 
@@ -318,21 +325,22 @@ class Board:
             #       birth/death in other instances.  
             #       Does that concept apply to puzzle pieces placed in solution area?
             #
-            # @todo Eventually modify outer code to extract the true ID.
-
-            # DELETE BELOW WHEN DONE.
-            # self.boardEstimate.pieces[assignment[1]].update(self.bMeas.pieces[assignment[0]])
+            #       10/26: Above might be corrected.  Need further testing to confirm.
+            #               Added note that outer context needs to provide proper ID.
+            #               No checking for correctness: not possible given what is known
+            #               in this context.
 
         # [2] Get un-matched pieces and assign new IDs
-
-        # @todo Currently the code is pseudo-code.  Need to convert to actual python code.
-        
+        #
+        # @todo This part is untested as of 10/26 but should work. No detected births in current test suite.
+        #
         iUnlabeled = set(range(self.size())).difference( iLabeled )
-        print(iUnlabeled)
         idSet = idContinue
         for i in iUnlabeled:
           self.pieces[i].id = idSet
           idSet = idSet + 1
+          #DEBUG
+          print("New piece. New ID. Displaying to confirm functionality. Delete once confirmed.")
 
       
     #=========================== markMissing ===========================
@@ -342,13 +350,12 @@ class Board:
         @brief  Given set of indices to measured pieces, mark remaining as unmeasured.
 
         @param[in] indSetMeasured   Index set indicating measured pieces.
-
         """
 
-        #IAMHERE: POP UP TO correct.
         indUnlabeled = set(range(self.size())).difference(indSetMeasured) 
-        print(indUnlabeled)
         for i in indUnlabeled:
+          #DEBUG
+          #print("Missing: " + str(i) + " == " + str(self.pieces[i].id))
           self.pieces[i].status = PieceStatus.GONE
 
         #IAMHERE 10/25
@@ -367,11 +374,12 @@ class Board:
         """!
         @brief  Number of pieces on the board.
 
-        @param[out] nPieces Number of pieces on the board.
+        @param[out] nPieces     Number of pieces on the board.
         """
         return len(self.pieces)
 
     #============================= extents =============================
+    #
     def extents(self):
         """!
         @brief  Iterate through puzzle pieces to get tight bounding box 
@@ -719,7 +727,8 @@ class Correspondences:
         """
 
         if (self.boardEstimate is None):
-          print('Setting to measured board since there is no prior. Trivial correspondence.')
+          #DEBUG
+          #print('Setting to measured board since there is no prior. Trivial correspondence.')
 
           self.boardEstimate = self.boardMeasurement
 
@@ -732,7 +741,8 @@ class Correspondences:
           self.pAssignments = matched_id
 
         else:
-          print('Generating correspondences.')
+          #DEBUG
+          #print('Generating correspondences.')
 
           # Compare with previous board and generate associations
           # Associations are stored in member variable (pAssignments).
@@ -777,8 +787,6 @@ class Correspondences:
           # pAssignments refers to the id of the puzzle piece
           #
           self.pAssignments = pFilteredAssignments
-          print("pAssignments ----")
-          print(self.pAssignments)
 
     #=========================== matchPieces ===========================
     #
@@ -818,7 +826,7 @@ class Correspondences:
                 # method is improper.
 
                 #DEBUG 
-                print( (self.boardMeasurement.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
+                #print( (self.boardMeasurement.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
 
                 #if type(ret) is tuple and len(ret) > 0:
                 #    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
@@ -829,7 +837,8 @@ class Correspondences:
 
         # Save for debug
         self.scoreTable = scoreTable.copy()
-        print(self.scoreTable)
+        #DEBUG
+        #print(self.scoreTable)
 
         # The measured piece will be assigned a solution piece
         # Some measured piece may not have a match according to the threshold.
@@ -1024,9 +1033,13 @@ class Correspondences:
         #         includes association.
         #
   
+        matchedLabels = {}
+        matchedIndices = set()
         if self.params.doUpdate:
             for assignment in self.pAssignments.items():
                 self.boardEstimate.pieces[assignment[1]].update(self.boardMeasurement.pieces[assignment[0]])
+                matchedLabels[assignment[0]] = self.boardEstimate.pieces[assignment[1]].id
+                matchedIndices.add(assignment[1])
             
         #IAMHERE. HOW TO PROCEED.
         #THE RELABEL ALSO NEEDS TO DEAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
@@ -1038,10 +1051,11 @@ class Correspondences:
         # @todo Need to work out labeling of visible/not visible, which for correspondences
         #       really means associated or not associated, so that track misses can be
         #       established.  That has more to do with the boardEstimate.
-        print(self.boardMeasurement)
-        print(self.boardEstimate)
-        self.boardMeasurement.relabel(self.pAssignments.items(), self.boardEstimate.size()+1)
-        self.boardEstimate.markMissing(self.pAssignments)
+        #print('CCCCCCCCCCCCCCCCC')
+        #print(self.pAssignments)
+        #print(matchedLabels)
+        self.boardMeasurement.relabel(matchedLabels.items(), self.boardEstimate.size()+1)
+        self.boardEstimate.markMissing(matchedIndices)
         # @todo Seems like this should be more like markStatus for the piece so that
         #       those with and w/out assignments get proper status label.
         #       How does it get more complex as we go though?

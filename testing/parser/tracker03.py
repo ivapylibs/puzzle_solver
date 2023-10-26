@@ -43,6 +43,7 @@ from puzzle.piece import Template
 #
 squarePiece = Template.buildSquare(20, color=(160, 160, 0), rLoc=(60, 40))
 spherePiece = Template.buildSphere(10, color=(0, 255, 0), rLoc=(70, 140))
+extraPiece  = Template.buildSquare(15, color=(0, 160, 200), rLoc=(30, 150))
 
 bigImage = np.zeros((200, 200, 3)).astype('uint8')
 
@@ -76,10 +77,11 @@ boardPer   = boardPerceive(None, binDet, theLayer, theTracker)
 shiftSq = np.array([5, 5])
 shiftSp = np.array([0, -5])
 
-for i in range(25):
+for i in range(35):
   bigImage = np.zeros((200, 200, 3)).astype('uint8')
   squarePiece.setPlacement(shiftSq, True) 
-  spherePiece.setPlacement(shiftSp, True) 
+  if (i < 25):
+    spherePiece.setPlacement(shiftSp, True) 
 
   if (i < 20):
     squarePiece.placeInImage(bigImage)
@@ -87,13 +89,16 @@ for i in range(25):
   if (i < 13) or (i > 17):
     spherePiece.placeInImage(bigImage)
 
+  if (i > 25):
+    print("Should see extra piece. Will be incorrectly associated.")
+    extraPiece.placeInImage(bigImage)
+
   boardPer.process(bigImage)
 
   outImage = np.zeros((200, 200, 3)).astype('uint8')
 
   plt.cla()
   boardPer.tracker.bMeas.display_mp(outImage, fh, ID_DISPLAY=True)
-  print(boardPer.tracker.bMeas)
   plt.pause(0.2)
 
 #IAMHERE
