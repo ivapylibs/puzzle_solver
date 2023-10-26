@@ -309,8 +309,6 @@ class Board:
 
         """
 
-        #IAMHERE: POP UP TO correct.
-
         # [1] Relabel the known pieces.
         #
         iLabeled = set()
@@ -358,10 +356,6 @@ class Board:
           #print("Missing: " + str(i) + " == " + str(self.pieces[i].id))
           self.pieces[i].status = PieceStatus.GONE
 
-        #IAMHERE 10/25
-        # @todo I don't think that the piece status is being set correctly.
-        #       Has to do with which piece gets the association.
-        #
         # @todo What is proper status for these pieces?  Shouldn't it agree with
         #       the puzzle piece status enumerations?? Need to resolve.
         #
@@ -1041,16 +1035,11 @@ class Correspondences:
                 matchedLabels[assignment[0]] = self.boardEstimate.pieces[assignment[1]].id
                 matchedIndices.add(assignment[1])
             
-        #IAMHERE. HOW TO PROCEED.
-        #THE RELABEL ALSO NEEDS TO DEAL WITH MISSING ASSIGNMENTS. GIVE NEW ID.
-        #DON'T COMMIT TO BOARD.  SHOULD NOT OVERLAP WITH BOARD LABELS.
-        #THAT MEANS SHOULD START AT SOME SPECIFIC NUMBER.
-        # 10/23 : Adding second argument that is the source board size + 1
-        #           so that unmatched are given "new" labels vis-a-vis the
-        #           source board.
         # @todo Need to work out labeling of visible/not visible, which for correspondences
         #       really means associated or not associated, so that track misses can be
         #       established.  That has more to do with the boardEstimate.
+        #       10/25: Assigning missing pieces the label "GONE"  Need to work out proper labels.
+        #
         #print('CCCCCCCCCCCCCCCCC')
         #print(self.pAssignments)
         #print(matchedLabels)
@@ -1059,11 +1048,6 @@ class Correspondences:
         # @todo Seems like this should be more like markStatus for the piece so that
         #       those with and w/out assignments get proper status label.
         #       How does it get more complex as we go though?
-        #
-        # @todo Can we just get the first element of each tuple?  So much easier.
-        #       The markMissing can deal with the index set difference.
-
-        pass
 
     #============================== adapt ==============================
     #
