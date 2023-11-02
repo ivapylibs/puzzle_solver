@@ -63,7 +63,7 @@ class Sift(MatchSimilar):
   #
   def __init__(self, tau=10, theThreshMatch=0.5):
     """!
-    @brief  Constructor for the puzzle piece histogram class.
+    @brief  Constructor for the puzzle piece sift class.
 
     @param[in]  tau             Threshold param to determine similarity for SIFT feature.
     @param[in]  theThreshMatch  Threshold to determine match (0-1).

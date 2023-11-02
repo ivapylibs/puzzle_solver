@@ -1,27 +1,31 @@
 #!/usr/bin/python3
-#=============================== tracker03 ===============================
+#=============================== tracker04 ===============================
 #
 # @brief    Pack detector + trackpointer into a perceiver instance and 
-#           test out functionality.
+#           test out functionality on color differentiated pieces.
 #
-# Here, data association across frames is added.  The circle path crossing 
-# the square path and leading to an identity switch in the board measurement
-# gets corrected by the data association module.  Track IDs are consistent.
+# Data association across frames based on color is used (histograms).  
+# The circle path crossing the square path and leading to an identity switch 
+# in the board measurement gets corrected by the data association module.  
+# Even with disappearance.  The birth of a new piece should not lead to bad 
+# track association since it is based on color now.   
 #
-#=============================== tracker03 ===============================
+# All pieces have proper IDs.
+#
+#=============================== tracker04 ===============================
 
 #
-# @file     tracker03.py
+# @file     tracker04.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-# @date     2024/09/15  [created]
+# @date     2024/11/02  [created]
 #
 #
 # NOTE:
 #   indent is 2 spaces.
 #   80 columns
 #
-#=============================== tracker03 ===============================
+#=============================== tracker04 ===============================
 
 
 #==[0] Prep environment
@@ -66,7 +70,7 @@ binDet     = detector.inImage(improc)
 
 theLayer   = boardMeasure()
 
-CfgTrack   = board.CfgCorrespondences.buildNearest()
+CfgTrack   = board.CfgCorrespondences.buildColorMatchCV()
 theTracker = board.Correspondences(CfgTrack)
 
 boardPer   = boardPerceive(None, binDet, theLayer, theTracker)
@@ -102,4 +106,4 @@ for i in range(35):
   plt.pause(0.2)
 
 #
-#=============================== tracker03 ===============================
+#=============================== tracker04 ===============================

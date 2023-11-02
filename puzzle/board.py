@@ -665,6 +665,15 @@ class CfgCorrespondences(AlgConfig):
     matchCfg.matchParams = None      # None means to use default settings.
     return matchCfg
 
+  #=========================== buildColorMatchCV===========================
+  #
+  #
+  def buildColorMatchCV():
+    matchCfg = CfgCorrespondences();
+    matchCfg.matcher = 'ColorHistCV'
+    matchCfg.matchParams = None      # None means to use default settings.
+    return matchCfg
+
 #
 #---------------------------------------------------------------------------
 #============================= Correspondences =============================
@@ -1094,12 +1103,14 @@ class Correspondences:
       elif (typeStr == 'Distance'):
         theConfig = diffScore.CfgDistance()
         matchType = diffScore.Distance
-
+      elif (typeStr == 'ColorHistCV'):
+        theConfig = diffScore.CfgHistogramCV()
+        matchType = diffScore.HistogramCV
 
       if (matchConfig is not None):
         theConfig.merge_from_other_cfg(matchConfig)
 
-      theMatcher = matchType.buildFromConfig(theConfig)
+      theMatcher = matchType(theConfig)
 
       return theMatcher
 

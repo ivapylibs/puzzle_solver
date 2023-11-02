@@ -25,9 +25,10 @@ import numpy as np
 import cv2
 import math
 from puzzle.pieces.matcher import MatchDifferent
+from puzzle.pieces.matcher import CfgDifferent
 from puzzle.piece import Template
 
-from detector.Configuration import AlgConfig
+
 
 #
 #---------------------------------------------------------------------------
@@ -35,18 +36,23 @@ from detector.Configuration import AlgConfig
 #---------------------------------------------------------------------------
 #
 
-class CfgDistance(AlgConfig):
+#------------------------------ CfgDistance ------------------------------
+#
+
+class CfgDistance(CfgDifferent):
   '''!
-  @brief  Configuration setting specifier for Moments class.
+  @brief  Configuration setting specifier for distance matcher class.
   '''
 
   #============================= __init__ ============================
   #
   def __init__(self, init_dict=None, key_list=None, new_allowed=True):
     '''!
-    @brief        Constructor of configuration instance.
+    @brief      Constructor of different matcher configuration instance.
   
-    @param[in]    cfg_files   List of config files to load to merge settings.
+    @param[in]  init_dict   Dictionary to use that expands default one. Usually not given.
+    @param[in]  key_list    Unsure.
+    @param[in]  new_allowed Are new entries allowed. Default is yes.
     '''
     if (init_dict == None):
       init_dict = CfgDistance.get_default_settings()
@@ -61,35 +67,42 @@ class CfgDistance(AlgConfig):
   @staticmethod
   def get_default_settings():
     '''!
-    @brief  Defines most basic, default settings for RealSense D435.
+    @brief  Defines default configuration parameter for distance matcher class.
 
     @param[out] default_dict  Dictionary populated with minimal set of
                               default settings.
     '''
-    default_dict = dict( farDist = float('inf') ) 
+    default_dict = CfgDifferent().get_default_settings()
+    default_dict.update( dict( tau = 35) )      # What is this about?? Why this value?
     return default_dict
 
 
 
+#-------------------------------- Distance -------------------------------
+#
 
 class Distance(MatchDifferent):
 
   #============================= __init__ ============================
   #
-  def __init__(self, tau=35):
+  def __init__(self, theParams = CfgDistance()):
     """!
     @brief  Constructor for the puzzle piece histogram class.
 
     @param[in]  tau     Threshold param to determine difference.
     """
-    super(Distance, self).__init__(tau)
+    super(Distance, self).__init__(theParams)
 
   #========================== extractFeature =========================
   #
   # @todo   Should it really be a static method? Might there ever be a need for configuration
   #         specifications that would dictate being a member function???
-  @staticmethod
-  def extractFeature(piece):
+  # @todo   0203/11/02 PAV - Yes!  When the feature extraction process has variable
+  #             parameters.  Almost always the case for non-trivial features.
+  #             Modifying code to reflect as much. Remove this todo once the modifications
+  #             are done, the code works, and the documentation supports this understanding.
+  #
+  def extractFeature(self, piece):
     """
     @brief Get the puzzle centroid value.
 
@@ -109,7 +122,7 @@ class Distance(MatchDifferent):
   @staticmethod
   def buildFromConfig(matchConfig):
 
-    matcher = Distance(matchConfig.farDist)
+    matcher = Distance(matchConfig)
     return matcher
 
 
@@ -119,23 +132,82 @@ class Distance(MatchDifferent):
 #---------------------------------------------------------------------------
 #
 
-class Histogram(MatchDifferent):
+class CfgHistogramCV(CfgDifferent):
+  '''!
+  @brief  Configuration setting specifier for Histogram puzzle comparator class.
+  '''
 
   #============================= __init__ ============================
   #
-  def __init__(self, tau=0.3):
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgHistogramCV.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = CfgDifferent.get_default_settings()
+    default_dict.update( dict( tau = 0.3 , colorSpace = 'toHSV', bins = [36, 32], \
+                                                                 ranges = [0, 180, 0, 256]) )
+    return default_dict
+
+  #============================ build_for_RGB ============================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def build_for_RGB():
+    '''!
+    @brief  Defines canned settings for RGB histogram matching. Prioritizes a bit efficiency
+            over accuracy.  16 bins per channel = 4096 bins, if using Cartesian product and not
+            separating coordinate-wise, in which case it would be 48 bins.
+
+    @param[out] theParams   Default parameters instance for RGB case.
+    '''
+
+    theParams = CfgHistogramCV()
+    default_dict = dict( tau = 0.3 , colorSpace = 'RGB', bins = [16, 16, 16],\
+                         range = [0, 256, 0, 256, 0, 256]) 
+    theParams.merge(default_dict)   # @todo Untested.
+    return default_dict
+
+#
+#-------------------------------- Histogram --------------------------------
+#
+
+class HistogramCV(MatchDifferent):
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, theParams=CfgHistogramCV()):
     """
     @brief  Constructor for the puzzle piece histogram class.
 
     @param[in]  tau     Threshold param to determine difference.
     """
 
-    super(Histogram, self).__init__(tau)
+    super(HistogramCV, self).__init__(theParams)
 
   #========================== extractFeature =========================
   #
-  @staticmethod
-  def extractFeature(piece): 
+  def extractFeature(self, piece): 
     """
     @brief Compute histogram from the raw puzzle data.
            See https://opencv-tutorial.readthedocs.io/en/latest/histogram/histogram.html
@@ -145,10 +217,10 @@ class Histogram(MatchDifferent):
     @param[out] Puzzle piece histogram.
     """
 
-    if issubclass(type(piece), Template):
-      if len(piece.y.colorFea) > 0:
-        return piece.y.colorFea
-    else:
+    if not issubclass(type(piece), Template):
+    #  if len(piece.y.colorFea) > 0:
+    #    return piece.y.colorFea
+    #else:
       raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
     #DEBUG
@@ -156,13 +228,18 @@ class Histogram(MatchDifferent):
     #cv2.waitKey()
 
     # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
-    img_hsv = cv2.cvtColor(piece.y.image, cv2.COLOR_RGB2HSV)
-    hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, [int(180/3), int(256/2)], [0, 180, 0, 256])
-    cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
-    piece.y.colorFea = hist
-
+    if (self.params.colorSpace == 'toHSV'):
+      img_hsv = cv2.cvtColor(piece.y.image.astype('uint8'), cv2.COLOR_RGB2HSV)
+      hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, self.params.bins,\
+                                                           self.params.ranges) 
+      cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+      # @todo   Why is MINMAX the one to choose.  Seems weird.  I think this may affect
+      #         how Bhattacharya works and converts it to a difference type.  Normally
+      #         Bhattacharya is a similarity score, not a difference score.  what is up?
+    
     return hist
+    #@todo   Remove because not applicable.
+    #piece.y.colorFea = hist
 
   #============================== score ==============================
   #
@@ -180,7 +257,8 @@ class Histogram(MatchDifferent):
     hist_B = piece_B.getFeature(self) 
 
     # Range from 0-1, smaller means closer
-    return  cv2.compareHist(hist_A, hist_B, cv2.HISTCMP_BHATTACHARYYA)
+    theScore =  cv2.compareHist(hist_A, hist_B, cv2.HISTCMP_BHATTACHARYYA)
+    return theScore
 
 #
 #---------------------------------------------------------------------------
@@ -188,7 +266,7 @@ class Histogram(MatchDifferent):
 #---------------------------------------------------------------------------
 #
 
-class CfgMoments(AlgConfig):
+class CfgMoments(CfgDifferent):
   '''!
   @brief  Configuration setting specifier for Moments class.
   '''
@@ -244,8 +322,7 @@ class Moments(MatchDifferent):
 
   #========================== extractFeature =========================
   #
-  @staticmethod
-  def extractFeature(piece):
+  def extractFeature(self, piece):
     """
     @brief  Compute moments from the raw puzzle data.
 
@@ -314,8 +391,7 @@ class PCA(MatchDifferent):
 
   #========================== extractFeature =========================
   #
-  @staticmethod
-  def extractFeature(piece):
+  def extractFeature(self, piece):
     """
     @brief Get the puzzle centroid value.
 

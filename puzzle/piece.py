@@ -443,6 +443,8 @@ class Template:
         """!
         @brief  Update template board puzzle piece based on association.
 
+        Performs the simplest of updates.
+
         @param[in]  matchedPiece    Latest matched measurement of a piece.
         """
 
