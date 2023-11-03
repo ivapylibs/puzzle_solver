@@ -180,8 +180,8 @@ class Template:
     #
     def getFeature(self, theMatcher = None):
         """!
-        @brief  Get the feature vector of the puzzle piece. Assign if not defined
-                based on passed matcher.
+        @brief  Get the feature vector of the puzzle piece. Assign if not
+                defined based on passed matcher.
 
         @param[in] theMatcher   Optional but recommended argument that specifies
                                 the feature matching implementation.
