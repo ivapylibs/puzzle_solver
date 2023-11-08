@@ -205,12 +205,13 @@ class boardMeasure(centroidMulti):
      
       #--[3] Collect other information.
       #
+      pCorn  = np.array([ri.bbox[1], ri.bbox[0]])
       pCent  = np.round(ri.centroid).astype(int)[::-1]      # (x,y) coords.
       pStat  = self.tparams.pieceStatus
 
       #--[4] Instantiate piece and add to measured board.
       #
-      thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, pCent, pStat)
+      thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, pCorn, pCent, pStat)
 
       #thePiece = self.pieceConstructor.buildFromPropsAndImage(ri, pImage, pStat)
       # @todo   Maybe should just work directly from region props info plus cropped image.

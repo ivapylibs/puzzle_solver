@@ -4,6 +4,9 @@
 # @brief    Test script for the most basic functionality of template
 #           puzzle piece class.
 #
+# Creates a few very basic instances of puzzle pieces, then visualizes them
+# in a virtual puzzle board.
+#
 #============================ basic01_template ===========================
 
 #
@@ -50,6 +53,7 @@ thePiece.placeInImageAt(bigImage, np.array([70, 30]))
 # Display the resulting image. Should have three puzzle pieces in it.
 plt.figure()
 plt.imshow(bigImage)
+plt.title("Test puzzle piece placement in image.")
 
 #==[4] Test the builder of the basic puzzle piece
 squarePiece = Template.buildSquare(20, color=(255, 0, 0), rLoc=(80, 40))

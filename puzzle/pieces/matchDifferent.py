@@ -297,11 +297,10 @@ class CfgMoments(CfgDifferent):
     @param[out] default_dict  Dictionary populated with minimal set of
                               default settings.
     '''
-    default_dict = dict(num = 20)
+    default_dict = CfgDifferent.get_default_settings()
+    default_dict.update( dict( tau = 5 ) )
 
     return default_dict
-
-
 
 
 class Moments(MatchDifferent):
@@ -311,14 +310,14 @@ class Moments(MatchDifferent):
 
   #============================= __init__ ============================
   #
-  def __init__(self, tau=5):
+  def __init__(self, theParams=CfgMoments()):
     """
     @brief  Constructor for the puzzle piece moments class.
 
     @param[in]  tau     Threshold param to determine difference.
     """
 
-    super(Moments, self).__init__(tau)
+    super(Moments, self).__init__(theParams)
 
   #========================== extractFeature =========================
   #
@@ -334,10 +333,11 @@ class Moments(MatchDifferent):
     @param[out]  huMoments: A list of huMoments value.
     """
 
-    if issubclass(type(piece), Template):
-      if len(piece.y.shapeFea) > 0:
-        return piece.y.shapeFea
-    else:
+    if not issubclass(type(piece), Template):
+    #if issubclass(type(piece), Template):
+    #  if len(piece.y.shapeFea) > 0:
+    #    return piece.y.shapeFea
+    #else:
       raise ('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
     moments = cv2.moments(piece.y.contour)
@@ -345,7 +345,6 @@ class Moments(MatchDifferent):
     for i in range(7):
       huMoments[i] = -1 * math.copysign(1.0, huMoments[i]) * math.log10(1e-06 + abs(huMoments[i]))
 
-    piece.y.shapeFea = huMoments
     return huMoments
 
   #============================== score ==============================
@@ -372,6 +371,43 @@ class Moments(MatchDifferent):
 #=================================== PCA ===================================
 #---------------------------------------------------------------------------
 #
+class CfgPCA(CfgDifferent):
+  '''!
+  @brief  Configuration setting specifier for Moments class.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgPCA.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = CfgDifferent.get_default_settings()
+    default_dict.update( dict( tau = 5 ) )
+
+    return default_dict
+
+
 class PCA(MatchDifferent):
   """!
   @brief    Uses pca to calculate rotation.
@@ -381,13 +417,13 @@ class PCA(MatchDifferent):
 
   #============================= __init__ ============================
   #
-  def __init__(self, tau=-float('inf')):
+  def __init__(self, theParams=CfgPCA()):
     """!
     @brief  Constructor for the puzzle piece histogram class.
 
     @param[in]  tau     Threshold param to determine difference.
     """
-    super(PCA, self).__init__(tau)
+    super(PCA, self).__init__(theParams)
 
   #========================== extractFeature =========================
   #

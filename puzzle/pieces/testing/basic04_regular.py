@@ -20,6 +20,7 @@
 import os
 
 import cv2
+import numpy as np
 import improcessor.basic as improcessor
 
 # ==[0] Prep environment
@@ -27,6 +28,8 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 
 from puzzle.parser import boardMeasure, CfgBoardMeasure
+import detector.inImage as detector
+
 from puzzle.parse.fromSketch import FromSketch
 from puzzle.piece import Regular
 
@@ -44,33 +47,51 @@ theMaskSol_src = cv2.imread('../../../testing/data/puzzle_15p_123rf.png')
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
+                           #cv2.GaussianBlur, ((3, 3), 0,),
+                           #cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
-theDet = FromSketch(improc)
-theDet.process(theMaskSol_src.copy())
+# @todo Weird approach to puzzle piece extraction.  Why not just threshold?  The image
+#       should permit such an activity.  After thresholding, just need to grab the
+#       connected components.  To thin out the borders, skeletonization may be in order.
+#       Each one is a puzzle piece mask.  Apply to the image and it is done.  Of course,
+#       the image may need to be cropped or resized so that the puzzle mask fits.  The best
+#       approach is to get the aspect ratio and match them (crop puzzle to match aspect
+#       ratio).  After that resize the image to match the target dimensions of the mask.
+#       Apply the mask to recover puzzle pieces.
+#
+# @note Applying just a threshold without edge detection and without blurring, works fine.
+#       Delete this comment once verified to work.
+# 
+# @note Acceptable for now, but should really adjust.  What does this say about Yunzhi's
+#       understanding of the problem? Ability to think through a simple problem?
+#       Won't fully know until testing out above approach.  It might actually align with
+#       puzzle board piece detection approach, since that also uses connected components
+#       (or should???).
+#
+theDet = detector.inImage(improc)
+theDet.process(theMaskSol_src)
 theMaskSol = theDet.getState().x
 
 # ==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
 puzzParm = CfgBoardMeasure()
-puzzParm.minArea = 5000
+puzzParm.minArea = 50
 
 theLayer = boardMeasure(puzzParm)
 
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
-# theBoardSol.display(ID_DISPLAY=True)
-# plt.show()
+theBoardSol.display_mp(ID_DISPLAY=True)
+plt.show()
 
 # ==[1.3] Focus on a single puzzle piece
 #
 
-theTemplate = theBoardSol.pieces[9]
-
-theRegular = Regular(theTemplate)
+theTemplate = theBoardSol.pieces[0]
+theRegular  = Regular(theTemplate)
+# IAMHERE: CRASHES HERE.
 
 # ==[2] Display the puzzle piece and the extracted info.
 #

@@ -29,8 +29,8 @@ from copy import deepcopy
 
 from trackpointer.centroidMulti import centroidMulti
 
-from puzzle.builder.board import Board
-from puzzle.piece.template import Template, PieceStatus
+from puzzle.board import Board
+from puzzle.piece import Template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 

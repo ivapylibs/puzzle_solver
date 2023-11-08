@@ -530,6 +530,7 @@ def get_corners(dst, neighborhood_size=5, score_threshold=0.3, minmax_threshold=
     labeled, num_objects = ndimage.label(maxima)
     # slices = ndimage.find_objects(labeled)
     yx = np.array(ndimage.center_of_mass(data, labeled, range(1, num_objects + 1)))
+    print(yx)
     xy = yx[:, ::-1]
 
     return xy

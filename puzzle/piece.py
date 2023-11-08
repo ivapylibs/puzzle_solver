@@ -61,6 +61,7 @@ class PuzzleTemplate:
     @brief  Data class containing puzzle piece information.
     """
 
+    pcorner:        np.ndarray = np.array([])   # @< The top left corner (x,y) of puzzle piece bbox.
     size:           np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
     rcoords:        np.ndarray = np.array([])   # @< Puzzle piece linear image coordinates.
     appear:         np.ndarray = np.array([])   # @< Puzzle piece color/appearance.
@@ -100,6 +101,7 @@ class Template:
 
         self.y = y                  # @< A PuzzleTemplate instance.
         self.rLoc = np.array(r)     # @< The default location is the top left corner.
+        # @todo  Might actually be the centroid.
         # @todo Why is the location stored here when PuzzleTemplate has it too?
         # @todo What benefit occurs from the duplicate given that there is potentialy for
         #       mismatch? Is mismatch useful?
@@ -141,10 +143,12 @@ class Template:
 
         if isOffset:
             self.rLoc = np.array(self.rLoc + r)
+            self.y.pcorner = np.array(self.y.pcorner + r)
         else:
             if isCenter:
                 self.rLoc = np.array(r - np.ceil(self.y.size / 2))
             else:
+                self.cLoc = np.array(self.y.pcorner + r - self.y.pcorner) #todo Need to double check.
                 self.rLoc = np.array(r)
 
     #    if isCenter:        # Specifying center and not top-left corner.
@@ -274,7 +278,7 @@ class Template:
 
         # Remap coordinates from own image sprite coordinates to bigger
         # image coordinates. 2*N
-        rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+        rcoords = np.array(offset).reshape(-1, 1) + self.y.pcorner.reshape(-1, 1) + self.y.rcoords
         #DEBUG
         #print(np.array(offset))
         #print(np.array(self.rLoc))
@@ -375,10 +379,10 @@ class Template:
     #========================= buildFromMaskAndImage =========================
     #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
-                instantiate a puzzle piece template.
+                instantiate a puzzle piece template.  Usually passed as cropped.
 
         Args:
             theMask: The individual mask.
@@ -393,6 +397,7 @@ class Template:
 
         # Populate dimensions.
         # Updated to OpenCV style
+        y.pcorner = cLoc
         y.size = [theMask.shape[1], theMask.shape[0]]
 
         y.mask = theMask.astype('uint8')

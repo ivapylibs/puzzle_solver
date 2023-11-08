@@ -4,6 +4,8 @@
 # @brief    Test script for the most basic functionality of histogram features
 #           for puzzle pieces. (60p img)
 #
+# NOTE: 09/15: BROKEN CODE. NEED TO FIX. (Put here on 11/08 but broken since 09/15)
+#
 # ============================ basic07_histogram ===========================
 
 #
@@ -22,12 +24,12 @@ import improcessor.basic as improcessor
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import Board
-from puzzle.builder.gridded import Gridded, ParamGrid
-from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
-from puzzle.parser.fromSketch import FromSketch
-from puzzle.piece.histogram import Histogram
-from puzzle.piece.regular import Regular
+from puzzle.board import Board
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.parse.fromLayer import FromLayer, ParamPuzzle
+from puzzle.parse.fromSketch import FromSketch
+from puzzle.pieces.matchDifferent import HistogramCV
+from puzzle.piece import Regular
 from puzzle.utils.imageProcessing import cropImage
 
 fpath = os.path.realpath(__file__)
@@ -35,10 +37,10 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
+theImageSol = cv2.imread(cpath + '/../../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
+theMaskSol_src = cv2.imread(cpath + '/../../../testing/data/puzzle_60p_AdSt408534841.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 # ==[1.1] Create an improcessor to obtain the mask.
@@ -106,7 +108,7 @@ theBoard.addPiece(theRegular_B)
 # ==[3] Create an edge matcher
 #
 
-theMatcher = Histogram()
+theMatcher = HistogramCV()
 
 # ==[4] Display the new board and the comparison result.
 #

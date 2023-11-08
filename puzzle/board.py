@@ -502,7 +502,7 @@ class Board:
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        char_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
+                        char_size = cv2.getTextSize(txt, font, 0.15, 2)[0]
 
                         y, x = np.nonzero(piece.y.mask)
 
@@ -532,7 +532,7 @@ class Board:
                 raise RuntimeError('No piece found')
 
             lengths = lengths.astype('int')
-            bbox = self.boundingBox().astype('int')
+            bbox    = self.boundingBox().astype('int')
 
             if BOUNDING_BOX:
                 # Just the exact bounding box size
@@ -553,18 +553,19 @@ class Board:
                 if ID_DISPLAY == True:
                     txt = str(piece.id)
                     font = cv2.FONT_HERSHEY_SIMPLEX
-                    char_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
+                    char_size = cv2.getTextSize(txt, font, 0.15, 2)[0]
 
                     y, x = np.nonzero(piece.y.mask)
 
                     if BOUNDING_BOX:
+                        print("bbox")
                         pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
                                int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
                     else:
-                        pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0],
-                               int(piece.rLoc[1] + np.mean(y)) + char_size[1])
+                        pos = (int(piece.y.pcorner[0] + np.mean(x)) - 3*char_size[0],
+                               int(piece.y.pcorner[1] + np.mean(y)) + char_size[1])
 
-                    font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 100
+                    font_scale = 1 #np.floor(min((max(x) - min(x)), (max(y) - min(y))) / 100)
                     cv2.putText(theImage, str(piece.id), pos, font,
                                 font_scale, ID_COLOR, 2, cv2.LINE_AA)
 
