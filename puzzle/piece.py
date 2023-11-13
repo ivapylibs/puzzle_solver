@@ -31,7 +31,7 @@ import numpy as np
 
 from puzzle.utils.imageProcessing import rotate_im
 
-import camera.utils as display
+from camera.utils import display
 
 # ===== Helper Elements
 #
@@ -393,6 +393,10 @@ class Template:
             thePiece: The puzzle piece instance.
         """
 
+        #DEBUG CODE: DELETE LATER
+        #display.rgb_cv(theImage,window_name='Puzzle Image')
+        #display.wait_cv()
+
         y = PuzzleTemplate()
 
         # Populate dimensions.
@@ -748,7 +752,7 @@ class EdgeDes:
 #
 class Regular(Template):
 
-    def __init__(self, *argv):
+    def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         """
         @brief  Constructor for the regular puzzle piece.
 
@@ -756,32 +760,32 @@ class Regular(Template):
             *argv: Input params.
         """
 
-        y = None
-        r = (0, 0)
-        id = None
-        theta = None
-        status = PieceStatus.UNKNOWN
+        #y = None
+        #r = (0, 0)
+        #id = None
+        #theta = None
+        #status = PieceStatus.UNKNOWN
 
-        if len(argv) == 1:
-            if isinstance(argv[0], Template):
-                y = argv[0].y
-                r = argv[0].rLoc
-                id = argv[0].id
-                theta = argv[0].theta
-                status = argv[0].status
-            else:
-                y = argv[0]
-        elif len(argv) == 2:
-            y = argv[0]
-            r = argv[1]
-        elif len(argv) >= 3 and len(argv) <= 4:
-            y = argv[0]
-            r = argv[1]
-            id = argv[2]
-        elif len(argv) > 4:
-            raise TypeError('Too many parameters!')
+        #if len(argv) == 1:
+        #    if isinstance(argv[0], Template):
+        #        y = argv[0].y
+        #        r = argv[0].rLoc
+        #        id = argv[0].id
+        #        theta = argv[0].theta
+        #        status = argv[0].status
+        #    else:
+        #        y = argv[0]
+        #elif len(argv) == 2:
+        #    y = argv[0]
+        #    r = argv[1]
+        #elif len(argv) >= 3 and len(argv) <= 4:
+        #    y = argv[0]
+        #    r = argv[1]
+        #    id = argv[2]
+        #elif len(argv) > 4:
+        #    raise TypeError('Too many parameters!')
 
-        super(Regular, self).__init__(y=y, r=r, id=id, theta=theta, pieceStatus=status)
+        super(Regular, self).__init__(y, r, id, theta, pieceStatus)
 
         # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
         self.edge = [EdgeDes() for i in range(4)]
@@ -798,6 +802,8 @@ class Regular(Template):
         else:
             self._process()
 
+    #=============================== setEdgeType ===============================
+    #
     def setEdgeType(self, direction, type):
         """
         @brief  Set up the type of the chosen edge.
@@ -825,7 +831,7 @@ class Regular(Template):
         # d_thresh is related to the size of the puzzle piece
         out_dict = sideExtractor(self.y, scale_factor=1,
                                  harris_block_size=5, harris_ksize=5,
-                                 corner_score_threshold=0.15, corner_minmax_threshold=100,
+                                 corner_score_threshold=0.7, corner_minmax_threshold=100,
                                  shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5,
                                  enable_rotate=enable_rotate)
 
@@ -845,6 +851,8 @@ class Regular(Template):
         self.filtered_harris_pts = out_dict['filtered_harris_pts']
         self.simple_harris_pts = out_dict['simple_harris_pts']
 
+    #=============================== rotatePiece ===============================
+    #
     def rotatePiece(self, theta):
         """
         @brief  Rotate the regular puzzle piece
@@ -865,8 +873,10 @@ class Regular(Template):
 
         return theRegular
 
+    #========================== buildFromMaskAndImage ==========================
+    #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.
@@ -880,10 +890,27 @@ class Regular(Template):
             theRegular: The puzzle piece instance.
         """
 
-        thePiece = Template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)
-        theRegular = Regular(thePiece)
+        thePiece = Template.buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=rLoc, \
+                                                                     pieceStatus=pieceStatus)
+        theRegular = Regular.upgradeTemplate(thePiece)
 
         return theRegular
+
+
+    #============================= upgradeTemplate =============================
+    #
+    @staticmethod
+    def upgradeTemplate(thePiece):
+        """!
+        @brief  Given a Template instance, transfer to a Regular instance.
+
+        @param[in]  thePiece    Puzzle piece as a Template instance.
+        @param[out]             Puzzle piece as a Regular instance.
+        """
+
+        thePiece = Regular(thePiece.y, thePiece.rLoc, thePiece.id, thePiece.theta, thePiece.status)
+        return thePiece
+
 #
 #============================== puzzle.piece.regular =============================
 

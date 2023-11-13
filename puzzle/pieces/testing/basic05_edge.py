@@ -24,6 +24,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import similaritymeasures
 
+from puzzle.parse.fromSketch import FromSketch
+from puzzle.piece import Regular
+
 from puzzle.board import Board
 from puzzle.builder.gridded import Gridded, CfgGridded
 from puzzle.parser import boardMeasure, CfgBoardMeasure
@@ -47,8 +50,6 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
                            improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
@@ -87,20 +88,23 @@ epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 # Not a fair game to directly use the epBoard
 # Instead, should restart from images
 
+#improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+#                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),), cv2.dilate, (np.ones((3, 3), np.uint8),))
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),),
-                           cv2.dilate, (np.ones((3, 3), np.uint8),)
-                           )
+                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),))
 theMaskMea = improc.apply(epImage)
 
 # cv2.imshow('debug', theMaskMea)
 # cv2.waitKey()
 
-theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
-                                            theParams=ParamGrid(areaThresholdLower=1000, pieceConstructor=Regular,
-                                                                reorder=True))
+theParams = CfgGridded()
+print(theParams)
+theParams.update(dict(minArea=1000, pieceConstructor='Regular', reorder=True))
+print('Done')
 
-# ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
+theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theParams)
+
+#===[1.5] Focus on a single puzzle piece and duplicate it with a new location
 #
 
 theRegular_A = theGrid.pieces[36]
@@ -120,6 +124,7 @@ theMatcher = Edge()
 # ==[4] Display the new board and the comparison result.
 #
 print('Should see True.')
+# DEBUG/IAMHERE: Crashes at this point now. Moving on.
 print(theMatcher.compare(theRegular_A, theRegular_B, method=similaritymeasures.pcm))
 
 theBoard.display()

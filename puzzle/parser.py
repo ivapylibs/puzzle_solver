@@ -188,19 +188,36 @@ class boardMeasure(centroidMulti):
     self.bMeas.clear()  # Clear board.
 
     imdims = np.shape(I)
-    vI = I.reshape(-1, imdims[2])        # Vectorized image.
+    #vI = I.reshape(-1, imdims[2])        # Vectorized image.
 
     for ri in self.trackProps:
-      #--[1] Region label process recovers bounding box mask.
+      #--[1] Region label process recovers bounding box mask and sliced image coordinates.
       #
+      pImage = I[ri.slice]
       pMask  = ri.image
+      #print("Image and Mask shapes.")
+      #print(pImage.shape)
+      #print(pMask.shape)
+      #DEBUG
+      # OLD CODE.  DELETE ONCE REST WORKING.
+      #print(ri)
+      #imdims = ri.image_intensity.shape(I)
+      #vI = ri.image_intensity(-1, imdims[2]) 
 
       #--[2] Extract the color image patch from vectorized image based on 
       #      bounding box mask and region pixel coords.
+      # NO LONGER A NECESSARY SEPARATE STEP SINCE INFORMATION IS CONTAINED IN
+      # THE REGIONPROPS INFORMATION STRUCTURE. DELETE WHEN NEW VERSION TESTED.
       #
-      indI   = np.ravel_multi_index( ri.coords.T, imdims[0:2] ) 
-      pImage = np.zeros( [ri.area_bbox, imdims[2]] )        # Rectangle.
-      pImage[np.ndarray.flatten(pMask),:] = vI[indI, :]     # Pixels within rectangle.
+      #indI   = np.ravel_multi_index( ri.coords.T, imdims[0:2] ) 
+      #pImage = np.zeros( [ri.area_bbox, imdims[2]] )        # Rectangle.
+      #pImage[np.ndarray.flatten(pMask),:] = vI[indI, :]     # Pixels within rectangle.
+      # IAMHERE Looks like this extraction is incorrect.  It uses the coordinates into
+      #         mask, but the mask is an image patch.  Need to figure out how to get the actual
+      #         image patch or the full image indices.
+      #print(pMask.shape)
+      #print(vI.shape)
+      #print(pImage.shape)
       pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
      
       #--[3] Collect other information.
