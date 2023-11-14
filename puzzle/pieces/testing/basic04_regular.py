@@ -2,9 +2,22 @@
 #=============================== basic04_regular ===============================
 #
 # @brief    Test script for the most basic functionality of regular
-#           puzzle piece class. (regular piece with 4 edges)
+#           puzzle piece class; a regular piece with 4 edges.
 #
+# Demonstration of the corner recovery process for the puzzle piece.  Takes
+# an image and a puzzle template, then creates a puzzle for regular piece
+# processing.  
 #
+# Only applies the side extraction process to a single piece.  It can be
+# manually adjusted, but does not perform more extensive testing across
+# multiple puzzle pieces.  
+#
+# Limited additional testing has discovered that the parameter settings and
+# processing does not lead to consistent detection of four corners.
+# Sometimes it is more, sometimes less.  The more corners makes sense
+# because some pieces have corner-like elements for the interior puzzle
+# piece carve outs.   These need to be excluded.  Four pieces need to be
+# consistently obtained.
 # 
 #=============================== basic04_regular ===============================
 
