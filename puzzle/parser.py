@@ -8,9 +8,22 @@
 #           into their own puzzle piece instances.
 #
 #
+# 1] boardMeasure
+#
 # Being a subclass of centroidMulti, this is effectively just a puzzle board
 # measurement strategy.  To be a full fledged system requires integration
 # with some sort of filter (e.g., temporal data association scheme).
+#
+#
+# 2] boardTracker
+#
+# Performs the data association code for keeping track of puzzle pieces over
+# time.
+#
+# 3] boardActivity
+#
+# Monitors the tracker associations and recovers the atomic actions or activities
+# inferred from the track states over time.
 #
 #============================== puzzle.parser ==============================
 #
