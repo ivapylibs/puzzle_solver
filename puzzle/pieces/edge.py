@@ -18,8 +18,8 @@
 import cv2
 import numpy as np
 
-from puzzle.piece.matchDifferent import MatchDifferent
-from puzzle.piece.regular import Regular
+from puzzle.pieces.matcher import MatchDifferent
+from puzzle.piece import Regular
 
 
 #
@@ -195,27 +195,30 @@ class Edge(MatchDifferent):
                     distance_color.append(dis_color(ret_A[i][1], ret_B[i][1]))
 
             else:
+                print(type(piece_A))
                 raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
 
         return distance_shape, distance_color
 
+    #================================= compare =================================
+    #
     def compare(self, piece_A, piece_B, method='type'):
-        """
+        """!
         @brief  Compare between two passed puzzle piece data.
 
-        Args:
-            piece_A: A template instance saving a piece's info.
-            piece_B: A template instance saving a piece's info.
-            method: The method option.
+        @param[in]  piece_A     Template instance with a piece's info.
+        @param[in]  piece_B     Template instance with a piece's info.
+        @param[in]  method      Comparison method to use. 
 
-        Returns:
-            The comparison result.
+        @return     The comparison result (True/False).
         """
 
-        # score is to calculate the similarity while it will call the feature extraction process inside
+        # Score is to calculate the similarity; will call feature extraction process inside
+        #
         distance_shape, distance_color = self.score(piece_A, piece_B, method=method)
 
-        if (np.array(distance_shape) < self.tau_shape).all() and (np.array(distance_color) < self.tau_color).all():
+        if (np.array(distance_shape) < self.tau_shape).all() \
+                                        and (np.array(distance_color) < self.tau_color).all():
             return True
         else:
             return False

@@ -33,16 +33,58 @@ from dataclasses import dataclass
 #
 import numpy as np
 
-from puzzle.builder.arrangement import Arrangement, ParamArrange
-from puzzle.builder.board import Board
+from puzzle.builder.arrangement import Arrangement, CfgArrangement
+from puzzle.board import Board
 
 
 # ===== Helper Elements
 #
 
-@dataclass
-class ParamAdj(ParamArrange):
-    tauAdj: float = 35
+#@dataclass
+#class ParamAdj(ParamArrange):
+#    tauAdj: float = 35
+# DELETE WHEN NEW CODE WORKS. BROKEN MANY PLACES.
+
+#---------------------------------------------------------------------------
+#====================== Configuration Node : Adjacent ======================
+#---------------------------------------------------------------------------
+#
+
+class CfgAdjacent(CfgArrangement):
+  '''!
+  @brief  Configuration setting specifier for Arrangement.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgAdjacent.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = super(CfgAdjacent,CfgAdjacent).get_default_settings()
+    default_dict.update(dict(tauAdj = 35))
+
+    return default_dict
+
 
 
 #
@@ -50,7 +92,7 @@ class ParamAdj(ParamArrange):
 #
 
 class Adjacent(Arrangement):
-    def __init__(self, theBoard=[], theParams=ParamAdj):
+    def __init__(self, theBoard=[], theParams=CfgAdjacent):
         """
         @brief Constructor for the puzzle.builder.adjacent class.
 
@@ -112,13 +154,15 @@ class Adjacent(Arrangement):
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
-        if hasattr(data, 'tauAdj'):
-            theParams = ParamAdj(tauAdj=data.tauAdj)
+        if hasattr(data, 'tauAdj'):     # ARGH!! DELETE LIKE OTHERS WHEN WORKING,.
+            theParams = CfgAdjacent()   # HAS TO DO WITH BAD SAVE/LOAD. MOVE TO HDF5
+            theParams.tauAdj = data.tauAdj
 
-        if hasattr(theParams, 'tauAdj'):
-            thePuzzle = Adjacent(aPuzzle, theParams)
-        else:
-            thePuzzle = Adjacent(aPuzzle)
+        thePuzzle = Adjacent(aPuzzle, theParams)
+        #if hasattr(theParams, 'tauAdj'):
+        #    thePuzzle = Adjacent(aPuzzle, theParams)
+        #else:
+        #    thePuzzle = Adjacent(aPuzzle)
 
         return thePuzzle
 

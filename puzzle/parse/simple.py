@@ -34,9 +34,12 @@ from puzzle.board import Board
 #
 class Simple(PerceiverSimple.simple):
 
-    def __init__(self, theParams=None, theDetector=None, theTracker=None):
+    def __init__(self, theParams=None, theDetector=None, theTracker=None,
+    theFilter=None):
         """!
-        @brief  Constructor for the simple puzzler parser. Lacks a filter.
+        @brief  Constructor for the simple puzzler parser. 
+
+        @note   Lacks filter implementation.
 
         Args:
             theDetector: The detector instance.
@@ -44,7 +47,7 @@ class Simple(PerceiverSimple.simple):
             theParams: The parameters.
         """
 
-        super(Simple, self).__init__(theParams, theDetector, theTracker, None)
+        super(Simple, self).__init__(theParams, theDetector, theTracker, theFilter)
 
         self.board = Board()
         self.Mask  = None

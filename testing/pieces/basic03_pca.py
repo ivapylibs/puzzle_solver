@@ -1,28 +1,28 @@
 #!/usr/bin/python3
-# ============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 #
-# @brief    Test script for the most basic functionality of moments. Create
+# @brief    Test script for the most basic functionality of pca. Create
 #           two puzzles (rotate 1 for 90 degree) and compare them by moments
-#           feature.
+#           pca.
 #
-# ============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 
 #
-# @file     basic02_moments.py
+# @file     basic03_pca.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/02  [created]
+# @date     2021/08/03  [created]
 #
-# ============================ basic02_moments ===========================
+#============================ basic03_pca ===========================
 
 
-# ==[0] Prep environment
+#==[0] Prep environment
 import numpy as np
 
-from puzzle.piece.moments import Moments
-from puzzle.piece.template import Template
+from puzzle.pieces.matchDifferent import PCA
+from puzzle.piece import Template
 
-# ==[1] Create raw puzzle piece data.
+#==[1] Create raw puzzle piece data.
 #
 theMask = np.full((20, 20), False, dtype=bool)
 theMask[4:14, 7:12] = True
@@ -40,17 +40,17 @@ theImage[7:12, 4:14, :] = np.full((1, 1, 3), [0, 200, 200])
 thePiece_2 = Template.buildFromMaskAndImage(theMask, theImage)
 thePiece_2.setPlacement(np.array([50, 50]))
 
-# ==[2] Test creation
+#==[2] Test creation
 #
 thePiece_1.display()
 thePiece_2.display()
 
-# ==[3] Create a moments instance and compare puzzle 1 and 2. Should see True.
+#==[3] Create a PCA instance and compare puzzle 1 and 2. Should see -90.
 #
-theMoment = Moments(5)
+thePCA = PCA(5)
 
-ret = theMoment.compare(thePiece_1, thePiece_2)
-print('Create a moments instance and compare puzzle 1 and 2. Should see True.')
+ret = thePCA.score(thePiece_1, thePiece_2)
+print('Create a PCA instance and compare puzzle 1 and 2. Should see -90.')
 print(ret)
 
 #

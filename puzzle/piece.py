@@ -31,7 +31,7 @@ import numpy as np
 
 from puzzle.utils.imageProcessing import rotate_im
 
-import camera.utils as display
+from camera.utils import display
 
 # ===== Helper Elements
 #
@@ -41,31 +41,34 @@ class PieceStatus(Enum):
     @brief PieceStatus used to keep track of the status of pieces.
     """
 
-    UNKNOWN = 0 # @< The default status.
-    MEASURED = 1  # @< The initial status in the current measured board (visible).
-    TRACKED = 2 # @< Not present in the current measured board (including INVISIBLE & GONE).
-    INHAND = 3
+    UNKNOWN  = 0    # @< The default status.
+    MEASURED = 1    # @< The initial status in the current measured board (visible).
+    TRACKED  = 2    # @< Not present in the current measured board (including INVISIBLE & GONE).
 
-    INVISIBLE=4 # @< A subset of TRACKED, which is occluded.
-    GONE=5 # @< A subset of TRACKED, which is not occluded. Be careful that this status may be inaccurate when piece extraction fails.
+    INHAND   = 3    # @< Presumably in player's/worker's hand.
+    INVISIBLE = 4   # @< A subset of TRACKED, which is occluded.
+    GONE = 5        # @< A subset of TRACKED, which is not occluded. Be careful that this status
+                    #       may be inaccurate when piece extraction fails.
 
 
 
+#
+#================================= PuzzleTemplate ================================
+#
 @dataclass
 class PuzzleTemplate:
-    size: np.ndarray = np.array([])  # @< Tight bbox size of puzzle piece image.
-    rcoords: np.ndarray = np.array([])  # @< Puzzle piece linear image coordinates.
-    appear: np.ndarray = np.array([])  # @< Puzzle piece linear color/appearance.
-    image: np.ndarray = np.array([], dtype='uint8')  # @< Template RGB image with BG default fill.
-    mask: np.ndarray = np.array([], dtype='uint8')  # @< Template binary mask image.
-    contour: np.ndarray = np.array([], dtype='uint8')  # @< Template binary contour image.
-    contour_pts: np.ndarray = np.array([])  # @< Template contour points.
+    """!
+    @brief  Data class containing puzzle piece information.
+    """
 
-    # Feature related
-    kpFea: tuple = ()  # @< The processed keypoint feature.
-    colorFea: np.ndarray = np.array([])  # @< The processed color feature.
-    shapeFea: np.ndarray = np.array([])  # @< The processed shape feature.
-
+    pcorner:        np.ndarray = np.array([])   # @< The top left corner (x,y) of puzzle piece bbox.
+    size:           np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
+    rcoords:        np.ndarray = np.array([])   # @< Puzzle piece linear image coordinates.
+    appear:         np.ndarray = np.array([])   # @< Puzzle piece color/appearance.
+    image:          np.ndarray = np.array([], dtype='uint8')    # @< Image w/ BG default fill.
+    mask:           np.ndarray = np.array([], dtype='uint8')    # @< Binary mask image.
+    contour:        np.ndarray = np.array([], dtype='uint8')    # @< Binary contour image.
+    contour_pts:    np.ndarray = np.array([])   # @< Template contour points.
 
 #
 #==================================== Template ===================================
@@ -73,7 +76,12 @@ class PuzzleTemplate:
 
 class Template:
     '''!
-    @brief  What is this??
+    @brief  Stores and encapsulates a template instance of a visual puzzle piece.
+
+
+    The language here is general, but the fact that it lives in the puzzle.piece namespace
+    indicates that this class is strictly associated to puzzle pieces.  As the base class,
+    it probably implements the simplest, no frills version of a template puzzle piece.
 
     '''
 
@@ -91,14 +99,27 @@ class Template:
             pieceStatus: The status of the puzzle pieces, including UNKNOWN, MEASURED, TRACKED, and INHAND.
         """
 
-        self.y = y # @< A PuzzleTemplate instance.
-        self.rLoc = np.array(r)  # @< The default location is the top left corner.
-        self.id = id    # @< Mainly for display and user operation.
-        self.status = pieceStatus  # @< To save the status of the puzzle pieces, for tracking purpose.
-        self.theta = theta  # @< Should be set up later by the alignment function. For regular piece, which means the angle to rotate to its upright.
+        self.y = y                  # @< A PuzzleTemplate instance.
+        self.rLoc = np.array(r)     # @< The default location is the top left corner.
+        # @todo  Might actually be the centroid.
+        # @todo Why is the location stored here when PuzzleTemplate has it too?
+        # @todo What benefit occurs from the duplicate given that there is potentialy for
+        #       mismatch? Is mismatch useful?
+        # @todo Good news is that only location is included outside of PuzzleTemplate
+        #       which means that update can take care of it as needed without getting
+        #       too complex. Just gotta work out what will be needed.
+        #
 
-        self.tracking_life = 0 # @< For saving the life count, only useful in the tracking function
+        self.id = id                # @< Unique ID for piece (assist with data association).
+        self.status = pieceStatus   # @< Status of the puzzle pieces, for tracking purpose.
+        self.theta  = theta         # @< Should be set up later by the alignment function. For
+                                    # regular piece, which means the angle to rotate to its upright.
 
+        self.lifespan = 0           # @< Save life count, only useful in the tracking function.
+        self.featVec  = None        # @< If assigned, feature descriptor vector of puzzle piece.
+
+    #================================== size =================================
+    #
     def size(self):
         """
         @brief  Return the dimensions of the puzzle piece image.
@@ -109,87 +130,90 @@ class Template:
 
         return self.y.size
 
-    @staticmethod
-    def getEig(img):
-        """
-        @brief  To find the major and minor axes of a blob and then return the aligned rotation.
-                See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
-                PCA is our default method which does not perform very well.
-
-        Args:
-            img: A contour image.
-
-        Returns:
-            theta: The aligned angle (degree).
-        """
-
-        # @note Currently, we use the image center
-
-        y, x = np.nonzero(img)
-        # x = x - np.mean(x)
-        # y = y - np.mean(y)
-        #
-        x = x - np.mean(img.shape[1] / 2)
-        y = y - np.mean(img.shape[0] / 2)
-
-        coords = np.vstack([x, y])
-        cov = np.cov(coords)
-        evals, evecs = np.linalg.eig(cov)
-        sort_indices = np.argsort(evals)[::-1]
-        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-        v2 = evecs[:, sort_indices[1]]
-
-        dict = {
-            'x': x,
-            'y': y,
-            'v1': v1,
-            'v2': v2,
-        }
-
-        theta = np.rad2deg(np.arctan2(dict['v1'][1], dict['v1'][0]))
-
-        # # Debug only
-        #
-        # scale = 20
-        # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
-        #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
-        # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
-        #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
-        # plt.plot(x, y, 'k.')
-        # plt.axis('equal')
-        # plt.gca().invert_yaxis()  # Match the image system with origin at top left
-        # plt.show()
-
-        return theta
-
-    def setPlacement(self, r, offset=False, isCenter=False):
+    #============================== setPlacement =============================
+    #
+    def setPlacement(self, r, isOffset=False, isCenter=False):
         """
         @brief  Provide pixel placement location information.
 
-        Args:
-            r: Location of its frame origin.
-            offset: Boolean indicating whether it sets the offset or not.
-            isCenter: Boolean indicating r is center or not.
+        @param[in]  r           Location of puzzle piece "frame origin."
+        @param[in]  isOffset    Boolean flag indicating whether placement is an offset (= Delta r).
+        @param[in]  isCenter    Boolean flag indicating if r is center reference.
         """
 
-        if isCenter:
-            if offset:
-                self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size / 2))
-            else:
-                self.rLoc = np.array(r - np.ceil(self.y.size / 2))
+        if isOffset:
+            self.rLoc = np.array(self.rLoc + r)
+            self.y.pcorner = np.array(self.y.pcorner + r)
         else:
-            if offset:
-                self.rLoc = np.array(self.rLoc + r)
+            if isCenter:
+                self.rLoc = np.array(r - np.ceil(self.y.size / 2))
             else:
+                self.cLoc = np.array(self.y.pcorner + r - self.y.pcorner) #todo Need to double check.
                 self.rLoc = np.array(r)
 
+    #    if isCenter:        # Specifying center and not top-left corner.
+    #        if isOffset:
+    #            self.rLoc = np.array(self.rLoc + r - np.ceil(self.y.size / 2))
+    #        else:
+    #            self.rLoc = np.array(r - np.ceil(self.y.size / 2))
+    #    else:
+    #        if isOffset:
+    #            self.rLoc = np.array(self.rLoc + r)
+    #        else:
+    #            self.rLoc = np.array(r)
+
+    #================================ displace ===============================
+    #
+    def displace(self, dr):
+        """
+        @brief  Displace puzzle piece.
+
+        @param[in]  dr          Displacement to apply.
+        @param[in]  isCenter    Boolean flag indicating if r is center reference.
+        """
+
+        self.setPlacement(dr, True, False)
+
+    #=============================== genFeature ==============================
+    #
+    def genFeature(self, theMatcher):
+
+        self.featVec = theMatcher.extractFeature(self)
+
+    #=============================== getFeature ==============================
+    #
+    def getFeature(self, theMatcher = None):
+        """!
+        @brief  Get the feature vector of the puzzle piece. Assign if not
+                defined based on passed matcher.
+
+        @param[in] theMatcher   Optional but recommended argument that specifies
+                                the feature matching implementation.
+        """
+
+        if self.featVec is not None:
+            return self.featVec 
+        else:
+            if theMatcher is None:
+                return None
+            else:
+                self.genFeature(theMatcher)
+                return self.featVec
+
+    #=============================== setStatus ===============================
+    #
+    def setStatus(self, theStatus):
+
+        self.status = theStatus
+
+    #================================ getMask ================================
+    #
     def getMask(self, theMask, offset=[0, 0]):
         """
         @brief Get an updated mask of the target.
 
-        Args:
-            theMask: The original mask of the target.
-            offset: The movement.
+        @param[in] theMask  Original mask of the target.
+        @param[in] offset   Movement.
 
         Returns:
             theMask: The updated mask of the target.
@@ -238,8 +262,7 @@ class Template:
 
         return theMask
 
-    #============================= placeInImage ============================
-    #
+    #============================== placeInImage =============================
     #
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
         """
@@ -255,7 +278,7 @@ class Template:
 
         # Remap coordinates from own image sprite coordinates to bigger
         # image coordinates. 2*N
-        rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
+        rcoords = np.array(offset).reshape(-1, 1) + self.y.pcorner.reshape(-1, 1) + self.y.rcoords
         #DEBUG
         #print(np.array(offset))
         #print(np.array(self.rLoc))
@@ -273,6 +296,8 @@ class Template:
             rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + rcoords
             theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
 
+    #============================= placeInImageAt ============================
+    #
     def placeInImageAt(self, theImage, rc, theta=None, isCenter=False, CONTOUR_DISPLAY=True):
         """
         @brief  Insert the puzzle piece into the image at the given location.
@@ -307,6 +332,8 @@ class Template:
             rcoords = rc.reshape(-1, 1) + rcoords
             theImage[rcoords[1], rcoords[0], :] = [0, 0, 0]
 
+    #================================ toImage ================================
+    #
     def toImage(self):
         """
         @brief  Return the puzzle piece image (cropped).
@@ -320,6 +347,8 @@ class Template:
 
         return theImage
 
+    #================================ display ================================
+    #
     def display(self, fh=None):
         """
         @brief  Display the puzzle piece contents in an image window.
@@ -347,11 +376,13 @@ class Template:
 
         return fh
 
+    #========================= buildFromMaskAndImage =========================
+    #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
-                instantiate a puzzle piece template.
+                instantiate a puzzle piece template.  Usually passed as cropped.
 
         Args:
             theMask: The individual mask.
@@ -362,10 +393,15 @@ class Template:
             thePiece: The puzzle piece instance.
         """
 
+        #DEBUG CODE: DELETE LATER
+        #display.rgb_cv(theImage,window_name='Puzzle Image')
+        #display.wait_cv()
+
         y = PuzzleTemplate()
 
         # Populate dimensions.
         # Updated to OpenCV style
+        y.pcorner = cLoc
         y.size = [theMask.shape[1], theMask.shape[0]]
 
         y.mask = theMask.astype('uint8')
@@ -410,6 +446,32 @@ class Template:
 
         return thePiece
 
+    #================================= update ================================
+    #
+    def update(self, matchedPiece):
+        """!
+        @brief  Update template board puzzle piece based on association.
+
+        Performs the simplest of updates.
+
+        @param[in]  matchedPiece    Latest matched measurement of a piece.
+        """
+
+        # Should update self (own properties) and (feature vector properties).
+        # How to do this has high variation, especially given that the feature
+        # vector derives from the piece properties.  Updating the piece properties
+        # may require non-trivial updates to the feature vector.  The degrees
+        # of freedom here are "high."
+        #
+        # What is right way to code?  Try to dump many options into the base
+        # template, or use sub-classes?   More complex case is to perform a
+        # mix of the two.
+        #
+        self.featVec = matchedPiece.featVec
+
+
+    #============================== rotatePiece ==============================
+    #
     def rotatePiece(self, theta):
         """
         @brief Rotate the puzzle template instance by the given angle.
@@ -472,10 +534,68 @@ class Template:
         thePiece.theta = self.theta + theta
 
         # Reset kpFea while colorFea & shapeFea is associated to the corrected case
-        thePiece.y.kpFea = ()
+        #thePiece.y.kpFea = ()
+        # @todo Remove kpFea, colorFea, and shapeFea code.
 
         return thePiece
 
+    #================================= getEig ================================
+    #
+    @staticmethod
+    def getEig(img):
+        """
+        @brief  To find the major and minor axes of a blob and then return the aligned rotation.
+                See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
+                PCA is our default method which does not perform very well.
+
+        Args:
+            img: A contour image.
+
+        Returns:
+            theta: The aligned angle (degree).
+        """
+
+        # @note Currently, we use the image center
+
+        y, x = np.nonzero(img)
+        # x = x - np.mean(x)
+        # y = y - np.mean(y)
+        #
+        x = x - np.mean(img.shape[1] / 2)
+        y = y - np.mean(img.shape[0] / 2)
+
+        coords = np.vstack([x, y])
+        cov = np.cov(coords)
+        evals, evecs = np.linalg.eig(cov)
+        sort_indices = np.argsort(evals)[::-1]
+        v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
+        v2 = evecs[:, sort_indices[1]]
+
+        dict = {
+            'x': x,
+            'y': y,
+            'v1': v1,
+            'v2': v2,
+        }
+
+        theta = np.rad2deg(np.arctan2(dict['v1'][1], dict['v1'][0]))
+
+        # # Debug only
+        #
+        # scale = 20
+        # plt.plot([dict['v1'][0] * -scale * 2, dict['v1'][0] * scale * 2],
+        #          [dict['v1'][1] * -scale * 2, dict['v1'][1] * scale * 2], color='red')
+        # plt.plot([dict['v2'][0] * -scale, dict['v2'][0] * scale],
+        #          [dict['v2'][1] * -scale, dict['v2'][1] * scale], color='blue')
+        # plt.plot(x, y, 'k.')
+        # plt.axis('equal')
+        # plt.gca().invert_yaxis()  # Match the image system with origin at top left
+        # plt.show()
+
+        return theta
+
+    #============================== buildSquare ==============================
+    #
     @staticmethod
     def buildSquare(size, color, rLoc=None):
         """
@@ -522,6 +642,8 @@ class Template:
 
         return thePiece
 
+    #============================== buildSphere ==============================
+    #
     @staticmethod
     def buildSphere(radius, color, rLoc=None):
         """
@@ -630,7 +752,7 @@ class EdgeDes:
 #
 class Regular(Template):
 
-    def __init__(self, *argv):
+    def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         """
         @brief  Constructor for the regular puzzle piece.
 
@@ -638,32 +760,32 @@ class Regular(Template):
             *argv: Input params.
         """
 
-        y = None
-        r = (0, 0)
-        id = None
-        theta = None
-        status = PieceStatus.UNKNOWN
+        #y = None
+        #r = (0, 0)
+        #id = None
+        #theta = None
+        #status = PieceStatus.UNKNOWN
 
-        if len(argv) == 1:
-            if isinstance(argv[0], Template):
-                y = argv[0].y
-                r = argv[0].rLoc
-                id = argv[0].id
-                theta = argv[0].theta
-                status = argv[0].status
-            else:
-                y = argv[0]
-        elif len(argv) == 2:
-            y = argv[0]
-            r = argv[1]
-        elif len(argv) >= 3 and len(argv) <= 4:
-            y = argv[0]
-            r = argv[1]
-            id = argv[2]
-        elif len(argv) > 4:
-            raise TypeError('Too many parameters!')
+        #if len(argv) == 1:
+        #    if isinstance(argv[0], Template):
+        #        y = argv[0].y
+        #        r = argv[0].rLoc
+        #        id = argv[0].id
+        #        theta = argv[0].theta
+        #        status = argv[0].status
+        #    else:
+        #        y = argv[0]
+        #elif len(argv) == 2:
+        #    y = argv[0]
+        #    r = argv[1]
+        #elif len(argv) >= 3 and len(argv) <= 4:
+        #    y = argv[0]
+        #    r = argv[1]
+        #    id = argv[2]
+        #elif len(argv) > 4:
+        #    raise TypeError('Too many parameters!')
 
-        super(Regular, self).__init__(y=y, r=r, id=id, theta=theta, pieceStatus=status)
+        super(Regular, self).__init__(y, r, id, theta, pieceStatus)
 
         # Assume the order 0, 1, 2, 3 correspond to left, right, top, bottom
         self.edge = [EdgeDes() for i in range(4)]
@@ -680,6 +802,8 @@ class Regular(Template):
         else:
             self._process()
 
+    #=============================== setEdgeType ===============================
+    #
     def setEdgeType(self, direction, type):
         """
         @brief  Set up the type of the chosen edge.
@@ -707,7 +831,7 @@ class Regular(Template):
         # d_thresh is related to the size of the puzzle piece
         out_dict = sideExtractor(self.y, scale_factor=1,
                                  harris_block_size=5, harris_ksize=5,
-                                 corner_score_threshold=0.15, corner_minmax_threshold=100,
+                                 corner_score_threshold=0.7, corner_minmax_threshold=100,
                                  shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5,
                                  enable_rotate=enable_rotate)
 
@@ -727,6 +851,8 @@ class Regular(Template):
         self.filtered_harris_pts = out_dict['filtered_harris_pts']
         self.simple_harris_pts = out_dict['simple_harris_pts']
 
+    #=============================== rotatePiece ===============================
+    #
     def rotatePiece(self, theta):
         """
         @brief  Rotate the regular puzzle piece
@@ -747,8 +873,10 @@ class Regular(Template):
 
         return theRegular
 
+    #========================== buildFromMaskAndImage ==========================
+    #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.
@@ -762,12 +890,29 @@ class Regular(Template):
             theRegular: The puzzle piece instance.
         """
 
-        thePiece = Template.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc, pieceStatus=pieceStatus)
-        theRegular = Regular(thePiece)
+        thePiece = Template.buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=rLoc, \
+                                                                     pieceStatus=pieceStatus)
+        theRegular = Regular.upgradeTemplate(thePiece)
 
         return theRegular
+
+
+    #============================= upgradeTemplate =============================
+    #
+    @staticmethod
+    def upgradeTemplate(thePiece):
+        """!
+        @brief  Given a Template instance, transfer to a Regular instance.
+
+        @param[in]  thePiece    Puzzle piece as a Template instance.
+        @param[out]             Puzzle piece as a Regular instance.
+        """
+
+        thePiece = Regular(thePiece.y, thePiece.rLoc, thePiece.id, thePiece.theta, thePiece.status)
+        return thePiece
+
 #
-# ================================ puzzle.piece.regular ================================
+#============================== puzzle.piece.regular =============================
 
 
 class Piece:

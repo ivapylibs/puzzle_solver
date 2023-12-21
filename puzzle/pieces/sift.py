@@ -22,8 +22,8 @@ import numpy as np
 from skimage.measure import ransac
 from skimage.transform import AffineTransform
 
-from puzzle.piece.matchSimilar import MatchSimilar
-from puzzle.piece.template import Template
+from puzzle.pieces.matcher import MatchSimilar
+from puzzle.piece import Template
 from puzzle.utils.dataProcessing import calculateMatches
 
 

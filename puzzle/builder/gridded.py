@@ -36,19 +36,63 @@ import scipy.cluster.hierarchy as hcluster
 from sklearn.cluster import KMeans
 
 from puzzle.builder.arrangement import Arrangement
-from puzzle.builder.board import Board
-from puzzle.builder.interlocking import Interlocking, ParamInter
+from puzzle.board import Board
+from puzzle.builder.interlocking import Interlocking, CfgInterlocking
 from puzzle.utils.dataProcessing import updateLabel
 
 
 # ===== Helper Elements
 #
 
-@dataclass
-class ParamGrid(ParamInter):
-    tauGrid: float = float('inf')  # The threshold size of the puzzle piece.
-    reorder: bool = False
-    grid: tuple = (None, None)
+#@dataclass
+#class ParamGrid(ParamInter):
+#    tauGrid: float = float('inf')  # The threshold size of the puzzle piece.
+#    reorder: bool = False
+#    grid: tuple = (None, None)
+#
+# DELETE WHEN NEW CODE WORKS.
+
+#---------------------------------------------------------------------------
+#======================= Configuration Node : Gridded ======================
+#---------------------------------------------------------------------------
+#
+
+class CfgGridded(CfgInterlocking):
+  '''!
+  @brief  Configuration setting specifier for centroidMulti.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgGridded.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = super(CfgGridded,CfgGridded).get_default_settings()
+    default_dict.update(dict(tauGrid = float('inf'),  # The threshold size of the puzzle piece.
+                        reorder = False, grid = (None, None) ))
+
+    return default_dict
+
 
 
 #
@@ -56,7 +100,7 @@ class ParamGrid(ParamInter):
 #
 
 class Gridded(Interlocking):
-    def __init__(self, theBoard=[], theParams=ParamGrid):
+    def __init__(self, theBoard=[], theParams=CfgGridded):
         """
         @brief Constructor for the puzzle.builder.adjacent class.
 
@@ -275,13 +319,16 @@ class Gridded(Interlocking):
         with open(fileName, 'rb') as fp:
             data = pickle.load(fp)
 
-        if theParams is None and hasattr(data, 'tauGrid'):
-            theParams = ParamGrid(data.tauGrid)
+        if theParams is None and hasattr(data, 'tauGrid'):  # DELETE WHEN CODE FIXED.
+            theParams = CfgGridded()                        # BAD SAVE/LOAD PROCESS.
+            theParams.tauGrid = data.tauGrid
 
-        if hasattr(theParams, 'tauGrid'):
-            thePuzzle = Gridded(aPuzzle, theParams)
-        else:
-            thePuzzle = Gridded(aPuzzle)
+        thePuzzle = Gridded(aPuzzle, theParams)
+        #WHAT IS THIS? DELETE IF ABOVE WORKS.
+        #if hasattr(theParams, 'tauGrid'):
+        #    thePuzzle = Gridded(aPuzzle, theParams)
+        #else:
+        #    thePuzzle = Gridded(aPuzzle)
 
         return thePuzzle
 

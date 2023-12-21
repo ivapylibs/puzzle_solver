@@ -75,7 +75,7 @@ plt.imshow(theImage)
 #==[5] Display the resulting image. Should see two circle pieces in a cropped region.
 #
 print('Should see two circle pieces in a cropped region.')
-fh = theBoard.display()
+fh = theBoard.display_mp()
 plt.show()
 
 #
