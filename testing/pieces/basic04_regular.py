@@ -24,6 +24,7 @@
 #
 # @file     basic04_regular.py
 #
+# @author   Patricio A. Vela        pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/17  [created]
 #
@@ -50,10 +51,10 @@ from puzzle.piece import Regular
 
 #===[1] Read the source image and template.
 #
-theImageSol = cv2.imread('../../../testing/data/balloon.png')
+theImageSol = cv2.imread('../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread('../../../testing/data/puzzle_15p_123rf.png')
+theMaskSol_src = cv2.imread('../../testing/data/puzzle_15p_123rf.png')
 
 #===[1.1] Create an improcessor to obtain the mask.
 #

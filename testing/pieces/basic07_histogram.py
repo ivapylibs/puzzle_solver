@@ -9,6 +9,7 @@
 #
 # @file     basic07_histogram.py
 #
+# @author   Patricio A. Vela        pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/09/29  [created]
 #
@@ -48,10 +49,10 @@ cpath = fpath.rsplit('/', 1)[0]
 
 #==[1.1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../../testing/data/balloon.png')
+theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread(cpath + '/../../../testing/data/puzzle_60p_AdSt408534841.png')
+theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_60p_AdSt408534841.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 #==[1.2] Create an improcessor to obtain the mask.
@@ -109,22 +110,38 @@ theParams.update(dict(minArea=1000, pieceConstructor=Regular, reorder=True))
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theParams)
 
 #==[2] Focus on a single puzzle piece for comparison with a Histogram matcher.
-#
+#      Use correct match first, then try a couple of wrong matches.
 theRegular_A = theGrid.pieces[1]
 theRegular_B = theGridMea.pieces[1]
 
 theMatcher = HistogramCV()
 
-print('Should see True.')
+print('Should see True, False, False.')
 print(theMatcher.compare(theRegular_A, theRegular_B))
 
-#==[3] Create board with the two compared pieces and display them.
-#
-theBoard = Board()
-theBoard.addPiece(theRegular_A)
-theBoard.addPiece(theRegular_B)
-theBoard.display_mp()
+theBoard1 = Board()
+theBoard1.addPiece(theRegular_A)
+theBoard1.addPiece(theRegular_B)
 
+theRegular_B = theGridMea.pieces[2]
+print(theMatcher.compare(theRegular_A, theRegular_B))
+
+theBoard2 = Board()
+theBoard2.addPiece(theRegular_A)
+theBoard2.addPiece(theRegular_B)
+
+theRegular_B = theGridMea.pieces[4]
+print(theMatcher.compare(theRegular_A, theRegular_B))
+
+theBoard3 = Board()
+theBoard3.addPiece(theRegular_A)
+theBoard3.addPiece(theRegular_B)
+
+#==[3] Display compared pieces as added to boards.
+#
+theBoard1.display_mp()
+theBoard2.display_mp()
+theBoard3.display_mp()
 plt.show()
 
 #
