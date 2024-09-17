@@ -14,12 +14,14 @@
 #
 # ============================ basic04_regular ===========================
 
-
+#==[0] Prep environment
+#
 import os
 
+import numpy as np
 import cv2
 import improcessor.basic as improcessor
-# ==[0] Prep environment
+
 import matplotlib.pyplot as plt
 
 from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
@@ -31,6 +33,7 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
+print(cpath)
 theImageSol = cv2.imread(cpath + '/../../testing/data/balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
@@ -39,6 +42,8 @@ theMaskSol_src = cv2.imread(cpath + '/../../testing/data/puzzle_15p_123rf.png')
 # ==[1.1] Create an improcessor to obtain the mask.
 #
 
+# @note I think this code is no longer relevant, but can't find proper test scripts
+#       to confirm.  PAV 09/17/2024.
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.GaussianBlur, ((3, 3), 0,),
                            cv2.Canny, (30, 200,),
@@ -48,7 +53,11 @@ theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-# ==[1.2] Extract info from theImage & theMask to obtain a board instance
+np.shape(theMaskSol)
+plt.imshow(theMaskSol)
+plt.show()
+
+#==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
 theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
 

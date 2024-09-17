@@ -37,6 +37,7 @@ thePiece = Template.buildFromMaskAndImage(theMask, theImage)
 # ==[2] Test creation
 #
 thePiece.display()
+print("First image displays a single puzzle piece in a small image.")
 
 # ==[3] Test insertion into image data.
 #
@@ -46,6 +47,8 @@ thePiece.placeInImage(bigImage)
 thePiece.setPlacement(np.array([50, 50]))
 thePiece.placeInImage(bigImage)
 thePiece.placeInImageAt(bigImage, np.array([70, 30]))
+
+print("First image displays a three puzzle pieces in a big image.")
 
 # Display the resulting image. Should have three puzzle pieces in it.
 plt.figure()
@@ -58,10 +61,13 @@ bigImage = np.zeros((200, 200, 3))
 squarePiece.placeInImage(bigImage)
 spherePiece.placeInImage(bigImage)
 plt.figure()
-plt.title("Test the builder of basic-shape puzzle pieces. Should see a red square and a green sphere")
+plt.title("Test builder of basic-shape puzzle pieces. Should see a red square and a green sphere")
 plt.imshow(bigImage)
+print("Third displays to different puzzle pieces in an image.")
 
 plt.show()
+print("Close all windows to end test.")
+
 
 #
 # ============================ basic01_template ===========================

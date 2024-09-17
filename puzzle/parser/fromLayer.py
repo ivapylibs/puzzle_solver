@@ -1,4 +1,4 @@
-# ======================== puzzle.parser.fromLayer ========================
+#========================= puzzle.parser.fromLayer =========================
 #
 # @class    puzzle.parser.fromLayer
 #
@@ -6,7 +6,7 @@
 #           (or mask and image) detection output. Converts all isolated
 #           regions into their own puzzle piece instances.
 #
-# ======================== puzzle.parser.fromLayer ========================
+#========================= puzzle.parser.fromLayer =========================
 #
 # @file     fromLayer.py
 #
@@ -16,9 +16,9 @@
 #           2021/08/01 [modified]
 #
 #
-# ======================== puzzle.parser.fromLayer ========================
+#========================= puzzle.parser.fromLayer =========================
 
-# ===== Environment / Dependencies
+#===== Environment / Dependencies
 #
 
 from dataclasses import dataclass
@@ -34,7 +34,7 @@ from puzzle.piece.template import Template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 
-# ===== Helper Elements
+#===== Helper Elements
 #
 
 @dataclass
@@ -116,6 +116,8 @@ class FromLayer(centroidMulti):
 
             self.haveMeas = True
 
+
+
     def findCorrectedContours(self, mask, FILTER=True):
         """
         @brief Find the right contours given a binary mask image.
@@ -147,16 +149,19 @@ class FromLayer(centroidMulti):
                 if hierarchy[i][3] == -1 and np.count_nonzero(hierarchy[:, 3] == i) >= 2:
 
                     # # Debug only
-                    # temp_mask = np.zeros_like(mask).astype('uint8')
-                    # cv2.drawContours(temp_mask, cnts[i], -1, (255, 255, 255), 2)
-                    # _, temp_mask = cv2.threshold(temp_mask, 10, 255, cv2.THRESH_BINARY)
-                    # cv2.imshow('temp_mask', temp_mask)
-                    # cv2.waitKey()
+                    temp_mask = np.zeros_like(mask).astype('uint8')
+                    cv2.drawContours(temp_mask, cnts[i], -1, (255, 255, 255), 2)
+                    _, temp_mask = cv2.threshold(temp_mask, 10, 255, cv2.THRESH_BINARY)
+                    cv2.imshow('temp_mask', temp_mask)
+                    cv2.waitKey()
 
                     pass
                 else:
                     keep.append(i)
 
+            # @todo Ther is a problem here.  Cannot cast to np.array
+            #       cnts is a tuple of irregular sizes.  How did this work before?
+            #       Did I change the code or what?
             cnts = np.array(cnts)
             cnts = cnts[keep]
         else:
@@ -200,6 +205,8 @@ class FromLayer(centroidMulti):
 
         return desired_cnts
 
+    #============================= mask2regions ============================
+    #
     def mask2regions(self, I, M, verbose=False):
         """
         @brief Convert the selection mask into a bunch of regions.
@@ -279,6 +286,8 @@ class FromLayer(centroidMulti):
 
         return regions
 
+    #=========================== regions2pieces ==========================
+    #
     def regions2pieces(self, regions):
         """
         @brief Convert the region information into puzzle pieces.
@@ -310,14 +319,14 @@ class FromLayer(centroidMulti):
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
 
     def process(self, I, M):
-        """
-        @brief  Run the tracking pipeline for image measurement.
+      """
+      @brief  Run the tracking pipeline for image measurement.
 
-        Args:
-            I: RGB image.
-            M: Mask image.
-        """
-        self.measure(I, M)
+      Args:
+        I: RGB image.
+        M: Mask image.
+      """
+      self.measure(I, M)
 
 #
-# ======================== puzzle.parser.fromLayer ========================
+#========================= puzzle.parser.fromLayer =========================
