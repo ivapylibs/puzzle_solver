@@ -2,15 +2,24 @@
 #============================= basic03simple =============================
 #
 # @brief    Augmenting basic setup by packaging into a simple board
-#           perceiver. 
+#           perceiver. Detector gets pieces only within a certain
+#           intensity range (after conversion to gray scale).  Not all
+#           pieces will be snagged.  The ones grabbed will have centroid
+#           markers.
+#
+# Basic test of recovering puzzle pieces from a given color image, based on
+# a detection mask.  The detector is based on a gray level range.
+# Setting the lower threshold to 90 will get three of the objects.  Lowering
+# to 70 will get five of the objects.  Too low and it crashes, maybe due to
+# grabbing the entire image. Has not been debugged.
 #
 #============================= basic03simple =============================
 
 #
 # @file     basic03_simple.py
 #
-# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @author   Patricio A. Vela,       pvela@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 #
 # @date     2021/08/02  [created]
 #
@@ -38,7 +47,8 @@ fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 #==[1] Build the perceiver.
-#--[1.1] Create the detector and tracker instances.
+#--[1.1] Create the detector and tracker instances.  This is what does the
+#        gary level detection part.
 #
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((90, 255, cv2.THRESH_BINARY),))

@@ -31,7 +31,7 @@ theMask = np.full((20, 20), False, dtype=bool)
 theMask[4:14, 7:12] = True
 theImage = np.zeros((20, 20, 3), dtype='uint8')
 theImage[4:14, 7:12, :] = np.full((1, 1, 3), [0, 200, 200])
-cLoc = np.array([[0],[0]])
+cLoc = np.array([0,0])
 
 thePiece_1 = Template.buildFromMaskAndImage(theMask, theImage, cLoc)
 thePiece_1.setPlacement(np.array([10, 10]))

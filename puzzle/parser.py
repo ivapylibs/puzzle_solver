@@ -564,9 +564,11 @@ class boardPerceive(Perceiver.Perceiver):
 
     """
 
-    if self.haveState:
+    if self.haveState and (self.filter is not None):
       self.filter.process(self.tracker.getState())
       # IAMHERE
+      # @note   Not sure when stopped working on this code. - 09/17/2024 - PAV.
+      #         The test script for this craps out.  Maybe not fully revised.
 
 
 

@@ -597,6 +597,9 @@ class Board:
         else:
             fh = plt.figure()
 
+        if theImage is None:
+          return fh
+
         theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, 
                                 CONTOUR_DISPLAY=CONTOUR_DISPLAY,
                                 BOUNDING_BOX=BOUNDING_BOX)

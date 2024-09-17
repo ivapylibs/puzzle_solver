@@ -78,7 +78,6 @@ class Template:
     '''!
     @brief  Stores and encapsulates a template instance of a visual puzzle piece.
 
-
     The language here is general, but the fact that it lives in the puzzle.piece namespace
     indicates that this class is strictly associated to puzzle pieces.  As the base class,
     it probably implements the simplest, no frills version of a template puzzle piece.
@@ -101,7 +100,7 @@ class Template:
 
         self.y = y                  # @< A PuzzleTemplate instance.
         self.rLoc = np.array(r)     # @< The default location is the top left corner.
-        # @todo  Might actually be the centroid.
+        # @todo Might actually be the centroid.
         # @todo Why is the location stored here when PuzzleTemplate has it too?
         # @todo What benefit occurs from the duplicate given that there is potentialy for
         #       mismatch? Is mismatch useful?
@@ -143,7 +142,9 @@ class Template:
 
         if isOffset:
             self.rLoc = np.array(self.rLoc + r)
+            print(self.y.pcorner)
             self.y.pcorner = np.array(self.y.pcorner + r)
+            print(self.y.pcorner)
         else:
             if isCenter:
                 self.rLoc = np.array(r - np.ceil(self.y.size / 2))
@@ -268,28 +269,29 @@ class Template:
         """
         @brief  Insert the puzzle piece into the image in the original location.
 
-        Args:
-            theImage: The source image to put puzzle piece into.
-            offset: The offset list.
-            CONTOUR_DISPLAY: The flag indicating whether to display the contours.
+        @param[in] theImage     Source image to put puzzle piece into.
+        @param[in] offset       Offset coordinates.
+
+        @param[in] CONTOUR_DISPLAY  Flag indicating whether to display the contours.
         """
 
-        # @todo Very weird. Not sure what is going on.  Uses resized image. Yucky.
-
-        # Remap coordinates from own image sprite coordinates to bigger
-        # image coordinates. 2*N
+        # Remap coordinates based on internal model of location. See comment below.
         print(offset)
         print(self.y.pcorner)
         print(self.y.rcoords)
         rcoords = np.array(offset).reshape(-1, 1) + self.y.pcorner.reshape(-1, 1) + self.y.rcoords
+        # @todo @WHY ADDING pcorner AND rcoords ???? WHAT IS GOING ON ???
+        # @todo WHAT ABOUT OFFSET??? WHAT DOES THAT DO??
+
         #DEBUG
         #print(np.array(offset))
         #print(np.array(self.rLoc))
         #print(self.y.rcoords)
         #print(rcoords)
 
-        # Dump color/appearance information into the image (It will override the original image).
-        # If rcoords is outside the image, they will not be displayed
+        # Dump color/appearance information into the image (override original image).
+        # If rcoords is outside the image, they will not be displayed.  Automatically
+        # corrected by class implementation.
         theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
         # May have to re-draw the contour for better visualization
@@ -625,7 +627,7 @@ class Template:
         # the tight bbox is just the square itself, so size is just size
         y.size = np.array([size, size])
         y.mask = np.ones((size, size), dtype=np.uint8) * 255
-        y.pcorner = np.array(rLoc)
+        y.pcorner = np.array([0,0])
 
         # Create a contour of the mask
         cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
@@ -649,7 +651,7 @@ class Template:
         if not rLoc:
             thePiece = Template(y)
         else:
-            thePiece = Template(y, rLoc)
+            thePiece = Template(y, np.array(rLoc))
 
         return thePiece
 
@@ -676,7 +678,7 @@ class Template:
         y.size = np.array([radius, radius]) * 2
         y.mask = np.zeros((2 * radius, 2 * radius), dtype=np.uint8)
         y.mask = cv2.circle(y.mask, center=(radius - 1, radius - 1), radius=radius, color=(255, 255, 255), thickness=-1)
-        y.pcorner = np.array([[0],[0]])
+        y.pcorner = np.array([0,0])
 
         # Create a contour of the mask
         cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
@@ -698,7 +700,7 @@ class Template:
         if not rLoc:
             thePiece = Template(y)
         else:
-            thePiece = Template(y, rLoc)
+            thePiece = Template(y, np.array(rLoc))
 
         return thePiece
 

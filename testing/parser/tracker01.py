@@ -67,7 +67,7 @@ boardPer = boardPerceive(None, binDet, theLayer)
 
 #==[3] Move pieces in image.
 #
-shiftSq = np.array([5, 5])
+shiftSq = np.array([2, 2])
 shiftSp = np.array([-2, 3])
 
 for i in range(6):
