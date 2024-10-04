@@ -1,17 +1,22 @@
 #!/usr/bin/python3
-# ============================ withOption_byColor ===========================
+#============================ arg01_clusterByColor ===========================
+## @file
+# @brief    Test the clustering methods and provide more options to the user.
 #
-# @brief    Test script for basic functionality of byColor on simulated puzzle pieces. Provide more options to the user.
+# Loads the desired puzzle and applies process according to arguments to create a
+# puzzle.  The puzzle is displayed.  If specified, the puzzle pieces will be
+# clusters and a separate image will be created with cluster ID overlay.
 #
-# ============================ withOption_byColor ===========================
-
+#  Use the ``--help`` flag to see what the options are.  Sending no option swill
+#  default to a 48 piece fish puzzle.
 #
-# @file     withOption_byColor.py
+# @ingroup TestCluster
+# @quitf
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2022/10/26  [created]
 #
-# ============================ withOption_byColor ===========================
+#============================ arg01_clusterByColor ===========================
 
 
 # ==[0] Prep environment
@@ -127,4 +132,4 @@ plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 plt.show()
 
 #
-# ============================ withOption_byColor ===========================
+#============================ arg01_clusterByColor ===========================

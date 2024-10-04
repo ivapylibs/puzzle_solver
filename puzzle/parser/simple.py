@@ -23,7 +23,7 @@
 
 # ===== Environment / Dependencies
 #
-import perceiver.simple as PerceiverSimple
+import perceiver.perceiver as Perceiver
 
 from puzzle.builder.board import Board
 
@@ -31,7 +31,7 @@ from puzzle.builder.board import Board
 #
 # ========================== puzzle.parser.simple =========================
 #
-class Simple(PerceiverSimple.simple):
+class Simple(Perceiver.Perceiver):
 
     def __init__(self, theDetector, theTracker, theParams=[]):
         """

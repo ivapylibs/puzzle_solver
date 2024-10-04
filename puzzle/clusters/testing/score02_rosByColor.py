@@ -1,22 +1,54 @@
 #!/usr/bin/python3
-# ============================ scoreHumanROS_byColor ===========================
+#=========================== score02_rosByColor ===========================
+## @file
+# @brief    Basic functionality of byColor clustering on simulated puzzle pieces
+#           with progress output to ROS. Builds on score01.
 #
-# @brief    Test script for basic functionality of byColor on simulated puzzle pieces.
-#           Will randomly shuffle the pieces and separate them into clusters. Then score the clusters with reference to the ground truth.
-#           We also add support for ROS.
+# This test script is a bit more complicated than typical ones, as it permits
+# command line arguments to change the source image and puzzle gridding.  The
+# default puzzle image is the fish puzzle, and the default gridding leads to
+# 48 pieces. 
 #
-# ============================ scoreHumanROS_byColor ===========================
-
+# The ROS output consists of a score topic (float) and a cluster information topic
+# (JSON).  The output can probably be done differently (as matrix/list) to avoid
+# JSON serialization and deserialization.  After all ROS already has tools to do
+# that if the topic type is known.  This test script will remain this way, but a
+# later one will use the reporting scheme to output the score and assignments
+# using a cleaner pipeline (needing less prep-work). For now, this one is good.
 #
-# @file     scoreHuman_byColor.py
+# The test script is important because the robot (Mary) will know what the cluster
+# assignments are from a previous calibration process. Knowing the assignment will
+# provide Mary with the information needed to assist with the clustering process.
+#
+# For full listing of source puzzle options and other settings use the ``--help`` 
+# flag. 
+#
+# ### Outcome ###
+#
+# Upon execution, the solution clustering is provided by overlaying a labeling of
+# the puzzle solution over the gridded image.  The randomly placed and exploded
+# pieces are displayed in another figure.  From there, the system starts to
+# cluster them and output the clustering core against the ground truth for each
+# cycle.
+#
+# At the end the score should be 1 (indicating perfect match against ground truth
+# clusters).
+#
+#
+# @ingroup TestCluster
+# @quitf
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2022/11/17  [created]
 #
-# ============================ scoreHumanROS_byColor ===========================
+#
+# NOTE:
+#   Indent is 4 spaces w/conversion.  Width is 90 columns.
+#
+#=========================== score02_rosByColor ===========================
 
 
-# ==[0] Prep environment
+#==[0] Prep environment
 import copy
 import os
 
@@ -45,10 +77,14 @@ from std_msgs.msg import String, Int32, Float64
 import json
 
 import argparse
+import pkg_resources
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
+
+#==[0.1] Argument parser.
+#
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--image', type=str, default='fish', choices=['duck', 'earth', 'balloon', 'elsa1', 'elsa2', 'rapunzel', 'dinos', 'fish'],
                        help='The image to be used for the puzzle.')
@@ -85,23 +121,23 @@ mask_dict = {
 }
 
 
-# ROS support
-
-# Start the roscore if not enabled
+#==[0.3] ROS support
+#        Start the roscore if not enabled
+#
 if not rosgraph.is_master_online():
     roscore_proc = subprocess.Popen(['roscore'], shell=True)
     # wait for a second to start completely
     time.sleep(1)
 
-# Init the node
-rospy.init_node("Test_cluster_info_publisher")
+# Initialize the node
+# TODO: If necessary, we can create custom message types later.
+rospy.init_node("score_cluster")
 cluster_info_pub = rospy.Publisher('cluster_info', String, queue_size=10)
-score_info_pub =  rospy.Publisher('score_info', Float64, queue_size=5) # If necessary, we can create some custom message type for this later.
+score_info_pub   = rospy.Publisher('score_info', Float64, queue_size=5) 
 
-# ==[1] Read the source image and template.
+#==[1] Read the source image and template.
 #
-
-prefix = cpath + '/../../testing/data/'
+prefix = pkg_resources.resource_filename('puzzle', 'testing/data/')
 
 theImageSol = cv2.imread(prefix + img_dict[opt.image])
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
@@ -109,9 +145,9 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol_src = cv2.imread(prefix + mask_dict[opt.mask])
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
-# ==[1.1] Create an improcessor to obtain the mask.
+#==[1.1] Create an improcessor to obtain the puzzle piece mask.
 #
-
+# TODO: This step can probably be made cleaner.  Not worrying for now. PAV 10/04/24.
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            cv2.GaussianBlur, ((3, 3), 0,),
                            cv2.Canny, (30, 200,),
@@ -122,14 +158,16 @@ theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
+#==[1.2] Use puzzle template image to synthesize a gridded puzzle.
+#        Display the original board for viewing with piece ID overlay.
+#
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
 
-# Display the original board
 theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
 
-# ==[2] Create a cluster instance and process the puzzle board.
+#==[2] Create a cluster instance and process the puzzle board.
+#      Display image with cluster ID overlay.
 #
-
 if opt.cluster_mode == 'number':
     theColorCluster = ByColor(theGrid, theParams=ParamColorCluster(cluster_num=opt.cluster_number, cluster_mode='number'))
 elif opt.cluster_mode == 'threshold':
@@ -139,51 +177,57 @@ else:
 
 theColorCluster.process()
 
-# Initialize the reference cluster id
+# Generate cluster label vs puzzle piece ID mapping.
 for k, v in theColorCluster.feaLabel_dict.items():
     theGrid.pieces[k].cluster_id = v
 
-print('The number of pieces:', len(theColorCluster.feature))
-print('The cluster label:', theColorCluster.feaLabel)
+print('No. of pieces :', len(theColorCluster.feature))
+print('Cluster labels:', theColorCluster.feaLabel)
 
 theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
 
-# ==[3.1] Simulate randomly clustering the pieces.
-
-# _, epBoard = theGrid.explodedPuzzle(dx=250, dy=250)
+#==[3.1] Simulate randomly clustering the pieces.
+#        First explode the puzzle to make space for clustering.
+#        
 _, epBoard = theGrid.explodedPuzzle(dx=500, dy=500)
 
 epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False))
 
-# ==[3.2] Randomly swap the puzzle pieces.
+#==[3.2] Randomly swap the puzzle pieces.
+#        Set fixed random seed for repeatable execution. 
 #
-
-# Set up the random seed to make sure we have the same initial state.
 np.random.seed(0)
 _, epBoard, _ = epBoard.swapPuzzle()
 
-epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
+epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True, 
+                                                ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
 
-# ==[4] Simulate the human performance. We separate the puzzle pieces into 4 groups.
-
-# Create the desired cluster2region id map, cluster_id: region_id
-# We may have different desired map (random)
-region_id_list = np.arange(4)
-np.random.seed()
-np.random.shuffle(region_id_list)
-cluster_region_dict = {i:v for i,v in enumerate(region_id_list)}
-print('The desired cluster id to region id map:', cluster_region_dict)
+#==[3.3] Define image quadrant regions.
 
 x_mid = epImage.shape[1]//2
 y_mid = epImage.shape[0]//2
 
-# Create the region_dict
+# Create the region_dict based on (x,y) coordinate ranges.
 region_dict = {
     0: [0,0,x_mid,y_mid],
     1: [x_mid,0,x_mid*2,y_mid],
     2: [0,y_mid,x_mid,y_mid*2],
     3: [x_mid,y_mid,x_mid*2,y_mid*2],
 }
+
+#==[3.4] Rather than have the cluster regions be ordered from top-left clockwise
+#        around, create a random assignment of quadrant region to cluster ID.
+#
+#        This is a cluster2region id map, cluster_id -> region_id
+#
+region_id_list = np.arange(4)
+np.random.seed()
+np.random.shuffle(region_id_list)
+cluster_region_dict = {i:v for i,v in enumerate(region_id_list)}
+print('cluster id to quadrant region map:', cluster_region_dict)
+
+
+#==[4] Simulate the human clustering by separating the puzzle pieces into 4 groups.
 
 # Compute the cluster id of each piece (based on the initial region)
 piece_human_cluster_dict = {}
@@ -301,4 +345,4 @@ for idx, piece_id in enumerate(epBoard.pieces):
 plt.show()
 
 #
-# ============================ scoreHumanROS_byColor ===========================
+#============================ scoreHumanROS_byColor ===========================
