@@ -56,7 +56,7 @@ from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 from camera.utils import display
 
-import perceiver.simple as PerceiverSimple 
+import perceiver.perceiver as Perceiver 
 
 #---------------------------------------------------------------------------
 #==================== Configuration Node : boardMeasure ====================
@@ -494,7 +494,7 @@ class boardMeasure(centroidMulti):
 # @note Moved from earlier version in parser/simple.py
 #
 
-class boardPerceive(PerceiverSimple.simple):
+class boardPerceive(Perceiver.Perceiver):
   """!  
   @brief  A simple perceiver for recovering puzzle pieces from a
           layer mask and an image. If desired, can do piece association.
@@ -577,9 +577,11 @@ class boardPerceive(PerceiverSimple.simple):
 
     """
 
-    if self.haveState:
+    if self.haveState and (self.filter is not None):
       self.filter.process(self.tracker.getState())
       # IAMHERE
+      # @note   Not sure when stopped working on this code. - 09/17/2024 - PAV.
+      #         The test script for this craps out.  Maybe not fully revised.
 
 
 

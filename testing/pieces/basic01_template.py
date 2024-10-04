@@ -35,11 +35,13 @@ theMask[4:14, 7:12] = True
 theImage = np.zeros((20, 20, 3))
 theImage[4:14, 7:12, :] = np.full((1, 1, 3), [1, 0, 1])
 
-thePiece = Template.buildFromMaskAndImage(theMask, theImage)
+cLoc = np.array([0,0])
+thePiece = Template.buildFromMaskAndImage(theMask, theImage, cLoc)
 
 #==[2] Test creation
 #
 thePiece.display()
+print("Testing out piece extraction.  Should see puzzle piece and mask.")
 
 #==[3] Test insertion into image data.
 #
@@ -54,11 +56,15 @@ thePiece.placeInImageAt(bigImage, np.array([70, 30]))
 plt.figure()
 plt.imshow(bigImage)
 plt.title("Test puzzle piece placement in image.")
+#plt.show()     # Uncomment to pause here; close windows to continue.
 
 #==[4] Test the builder of the basic puzzle piece
 squarePiece = Template.buildSquare(20, color=(255, 0, 0), rLoc=(80, 40))
 spherePiece = Template.buildSphere(10, color=(0, 255, 0), rLoc=(80, 140))
 bigImage = np.zeros((200, 200, 3))
+# @todo DOES NOT USE rLoc BUT IT PROBABLY SHOULD!!!! NEED TO CORRECT.
+#       APPEARS TO RELY ON pcorner. WHY IS THAT?  NEED TO DOCUMENT BETTER!
+#       CHECK HOW DISPLAY WORKS!! WHY ISN'T pcorner ALWAYS SIMPLY [0,0]??
 squarePiece.placeInImage(bigImage)
 spherePiece.placeInImage(bigImage)
 plt.figure()

@@ -68,5 +68,8 @@ display.rgb_cv(theImage,window_name='Input')
 display.binary_cv(theDet.getState().x, window_name='Output')
 display.wait_cv()
 
+print("This test script is suspect.  It uses edge detection when thresholding");
+print("of the image is a better choice for getting a mask image.");
+
 #
 # ============================ basic04_fromSketch ============================

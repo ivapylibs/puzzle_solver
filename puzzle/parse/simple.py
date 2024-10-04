@@ -24,7 +24,7 @@
 # ===== Environment / Dependencies
 #
 import camera.utils.display as display
-import perceiver.simple as PerceiverSimple
+import perceiver.perceiver as Perceiver
 
 from puzzle.board import Board
 
@@ -32,7 +32,7 @@ from puzzle.board import Board
 #
 # ========================== puzzle.parser.simple =========================
 #
-class Simple(PerceiverSimple.simple):
+class Simple(Perceiver.Perceiver):
 
     def __init__(self, theParams=None, theDetector=None, theTracker=None,
     theFilter=None):
