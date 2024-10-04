@@ -107,5 +107,8 @@ ENV/
 
 *.sw?
 
-# large data
+# large data or testing output data that is not important.
+# some data might be put in the repo in these paths intentionally.
+# if that is the case, then it is because doing so has value.
 puzzle/testing/data_rosbag
+puzzle/testing/clusters/output
