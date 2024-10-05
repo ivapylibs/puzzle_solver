@@ -37,9 +37,9 @@ import ivapy.display_cv as display
 #
 
 class PieceStatus(Enum):
-    """
+    '''!
     @brief PieceStatus used to keep track of the status of pieces.
-    """
+    '''
 
     UNKNOWN  = 0    # @< The default status.
     MEASURED = 1    # @< The initial status in the current measured board (visible).
@@ -57,15 +57,15 @@ class PieceStatus(Enum):
 #
 @dataclass
 class PuzzleTemplate:
-    """!
+    '''!
     @brief  Data class containing puzzle piece information.
-    """
+    '''
 
     pcorner:        np.ndarray = np.array([])   # @< The top left corner (x,y) of puzzle piece bbox.
-    size:           np.ndarray = np.array([])   # @< Tight bbox size of puzzle piece image.
+    size:           np.ndarray = np.array([])   # @< Tight bbox size (width, height) of puzzle piece image.
     rcoords:        np.ndarray = np.array([])   # @< Puzzle piece linear image coordinates.
-    appear:         np.ndarray = np.array([])   # @< Puzzle piece color/appearance.
-    image:          np.ndarray = np.array([], dtype='uint8')    # @< Image w/ BG default fill.
+    appear:         np.ndarray = np.array([])   # @< Puzzle piece vectorized color/appearance.
+    image:          np.ndarray = np.array([], dtype='uint8')    # @< Image w/BG (original).
     mask:           np.ndarray = np.array([], dtype='uint8')    # @< Binary mask image.
     contour:        np.ndarray = np.array([], dtype='uint8')    # @< Binary contour image.
     contour_pts:    np.ndarray = np.array([])   # @< Template contour points.
@@ -86,8 +86,8 @@ class Template:
 
     #================================ __init__ ===============================
     #
-    def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
-        """!
+    def __init__(self, y:PuzzleTemplate=None, r=None, id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
+        '''!
         @brief  Constructor for template class.
 
         Args:
@@ -96,10 +96,13 @@ class Template:
             id: The puzzle piece id in the measured board. Be set up by the board.
             theta: The puzzle piece aligned angle.
             pieceStatus: The status of the puzzle pieces, including UNKNOWN, MEASURED, TRACKED, and INHAND.
-        """
+        '''
 
         self.y = y                  # @< A PuzzleTemplate instance.
-        self.rLoc = np.array(r)     # @< The default location is the top left corner.
+        if (r is None):
+          self.rLoc = y.pcorner     # @< The default location is the top left corner.
+        else:
+          self.rLoc = np.array(r)     
         # @todo Might actually be the centroid.
         # @todo Why is the location stored here when PuzzleTemplate has it too?
         # @todo What benefit occurs from the duplicate given that there is potentialy for
@@ -142,9 +145,7 @@ class Template:
 
         if isOffset:
             self.rLoc = np.array(self.rLoc + r)
-            print(self.y.pcorner)
             self.y.pcorner = np.array(self.y.pcorner + r)
-            print(self.y.pcorner)
         else:
             if isCenter:
                 self.rLoc = np.array(r - np.ceil(self.y.size / 2))
@@ -276,9 +277,11 @@ class Template:
         """
 
         # Remap coordinates based on internal model of location. See comment below.
-        print(offset)
-        print(self.y.pcorner)
-        print(self.y.rcoords)
+        #DEBUG
+        #print(offset)
+        #print(self.y.pcorner)
+        #print(self.y.rcoords)
+        #print(self.y.size)
         rcoords = np.array(offset).reshape(-1, 1) + self.y.pcorner.reshape(-1, 1) + self.y.rcoords
         # @todo @WHY ADDING pcorner AND rcoords ???? WHAT IS GOING ON ???
         # @todo WHAT ABOUT OFFSET??? WHAT DOES THAT DO??
@@ -292,6 +295,10 @@ class Template:
         # Dump color/appearance information into the image (override original image).
         # If rcoords is outside the image, they will not be displayed.  Automatically
         # corrected by class implementation.
+        #DEBUG
+        #print("==========PIM")
+        #print(np.shape(self.y.appear))
+        #print(np.shape(rcoords))
         theImage[rcoords[1], rcoords[0], :] = self.y.appear
 
         # May have to re-draw the contour for better visualization
@@ -408,7 +415,7 @@ class Template:
 
         # Populate dimensions.
         # Updated to OpenCV style
-        y.size    = [theMask.shape[1], theMask.shape[0]]
+        y.size    = [theMask.shape[1], theMask.shape[0]]        # width then height
         y.pcorner = cLoc
         # @note Setting cLoc manually like this seems really weird.  Why should it
         #       be given externally?   Why isn't it just the min of rcoords?
@@ -416,17 +423,17 @@ class Template:
         #       does not conform to implementation?  - 09/17/2024 - PAV.
         # @note What is rLoc role here?  Why considered separate/outside core Template
         #       information?  Is it to support initial value and changed values?
-        #       Documentation is slim here. - 09/17/024 - PAV.
+        #       Documentation is slim here. - 09/17/2024 - PAV.
         #
 
         y.mask = theMask.astype('uint8')
 
-        # Create a contour of the mask
+        # Create a contour of the mask.  Find version gets the contour/boundary.
+        # Draw version creates binary contour mask.
         cnts = cv2.findContours(y.mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
         y.contour_pts = cnts[0][0]
         y.contour = np.zeros_like(y.mask).astype('uint8')
-        cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+        cv2.drawContours(y.contour, cnts[0], -1, 255, thickness=2)
 
         # Debug only
         # hull = cv2.convexHull(cnts[0][0])
@@ -437,18 +444,18 @@ class Template:
 
         y.rcoords = list(np.nonzero(theMask))  # 2 (row,col) x N
 
-        # Updated to OpenCV style -> (x,y)
-        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]  # 2 (x;y) x N
+        # Get individual pixel colors from image patch.  Updated to OpenCV style -> (x,y)
+        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0] # 2 (x;y) x N
         y.rcoords = np.array(y.rcoords)
 
-        y.appear = theImage[y.rcoords[1], y.rcoords[0], :]
+        y.appear = theImage[y.rcoords[1], y.rcoords[0], :]      # Vectorized appearance.
 
         # Store template image.
         # For now, not concerned about bad image data outside of mask.
         y.image = theImage
 
         if rLoc is None:
-            thePiece = Template(y)
+            thePiece = Template(y, cLoc)
         else:
             thePiece = Template(y, rLoc)
 

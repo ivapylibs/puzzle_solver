@@ -388,7 +388,7 @@ class Gridded(Interlocking):
         return thePuzzle
 
     @staticmethod
-    def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
+    def buildFrom_ImageAndMask(theImage, theMask, theParams=CfgGridded()):
         """
         @brief Given an image and an image mask, parse both to recover
                the puzzle calibration/solution.

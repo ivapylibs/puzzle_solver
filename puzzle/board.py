@@ -384,6 +384,8 @@ class Board:
 
         # [[min x, min y], [max x, max y]]
         bbox = self.boundingBox()
+        #DEBUG
+        #print(f'bbox =  {bbox}')
 
         if bbox is not None:
             lengths = bbox[1] - bbox[0]
@@ -416,6 +418,12 @@ class Board:
 
                 # bottom right coordinate
                 br = piece.rLoc + piece.size()
+
+                #print((piece.y.pcorner, piece.rLoc, piece.size(), tl, br))
+                #DEBUG VISUAL
+                #import ivapy.display_cv as display
+                #display.rgb(piece.y.image)
+                #display.wait()
 
                 bbox[0] = np.min([bbox[0], tl], axis=0)
                 bbox[1] = np.max([bbox[1], br], axis=0)
@@ -471,7 +479,6 @@ class Board:
 
         if theImage is not None:
             # Check dimensions ok and act accordingly, should be equal or bigger, not less.
-
             lengths = self.extents()
 
             if lengths is None:
@@ -491,7 +498,13 @@ class Board:
                                          dtype='uint8')
 
             # Have to deal with cases where pieces are out of bounds
-            if theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
+            #print(theImage.shape)
+            #print(theImage_enlarged.shape)
+            #print(lengths)
+            #if theImage.shape[1] - lengths[0] < 0 or theImage.shape[0] - lengths[1] < 0:
+            #  theImage_enlarged = np.zeros((lengths[1]+1,lengths[0]+1,3))
+
+            if True or theImage.shape[1] - lengths[0] >= 0 and theImage.shape[0] - lengths[1] >= 0:
                 for key in self.pieces:
 
                     piece = self.pieces[key]
@@ -502,14 +515,14 @@ class Board:
                     if ID_DISPLAY == True:
                         txt = str(piece.id)
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        char_size = cv2.getTextSize(txt, font, 0.15, 2)[0]
+                        char_size = cv2.getTextSize(txt, font, 1, 1)[0]
 
                         y, x = np.nonzero(piece.y.mask)
 
                         pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0] + abs(enlarge[0]),
                                int(piece.rLoc[1] + np.mean(y)) + char_size[1] + abs(enlarge[1]))
 
-                        font_scale = min((max(x) - min(x)), (max(y) - min(y))) / 30
+                        font_scale = 1 #min((max(x) - min(x)), (max(y) - min(y))) / 30
                         cv2.putText(theImage_enlarged, str(piece.id), pos, font,
                                     font_scale, ID_COLOR, 1, cv2.LINE_AA)
                         #
@@ -607,6 +620,33 @@ class Board:
         plt.imshow(theImage)
 
         return fh
+
+    #============================= display_cv ============================
+    #
+    def display_cv(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
+                                                                   BOUNDING_BOX=False):
+        """!
+        @brief  Display the puzzle board as an image using matplot library.
+
+        @param[in]  theImage
+        @param[in]  fh                  Figure handle if available.
+        @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
+        @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
+
+        @param[out] fh                  Figure handle.
+        """
+        import ivapy.display_cv as display
+
+        #DEBUG
+        #print(f'display shape: {np.shape(theImage)}.')
+        theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, 
+                                CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+                                BOUNDING_BOX=BOUNDING_BOX)
+
+        #DEBUG
+        #print("display now")
+        display.rgb(theImage)
+        #print("display done")
 
 
 #---------------------------------------------------------------------------

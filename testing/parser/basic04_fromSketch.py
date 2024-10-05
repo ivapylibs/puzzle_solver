@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# ============================ basic04_fromSketch ============================
+#============================= basic04_fromSketch ============================
 #
 # @brief    Code to test out the simple image detector for a fairly
 #           contrived scenario: threshold a grayscale image.
@@ -9,7 +9,7 @@
 # is simply fictitious data placed into an array (same as fake data in
 # earlier test scripts).
 #
-# ============================ basic04_fromSketch ============================
+#============================= basic04_fromSketch ============================
 
 #
 # @file     basic04_fromSketch.m
@@ -40,16 +40,15 @@ from puzzle.parse.fromSketch import FromSketch
 # ==[1] Read a sketch image that needs to be processed.
 #
 
-theImage = cv2.imread('../data/puzzle_15p_123rf.png')
+#theImage = cv2.imread('../data/puzzle_15p_123rf.png')
+theImage = cv2.imread('../data/puzzle_48p.jpg')
 
 # ==[2] Instantiate inImage detector with an image processor that does
 #      the thresholding.
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (100, 200,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
 
@@ -68,8 +67,5 @@ display.rgb_cv(theImage,window_name='Input')
 display.binary_cv(theDet.getState().x, window_name='Output')
 display.wait_cv()
 
-print("This test script is suspect.  It uses edge detection when thresholding");
-print("of the image is a better choice for getting a mask image.");
-
 #
-# ============================ basic04_fromSketch ============================
+#============================= basic04_fromSketch ============================

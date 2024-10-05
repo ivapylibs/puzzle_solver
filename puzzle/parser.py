@@ -128,6 +128,9 @@ class boardMeasure(centroidMulti):
     @param[in]  theParams   The parameters/config settings for the track pointer.
     """
 
+    if params is None:
+      params = CfgBoardMeasure()
+
     super(boardMeasure, self).__init__(None, params)
 
     self.bMeas = Board()  # @< The measured board.
@@ -162,7 +165,13 @@ class boardMeasure(centroidMulti):
     self.bMeas = Board()                # Get a new measured board.
     super(boardMeasure, self).measure(M)
 
+
+    # DEBUG
+    #print("boardMeasure : measure.")
+    #print("Made it through here fine.")
     self._regions2board(I)
+    #print(f'Number of pieces : {self.bMeas.size()}')
+
 
     # Override since some regions might be too small or large. Check again.
     # Also regenerate the list of "track points."
@@ -204,34 +213,21 @@ class boardMeasure(centroidMulti):
     #vI = I.reshape(-1, imdims[2])        # Vectorized image.
 
     for ri in self.trackProps:
-      #--[1] Region label process recovers bounding box mask and sliced image coordinates.
+      #--[1] Region label process recovers bounding box mask and sliced image coords.
+      #      Extract the color image patch from mask, and vectorized image data
+      #      based on mask and region pixel coords.
       #
       pImage = I[ri.slice]
       pMask  = ri.image
+      pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
+
       #print("Image and Mask shapes.")
       #print(pImage.shape)
       #print(pMask.shape)
-      #DEBUG
-      # OLD CODE.  DELETE ONCE REST WORKING.
-      #print(ri)
-      #imdims = ri.image_intensity.shape(I)
-      #vI = ri.image_intensity(-1, imdims[2]) 
-
-      #--[2] Extract the color image patch from vectorized image based on 
-      #      bounding box mask and region pixel coords.
-      # NO LONGER A NECESSARY SEPARATE STEP SINCE INFORMATION IS CONTAINED IN
-      # THE REGIONPROPS INFORMATION STRUCTURE. DELETE WHEN NEW VERSION TESTED.
-      #
-      #indI   = np.ravel_multi_index( ri.coords.T, imdims[0:2] ) 
-      #pImage = np.zeros( [ri.area_bbox, imdims[2]] )        # Rectangle.
-      #pImage[np.ndarray.flatten(pMask),:] = vI[indI, :]     # Pixels within rectangle.
-      # IAMHERE Looks like this extraction is incorrect.  It uses the coordinates into
-      #         mask, but the mask is an image patch.  Need to figure out how to get the actual
-      #         image patch or the full image indices.
-      #print(pMask.shape)
-      #print(vI.shape)
-      #print(pImage.shape)
-      pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
+      #print("Theta??")
+      #print(ri.orientation)
+      #@todo    orientation part may be worth keeping if it is consistently computed.
+      #         then can use for placing in proper orientation. - PAV 10/04/2024.
      
       #--[3] Collect other information.
       #
@@ -241,19 +237,39 @@ class boardMeasure(centroidMulti):
 
       #--[4] Instantiate piece and add to measured board.
       #
-      thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, pCorn, pCent, pStat)
+      ##
+      ## Gridded: buildFrom_ImageAndMask (theParams = custom CfgGridded) 
+      ## Arrangement: buildFrom_ImageAndMask (theParams)
+      ##
+      #DEBUG 
+      #print('-----')
+      #print(ri.area)
+      #print(self.tparams.minArea)
+      #print((ri.bbox[2]-ri.bbox[0])*(ri.bbox[3]-ri.bbox[1]))
+      #print(np.shape(pMask))
+      #print(np.shape(pImage))
+      #print(pCorn)
+      #print(pCent)
+      #print(pStat)
+      #print('EEEEE')
+      if (ri.area > self.tparams.minArea):
+        thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, 
+                                                               pCorn, None, pStat)
+        # @todo I was sending the centroid as a coordinate. Why was that??
+        #       Why do we need the centroid?  Is it to better test for proximity?
+        #       Otherwise, the corner may not be a great way to do so? PAV 10/04/2024.
+        #       May need to fix this downstream.
 
-      #thePiece = self.pieceConstructor.buildFromPropsAndImage(ri, pImage, pStat)
-      # @todo   Maybe should just work directly from region props info plus cropped image.
-      #         Let builder extract what it needs to.
-      # @todo   Revisit once working.
+        #thePiece = self.pieceConstructor.buildFromPropsAndImage(ri, pImage, pStat)
+        # @todo   Maybe should just work directly from region props info plus cropped image.
+        #         Let builder extract what it needs to.
+        # @todo   Revisit once working.
+        self.bMeas.addPiece(thePiece)
 
-      self.bMeas.addPiece(thePiece)
-
-      #DEBUG
-      #display.rgb_cv(pImage)
-      #display.binary_cv(ri.image)
-      #display.wait_cv()
+        #DEBUG
+        #display.rgb_cv(pImage)
+        #display.binary_cv(ri.image)
+        #display.wait_cv()
       # @todo   Appears to miss outer pixel boundary during piece plotting. But here
       #         that is not the case.  Something happens elsewhere. Maybe in the
       #         plot/display or place in image routine.  Need to double check code.
@@ -566,6 +582,7 @@ class boardPerceive(Perceiver.Perceiver):
       self.haveObs = True
       self.haveState = True
       self.haveRun = True
+
     else:
       self.haveState = False
 

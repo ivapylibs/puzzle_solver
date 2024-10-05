@@ -1,4 +1,4 @@
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 #
 # @class    puzzle.builder.arrangement
 #
@@ -13,7 +13,7 @@
 # mechanism to indicate how "close" a current solution would be to the
 # calibrated solution.
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 #
 # @file     arrangement.py
 #
@@ -22,7 +22,7 @@
 # @date     2021/07/30 [created]
 #           2021/08/05 [modified]
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 
 import pickle
 from dataclasses import dataclass
@@ -344,9 +344,11 @@ class Arrangement(Board):
 
         return thePuzzle
 
+    #====================== buildFrom_ImageAndMask =====================
+    #
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
-        """
+        """!
         @brief Given an image and an image mask, parse both to recover
                the puzzle calibration/solution.
 
@@ -367,6 +369,7 @@ class Arrangement(Board):
         else:
             pParser = boardMeasure(theParams)
 
+        # DEBUGGING: BREAKS HERE.
         pParser.process(theImage, theMask)
         if hasattr(theParams, 'tauDist'):
             thePuzzle = Arrangement(pParser.getState(), theParams)
@@ -489,4 +492,4 @@ class Arrangement(Board):
         return thePuzzle
 
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
