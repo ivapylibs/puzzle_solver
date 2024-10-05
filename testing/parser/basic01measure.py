@@ -21,14 +21,15 @@
 #================================ basic01 ================================
 
 
-import cv2
 #==[0] Prep environment
+#
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
 from puzzle.parser import boardMeasure, CfgBoardMeasure
 
-#==[1] Create image
+#==[1] Create image and insert two circles into it.
 #
 theImage = np.zeros((100, 100, 3))
 
@@ -68,13 +69,16 @@ theBoard = theLayer.bMeas
 
 #==[4] Display the original image. Should see two circle pieces.
 #
-print('Should see two circle pieces.')
+print('First  plot is original image.   Should see two circle pieces.')
+print('Second plot is mask.             Should see two masks.')
+print((type(theImage), type(theMask)))
 plt.imshow(theImage)
-#plt.show()
+plt.figure()
+plt.imshow(theMask)
 
 #==[5] Display the resulting image. Should see two circle pieces in a cropped region.
 #
-print('Should see two circle pieces in a cropped region.')
+print('Third plot is the board. Should see two circle pieces in a -cropped- region.')
 fh = theBoard.display_mp()
 plt.show()
 

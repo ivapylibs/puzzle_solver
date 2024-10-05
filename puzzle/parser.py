@@ -170,8 +170,6 @@ class boardMeasure(centroidMulti):
     #print("boardMeasure : measure.")
     #print("Made it through here fine.")
     self._regions2board(I)
-    #print(f'Number of pieces : {self.bMeas.size()}')
-
 
     # Override since some regions might be too small or large. Check again.
     # Also regenerate the list of "track points."

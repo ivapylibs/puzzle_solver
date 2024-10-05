@@ -2,10 +2,6 @@
 #
 # @class    puzzle.parser.fromLayer
 #
-# @brief    A basic detector class that processes a layered image
-#           (or mask and image) detection output. Converts all isolated
-#           regions into their own puzzle piece instances.
-#
 # ======================== puzzle.parser.fromLayer ========================
 #
 # @file     fromLayer.py
@@ -51,6 +47,11 @@ class ParamPuzzle:
 #
 
 class FromLayer(centroidMulti):
+    '''!
+    @brief  A basic detector class that processes a layered image
+            (or mask and image) detection output. Converts all isolated
+            regions into their own puzzle piece instances.
+    '''
 
     def __init__(self, theParams=ParamPuzzle):
         """
@@ -304,8 +305,8 @@ class FromLayer(centroidMulti):
             # cv2.imshow('debug_mask', theMask)
             # cv2.waitKey()
 
-            thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc,
-                                                                   pieceStatus=self.params.pieceStatus)
+            thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc, 
+                                                rLoc=rLoc, pieceStatus=self.params.pieceStatus)
             # # Debug only
             # cv2.imshow('debug_piece', thePiece.toImage())
             # cv2.waitKey()
