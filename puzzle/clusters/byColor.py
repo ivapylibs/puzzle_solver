@@ -22,8 +22,8 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn import metrics
 from scipy.optimize import linear_sum_assignment
 
-from puzzle.builder.board import Board
-from puzzle.piece.histogram import Histogram
+from puzzle.board import Board
+from puzzle.pieces.matchDifferent import HistogramCV as Histogram
 
 #===== Helper Elements
 #
@@ -32,14 +32,18 @@ from puzzle.piece.histogram import Histogram
 class ParamColorCluster:
     '''!
     Configuration parameter struct for byColor clustering.
+
+    There are two basic clustering approaches implemented.  One is an agglomerative
+    clustering method based on a distance threshold.  The other is based on a target
+    quantity of clusters or groupings. These are mutually exclusing implementations.
     '''
     # @todo Should convert to a AlgConfig instance.
-    tauDist: float = 0.5
-    cluster_num: int = 2
-    cluster_mode: str = 'threshold' # 'threshold' or 'number'
+    tauDist:        float   = 0.5           # @< Distance threshold for cluster merging?
+    cluster_num:    int     = 4             # @< Number of clusters to target based on mode.
+    cluster_mode:   str     = 'threshold'   # @< Cluster by 'threshold' or 'number'
 
 #
-# ================================ puzzle.clusters.byColor ================================
+#============================= puzzle.clusters.byColor =============================
 #
 class ByColor(Board):
     '''!
@@ -89,7 +93,7 @@ class ByColor(Board):
         # For each piece, collect its feature signature (based on color!!).
         for key in self.pieces:
             piece = self.pieces[key]
-            self.feature.append(self.feaExtractor.colorFeaExtract(piece).flatten())
+            self.feature.append(self.feaExtractor.extractFeature(piece).flatten())
 
         self.feature = np.array(self.feature)       # Convert to matrix for distance scoring.
 

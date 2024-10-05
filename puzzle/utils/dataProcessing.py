@@ -26,21 +26,19 @@ from rospy_message_converter import message_converter, json_message_converter
 from sklearn.cluster import KMeans
 from sklearn.cluster import AgglomerativeClustering
 
-# ====================== puzzle.utils.dataProcessing ======================
+#=============================== updateLabel ===============================
 #
-
 def updateLabel(x_list, x_label):
-    """
+    """!
     @brief  Update the label according to the ranking of all the elements'
             (with the same label) mean value.
             E.g., x_list = [28,137,263,269,33,151] / x_label = [2,3,1,1,2,3] ->
             x_label_updated = [0,1,2,2,0,1]
-    Args:
-        x_list: The value list.
-        x_label: The original label.
+    
+    @param[in]  x_list  Value list.
+    @param[in]  x_label Original label.
 
-    Returns:
-        x_label_updated: The updated label.
+    @param[out] x_label_updated     The updated label.
     """
 
     x_mean = []
@@ -54,6 +52,8 @@ def updateLabel(x_list, x_label):
 
     return x_label_updated
 
+#============================== copyAttributes =============================
+#
 class copyAttributes(object):
 
     def __init__(self, source):
@@ -86,37 +86,46 @@ class copyAttributes(object):
             setattr(target, attr, value)
         return target
 
+
+#============================= calculateMatches ============================
+#
 def calculateMatches(des1, des2, ratio_threshold=0.7):
-    """
+    """!
     @brief  Calculate the matches based on KNN
-            See https://github.com/adumrewal/SIFTImageSimilarity/blob/master/SIFTSimilarityInteractive.ipynb
 
+    For premise behind this approach, see
+    https://github.com/adumrewal/SIFTImageSimilarity/blob/master/SIFTSimilarityInteractive.ipynb
 
-    Args:
-        des1: The descriptor.
-        des2: The descriptor.
+    @param[in]  des1        First descriptor.
+    @param[in]  des2        Second descriptor.
 
-    Returns:
-        topResults: The final matches.
+    @param[in] topResults   Final matches.
     """
     bf = cv2.BFMatcher()
     try:
+        # First match keypoint descriptors from 1 to 2.
         matches = bf.knnMatch(des1, des2, k=2)
+
+        # Then match keypoint descriptors from 2 to 1.
+        matches = bf.knnMatch(des2, des1, k=2)
+
+        # Keep only matches are closer than next best option
         topResults1 = []
+        topResults2 = []
         for m, n in matches:
             if m.distance < ratio_threshold * n.distance:
                 topResults1.append([m])
-
-        matches = bf.knnMatch(des2, des1, k=2)
-        topResults2 = []
     
         for m, n in matches:
             if m.distance < ratio_threshold * n.distance:
                 topResults2.append([m])
+
     except:
         print('No matches')
         return []
 
+    # Cross-compare matches and retain symmetric ones.
+    #
     topResults = []
     for match1 in topResults1:
         match1QueryIndex = match1[0].queryIdx
@@ -126,10 +135,15 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
             match2QueryIndex = match2[0].queryIdx
             match2TrainIndex = match2[0].trainIdx
 
+            # Symmetry of keypoint matches test.
             if (match1QueryIndex == match2TrainIndex) and (match1TrainIndex == match2QueryIndex):
                 topResults.append(match1)
+
+
     return topResults
 
+#================================= checkKey ================================
+#
 def checkKey(dict1, dict2, value):
     """
     @brief Check the key & value pairs between two dicts given a query value.
@@ -148,6 +162,8 @@ def checkKey(dict1, dict2, value):
 
     return key1 == key2
 
+#============================== closestNumber ==============================
+#
 def closestNumber(num, basis=50, lower=True):
     """
     @brief Get the closest number to the basis target for the input number.

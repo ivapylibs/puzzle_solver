@@ -32,12 +32,16 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+import ivapy.display_cv as display
+
 import improcessor.basic as improcessor
-from puzzle.builder.gridded import Gridded, ParamGrid
-from puzzle.parser.fromSketch import FromSketch
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.parse.fromSketch import FromSketch
 from puzzle.utils.imageProcessing import cropImage
 
 import argparse
+import pkg_resources
+
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -79,7 +83,7 @@ mask_dict = {
 # ==[1] Read the source image and template.
 #
 
-prefix = cpath + '/../../testing/data/'
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
 
 theImageSol = cv2.imread(prefix + img_dict[opt.image])
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
@@ -91,19 +95,31 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           cv2.dilate, (np.ones((3, 3), np.uint8),),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
+#DEBUG
+#print("Creating window: should see a processed mask.")
+#import ivapy.display_cv as display
+#display.rgb(theImageSol,window_name='Input')
+#display.binary(theMaskSol, window_name='Output')
+#display.wait()
+
+cfgGrid = CfgGridded()
+cfgGrid.tauGrid = 5000
+cfgGrid.reorder=False
+
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
+#theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=CfgGridded(areaThresholdLower=5000, removeBlack=False, reorder=True))
 
 # Display the original board
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
+print("board.display_mp has been updated.  Check and revise this invocation.")
+theGrid.display_mp(theImageSol, None, CONTOUR_DISPLAY=False, ID_DISPLAY=True)#, TITLE='Original ID')
+# Display the original board
+# theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
@@ -120,12 +136,18 @@ if opt.with_cluster:
     theColorCluster.process()
 
     for k, v in theColorCluster.feaLabel_dict.items():
+        #theGrid.pieces[k].id = v
+        print("this code should be correct now. Pieces need a cluster ID.")
+        # @todo THE ABOVE CODE IS BAD. IT IS A KLUDGE UNTIL MERGED WITH YUNZHI.
+        #       YUNZHI HAS UPDATED DISPLAY ROUTINE.
         theGrid.pieces[k].cluster_id = v
 
     print('The number of pieces:', len(theColorCluster.feature))
     print('The cluster label:', theColorCluster.feaLabel)
 
-    theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
+    print("board.display_mp has been updated.  Check and revise this invocation.")
+    theGrid.display_mp(theImageSol,CONTOUR_DISPLAY=True, ID_DISPLAY=True)#, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
+    #theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
 
 plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 

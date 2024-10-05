@@ -26,6 +26,7 @@ import scipy
 import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
 from sklearn.cluster import KMeans
+from camera.utils import display
 
 from puzzle.utils.imageProcessing import rotate_im
 
@@ -421,7 +422,7 @@ def create_side_images(class_image, inout, corners):
         side_image_rot, M = rotate(side_image, htw)
 
         side_corners = np.array(np.round([M.dot((corners[corner_idx][0], corners[corner_idx][1], 1))
-                                          for corner_idx in side_corners_idx])).astype(np.int)
+                                          for corner_idx in side_corners_idx])).astype(int)
 
         # Order the corners from higher (smaller y coordinate)
         if side_corners[0, 1] > side_corners[1, 1]:
@@ -512,25 +513,61 @@ def cluster_lines(lines):
     return np.array(final_labels)
 
 
+#================================= get_corners =================================
+#
 def get_corners(dst, neighborhood_size=5, score_threshold=0.3, minmax_threshold=100):
     """
-    Given the input Harris image (where in each pixel the Harris function is computed),
-    extract discrete corners
+    @brief  Given the input Harris image (where in each pixel the Harris function is
+            computed), extract discrete corners satisfying detection constraints.
+
+    @param[in]  dst
+    @param[in]  neighborhood_size
+    @param[in]  score_threshold
+    @param[in]  minmax_threshold
+
+    @param[out] xy ??
     """
-    data = dst.copy()
+
+    # @note Not documented, so unsure if processing is optimal / uses libraries well.
+    #       May need to more rigorously review later. PAV 2023/11/13.
+
+    data = dst.copy()       # Will be modified and manipulated, hence copy.
+
+    #DEBUG
+    #print('get_corners')
+    #print(dst.max())
 
     data[data < score_threshold * dst.max()] = 0.
 
+    #O#DEBUG
+    #print(np.sum(data>0))
+
     data_max = filters.maximum_filter(data, neighborhood_size)
-    maxima = (data == data_max)
+    maxima   = (data == data_max)
     data_min = filters.minimum_filter(data, neighborhood_size)
-    diff = ((data_max - data_min) > minmax_threshold)
+    diff     = ((data_max - data_min))
+
+    #DEBUG
+    #print(np.sum(data_max>0))
+    #diff     = ((data_max - data_min) > minmax_threshold)
+    #print(np.max(diff))
+
+    diff     = diff >= 0.80*np.max(diff) # minmax_threshold 
+    # WHY NOT JUST GET TOP FOUR??? WOULDN'T THAT BE MORE ROBUST?? OTHERWISE
+    # THE THRESHOLD CAN GIVE MORE OR LESS THAN FOUR ELEMENTS.
+    #
+    # @todo AT LEAST OVERRIDE THE minmax_threshold to be a ratio. PAV 2023/11/13.
+    #
     maxima[diff == 0] = 0
 
     labeled, num_objects = ndimage.label(maxima)
     # slices = ndimage.find_objects(labeled)
     yx = np.array(ndimage.center_of_mass(data, labeled, range(1, num_objects + 1)))
     xy = yx[:, ::-1]
+
+    #DEBUG
+    #print(np.sum(maxima))
+    #print(yx)
 
     return xy
 
@@ -707,6 +744,8 @@ def get_best_fitting_rect_coords(xy, d_threshold=30, perp_angle_thresh=20, verbo
     return xy[best_fitting_idxs]
 
 
+#============================== get_default_params =============================
+#
 def get_default_params():
     side_extractor_default_values = {
         # 'before_segmentation_func': partial(cv2.medianBlur, ksize=5),
@@ -716,8 +755,8 @@ def get_default_params():
         'harris_blocksize': 5,
         'harris_ksize': 5,
         'corner_nsize': 5,
-        'corner_score_threshold': 0.2,
-        'corner_minmax_threshold': 100,
+        'corner_score_threshold': 0.7,
+        'corner_minmax_threshold': 100,     # @todo Make a threshold factor, not actual threshold
         'corner_refine_rect_size': 5,
         'edge_erode_size': 3,
         'shape_classification_distance_threshold': 100,
@@ -731,33 +770,54 @@ def get_default_params():
     return side_extractor_default_values.copy()
 
 
+#================================ sideExtractor ================================
+#
 def sideExtractor(puzzleTemplate, **kwargs):
+    """!
+    @brief  Unsure what does.  No documentation. PAV - 2023/11/13.
+
+    @param[in]  puzzleTemplate  Puzzle piece template instance.
+    @param[in]  OTHERS. WHO KNOWS.
+    """
+
     params = get_default_params()
     for key in kwargs:
         params[key] = kwargs[key]
 
     out_dict = {}
 
-    mask = puzzleTemplate.mask.copy()
+    mask    = puzzleTemplate.mask.copy()
     contour = puzzleTemplate.contour.copy()
-    image = puzzleTemplate.image.copy()
+    image   = puzzleTemplate.image.copy()
 
-    # # Debug only
     # cv2.imshow('mask',mask)
     # cv2.imshow('contour',contour)
     # cv2.imshow('image',image)
     # cv2.waitKey()
 
     # To enable cornerHarris to function properly, create an enlarged image
-    mask_enlarged = np.zeros((mask.shape[0] + 20, mask.shape[1] + 20), dtype='uint8')
-    contour_enlarged = mask_enlarged.copy()
-    image_enlarged = np.zeros((image.shape[0] + 20, image.shape[1] + 20, 3), dtype='uint8')
+    mask    = np.pad(puzzleTemplate.mask, 10, mode='constant', constant_values=(0,))
+    contour = np.pad(puzzleTemplate.contour, 10, mode='constant', constant_values=(0,))
+    image   = np.pad(puzzleTemplate.image, ((10,),(10,),(0,)) , mode='constant', constant_values=(0,))
 
-    mask_enlarged[10:mask.shape[0] + 10, 10:mask.shape[1] + 10] = mask
-    contour_enlarged[10:contour.shape[0] + 10, 10:contour.shape[1] + 10] = contour
-    image_enlarged[10:image.shape[0] + 10, 10:image.shape[1] + 10, :] = image
+    # REMOVE CODE SINCE REPLACE WITH NP.PAD ABOVE.  NOT SURE WHY DID NOT USE ORIGINALLY.
+    # WHAT IS UP WITH STUDENT'S PYTHON CODING SKILLS??
+    #
+    #mask_enlarged    = np.zeros((mask.shape[0] + 20, mask.shape[1] + 20), dtype='uint8')
+    #contour_enlarged = mask_enlarged.copy()
+    #image_enlarged = np.zeros((image.shape[0] + 20, image.shape[1] + 20, 3), dtype='uint8')
 
-    harris = cv2.cornerHarris(mask_enlarged, params['harris_blocksize'], params['harris_ksize'], 0.04)
+    #mask_enlarged[10:mask.shape[0] + 10, 10:mask.shape[1] + 10] = mask
+    #contour_enlarged[10:contour.shape[0] + 10, 10:contour.shape[1] + 10] = contour
+    #image_enlarged[10:image.shape[0] + 10, 10:image.shape[1] + 10, :] = image
+
+    # # Debug only
+    print("In sideExtractor function.")
+    display.binary_cv(mask, window_name='Mask')
+    display.rgb_cv(image,window_name='Piece')
+    display.binary_cv(contour*255,window_name='Contour')
+
+    harris = cv2.cornerHarris(mask, params['harris_blocksize'], params['harris_ksize'], 0.04)
 
     # Perform a simple thresholding
     i, j = 0, 1
@@ -766,20 +826,37 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
     out_dict['simple_harris_pts'] = harris_pts - 10
 
-    harris = harris * mask_enlarged
+    harris = harris * mask
 
     # Get filtered harris corner position
     xy = get_corners(harris, params['corner_nsize'], params['corner_score_threshold'],
                      params['corner_minmax_threshold'])
-    xy = np.round(xy / params['scale_factor']).astype(np.int)
+    xy = np.round(xy / params['scale_factor']).astype(int)
     out_dict['filtered_harris_pts'] = xy - 10
+    #DEBUG
+
+    #print('HERE!!')
+    #print(np.shape(xy))
 
     if len(xy) < 4:
         raise RuntimeError('Not enough corners')
 
     # Get the 4 rectangle points
+    # @todo ARGH!! NOT RELIABLE. SHOULD USE NMS IN get_corners.  WHY WAS THAT NOT DONE??
+    #       OR IS IT DONE BUT COMMUNICATED POORLY????
+    #
+    # @note METHOD IS UNRELIABLE.  NOT SURE WHY DONE THIS WAY.  NEED BETTER WAY TO GET THE
+    #       CORNERS.  SOME PIECES WILL HAVE 6 OR MORE VALID CORNERS DUE TO ANGULAR PARTS
+    #       WHEN PIECE EDGES GO IN.  NEED TO GET THE EXTREMAL ONE, NOT "INTERNAL" ONES.
+    #       SINCE APPROACH NOT DOCUMENTED, IT IS HARD TO KNOW HOW TO FIX WITHOUT RECODING
+    #       FROM SCRATCH.  LEAVING FOR LATER.
+    #
+    print('---')
+    print(xy)
     intersections = get_best_fitting_rect_coords(xy, d_threshold=params['d_thresh'],
                                                  perp_angle_thresh=params['perp_angle_thresh'])
+    print(intersections)
+    display.wait_cv()
     out_dict['rectangle_pts'] = intersections - 10
     if intersections is None:
         raise RuntimeError('No rectangle found')
@@ -795,7 +872,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
         out_dict['rotation_angle'] = rotation_angle
 
-        edges = contour_enlarged
+        edges = contour
 
         # Without relative translation return
         # edges, mask_temp, M, x_pad, y_pad = rotate_im(edges, rotation_angle)
@@ -804,8 +881,8 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
         # With relative translation return
         edges, mask_temp, M, x_pad, y_pad, _ = rotate_im(edges, rotation_angle)
-        theImage, _, _, _, _, _ = rotate_im(image_enlarged, rotation_angle, mask=mask_temp)
-        theMask, _, _, _, _, _ = rotate_im(mask_enlarged, rotation_angle, mask=mask_temp)
+        theImage, _, _, _, _, _ = rotate_im(image, rotation_angle, mask=mask_temp)
+        theMask, _, _, _, _, _ = rotate_im(mask, rotation_angle, mask=mask_temp)
 
         # # Debug only
         # masked = cv2.bitwise_and(theImage, theImage, mask=edges)
@@ -823,7 +900,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
         # Rotate intersection points
 
         intersections = np.array(
-            np.round([M.dot((point[0] + x_pad[0], point[1] + y_pad[0], 1)) for point in intersections])).astype(np.int)
+            np.round([M.dot((point[0] + x_pad[0], point[1] + y_pad[0], 1)) for point in intersections])).astype(int)
 
         # With Rotation
         intersections = intersections + np.array([x_pad[1] + x_pad[2], y_pad[1] + y_pad[2]])
@@ -859,7 +936,7 @@ def sideExtractor(puzzleTemplate, **kwargs):
 
         # # @todo Rotate
         # # Rotate intersection points
-        # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(np.int)
+        # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(int)
 
         yb, xb = compute_barycentre(mask_enlarged)
 
