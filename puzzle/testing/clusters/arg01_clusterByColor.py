@@ -96,10 +96,6 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
-                           #FROM MIDDLE. NOT NEEDED.
-                           #cv2.GaussianBlur, ((3, 3), 0,),
-                           #cv2.Canny, (30, 200,),
-                           #cv2.erode, (np.ones((3, 3), np.uint8),),
 
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
@@ -112,7 +108,6 @@ theMaskSol = theDet.getState().x
 #display.binary(theMaskSol, window_name='Output')
 #display.wait()
 
-
 cfgGrid = CfgGridded()
 cfgGrid.tauGrid = 5000
 cfgGrid.reorder=False
@@ -121,7 +116,10 @@ theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 #theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=CfgGridded(areaThresholdLower=5000, removeBlack=False, reorder=True))
 
 # Display the original board
+print("board.display_mp has been updated.  Check and revise this invocation.")
 theGrid.display_mp(theImageSol, None, CONTOUR_DISPLAY=False, ID_DISPLAY=True)#, TITLE='Original ID')
+# Display the original board
+# theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #
@@ -138,14 +136,18 @@ if opt.with_cluster:
     theColorCluster.process()
 
     for k, v in theColorCluster.feaLabel_dict.items():
-        theGrid.pieces[k].id = v
-    # @todo THE ABOVE CODE IS BAD. IT IS A KLUDGE UNTIL MERGED WITH YUNZHI.
-    #       YUNZHI HAS UPDATED DISPLAY ROUTINE.
+        #theGrid.pieces[k].id = v
+        print("this code should be correct now. Pieces need a cluster ID.")
+        # @todo THE ABOVE CODE IS BAD. IT IS A KLUDGE UNTIL MERGED WITH YUNZHI.
+        #       YUNZHI HAS UPDATED DISPLAY ROUTINE.
+        theGrid.pieces[k].cluster_id = v
 
     print('The number of pieces:', len(theColorCluster.feature))
     print('The cluster label:', theColorCluster.feaLabel)
 
+    print("board.display_mp has been updated.  Check and revise this invocation.")
     theGrid.display_mp(theImageSol,CONTOUR_DISPLAY=True, ID_DISPLAY=True)#, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
+    #theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
 
 plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 

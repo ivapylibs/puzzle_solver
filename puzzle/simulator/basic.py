@@ -80,7 +80,7 @@ class Basic:
 
         # We only need the matched index.
         # It is only used for simulation cases and we assume that this matching result should always be perfect.
-        if shareFlag == False:
+        if self.shareFlag == False:
             self.planner.manager.process(self.puzzle)
             self.matchSimulator = self.planner.manager.pAssignments
 
@@ -194,7 +194,7 @@ class Basic:
             return None
 
 
-    def takeAction(self, plan):
+    def takeAction(self, plan, verbose=False):
         """
         @brief Perform the plan.
 
@@ -224,11 +224,13 @@ class Basic:
                 action_param = action[3]
 
                 if action_type == 'rotate':
-                    print(f'Rotate piece {piece_id} by {int(action_param)} degree')
+                    if verbose:
+                        print(f'Rotate piece {piece_id} by {int(action_param)} degree')
                     self.puzzle.pieces[piece_id] = self.puzzle.pieces[piece_id].rotatePiece(
                         action_param)
                 elif action_type == 'move':
-                    print(f'Move piece {piece_id} by {action_param}')
+                    if verbose:
+                        print(f'Move piece {piece_id} by {action_param}')
                     self.puzzle.pieces[piece_id].setPlacement(action_param, offset=True)
 
 

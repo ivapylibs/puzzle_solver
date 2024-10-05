@@ -23,7 +23,10 @@
 
 # ===== Environment / Dependencies
 #
+<<<<<<< HEAD:puzzle/parse/simple.py
 import camera.utils.display as display
+=======
+>>>>>>> yunzhi:puzzle/parser/simple.py
 import perceiver.perceiver as Perceiver
 
 from puzzle.board import Board

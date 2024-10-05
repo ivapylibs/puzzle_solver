@@ -32,7 +32,7 @@ from trackpointer.centroidMulti import centroidMulti
 from puzzle.board import Board
 from puzzle.piece import Template, PieceStatus
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
-
+import warnings
 
 # ===== Helper Elements
 #
@@ -44,7 +44,7 @@ class ParamPuzzle:
     lengthThresholdLower: float = 1000
     pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.MEASURED
-
+    removeBlack: bool = True
 
 #
 # ======================== puzzle.parser.fromLayer ========================
@@ -126,6 +126,9 @@ class FromLayer(centroidMulti):
         Returns:
             desired_cnts: Contour list.
         """
+
+        # Dummy way to ignore the warning https://stackoverflow.com/a/35466382
+        warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
         # For details of options, see https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
         # and https://docs.opencv.org/4.5.2/d3/dc0/group__imgproc__shape.html#ga4303f45752694956374734a03c54d5ff
@@ -264,14 +267,16 @@ class FromLayer(centroidMulti):
                         skipFlag = True
                         break
 
-            # Todo: A tricky solution to skip regions of all black, which is for our real scene
-            if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')),
-                                                           cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
-                # Debug only
-                # cv2.imshow('seg_img', seg_img)
-                # cv2.imshow('I', I)
-                # cv2.waitKey()
-                continue
+            # Note that float64 is not supported by cv2
+            # Todo: A tricky solution to skip regions of all black, which is deisgned for our real scene
+            if self.params.removeBlack:
+                if cv2.countNonZero(cv2.threshold(cv2.cvtColor(cv2.bitwise_and(I, I, mask=seg_img.astype('uint8')).astype('float32'),
+                                                               cv2.COLOR_BGR2GRAY), 50, 255, cv2.THRESH_BINARY)[1]) == 0:
+                    # # Debug only
+                    # cv2.imshow('seg_img_all_black', seg_img)
+                    # cv2.imshow('I', I)
+                    # cv2.waitKey()
+                    continue
 
             if not skipFlag:
                 # Add theMask, theImage, rLoc, the region
@@ -294,8 +299,16 @@ class FromLayer(centroidMulti):
             theMask = region[0]
             theImage = region[1]
             rLoc = region[2]
+
+            # # Debug only
+            # cv2.imshow('debug_mask', theMask)
+            # cv2.waitKey()
+
             thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc=rLoc,
                                                                    pieceStatus=self.params.pieceStatus)
+            # # Debug only
+            # cv2.imshow('debug_piece', thePiece.toImage())
+            # cv2.waitKey()
 
             pieces.append(thePiece)
 

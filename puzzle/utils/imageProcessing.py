@@ -59,7 +59,6 @@ def cropImage(image, template):
 
     return dst
 
-
 def rotate_im(image, angle, mask=None):
     """
     @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
@@ -143,7 +142,6 @@ def rotate_im(image, angle, mask=None):
 
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), rLoc_relative
 
-
 def white_balance(img):
     """
     @brief Change the white balance of the image.
@@ -161,7 +159,6 @@ def white_balance(img):
     result[:, :, 2] = result[:, :, 2] - ((avg_b - 128) * (result[:, :, 0] / 255.0) * 1.1)
     result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
     return result
-
 
 def extract_region(img, verbose=False):
     """

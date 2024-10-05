@@ -20,7 +20,7 @@ import copy
 # Surveillance system
 from Surveillance.deployment.Base import BaseSurveillanceDeploy
 from Surveillance.deployment.Base import Params as bParams
-
+from Surveillance.utils.configs import CfgNode_Surv as CfgSurv
 
 class SurvRunner():
     """
@@ -41,23 +41,22 @@ class SurvRunner():
 
         ### build the surveillance
         configs = bParams(
-            markerLength = 0.075,
-            W = 1920,               # The width of the frames
-            H = 1080,                # The depth of the frames
             reCalibrate = False,
             ros_pub = False,         # Publish the test data to the ros or not
-            test_rgb_topic = self.rgb_topic,
-            test_depth_topic = self.dep_topic,
             # activity_topic= test_activity_topic,
             visualize = True,
             run_system= True,        
             # activity_label = args.act_collect
             # Postprocessing
-            bound_limit = [200,200,50,50], # @< The ignored region area. Top/Bottom/Left/Right. E.g., Top: 200, 0-200 is ignored.
+            bound_limit = [200,60,50,50], # @< The ignored region area. Top/Bottom/Left/Right. E.g., Top: 200, 0-200 is ignored.
             mea_mode = 'test', # @< The mode for the postprocessing function, 'test' or 'sol'.
             mea_test_r = 150,  # @< The circle size in the postprocessing for the measured board.
         )
-        self.surv = BaseSurveillanceDeploy.buildPub(configs, bag_path=self.calib_bag_path)
+        cfg = CfgSurv()
+        cfg.load_defaults()
+        self.surv = BaseSurveillanceDeploy.buildPub(configs, cfg=cfg, bag_path=self.calib_bag_path)
+
+        bg_seg = self.surv.scene_interpreter.bg_seg
 
 
         print("\n=========== The Surveillance Calibration finished===========")

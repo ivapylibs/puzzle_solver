@@ -65,7 +65,7 @@ theLayer = boardMeasure(puzzParm)
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
-# ==[1.3] Create an Grid instance and explode it into two new boards
+# ==[1.3] Create a Grid instance and explode it into two new boards
 #
 
 print('Running through test cases. Will take a bit.')

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================ realSolverManualCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver & with manual calibration process. (real img)
+# @brief    Test script with command from the solver & with manual calibration process (remove the pieces one by one from the connected puzzle). (real img)
 #
 # ============================ realSolverManualCalibrate_basic ===========================
 

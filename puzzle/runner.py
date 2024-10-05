@@ -26,17 +26,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 
+from puzzle.piece.template import Template, PieceStatus
+from puzzle.piece.sift import Sift
 from puzzle.builder.board import Board
 from puzzle.builder.arrangement import Arrangement
+from puzzle.builder.interlocking import Interlocking
 from puzzle.builder.gridded import Gridded, ParamGrid
+from puzzle.clusters.byColor import ByColor, ParamColorCluster
 from puzzle.manager import Manager, ManagerParms
-from puzzle.piece.sift import Sift
-from puzzle.utils.dataProcessing import closestNumber
+from puzzle.utils.dataProcessing import closestNumber, kmeans_id_2d, agglomerativeclustering_id_2d
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 from puzzle.utils.puzzleProcessing import calibrate_real_puzzle
 from puzzle.solver.simple import Simple
 from puzzle.simulator.planner import Planner, ParamPlanner
-from puzzle.piece.template import Template, PieceStatus
 
 
 # ===== Helper Elements
@@ -44,18 +46,29 @@ from puzzle.piece.template import Template, PieceStatus
 
 @dataclass
 class ParamRunner(ParamPlanner):
+    # Params to filter out the pieces
     areaThresholdLower: int = 1000
     areaThresholdUpper: int = 10000
     lengthThresholdLower: int = 1000
     BoudingboxThresh: tuple = (10, 200)
+
+    # Params for basic puzzle info
     pieceConstructor: any = Template
     pieceStatus: int = PieceStatus.MEASURED
-    tauDist: int = 100
+
+    # Other params
+    tauDist: int = 100 # For in-place check
     hand_radius: int = 200
     tracking_life_thresh: int = 15
     solution_area: np.array = np.array([0,0,0,0])
     solution_area_center: np.array = np.array([0,0])
-    solution_area_size: np.array = np.array([0,0])
+    solution_area_size: float = 0.0
+
+    # Params for clustering (currently all for byColor)
+    cluster_mode: str = 'number' # 'number' or 'threshold'
+    cluster_number: int = 3 # For number mode
+    cluster_threshold: float = 0.5 # For threshold mode
+    score_method: str = 'label' # 'label' or 'histogram' criteria for clustering
 
 class RealSolver:
     def __init__(self, theParams=ParamRunner):
@@ -68,16 +81,23 @@ class RealSolver:
         self.theSolver = Simple(None)
         self.thePlanner = Planner(self.theSolver, self.theManager, self.params)
 
+        # Current measure board
+        self.meaBoard = None
+
         # Mainly for debug
         self.bMeasImage = None
         self.bTrackImage = None
         self.bTrackImage_SolID = None
+        self.bSolImage = None
+        self.bClusterImage = None
 
         # Mainly for calibration of the solution board
         self.theCalibrated = Board()
-
-        # For solution board calibration & solution area
         self.thePrevImage = None
+
+        # Clustering
+        self.theClusterBoard = None
+
 
     def calibrate(self, theImageMea, visibleMask, hTracker_BEV, option=1, verbose=False):
         """
@@ -103,14 +123,20 @@ class RealSolver:
             input: A board/path/raw image.
         """
 
-        if issubclass(type(input), Board):
-            theArrangeSol = Gridded(input)
-        elif isinstance(input, str):
-            theArrangeSol = Gridded.buildFromFile_Puzzle(input)
-            # Currently, we only change the solution area if we have already calibrated it
+        # @note For our old random test cases, the solution board does not have to be a grid board.
+        # That's why we choose Arrangement class at first.
 
-            self.params.solution_area = [closestNumber(theArrangeSol.boundingBox()[0][0], 30), closestNumber(theArrangeSol.boundingBox()[0][1],30), \
-                                         closestNumber(theArrangeSol.boundingBox()[1][0], 30, lower=False), closestNumber(theArrangeSol.boundingBox()[1][1], 30, lower=False)]
+        if issubclass(type(input), Board):
+            theGridSol = Gridded(input)
+        elif isinstance(input, str):
+            assert os.path.exists(input), 'The input path does not exist.'
+            theGridSol = Gridded.buildFromFile_Puzzle(input)
+            # Todo: Currently, we only change the solution area if we reads from a file of board instance. The other options may need updates.
+
+            self.params.solution_area = [closestNumber(theGridSol.boundingBox()[0][0], 30),
+                                         closestNumber(theGridSol.boundingBox()[0][1], 30),
+                                         closestNumber(theGridSol.boundingBox()[1][0], 30, lower=False),
+                                         closestNumber(theGridSol.boundingBox()[1][1], 30, lower=False)]
 
             self.params.solution_area_center = np.array([(self.params.solution_area[0] + self.params.solution_area[2]) / 2, (self.params.solution_area[1] + self.params.solution_area[3]) / 2])
             self.params.solution_area_size = np.linalg.norm(self.params.solution_area_center-np.array([self.params.solution_area[0],self.params.solution_area[1]]))
@@ -121,19 +147,15 @@ class RealSolver:
                                                 BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                                 verbose=False)
 
-            theArrangeSol = Gridded.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
+            theGridSol = Gridded.buildFrom_ImageAndMask(img_input, theMaskSol, self.params)
 
         # For theManager & theSolver
-        self.theManager.solution = theArrangeSol
+        self.theManager.solution = theGridSol
+        self.theSolver.desired = theGridSol
 
         # # Debug only
         # cv2.imshow('Debug', self.theManager.solution.toImage())
         # cv2.waitKey()
-
-        self.theSolver.desired = theArrangeSol
-
-        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
-                                                          ID_DISPLAY=True)
 
         # For saving the status history
         self.thePlanner.status_history = dict()
@@ -141,6 +163,78 @@ class RealSolver:
         for i in range(self.theManager.solution.size()):
             self.thePlanner.status_history[i] = []
             self.thePlanner.loc_history[i] = []
+
+        # For debug
+        self.bSolImage = self.theManager.solution.toImage(theImage=np.zeros_like(img_input), BOUNDING_BOX=False,
+                                                          ID_DISPLAY=True)
+
+
+    def setClusterBoard(self, target_board=None, mode='solution'):
+        """
+        @brief Set up the cluster board.
+               Two ways to support clustering stuff:
+               1) Use the solution board as the cluster board. You can track the progress in this way.
+               2) Use any board. But only give a one-time suggestion.
+
+        Args:
+            mode: 'solution' or 'arbitrary', default is 'solution'.
+            target_board: the reference board for clustering. Can be any board at any time (does not have to be the solution one)
+
+        Returns:
+
+        """
+
+        if mode == 'solution':
+            target_board = self.theManager.solution
+        elif mode == 'arbitrary':
+            assert target_board is not None, 'Please provide a board for clustering.'
+        else:
+            raise ValueError('The mode should be "solution" or "arbitrary".')
+
+        if self.params.cluster_mode == 'number':
+            self.theClusterBoard = ByColor(target_board, theParams=ParamColorCluster(cluster_num=self.params.cluster_number,
+                                                                           cluster_mode='number'))
+        elif self.params.cluster_mode == 'threshold':
+            self.theClusterBoard = ByColor(target_board, theParams=ParamColorCluster(tauDist=self.params.cluster_threshold,
+                                                                           cluster_mode='threshold'))
+        else:
+            raise ValueError('Invalid cluster mode.')
+
+        self.theClusterBoard.process()
+
+        # Initialize the cluster id
+        for k, v in self.theClusterBoard.feaLabel_dict.items():
+            self.theClusterBoard.pieces[k].cluster_id = v
+
+        self.bClusterImage = self.theClusterBoard.toImage(theImage=np.zeros_like(self.bSolImage), BOUNDING_BOX=False,
+                                                                ID_DISPLAY=True, ID_DISPLAY_OPTION=1)
+
+    def clusterScore(self):
+        """
+        @brief Compute the clustering score of the current tracked board.
+
+        Returns:
+            The clustering score.
+        """
+        assert self.theClusterBoard is not None, 'Please set up the cluster board first.'
+
+        # We only consider the pieces whose statuses are not GONE
+        piece_loc_dict = {}
+        for piece_id, piece in self.thePlanner.record['meaBoard'].pieces.items():
+            if piece.status != PieceStatus.GONE:
+                piece_loc_dict[piece_id] = piece.rLoc
+
+        # Maybe incomplete compared to the reference
+        # Hierarchical clustering based on the 2d locations of the tracked board
+        # current_cluster_dict = agglomerativeclustering_id_2d(piece_loc_dict, self.params.cluster_number)
+        current_cluster_dict = kmeans_id_2d(piece_loc_dict, self.params.cluster_number)
+
+        # Debug only
+        print(f"Cluster info: {current_cluster_dict}")
+        print(f"Reference info: {self.theClusterBoard.feaLabel_dict}")
+        score = self.theClusterBoard.score(current_cluster_dict, method=self.params.score_method)
+
+        return '{:.1%}'.format(score)
 
     def progress(self, USE_MEASURED=True):
         """
@@ -151,7 +245,7 @@ class RealSolver:
         It is not always true when the matching is wrong/rotation is not correct. So there are some false positives.
 
         Args:
-            USE_MEASURED: Use the measured board or use the tracked board.
+            USE_MEASURED: Use the measured board, otherwise use the tracked board.
 
         Returns:
             thePercentage: The progress.
@@ -187,57 +281,68 @@ class RealSolver:
             # Then we have some matched pieces id: location
             pLocs_sol = {}
             for match in self.thePlanner.record['match'].items():
-                pLocs_sol[match[1]] = pLocs[match[0]]
+
+                # When we work on tracked board, we need to remove those pieces whose statuses are GONE
+                if self.thePlanner.record['meaBoard'].pieces[match[0]].status != PieceStatus.GONE:
+                    pLocs_sol[match[1]] = pLocs[match[0]]
 
             # Check all the matched pieces
             # inPlace is just checking the top left corner for now. It is not 100% accurate.
             # Todo: We may add a solution board to the simulator to make it more concise
             inPlace = self.thePlanner.manager.solution.piecesInPlace(pLocs_sol, tauDist=self.params.tauDist)
 
+
             val_list = [val for _, val in inPlace.items()]
 
-            # # Debug only
+            # Debug only
+            print(f"piece in-place info: {inPlace}")
             # print(val_list)
 
             thePercentage = '{:.1%}'.format(np.count_nonzero(val_list) / len(self.thePlanner.manager.solution.pieces))
 
         return thePercentage
 
-    def process(self, theImageMea, visibleMask, hTracker_BEV, verbose=False):
+    def process(self, theImageMea, visibleMask, hTracker_BEV, run_solver=True, planOnTrack=False, verbose=False):
         """
         @brief Process the input from the surveillance system.
+                It first obtain the measured pieces, which is categorized into the solution area pieces and the working area pieces.
+                Then the solving plan is obtained.
 
         Args:
             theImageMea: The input image (from the surveillance system).
             visibleMask: The mask image of the visible area (no hand/robot)(from the surveillance system).
             hTracker_BEV: The location of the hand in the BEV.
+            run_solver: Run the solver or not.
+            planOnTrack: Plan on the tracked board or not.
+            verbose: If True, will display the detected measured pieces, from working or solution area.
 
         Returns:
             plan: The action plan.
         """
 
         # Todo: Move to somewhere else
-        # We will adopt the frame difference idea in the solution area
+        # We will adopt the frame difference idea in the solution area to get the pieces later, here we crop the solution area out first
         mask_working = np.ones(theImageMea.shape[:2],dtype='uint8')
         mask_working[self.params.solution_area[1]:self.params.solution_area[3], self.params.solution_area[0]:self.params.solution_area[2]] = 0
         mask_solution = 1 - mask_working
 
         theImageMea_solutionArea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_solution)
 
-
-        theImageMea = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
+        theImageMea_work = cv2.bitwise_and(theImageMea, theImageMea, mask=mask_working)
 
 
         # Create an improcessor to obtain the mask.
-        theMaskMea = preprocess_real_puzzle(theImageMea, areaThresholdLower=self.params.areaThresholdLower,
+        theMaskMea_work = preprocess_real_puzzle(theImageMea_work, areaThresholdLower=self.params.areaThresholdLower,
                                                 areaThresholdUpper=self.params.areaThresholdUpper,
                                             BoudingboxThresh=self.params.BoudingboxThresh, WITH_AREA_THRESH=True,
                                             verbose=False)
 
-        # Create an arrangement instance.
-        theArrangeMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea, self.params)
+        # Create an Interlocking instance.
+        theInterMea_work = Interlocking.buildFrom_ImageAndMask(theImageMea_work, theMaskMea_work, self.params)
+        theInterMea_work_img = theInterMea_work.toImage(theImage=np.zeros_like(theImageMea))
 
-        # Only update when the hand is far away or not visible
+        theInterMea_all = copy.deepcopy(theInterMea_work)
+        # Only update when the hand is far away or not visible for the solution area
         if hTracker_BEV is None or \
                 np.linalg.norm(hTracker_BEV.reshape(2, -1) - self.params.solution_area_center.reshape(2, -1)) > self.params.hand_radius + self.params.solution_area_size + 50:
 
@@ -246,12 +351,28 @@ class RealSolver:
                                                                        option=0, verbose=verbose)
 
             # Combination of the pieces from the solution area and other working area
+            # In fact we usually have only one piece added here (frame difference idea)
             for piece in self.theCalibrated.pieces.values():
-                theArrangeMea.addPiece(piece)
+                theInterMea_all.addPiece(piece)
 
-        # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent.
-        plan = self.thePlanner.process(theArrangeMea, rLoc_hand=hTracker_BEV, visibleMask=visibleMask,
-                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=True)
+        theInterMea_all_img = theInterMea_all.toImage(theImage=np.zeros_like(theImageMea))
+        
+        # visualize
+        if verbose:
+            print("Showing the debug info of the puzzle solver before the planning. Press any key on the last window to continue...")
+            cv2.imshow("The work space measured pieces", theImageMea_work[:,:,::-1])
+            cv2.imshow("The solution space measured pieces", theImageMea_solutionArea[:,:,::-1])
+            cv2.imshow("The work space puzzle mask", theMaskMea_work)
+            cv2.imshow("The work space board", theInterMea_work_img[:,:,::-1])
+            cv2.imshow("The all space board", theInterMea_all_img[:,:,::-1])
+            cv2.waitKey()
+            cv2.destroyAllWindows()
+
+
+        # Note that hTracker_BEV is (2,1) while our rLoc is (2, ). They have to be consistent. We have forced to reshape them inside planner.
+        self.meaBoard = theInterMea_all
+        plan = self.thePlanner.process(theInterMea_all, rLoc_hand=hTracker_BEV, theImageMea=theImageMea, visibleMask=visibleMask,
+                                       COMPLETE_PLAN=True, SAVED_PLAN=False, RUN_SOLVER=run_solver, planOnTrack=planOnTrack)
 
         # with full size view
         self.bMeasImage = self.thePlanner.manager.bMeas.toImage(theImage=np.zeros_like(theImageMea), BOUNDING_BOX=False,
@@ -264,11 +385,15 @@ class RealSolver:
         # Return action plan
         return plan
 
-    def getMeaBoard(self)->Gridded:
-        return self.thePlanner.manager.bMeas
+    def getMeaBoard(self):
+        return self.meaBoard
     
-    def getSolBoard(self)->Gridded:
+    def getSolBoard(self):
         return self.thePlanner.manager.solution
+    
+    def getTrackBoard(self):
+        return self.thePlanner.record['meaBoard']
+
 
 #
 # ========================== puzzle.runner =========================
