@@ -55,6 +55,7 @@ SCORE_SIMILAR = 1
 @dataclass
 class ManagerParms:
     matcher: any = Moments(20)
+    assignmentMethod: any = 'hungarian'
 
 #
 # ================================ manager ================================
@@ -80,6 +81,7 @@ class Manager(FromLayer):
         self.pAssignments_rotation = {}  # @< Assignments: meas to sol. The rotation angles (degree).
 
         self.matcher = theParams.matcher  # @< Matcher instance.
+        self.assignmentMethod = theParams.assignmentMethod  # @< Assignment method.
 
         self.skipList = [] # @< Be set up by the simulator. We want to skip some pieces that are in a clutter.
 
@@ -178,11 +180,15 @@ class Manager(FromLayer):
         # Save for debug
         self.scoreTable_shape = scoreTable_shape.copy()
 
-        # The measured piece will be assigned a solution piece
-        # However, for some measured piece, they may not have a match according to the threshold.
-        # self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
-
-        self.pAssignments = self.hungarianAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+        if self.assignmentMethod == 'greedy':
+            # The measured piece will be assigned a solution piece
+            # However, for some measured piece, they may not have a match according to the threshold.
+            self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+        elif self.assignmentMethod == 'hungarian':
+            # Todo: Currently, it does not support scoreTable_edge_color. (We do not use edge color feature now)
+            self.pAssignments = self.hungarianAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
+        else:
+            raise TypeError('The assignment method is of wrong input.')
 
 
     def hungarianAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):

@@ -1,4 +1,4 @@
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 #
 # @class    puzzle.builder.arrangement
 #
@@ -13,7 +13,7 @@
 # mechanism to indicate how "close" a current solution would be to the
 # calibrated solution.
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 #
 # @file     arrangement.py
 #
@@ -22,7 +22,7 @@
 # @date     2021/07/30 [created]
 #           2021/08/05 [modified]
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================
 
 import pickle
 from dataclasses import dataclass
@@ -34,17 +34,53 @@ import detector.inImage as detector
 import improcessor.basic as improcessor
 import numpy as np
 
-import puzzle.parser.simple as perceiver
-from puzzle.builder.board import Board
-from puzzle.parser.fromLayer import FromLayer, ParamPuzzle
+import puzzle.parse.simple as perceiver
+from puzzle.board import Board
+from puzzle.parser import boardMeasure, CfgBoardMeasure
 
 
 # ===== Helper Elements
 #
 
-@dataclass
-class ParamArrange(ParamPuzzle):
-    tauDist: int = 20  # @< The threshold of whether two puzzle pieces are correctly matched.
+#---------------------------------------------------------------------------
+#===================== Configuration Node : Arrangement ====================
+#---------------------------------------------------------------------------
+#
+
+class CfgArrangement(CfgBoardMeasure):
+  '''!
+  @brief  Configuration setting specifier for centroidMulti.
+  '''
+
+  #============================= __init__ ============================
+  #
+  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+    '''!
+    @brief        Constructor of configuration instance.
+  
+    @param[in]    cfg_files   List of config files to load to merge settings.
+    '''
+    if (init_dict == None):
+      init_dict = CfgArrangement.get_default_settings()
+
+    super().__init__(init_dict, key_list, new_allowed)
+
+  #========================= get_default_settings ========================
+  #
+  # @brief    Recover the default settings in a dictionary.
+  #
+  @staticmethod
+  def get_default_settings():
+    '''!
+    @brief  Defines most basic, default settings for RealSense D435.
+
+    @param[out] default_dict  Dictionary populated with minimal set of
+                              default settings.
+    '''
+    default_dict = super(CfgArrangement,CfgArrangement).get_default_settings()
+    default_dict.update(dict(tauDist = 20))
+
+    return default_dict
 
 
 #
@@ -53,7 +89,7 @@ class ParamArrange(ParamPuzzle):
 
 class Arrangement(Board):
 
-    def __init__(self, theBoard=[], theParams=ParamArrange):
+    def __init__(self, theBoard=[], theParams=CfgArrangement):
         """
         @brief  Constructor for the puzzle.builder.arrangement class.
 
@@ -223,14 +259,17 @@ class Arrangement(Board):
             elif issubclass(type(data), Board):
                 theBoard = data
 
-            if hasattr(data, 'tauDist'):
-                theParams = ParamArrange(tauDist=data.tauDist)
+            if hasattr(data, 'tauDist'):            # NOT GOOD PRACTICE!!!
+                theParams = CfgArrangement()        # DELETE ONCE FIGURE PROCESS.
+                theParams.tauDist = data.tauDist    # LOOKS TO BE CRAPPY SAVE/LOAD APPROACH.
 
         if isinstance(theBoard, Board):
-            if hasattr(theParams, 'tauDist'):
-                thePuzzle = Arrangement(theBoard, theParams)
-            else:
-                thePuzzle = Arrangement(theBoard)
+            thePuzzle.Arrangement(theBoard, theParams)
+            # DELETE WHEN ABOVE WORKS.
+            #if hasattr(theParams, 'tauDist'):
+            #    thePuzzle = Arrangement(theBoard, theParams)
+            #else:
+            #    thePuzzle = Arrangement(theBoard)
         else:
             raise TypeError('There is no board instance saved in the file!')
 
@@ -305,9 +344,11 @@ class Arrangement(Board):
 
         return thePuzzle
 
+    #====================== buildFrom_ImageAndMask =====================
+    #
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
-        """
+        """!
         @brief Given an image and an image mask, parse both to recover
                the puzzle calibration/solution.
 
@@ -323,11 +364,12 @@ class Arrangement(Board):
             thePuzzle: The arrangement puzzle board instance.
         """
 
-        if hasattr(theParams, 'areaThresholdLower'):
-            pParser = FromLayer(theParams)
+        if theParams is None:
+            pParser = boardMeasure()
         else:
-            pParser = FromLayer()
+            pParser = boardMeasure(theParams)
 
+        # DEBUGGING: BREAKS HERE.
         pParser.process(theImage, theMask)
         if hasattr(theParams, 'tauDist'):
             thePuzzle = Arrangement(pParser.getState(), theParams)
@@ -370,10 +412,16 @@ class Arrangement(Board):
         elif theDetector is None and theProcessor is not None:
             theDetector = detector.inImage(theProcessor)
 
-        if hasattr(theParams, 'areaThresholdLower'):
-            theLayer = FromLayer(theParams)
+        if theParams is None:
+            pParser = boardMeasure()
         else:
-            theLayer = FromLayer()
+            pParser = boardMeasure(theParams)
+
+        #DELETE WHEN ABOVE RUNS.
+        #if hasattr(theParams, 'areaThresholdLower'):
+        #    theLayer = FromLayer(theParams)
+        #else:
+        #    theLayer = FromLayer()
 
         pParser = perceiver.Simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
 
@@ -421,10 +469,16 @@ class Arrangement(Board):
         elif theDetector is None and theProcessor is not None:
             theDetector = detector.inImage(theProcessor)
 
-        if hasattr(theParams, 'areaThresholdLower'):
-            theLayer = FromLayer(theParams)
+        if theParams is None:
+            pParser = boardMeasure()
         else:
-            theLayer = FromLayer()
+            pParser = boardMeasure(theParams)
+
+        #DELETE WHEN ABOVE RUNS.
+        #if hasattr(theParams, 'areaThresholdLower'):
+        #    theLayer = FromLayer(theParams)
+        #else:
+        #    theLayer = FromLayer()
 
         pParser = perceiver.Simple(theDetector=theDetector, theTracker=theLayer, theParams=None)
 
@@ -438,4 +492,4 @@ class Arrangement(Board):
         return thePuzzle
 
 #
-# ======================= puzzle.builder.arrangement ======================
+#======================= puzzle.builder.arrangement ======================

@@ -121,30 +121,8 @@ thePlanner = Planner(theSolver, theManager, theParams=ParamPlanner(areaThreshold
 thePlannerHand = PlannerHand(theSolver, theManager, theParams=ParamPlanner(areaThresholdLower=20000))
 
 # ==[4] Read the source image to create a hand.
-#
-# fsize = 1
-# theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
-# theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-# theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
-# theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(10, 400))
-
-# fsize = 3
-# theImageSol = cv2.imread(cpath + '/../../testing/data/hand_arm.png', cv2.IMREAD_UNCHANGED)
-# theMaskSol = theImageSol[:,:,-1]
-# theImageSol = cv2.cvtColor(theImageSol[:,:,:3], cv2.COLOR_BGR2RGB)
-# theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
-# theMaskSol = cv2.resize(theMaskSol, (0, 0), fx=fsize, fy=fsize)
-#
-# # cv2.imshow('demo', theMaskSol)
-# # cv2.waitKey()
-# theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-# init_agent_loc = [600, 1700]
-#
-# theHandAppearance.setPlacement(r=init_agent_loc)
-# theHand = Hand(theHandAppearance)
 
 theHand = setHand(init_agent_loc = [600, 1700])
-
 
 # ==[5] Create a simulator and display.
 #

@@ -82,7 +82,7 @@ with open(cpath + '/data/image_6p.obj', 'wb') as fp:
 
 del theData_save
 
-# ==[2] Create an Grid instance
+# ==[2] Create a Grid instance
 #
 
 # ==[2.1] Test buildFromFile_Puzzle

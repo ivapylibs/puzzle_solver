@@ -59,7 +59,6 @@ def cropImage(image, template):
 
     return dst
 
-
 def rotate_im(image, angle, mask=None):
     """
     @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
@@ -143,7 +142,6 @@ def rotate_im(image, angle, mask=None):
 
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), rLoc_relative
 
-
 def white_balance(img):
     """
     @brief Change the white balance of the image.
@@ -161,7 +159,6 @@ def white_balance(img):
     result[:, :, 2] = result[:, :, 2] - ((avg_b - 128) * (result[:, :, 0] / 255.0) * 1.1)
     result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
     return result
-
 
 def extract_region(img, verbose=False):
     """
@@ -202,23 +199,25 @@ def extract_region(img, verbose=False):
 
     return regions
 
-def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, BoudingboxThresh = (30,80), cannyThresh=(30, 50), WITH_AREA_THRESH=False ,verbose=False):
-    """
-    @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
-            Note that the threshold is very important. It requires to have the prior knowledge.
+def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, \
+                            BoudingboxThresh = (30,80), cannyThresh=(30, 50), \
+                            WITH_AREA_THRESH=False ,verbose=True):
+    """!
+    @brief Preprocess the RGB image of a segmented puzzle piece in a circle
+            area to obtain a mask.  Note that the threshold is very
+            important. It requires having prior knowledge.
 
-    Args:
-        img: RGB image input.
-        mask: Mask image input.
-        areaThresholdLower: The lower threshold of the area.
-        areaThresholdUpper: The upper threshold of the area.
-        BoudingboxThresh: The size threshold of the bounding box area.
-        cannyThresh: The threshold for canny.
-        WITH_AREA_THRESH: Mainly for previous codes which have not set the BoudingboxThresh properly.
-        verbose: The flag of whether to debug.
+    @param[in] img      RGB image input.
+    @param[in] mask     Mask image input.
+    @param[in] areaThresholdLower   Lower threshold for area.
+    @param[in] areaThresholdUpper   Upper threshold for area.
+    @param[in] BoudingboxThresh     Size threshold of the bounding box area.
+    @param[in] cannyThresh          Threshold for canny.
+    @param[in] WITH_AREA_THRESH     Mainly for previous codes which have not
+                                    set the BoudingboxThresh properly.
+    @param[in] verbose  Debug verbosity lag.
 
-    Returns:
-        seg_img_combined: The mask region list.
+    @return seg_img_combined    The mask region list.
     """
 
     # Manually add a black bounding box on the edges,
@@ -237,13 +236,13 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
         # Right now we will always use this step for now.
         improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                    cv2.medianBlur, (5,),
-                                   improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),),
-                                   cv2.dilate, (np.ones((5, 5), np.uint8),)
+                                   improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),)
+                                   #cv2.dilate, (np.ones((5, 5), np.uint8),)
                                    )
         mask = improc.apply(img_black_border)
 
         if verbose:
-            cv2.imshow('mask', mask)
+            cv2.imshow('mask', mask.astype('uint8')*255)
             cv2.waitKey()
 
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
@@ -255,11 +254,11 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
     im_pre_canny = improc.apply(img_black_border)
 
     if verbose:
-        cv2.imshow('im_pre_canny+thresh', im_pre_canny)
+        cv2.imshow('im_pre_canny+thresh', im_pre_canny.astype('uint8')*255)
         cv2.waitKey()
 
     # connectedComponents assumption
-    num_labels, labels = cv2.connectedComponents(mask)
+    num_labels, labels = cv2.connectedComponents(mask.astype('uint8'))
 
     regions = []  # The mask region list.
     for i in range(1, num_labels):
@@ -270,11 +269,12 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
         # else:
         #     verbose = False
 
-        im_pre_connected = cv2.bitwise_and(im_pre_canny, im_pre_canny,
+        im_pre_connected = cv2.bitwise_and(im_pre_canny.astype('uint8'), 
+                                           im_pre_canny.astype('uint8'),
                                            mask=np.where(labels == i, 1, 0).astype('uint8'))
 
         if verbose:
-            cv2.imshow('im_pre_connected', im_pre_connected)
+            cv2.imshow('im_pre_connected', im_pre_connected.astype('uint8')*255)
             cv2.waitKey()
 
         # 3 will lead to better split while 5 is with fewer holes

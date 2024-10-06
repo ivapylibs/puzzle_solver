@@ -34,10 +34,10 @@ Requires the installation of the following python packages:
 
 - ```numpy```
 - ```matplotlib```
-- ```scipy```
+- ```scipy>=1.8.1```
 - ```scikit-learn```
 - ```scikit-image```
 - ```opencv-contrib-python```
 - ```similaritymeasures```
 - ```pygame```
-
+- ```pip install rospy-message-converter```

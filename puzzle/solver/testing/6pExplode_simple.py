@@ -51,7 +51,7 @@ bSource = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0].imshow(bSource)
 axarr[0].title.set_text('Source Board')
 
-# ==[2] Create an Grid instance and explode it
+# ==[2] Create a Grid instance and explode it
 #
 
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol)

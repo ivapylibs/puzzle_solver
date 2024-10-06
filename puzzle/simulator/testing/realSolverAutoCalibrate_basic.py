@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================ realSolverAutoCalibrate_basic ===========================
 #
-# @brief    Test script with command from the solver & with automatic calibration process. (real img)
+# @brief    Test script with command from the solver & with automatic calibration process (put exploded pieces together according to rough distance). (real img)
 #
 # ============================ realSolverAutoCalibrate_basic ===========================
 
@@ -91,10 +91,10 @@ theGridSol = Gridded(theBoard)
 theGridMea = Gridded.buildFrom_ImageAndMask(theImageMea, theMaskMea,
                                             theParams=ParamGrid(areaThresholdLower=1000, reorder=True,
                                                                 pieceConstructor=Regular))
-# fhSol, fhMea = plt.figure(), plt.figure()
-# theGridSol.display(fh=fhSol)
-# theGridMea.display(fh=fhMea)
-# plt.show()
+fhSol, fhMea = plt.figure(), plt.figure()
+theGridSol.display(fh=fhSol)
+theGridMea.display(fh=fhMea)
+plt.show()
 
 # ==[3] Create a manager
 #

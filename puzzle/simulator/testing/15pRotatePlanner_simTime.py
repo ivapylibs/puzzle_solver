@@ -32,6 +32,7 @@ from puzzle.simulator.simTime import SimTime
 from puzzle.solver.simple import Simple
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
+from puzzle.utils.simProcessing import setHand
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -120,17 +121,19 @@ thePlannerHand = PlannerHand(theSolver, theManager)
 
 # ==[4] Read the source image to create a hand.
 #
-fsize = 1
-theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
-theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
-theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+# fsize = 1
+# theImageSol = cv2.imread(cpath + '/../../testing/data/hand.png')
+# theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
+# theImageSol = cv2.resize(theImageSol, (0, 0), fx=fsize, fy=fsize)
+#
+# theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
+# theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
+# init_agent_loc = [600, 50]
+#
+# theHandAppearance.setPlacement(r=init_agent_loc)
+# theHand = Hand(theHandAppearance)
 
-theMaskSol = preprocess_real_puzzle(theImageSol, cannyThresh=(50, 400))
-theHandAppearance = Template.buildFromMaskAndImage(theMaskSol, theImageSol)
-init_agent_loc = [600, 50]
-
-theHandAppearance.setPlacement(r=init_agent_loc)
-theHand = Hand(theHandAppearance)
+theHand = setHand(init_agent_loc = [600, 1700])
 
 # ==[5] Create a simulator and display.
 #

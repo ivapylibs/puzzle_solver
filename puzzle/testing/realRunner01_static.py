@@ -2,10 +2,10 @@
 """
 
     @brief:             Test and update the puzzle solver planner function on the real world data.
-                        The motivation for this test is the limit of the performance stability in the real system testing scenerio.
+                        The motivation for this test series is the limit of the performance stability in the real system testing scenerio.
                         Hence, this can be treated as an augmentation of the previous real-world unit test for the robustness.
 
-                        The test focus on the puzzle solving planner, rather than the activity-related functions.
+                        The test focuses on the puzzle solving planner, rather than the activity-related functions.
     
     @author:            Yiye Chen,          yychen2019@gatech.edu
     @date:              07/14/2022[created]
@@ -15,6 +15,7 @@
 # ===[0] prepare Dependencies
 from argparse import ArgumentParser
 import os, sys
+from tqdm import tqdm
 from copy import deepcopy
 
 import rosbag
@@ -110,17 +111,37 @@ puzzle_solver = RealSolver(configs_puzzleSolver)
 
 # puzzle solver - set solution board
 puzzle_solver.setSolBoard(rgb_example, sol_path)
+
 solImg = puzzle_solver.bSolImage
 plt.figure()
 plt.title("The solution board")
 plt.imshow(solImg)
-plt.show()
+plt.pause(1)
+# assert the solution board coordinate is assigned correctly. In some cases it maps multiple pieces to a same coordinate.
+solBoard = puzzle_solver.getSolBoard()
+print(solBoard.getGc())
+if not solBoard.assert_gc(verbose=True):
+    print("GC assignment incorrect")
+    exit()
+else:
+    print("GC assignment is good.")
 
 
 # ===[4] Run
 rgb = None
 dep = None
+
+# prepare plt.figures
+fh, (ax1_sv, ax2_sv) = plt.subplots(1, 2)
+fh.tight_layout()
+fh.suptitle("The Surveillance system")
+fh2, (ax1_ps, ax2_ps) = plt.subplots(1, 2)
+fh2.suptitle("The puzzle solver.")
+fh2.tight_layout()
+
+tqdm_bar = tqdm(total=test_rosbag.get_message_count(topic_filters=["/test_rgb"]))
 for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
+    tqdm_bar.update(1)
 
     # ----- Read data
     if topic == "/test_rgb":
@@ -152,25 +173,36 @@ for topic, msg, t in test_rosbag.read_messages(["/test_rgb", "/test_depth"]):
     plans = puzzle_solver.process(postImg, visibleMask, hTracker_BEV, verbose=False)
 
     # simulate the plan
-    meaBoard = puzzle_solver.getMeaBoard()
+    # meaBoard = puzzle_solver.getMeaBoard()
+    meaBoard = puzzle_solver.getTrackBoard()
     theSim = Basic(deepcopy(meaBoard))
     for plan in plans:
-        theSim.takeAction([plan])
+        theSim.takeAction([plan], verbose=False)
     img_assemble = theSim.toImage()
 
-    # visualize
-    #display_images_cv([rgb[:,:,::-1]], ratio=0.6, window_name="The test rgb frame")
-    #display_images_cv([img_assemble])
-    #opKey = cv2.waitKey(1)
 
-    fh, (ax1, ax2) = plt.subplots(1, 2)
-    ax1.imshow(rgb)
-    ax1.set_title("THe test rgb frame")
+    # -- print key information for debugging
+    print("The correspondence detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments))
+    print("The rotations detected by the manager: \n {}".format(puzzle_solver.theManager.pAssignments_rotation))
+    # print("The measure board adjacency matrix: \n {}".format(meaBoard.adjMat))
 
-    ax2.imshow(img_assemble)
-    ax2.set_title("THe simulated assembly result")
 
-    plt.show()
+    # -- visualization for debugging
+
+    # the surveillance system 
+    ax1_sv.imshow(rgb)
+    ax1_sv.set_title("THe test rgb frame")
+    ax2_sv.imshow(puzzle_layer)
+    ax2_sv.set_title("THe extracted puzzle layer")
+
+    # the puzzle solver
+    ax1_ps.imshow(meaBoard.toImage(ID_DISPLAY=True))
+    ax1_ps.set_title("THe measure board")
+    ax2_ps.imshow(img_assemble)
+    ax2_ps.set_title("THe simulated assembly result")
+
+    plt.pause(1)
+    # plt.show()
 
     # reset
     rgb = None

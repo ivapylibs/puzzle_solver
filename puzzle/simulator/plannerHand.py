@@ -19,13 +19,11 @@
 #
 # ========================= puzzle.simulator.plannerHand ========================
 
-from puzzle.simulator.planner import Planner
+from puzzle.simulator.planner import Planner, ParamPlanner
 from puzzle.builder.board import Board
-from puzzle.builder.gridded import ParamGrid
-
 
 class PlannerHand(Planner):
-    def __init__(self, solver, manager, theParams=ParamGrid):
+    def __init__(self, solver, manager, theParams=ParamPlanner):
         """
         @brief  Define the general planner planning process.
 

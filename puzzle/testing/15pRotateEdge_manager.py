@@ -111,7 +111,7 @@ theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea,
 # ==[3] Create a manager
 #
 
-theManager = Manager(theGridSol, ManagerParms(matcher=Edge()))
+theManager = Manager(theGridSol, ManagerParms(matcher=Edge(), assignmentMethod='greedy'))
 theManager.process(theGridMea)
 
 # ==[4] Display. Should see some ids on the puzzle pieces

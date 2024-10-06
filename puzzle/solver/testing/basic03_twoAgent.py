@@ -61,7 +61,7 @@ theBoardMea = theLayer.getState()
 f, axarr = plt.subplots(1, 2)
 
 theBoardMea_img = theBoardMea.toImage(ID_DISPLAY=True)
-theBoardSol_img = theBoardSol.toImage()
+theBoardSol_img = theBoardSol.toImage(ID_DISPLAY=True)
 axarr[0].imshow(theBoardMea_img)
 axarr[0].title.set_text('Original measured board')
 
@@ -120,6 +120,7 @@ while 1:
         finishFlag = True
     else:
 
+        # Todo: We have combined piece_id & piece_index, index has been a legacy one.
         piece_id = plan[0][0]
         piece_index = plan[0][1]
         action_type = plan[0][2]
