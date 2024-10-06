@@ -1,12 +1,8 @@
-#============================= puzzle.piece.template =============================
+#================================ puzzle.piece code ==================================
 #
-# @brief    The base class for puzzle piece specification or description encapsulation. 
-#           This simply stores the template image and related data for a puzzle piece in
-#           its canonical orientation.
+# Classes for puzzle piece specification or description encapsulation. 
 #
-#============================= puzzle.piece.template =============================
-#
-# @file     template.py
+#================================ puzzle.piece code ==================================
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu
@@ -17,7 +13,7 @@
 #   95 columns.
 #   indent is 4 spaces.
 #
-#============================= puzzle.piece.template =============================
+#================================ puzzle.piece code ==================================
 
 # ===== Environment / Dependencies
 #
@@ -738,13 +734,35 @@ class Template:
 
         return thePiece
 
+
+class Piece:
+  '''!
+  @brief    Bad code here.  Created a dummy Piece class rather than use the Template
+            class for defining the static method getBuilderFromString.
+
+  @todo     When have time, need to integrate into Template or have be generic
+            function available through the Piece package. Piece.getBuilderFromString.
+            or Piece.Template, Piece.Regular, etc.  For now leaving until have time
+            to make correction and ensure code + unit tests work.
+  '''
+  staticmethod
+  def getBuilderFromString(theStr):
+
+    if (theStr == 'Template'):
+      return Template
+    elif (theStr == 'Regular'):
+      return Regular
+    else:
+      return Template
+
 #
-# ========================= puzzle.piece.template =========================
-# ================================ puzzle.piece.regular ================================
+#============================== puzzle.piece.template ==============================
+
+#=============================== puzzle.piece.regular ==============================
 #
 # @brief    Establish a regular puzzle piece (4 sides with locks)
 #
-# ================================ puzzle.piece.regular ================================
+#=============================== puzzle.piece.regular ==============================
 #
 # @file     regular.py
 #
@@ -752,9 +770,9 @@ class Template:
 # @date     2021/08/17 [created]
 #
 #
-# ================================ puzzle.piece.regular ================================
+#=============================== puzzle.piece.regular ==============================
 
-# ===== Environment / Dependencies
+#===== Environment / Dependencies
 #
 
 from puzzle.utils.sideExtractor import sideExtractor
@@ -796,42 +814,26 @@ class EdgeDes:
 
 
 #
-# ================================ puzzle.piece.regular ================================
+#============================== puzzle.piece.regular =============================
 #
 class Regular(Template):
+    '''!
+    @brief  A puzzle has Regular pieces when they are all of a consistent sizing such
+            that their edge structure can be compared in a standard North, South,
+            East, West approach. Usually Regular pieces are part of a Gridded puzzle.
+    '''
 
+    #============================= __init__ Regular ============================
+    #
     def __init__(self, y:PuzzleTemplate=None, r=(0, 0), id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
-        """
-        @brief  Constructor for the regular puzzle piece.
+        '''!
+        @brief  Constructor for the regular puzzle piece.  Arguments are optional.
 
-        Args:
-            *argv: Input params.
-        """
-
-        #y = None
-        #r = (0, 0)
-        #id = None
-        #theta = None
-        #status = PieceStatus.UNKNOWN
-
-        #if len(argv) == 1:
-        #    if isinstance(argv[0], Template):
-        #        y = argv[0].y
-        #        r = argv[0].rLoc
-        #        id = argv[0].id
-        #        theta = argv[0].theta
-        #        status = argv[0].status
-        #    else:
-        #        y = argv[0]
-        #elif len(argv) == 2:
-        #    y = argv[0]
-        #    r = argv[1]
-        #elif len(argv) >= 3 and len(argv) <= 4:
-        #    y = argv[0]
-        #    r = argv[1]
-        #    id = argv[2]
-        #elif len(argv) > 4:
-        #    raise TypeError('Too many parameters!')
+        @param[in]  y           Puzzle template instance.
+        @param[in]  r           Location of the puzzle piece (top-left corner).
+        @param[in]  theta       Orientation of the piece.
+        @param[in]  pieceStatus Measurement status.
+        '''
 
         super(Regular, self).__init__(y, r, id, theta, pieceStatus)
 
@@ -839,10 +841,10 @@ class Regular(Template):
         self.edge = [EdgeDes() for i in range(4)]
 
         # Debug only
-        self.class_image = None
-        self.rectangle_pts = None
-        self.filtered_harris_pts = None
-        self.simple_harris_pts = None
+        self.class_image            = None
+        self.rectangle_pts          = None
+        self.filtered_harris_pts    = None
+        self.simple_harris_pts      = None
         self.theta = None
 
         if theta == 0:
@@ -850,43 +852,27 @@ class Regular(Template):
         else:
             self._process()
 
-    #=============================== setEdgeType ===============================
+    #================================= _process ================================
     #
-    def setEdgeType(self, direction, type):
-        """
-        @brief  Set up the type of the chosen edge.
-
-        Args:
-            direction: The edge to be set up.
-            type: The type.
-        """
-
-        self.edge[direction].type = type
-
-    def displayEdgeType(self):
-        """
-        @brief  Display the edge type of the piece.
-        """
-
-        for direction in EdgeDirection:
-            print(f'{direction.name}:', self.edge[direction.value].type)
-
     def _process(self, enable_rotate=True):
-        """
+        '''!
         @brief Run the sideExtractor.
-        """
+        '''
+
+        # @todo     Enable rotate should be a param flag.
+        # @note     All of the work is done in sideExtractor.  Why have it be separate?
 
         # d_thresh is related to the size of the puzzle piece
         out_dict = sideExtractor(self.y, scale_factor=1,
                                  harris_block_size=5, harris_ksize=5,
                                  corner_score_threshold=0.7, corner_minmax_threshold=100,
-                                 shape_classification_nhs=3, d_thresh=(self.y.size[0] + self.y.size[1]) / 5,
+                                 shape_classification_nhs=3, 
+                                 d_thresh=(self.y.size[0] + self.y.size[1]) / 5,
                                  enable_rotate=enable_rotate)
 
         # Set up the type/img of the chosen edge
         for direction in EdgeDirection:
             self.setEdgeType(direction.value, out_dict['inout'][direction.value])
-
             self.edge[direction.value].image = out_dict['class_image']
             self.edge[direction.value].mask = out_dict['side_images'][direction.value]
 
@@ -898,6 +884,31 @@ class Regular(Template):
         self.rectangle_pts = out_dict['rectangle_pts']
         self.filtered_harris_pts = out_dict['filtered_harris_pts']
         self.simple_harris_pts = out_dict['simple_harris_pts']
+
+    #=============================== setEdgeType ===============================
+    #
+    def setEdgeType(self, direction, etype):
+        '''!
+        @brief  Set up the type of the chosen edge.
+
+        @param[in]  direction   The edge to be set up.
+        @param[in]  etype       The edge type.
+
+        @todo   Shouldn't this be a private or protected member function?
+        '''
+
+        self.edge[direction].type = type
+
+    #============================== printEdgeType ==============================
+    #
+    def printEdgeType(self):
+        """
+        @brief  Display the edge type of the piece.
+        """
+
+        for direction in EdgeDirection:
+            print(f'{direction.name}:', self.edge[direction.value].type)
+
 
     #=============================== rotatePiece ===============================
     #
@@ -925,22 +936,23 @@ class Regular(Template):
     #
     @staticmethod
     def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
-        """
+        '''!
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.
 
-        Args:
-            theMask: The individual mask.
-            theImage: The source image.
-            rLoc: The puzzle piece location in the whole image.
+        @param[in]  theMask     Individual mask.
+        @param[in]  theImage    Source image.
+        @param[in]  rLoc        Puzzle piece (corner) location in the whole image.
 
-        Returns:
-            theRegular: The puzzle piece instance.
-        """
+        @param[in]  theRegular  Puzzle piece instance as a Regular piece.
+        '''
 
         thePiece = Template.buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=rLoc, \
                                                                      pieceStatus=pieceStatus)
+        #DEBUG
+        #print("MI -- Made Template just fine.")
         theRegular = Regular.upgradeTemplate(thePiece)
+        #print("MI -- Upgrade to Regular just fine.")
 
         return theRegular
 
@@ -949,32 +961,19 @@ class Regular(Template):
     #
     @staticmethod
     def upgradeTemplate(thePiece):
-        """!
+        '''!
         @brief  Given a Template instance, transfer to a Regular instance.
 
         @param[in]  thePiece    Puzzle piece as a Template instance.
         @param[out]             Puzzle piece as a Regular instance.
-        """
+        '''
 
-        thePiece = Regular(thePiece.y, thePiece.rLoc, thePiece.id, thePiece.theta, thePiece.status)
+        thePiece = Regular(thePiece.y, thePiece.rLoc, thePiece.id, 
+                                                      thePiece.theta, thePiece.status)
         return thePiece
 
 #
 #============================== puzzle.piece.regular =============================
 
-
-class Piece:
-
-  staticmethod
-  def getBuilderFromString(theStr):
-
-    if (theStr == 'Template'):
-      return Template
-    elif (theStr == 'Regular'):
-      return Regular
-    else:
-      return Template
-
-
 #
-#============================= puzzle.piece.template =============================
+#================================ puzzle.piece code ==================================

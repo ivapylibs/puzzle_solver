@@ -515,7 +515,7 @@ def cluster_lines(lines):
 
 #================================= get_corners =================================
 #
-def get_corners(dst, neighborhood_size=5, score_threshold=0.3, minmax_threshold=100):
+def get_corners(dst, neighborhood_size=5, score_factor=0.2, minmax_factor=0.2):
     """
     @brief  Given the input Harris image (where in each pixel the Harris function is
             computed), extract discrete corners satisfying detection constraints.
@@ -535,32 +535,44 @@ def get_corners(dst, neighborhood_size=5, score_threshold=0.3, minmax_threshold=
 
     #DEBUG
     #print('get_corners')
-    #print(dst.max())
+    #print(f'max and lower bar: {[dst.max(), score_factor * dst.max()]}')
 
-    data[data < score_threshold * dst.max()] = 0.
+    data[data < score_factor * dst.max()] = 0.
 
-    #O#DEBUG
+    #DEBUG
     #print(np.sum(data>0))
+    #print(f'unique = {np.unique(dst.flatten())}')
 
-    data_max = filters.maximum_filter(data, neighborhood_size)
+    data_max = filters.maximum_filter(data, neighborhood_size, mode='constant', cval = 0)
     maxima   = (data == data_max)
-    data_min = filters.minimum_filter(data, neighborhood_size)
+    data_min = filters.minimum_filter(data, neighborhood_size, mode='constant', cval = 0)
     diff     = ((data_max - data_min))
 
     #DEBUG
+    #print(f'data_max unique = {np.unique(data_max.flatten())}')
     #print(np.sum(data_max>0))
     #diff     = ((data_max - data_min) > minmax_threshold)
     #print(np.max(diff))
+    #print(f'diff unique = {np.unique(diff.flatten())}')
 
-    diff     = diff >= 0.80*np.max(diff) # minmax_threshold 
+    diff  = diff >= minmax_factor*np.max(diff) # minmax_threshold 
+    maxima[diff == 0] = 0
+
     # WHY NOT JUST GET TOP FOUR??? WOULDN'T THAT BE MORE ROBUST?? OTHERWISE
     # THE THRESHOLD CAN GIVE MORE OR LESS THAN FOUR ELEMENTS.
     #
     # @todo AT LEAST OVERRIDE THE minmax_threshold to be a ratio. PAV 2023/11/13.
-    #
-    maxima[diff == 0] = 0
 
     labeled, num_objects = ndimage.label(maxima)
+    #DEBUG VISUAL
+    #plt.imshow(data)
+    #plt.figure()
+    #plt.imshow(data_max)
+    #plt.figure()
+    #plt.imshow(labeled)
+    #plt.show()
+    #print(np.shape(labeled))
+    #print(num_objects)
     # slices = ndimage.find_objects(labeled)
     yx = np.array(ndimage.center_of_mass(data, labeled, range(1, num_objects + 1)))
     xy = yx[:, ::-1]
@@ -754,9 +766,11 @@ def get_default_params():
         'scale_factor': 1,
         'harris_blocksize': 5,
         'harris_ksize': 5,
+        'harris_kfactor' : 0.04,
         'corner_nsize': 5,
-        'corner_score_threshold': 0.7,
-        'corner_minmax_threshold': 100,     # @todo Make a threshold factor, not actual threshold
+        'corner_cull_factor' : 0.2,
+        'corner_score_factor': 0.30,
+        'corner_minmax_factor': 0.30, 
         'corner_refine_rect_size': 5,
         'edge_erode_size': 3,
         'shape_classification_distance_threshold': 100,
@@ -769,6 +783,40 @@ def get_default_params():
 
     return side_extractor_default_values.copy()
 
+
+def get_binarymask_params():
+    side_extractor_default_values = {
+        # 'before_segmentation_func': partial(cv2.medianBlur, ksize=5),
+        # 'bin_threshold': 130,
+        # 'after_segmentation_func': None,
+        'scale_factor': 1,
+        'harris_blocksize': 5,
+        'harris_ksize': 5,
+        'harris_kfactor' : 0.04,
+        'corner_nsize': 5,
+        'corner_cull_factor' : 0.2,
+        'corner_score_factor': 0.30,
+        'corner_minmax_factor': 0.30, 
+        'corner_refine_rect_size': 5,
+        'edge_erode_size': 3,
+        'shape_classification_distance_threshold': 100,
+        'shape_classification_nhs': 5,
+        'inout_distance_threshold': 5,
+        'perp_angle_thresh': 30,
+        'd_thresh': 30,
+        'enable_rotate': True
+    }
+
+    return side_extractor_default_values.copy()
+
+# @todo These should really be a part of Regular piece.  That is when they are
+#       triggered. Also create a single entry point for the parameters.
+#       Placing deep within this is not good.  Should be possible to
+#       just invoke this within the Regular piece configuration script.
+#       That way it exists externally and can be modified there to work
+#       for binary masks.
+#       Should work on next.  10/06/2024 - PAV.
+#
 
 #================================ sideExtractor ================================
 #
@@ -796,6 +844,8 @@ def sideExtractor(puzzleTemplate, **kwargs):
     # cv2.waitKey()
 
     # To enable cornerHarris to function properly, create an enlarged image
+
+    # @note Should only need to process the mask!! Why others? - PAV 10/06/2024. 
     mask    = np.pad(puzzleTemplate.mask, 10, mode='constant', constant_values=(0,))
     contour = np.pad(puzzleTemplate.contour, 10, mode='constant', constant_values=(0,))
     image   = np.pad(puzzleTemplate.image, ((10,),(10,),(0,)) , mode='constant', constant_values=(0,))
@@ -811,67 +861,92 @@ def sideExtractor(puzzleTemplate, **kwargs):
     #contour_enlarged[10:contour.shape[0] + 10, 10:contour.shape[1] + 10] = contour
     #image_enlarged[10:image.shape[0] + 10, 10:image.shape[1] + 10, :] = image
 
-    # # Debug only
-    print("In sideExtractor function.")
-    display.binary_cv(mask, window_name='Mask')
-    display.rgb_cv(image,window_name='Piece')
-    display.binary_cv(contour*255,window_name='Contour')
+    #DEBUG 
+    #print("In sideExtractor function.")
+    #print(params)
+    #print(type(mask))
+    #print(type(mask[0,0]))
+    #print(np.max(mask))
 
-    harris = cv2.cornerHarris(mask, params['harris_blocksize'], params['harris_ksize'], 0.04)
+    #DEBUG VISUAL
+    #display.binary_cv(mask, window_name='Mask')
+    #display.rgb_cv(image,window_name='Piece')
+    #display.binary_cv(contour*255,window_name='Contour')
+    #print("OpenCV wait for key")
+
+    harris = cv2.cornerHarris(np.float32(mask), params['harris_blocksize'], 
+                                          params['harris_ksize'], params['harris_kfactor'])
+
+    #DEBUG
+    #print(f"Harris max is {harris.max()}")
 
     # Perform a simple thresholding
     i, j = 0, 1
-    harris_pts = np.argwhere(harris > 0.01 * harris.max())
+    tauHarris = params['corner_cull_factor'] * harris.max()
+    harris_pts = np.argwhere(harris > tauHarris)
     harris_pts.T[[i, j]] = harris_pts.T[[j, i]]
 
     out_dict['simple_harris_pts'] = harris_pts - 10
 
     harris = harris * mask
 
-    # Get filtered harris corner position
-    xy = get_corners(harris, params['corner_nsize'], params['corner_score_threshold'],
-                     params['corner_minmax_threshold'])
+    #DEBUG VISUAL
+    #dst = cv2.dilate(harris, None)
+    #image[dst > tauHarris] = [0,0,255]
+    #display.rgb_cv(image,window_name='Corners')
+
+    # Get set of candidate harris corner position using non-maximum suppression plus
+    # additional thresholding on possible candidate set.
+    #
+    #DEBUG
+    #print('--- get corners -->')
+    xy = get_corners(harris, params['corner_nsize'], params['corner_score_factor'],
+                     params['corner_minmax_factor'])
+    #DEBUG
+    #print('--- get corners --|')
     xy = np.round(xy / params['scale_factor']).astype(int)
     out_dict['filtered_harris_pts'] = xy - 10
+
     #DEBUG
+    #print(f'xy shape is {np.shape(xy)}')
+    #print(f'xy = {xy}')
+    #print('--- xy corner check. --|')
 
-    #print('HERE!!')
-    #print(np.shape(xy))
+    #DEBUG VISUAL : Pick one of two below.
+    #display.wait_cv(250)
+    #display.wait_cv()
 
-    if len(xy) < 4:
-        raise RuntimeError('Not enough corners')
+    try:
+      if len(xy) < 4:
+          raise RuntimeError('Not enough corners')
+    except:
+        print("UH - OH. Going to crap out now!!! View output then press a key to accept.")
+        dst = cv2.dilate(harris, None)
+        image[dst > tauHarris] = [0,0,255]
+        display.rgb_cv(image,window_name='Corners')
+        display.wait_cv()
 
-    # Get the 4 rectangle points
-    # @todo ARGH!! NOT RELIABLE. SHOULD USE NMS IN get_corners.  WHY WAS THAT NOT DONE??
-    #       OR IS IT DONE BUT COMMUNICATED POORLY????
+    # Since there can be more than 4 candidate corner pieces, the next step is to get
+    # the four that provide the best rectangle from a puzzle piece perspective.
     #
-    # @note METHOD IS UNRELIABLE.  NOT SURE WHY DONE THIS WAY.  NEED BETTER WAY TO GET THE
-    #       CORNERS.  SOME PIECES WILL HAVE 6 OR MORE VALID CORNERS DUE TO ANGULAR PARTS
-    #       WHEN PIECE EDGES GO IN.  NEED TO GET THE EXTREMAL ONE, NOT "INTERNAL" ONES.
-    #       SINCE APPROACH NOT DOCUMENTED, IT IS HARD TO KNOW HOW TO FIX WITHOUT RECODING
-    #       FROM SCRATCH.  LEAVING FOR LATER.
-    #
-    print('---')
-    print(xy)
     intersections = get_best_fitting_rect_coords(xy, d_threshold=params['d_thresh'],
                                                  perp_angle_thresh=params['perp_angle_thresh'])
-    print(intersections)
-    display.wait_cv()
+
+    #DEBUG
+    #print(intersections)
+
     out_dict['rectangle_pts'] = intersections - 10
     if intersections is None:
         raise RuntimeError('No rectangle found')
 
     if params['enable_rotate']:
-
-        # @todo Rotate to get a horizontal puzzle piece
+        # Rotate to get a horizontal puzzle piece
         if intersections[1, 0] == intersections[0, 0]:
             rotation_angle = 90
         else:
             rotation_angle = np.arctan2(intersections[1, 1] - intersections[0, 1],
                                         intersections[1, 0] - intersections[0, 0]) * 180 / np.pi
-
         out_dict['rotation_angle'] = rotation_angle
-
         edges = contour
 
         # Without relative translation return
@@ -922,21 +997,11 @@ def sideExtractor(puzzleTemplate, **kwargs):
                                            params['shape_classification_nhs'])
         out_dict['class_image'] = class_image
 
-    else:
-
-        # without rotation
-
+    else:       # without rotation
         out_dict['rotation_angle'] = 0
 
         edges = contour_enlarged
-        # Rotate all images
-        # # @todo Rotate
-        # edges, M = rotate(edges, rotation_angle)
         out_dict['edges'] = edges[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
-
-        # # @todo Rotate
-        # # Rotate intersection points
-        # intersections = np.array(np.round([M.dot((point[0], point[1], 1)) for point in intersections])).astype(int)
 
         yb, xb = compute_barycentre(mask_enlarged)
 
@@ -950,12 +1015,9 @@ def sideExtractor(puzzleTemplate, **kwargs):
                                            params['shape_classification_nhs'])
         out_dict['class_image'] = class_image[10:mask.shape[0] + 10, 10:mask.shape[1] + 10]
 
+
     inout = compute_inout(class_image, line_params, (xb, yb), params['inout_distance_threshold'])
     out_dict['inout'] = inout
-
-    # Todo: Currently, we do not need this part
-    # side_images = create_side_images(class_image, inout, corners)
-    # out_dict['side_images'] = side_images
 
     side_images = create_side_images_simple(out_dict['class_image'], inout, corners)
     out_dict['side_images'] = side_images

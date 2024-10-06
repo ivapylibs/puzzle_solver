@@ -20,6 +20,7 @@ import numpy as np
 
 from puzzle.pieces.matcher import MatchDifferent
 from puzzle.piece import Regular
+from puzzle.piece import Template
 
 
 #
@@ -186,6 +187,8 @@ class Edge(MatchDifferent):
         if type(piece_A) != type(piece_B):
             raise TypeError('Input should be of the same type.')
         else:
+            print(type(piece_A))
+            print(type(piece_B))
             if isinstance(piece_A, Regular):
 
                 ret_A = self.process(piece_A, method=method)
@@ -196,7 +199,7 @@ class Edge(MatchDifferent):
 
             else:
                 print(type(piece_A))
-                raise TypeError('The input type is wrong. Need a template instance or a puzzleTemplate instance.')
+                raise TypeError('The input type is wrong. Need a Regular piece instance.')
 
         return distance_shape, distance_color
 

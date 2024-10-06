@@ -32,7 +32,7 @@ from sklearn.cluster import KMeans
 from puzzle.builder.arrangement import Arrangement
 from puzzle.board import Board
 from puzzle.builder.interlocking import Interlocking, CfgInterlocking
-from puzzle.utils.dataProcessing import updateLabel
+from puzzle.utils.dataProcessing import updateLabel, partition_even
 
 
 #
@@ -44,6 +44,7 @@ from puzzle.utils.dataProcessing import updateLabel
 class CfgGridded(CfgInterlocking):
   '''!
   @brief  Configuration setting specifier for gridded puzzle.
+
   '''
 
   #=============================== __init__ ==============================
@@ -72,8 +73,11 @@ class CfgGridded(CfgInterlocking):
                               default settings.
     '''
     default_dict = super(CfgGridded,CfgGridded).get_default_settings()
-    default_dict.update(dict(tauGrid = float('inf'),  # The threshold size of the puzzle piece.
-                        reorder = False, grid = (None, None) ))
+    default_dict.update(dict(tauGrid = float('inf'),    # Threshold on size of puzzle piece.
+                        reorder = False,                # Reorder pieces based on grid.
+                        grid = (None, None) ),          # Not sure. kmeans?
+                        gridding = 'rectangular'        # Default grid estimation method.
+                        )
 
     return default_dict
 
@@ -111,102 +115,124 @@ class Gridded(Interlocking):
       # Store the calibrated grid location of the puzzle piece, e.g., [x; y]
       # We do not have to worry about the index or id here since they are the same in
       # the solution board.
-      self.gc = np.zeros((2, theBoard.size()))
+      self.gc = np.zeros((2, theBoard.size()))      # @< Puzzle piece grid locations.
+      self.pshape = []                              # @< Puzzle grid dims (width x height)
     else:
       raise TypeError('Not initialized properly')
 
     # @todo Need to figure out what this does.  PAV 10/05/2024.
-    self.__processGrid(theParams.reorder, theParams.tauGrid, theParams.grid, verbose=False)
+    # @note Creates the puzzle grid ordering.
+    self.__processGrid(verbose = False)
 
 
   #============================= _processGrid ============================
   #
-  def __processGrid(self, reorder=False, tauPiece=float('inf'), 
-                    kmeans_cluster=(None, None), verbose=False):
+  def __processGrid(self, verbose=False):
     '''!
     @brief  Process the solution board and determine what pieces interlock with
             which others and the grid ordering. Grid ordering helps to determine
             adjacency.
 
-    Note that if the pieces are close to each other, this function may fail when
-    the location of a piece is not computed properly.  
-
-    @param[in]  reorder         Flag signaling to reorder piece id based on grid location.
-    @param[in]  tauPiece        Threshold for both x,y.
-    @param[in]  kmeans_cluster  Desired grid numbers for the puzzle.
-    @param[in]  verbose         Verbosity flag (true/false).
+    Since the puzzle pieces are marked by their top-left corner coordinate, it should
+    be possible to discern the puzzle piece gridding by enumerating through this
+    listing in the right way. In particular, the top row will have consistent
+    y-coordinate locations.  The left column with also have consistent x-coordinate
+    locations.  Between these, it should be possible to split all the other pieces up.
+    A good start is to use the top row pieces to establish an x-ordering, and the left
+    column pieces to establish a y-ordering.  Then pieces closest to one of the (x,y)
+    grid approximations should give the right answer.
     '''
 
     pLoc = self.pieceLocations()
 
-    x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
-    y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
+    if self.params.gridding == 'rectangular':
+      # Code below works for a rectangular gridding of the puzzle based on assumption
+      # in the documentation above.
+      x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
+      y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
 
+      # Use rectangular shape assumptions to get no. of rows and columns.
+      # Store in pshape.
+      xMin = np.min(x_list)
+      yMin = np.min(y_list)
+      self.pshape = [ np.count_nonzero(y_list == yMin) , np.count_nonzero(x_list == xMin) ]
 
-    # get the x, y labels
+      #DEBUG
+      print(self.pshape)
 
-    try:
-      if self.params.gcMethod == "cluster":
-        x_labels, y_labels = self.__processGrid_cluster(x_list, y_list, kmeans_cluster,
-                                                                                tauPiece)
-      elif self.params.gcMethod == "rectangle":
-        x_labels, y_labels = self.__processGrid_rectangle(x_list, y_list)
+      # Use known row and column quantities to get the x, y labels of the puzzle
+      # pieces by partitioning in vertical and horizontal so that each partition
+      # has the same number of elements in it.  That gets the answer.
+      x_labels, x_parts = partition_even(x_list, partition_num=self.pshape[0], order="ascend")
+      y_labels, y_parts = partition_even(y_list, partition_num=self.pshape[1], order="ascend")
 
-      # For debug. Plot the coordinates
-      if verbose:
-        colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1))
-        colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1))
-        fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
-        ax1.scatter(x_list, y_list)
-        ax1.set_title("The piece coordinates")
-        colors_x = np.array([colors_x_all[l, :] for l in x_labels])
-        ax2.scatter(x_list, y_list, color=colors_x)
-        ax2.set_title("The gc x coordinate assignment")
-        colors_y = np.array([colors_y_all[l] for l in y_labels])
-        ax3.scatter(x_list, y_list, color=colors_y)
-        ax3.set_title("The gc y coordinate assignment")
-        plt.show()
+    elif self.params.gridding == 'arrangedbox':
 
-      # Reorder the pieces, so the id will correspond to the grid location
-      if reorder:
-        pieces_src = deepcopy(self.pieces)
-        pieceKeysList = list(self.pieces.keys())
+      x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
+      y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
 
-        num = 0
+      x_labels, y_labels = self.__processGrid_rectangular(x_list, y_list)
 
-        # Save the changes, {new:old}
-        dict_conversion = {}
+    else:
+      # The puzzle need not be rectangular.  That would be problematic.
+      # Uncomment if statement when ready.  Push other options to else.
+      # They won't be developed at this moment.
+      warning("This code not developed.  Will fail downstream.")
 
-        for jj in range(max(y_labels) + 1):
-          for ii in range(max(x_labels) + 1):
-            for idx, pts in enumerate(zip(x_labels, y_labels)):
-              if pts[0] == ii and pts[1] == jj:
-                self.pieces[num] = pieces_src[pieceKeysList[idx]]
-                dict_conversion[num] = pieceKeysList[idx]
-                self.pieces[num].id = num
-                self.gc[:, num] = ii, jj
-                num = num + 1
-                break
+    # If verbose, plot the coordinates and provide visuals that show correct processing.
+    # Here there are three scatter plots.  One is of the puzzle piece corner
+    # coordinates. The other two are of the puzzle piece x-ordering and then the
+    # y-ordering.  The marker hues should change in x and in y, respectively.
+    if verbose:
+      colors_x_all = cm.rainbow(np.linspace(0, 1, x_labels.max() + 1))
+      colors_y_all = cm.rainbow(np.linspace(0, 1, y_labels.max() + 1))
+      fh, (ax1, ax2, ax3) = plt.subplots(1, 3)
+      ax1.scatter(x_list, y_list)
+      ax1.set_title("The piece coordinates")
+      colors_x = np.array([colors_x_all[l, :] for l in x_labels])
+      ax2.scatter(x_list, y_list, color=colors_x)
+      ax2.set_title("The gc x coordinate assignment")
+      colors_y = np.array([colors_y_all[l] for l in y_labels])
+      ax3.scatter(x_list, y_list, color=colors_y)
+      ax3.set_title("The gc y coordinate assignment")
+      plt.show()
 
-        # Have to re-compute adjMat/ilMat
-        adjMat_src = deepcopy(self.adjMat)
-        for ii in range(self.size()):
-          for jj in range(ii + 1, self.size()):
-            self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
-            self.adjMat[jj, ii] = self.adjMat[ii, jj]
+    # Reorder the pieces, so the id will correspond to the grid location
+    if self.params.reorder:
+      pieces_src = deepcopy(self.pieces)
+      pieceKeysList = list(self.pieces.keys())
 
-        self.ilMat = self.adjMat
+      num = 0
 
-      else:
-        for ii in range(self.size()):
-          # The order is in line with the one saving in self.pieces
+      # Save the changes, {new:old}
+      dict_conversion = {}
 
-          # Todo: Eventually, this has to be upgraded to a dict?
-          self.gc[:, ii] = x_labels[ii], y_labels[ii]
-    except:
-      # Clustering may fail in some cases
-      # Todo: Currently, do nothing (some functions like explodedPuzzle may not work properly)
-      pass
+      for jj in range(max(y_labels) + 1):
+        for ii in range(max(x_labels) + 1):
+          for idx, pts in enumerate(zip(x_labels, y_labels)):
+            if pts[0] == ii and pts[1] == jj:
+              self.pieces[num] = pieces_src[pieceKeysList[idx]]
+              dict_conversion[num] = pieceKeysList[idx]
+              self.pieces[num].id = num
+              self.gc[:, num] = ii, jj
+              num = num + 1
+              break
+
+      # Have to re-compute adjMat/ilMat
+      adjMat_src = deepcopy(self.adjMat)
+      for ii in range(self.size()):
+        for jj in range(ii + 1, self.size()):
+          self.adjMat[ii, jj] = adjMat_src[dict_conversion[ii], dict_conversion[jj]]
+          self.adjMat[jj, ii] = self.adjMat[ii, jj]
+
+      self.ilMat = self.adjMat
+
+    else:
+      for ii in range(self.size()):
+        # The order is in line with the one saving in self.pieces
+        self.gc[:, ii] = x_labels[ii], y_labels[ii]
+        # TODO  Eventually, this has to be upgraded to a dict? 
+        # TODO  Does it? Why? - PAV - 10/06/2024.
 
 
 
@@ -247,11 +273,11 @@ class Gridded(Interlocking):
 
     return np.array(x_labels), np.array(y_labels)
     
-  #======================== __processGrid_cluster ========================
+  #======================== __processGrid_rectangular ========================
   #
-  def __processGrid_rectangle(self, x_list, y_list):
+  def __processGrid_rectangular(self, x_list, y_list):
     '''!
-    @brief  Generate grid based on assumption that grid is a rectangle.
+    @brief  Generate grid based on assumption that grid is rectangular.
             The method is to check all the two number combinations that multiply to the
             piece number.
             The two number will be treated as the maximum grid coordinate along x and y
@@ -267,6 +293,9 @@ class Gridded(Interlocking):
     @params[out] x_labels   Grid coordinates in x-direction ((N, 1))
     @params[out] y_labels   Grid coordinates in y-direction ((N, 1))
     '''
+    print("Processing rectangular.")
+    print(x_list)
+    print(y_list)
     N_piece = x_list.shape[0]
 
     # the result cache
@@ -383,6 +412,7 @@ class Gridded(Interlocking):
     return epImage, epBoard, change_dict
 
   #============================ explodedPuzzle ===========================
+  #
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0, 0, 0)):
     '''!
     @brief  Create an exploded version of the puzzle. It is an image with no touching
@@ -551,12 +581,9 @@ class Gridded(Interlocking):
     @return   thePuzzle   Gridded puzzle board instance.
     '''
 
-    aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
+    aPuzzle   = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
-    if hasattr(theParams, 'tauGrid'):
-      thePuzzle = Gridded(aPuzzle, theParams)
-    else:
-      thePuzzle = Gridded(aPuzzle)
+    thePuzzle = Gridded(aPuzzle, theParams)
 
     return thePuzzle
 

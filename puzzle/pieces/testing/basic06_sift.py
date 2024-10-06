@@ -18,6 +18,7 @@
 # ==[0] Prep environment
 
 import os
+import pkg_resources
 
 import cv2
 import improcessor.basic as improcessor
@@ -35,15 +36,16 @@ from puzzle.utils.imageProcessing import cropImage
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
-# ==[1] Read the source image and template.
+#==[1] Read the source image and template.
 #
-theImageSol = cv2.imread('../../../testing/data/balloon.png')
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+theImageSol = cv2.imread(prefix + 'balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread('../../../testing/data/puzzle_60p_AdSt408534841.png')
+theMaskSol_src = cv2.imread(prefix + 'puzzle_60p_AdSt408534841.png')
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
-# ==[1.1] Create an improcessor to obtain the mask.
+#==[1.1] Create an improcessor to obtain the mask.
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
@@ -53,7 +55,7 @@ theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-# ==[1.2] Extract info from theImage & theMask to obtain a board instance
+#==[1.2] Extract info from theImage & theMask to obtain a board instance
 #
 puzzParm = CfgBoardMeasure()
 puzzParm.minArea = 500
@@ -63,7 +65,7 @@ theLayer = boardMeasure(puzzParm)
 theLayer.process(theImageSol, theMaskSol)
 theBoardSol = theLayer.getState()
 
-# ==[1.3] Create a Grid instance and explode it into two new boards
+#==[1.3] Create a Grid instance and explode it into two new boards
 #
 
 print('Running through test cases. Will take a bit.')
@@ -76,7 +78,7 @@ theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, gridParm)
 
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 
-# ==[1.4] Create a new Grid instance from the images
+#==[1.4] Create a new Grid instance from the images
 #
 
 # @note
@@ -94,11 +96,11 @@ theMaskMea = improc.apply(epImage)
 # cv2.waitKey()
 
 theGridOpt =  CfgGridded()
-print(theGridOpt)
-theGridOpt.pieceBuilder = 'Regular'
+theGridOpt.pieceConstructor = 'Regular'
 theGridOpt.tauMinArea = 1000
 
-                                            #theParams=ParamGrid(areaThresholdLower=1000, pieceConstructor=Regular, reorder=True)
+theParams = CfgGridded()
+theParams.update(dict(areaThresholdLower=1000, pieceConstructor=Regular, reorder=True))
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theGridOpt)
 
 # ==[1.5] Focus on a single puzzle piece and duplicate it with a new location

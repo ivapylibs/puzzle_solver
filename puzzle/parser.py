@@ -217,6 +217,7 @@ class boardMeasure(centroidMulti):
       #      based on mask and region pixel coords.
       #
       #DEBUG
+      #print('Starting with a piece ---------------')
       #print(self.tparams)
       pImage = I[ri.slice]
       pMask  = ri.image
