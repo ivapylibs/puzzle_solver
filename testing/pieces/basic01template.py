@@ -42,6 +42,8 @@ thePiece = Template.buildFromMaskAndImage(theMask, theImage, cLoc)
 #
 thePiece.display()
 print("Testing out piece extraction.  Should see puzzle piece and mask.")
+print("First image displays a single puzzle piece in a small image.")
+print("Correct the messages.")
 
 #==[3] Test insertion into image data.
 #
@@ -51,6 +53,8 @@ thePiece.placeInImage(bigImage)
 thePiece.setPlacement(np.array([50, 50]))
 thePiece.placeInImage(bigImage)
 thePiece.placeInImageAt(bigImage, np.array([70, 30]))
+
+print("First image displays a three puzzle pieces in a big image.")
 
 # Display the resulting image. Should have three puzzle pieces in it.
 plt.figure()
@@ -70,8 +74,11 @@ spherePiece.placeInImage(bigImage)
 plt.figure()
 plt.title("Test builder of basic-shape puzzle pieces: red square and green sphere")
 plt.imshow(bigImage)
+print("Third displays to different puzzle pieces in an image.")
 
 plt.show()
+print("Close all windows to end test.")
+
 
 #
 #============================ basic01_template ===========================
