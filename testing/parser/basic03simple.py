@@ -4,7 +4,7 @@
 # @brief    Augmenting basic setup by packaging into a simple board
 #           perceiver. Detector gets pieces only within a certain
 #           intensity range (after conversion to gray scale).  Not all
-#           pieces will be snagged.  The ones grabbed will have centroid
+#           pieces will be snagged.  The ones grabbed will have corner
 #           markers.
 #
 # Basic test of recovering puzzle pieces from a given color image, based on
@@ -36,15 +36,14 @@
 import os
 
 import cv2
+import matplotlib.pyplot as plt
+import pkg_resources
+
 import detector.inImage as detector
 import improcessor.basic as improcessor
-import matplotlib.pyplot as plt
-
 import puzzle.parse.simple as perceiver
 from puzzle.parser import boardMeasure, CfgBoardMeasure
 
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
 
 #==[1] Build the perceiver.
 #--[1.1] Create the detector and tracker instances.  This is what does the
@@ -63,7 +62,9 @@ boardPer = perceiver.Simple(None, binDet, theLayer)
 #==[2] Load image
 #      Extract info from the image
 #
-theImage = cv2.imread('../data/shapes_color_six_image.png')
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+
+theImage = cv2.imread(prefix + 'shapes_color_six_image.png')
 boardPer.process(theImage)
 
 #==[4] Display the state

@@ -2,8 +2,8 @@
 #
 # @class    puzzle.parser.fromSketch
 #
-# @brief    A derived detector class that can process an image & mask image to create
-#           a binary mask.
+# @brief    A derived detector class that can process an image & mask
+#           image to create a binary mask.
 #
 #           @todo Not fully developed yet.
 #
@@ -71,4 +71,4 @@ class FromSketch(inImage):
         self.adapt()
 
 #
-# ======================== puzzle.parser.fromSketch ========================
+#======================== puzzle.parser.fromSketch ========================

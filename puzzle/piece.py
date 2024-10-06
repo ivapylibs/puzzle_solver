@@ -279,6 +279,8 @@ class Template:
         # Remap coordinates based on internal model of location. See comment below.
         #DEBUG
         #print(offset)
+        #print(type(self.y.pcorner))
+        #print(type(self.y.rcoords))
         #print(self.y.pcorner)
         #print(self.y.rcoords)
         #print(self.y.size)
@@ -618,7 +620,7 @@ class Template:
     #============================== buildSquare ==============================
     #
     @staticmethod
-    def buildSquare(size, color, rLoc=None):
+    def buildSquare(size, color, rLoc=[0,0]):
         """
         @brief  Build a square piece.
 
@@ -634,7 +636,7 @@ class Template:
         # the tight bbox is just the square itself, so size is just size
         y.size = np.array([size, size])
         y.mask = np.ones((size, size), dtype=np.uint8) * 255
-        y.pcorner = np.array([0,0])
+        y.pcorner = np.array(rLoc)
 
         # Create a contour of the mask
         cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
@@ -665,7 +667,7 @@ class Template:
     #============================== buildSphere ==============================
     #
     @staticmethod
-    def buildSphere(radius, color, rLoc=None):
+    def buildSphere(radius, color, rLoc=[0,0]):
         """
         @brief  Build a sphere piece.
 
@@ -685,7 +687,7 @@ class Template:
         y.size = np.array([radius, radius]) * 2
         y.mask = np.zeros((2 * radius, 2 * radius), dtype=np.uint8)
         y.mask = cv2.circle(y.mask, center=(radius - 1, radius - 1), radius=radius, color=(255, 255, 255), thickness=-1)
-        y.pcorner = np.array([0,0])
+        y.pcorner = np.array(rLoc)
 
         # Create a contour of the mask
         cnts = cv2.findContours(y.mask, cv2.RETR_TREE,

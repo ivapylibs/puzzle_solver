@@ -20,13 +20,14 @@
 #================================ basic02 ================================
 
 
+#==[0] Prep environment
+#
 import os
-
 import cv2
-# ==[0] Prep environment
 import matplotlib.pyplot as plt
+import pkg_resources
+import numpy as np
 
-#from puzzle.parser.fromLayer import FromLayer
 from puzzle.parser import boardMeasure, CfgBoardMeasure
 
 #fpath = os.path.realpath(__file__)
@@ -34,8 +35,10 @@ from puzzle.parser import boardMeasure, CfgBoardMeasure
 
 #==[1] Load image and mask
 #
-theImage = cv2.imread('../data/shapes_color_six_image.png')
-theMask  = cv2.imread('../data/shapes_color_six_binary.png', cv2.IMREAD_GRAYSCALE)
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+
+theImage = cv2.imread(prefix + 'shapes_color_six_image.png')
+theMask  = cv2.imread(prefix + 'shapes_color_six_binary.png', cv2.IMREAD_GRAYSCALE) > 0
 
 #==[2] Instantiate board measure object. 
 #      Extract info from theImage & theMask to obtain a board instance

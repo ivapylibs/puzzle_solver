@@ -70,7 +70,7 @@ boardPer = boardPerceive(None, binDet, theLayer)
 shiftSq = np.array([2, 2])
 shiftSp = np.array([-2, 3])
 
-for i in range(6):
+for i in range(10):
   bigImage = np.zeros((200, 200, 3)).astype('uint8')
   squarePiece.setPlacement(shiftSq, True) 
   spherePiece.setPlacement(shiftSp, True) 
@@ -84,7 +84,7 @@ for i in range(6):
 
   plt.cla()
   boardPer.tracker.bMeas.display_mp(outImage, fh, ID_DISPLAY=True)
-  plt.pause(0.2)
+  plt.pause(0.5)
 
 #
 #=============================== tracker01 ===============================

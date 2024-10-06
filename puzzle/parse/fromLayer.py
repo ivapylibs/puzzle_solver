@@ -80,23 +80,24 @@ class FromLayer(centroidMulti):
 
         return tstate
 
+    #================================ measure ================================
+    #
     def measure(self, I, M):
-        """
+        '''!
         @brief  Process the passed imagery to recover puzzle pieces and
                 manage their track states.
 
-        Args:
-            I:  RGB image.
-            M:  Mask image.
-        """
+        @param[in] I    RGB image.
+        @param[in] M    Mask image.
+        '''
 
         # 1] Extract pieces based on disconnected component regions
         #
-        regions = self.mask2regions(I, M)
+        regions = self._mask2regions(I, M, true)
 
         # 2] Instantiate puzzle piece elements from extracted data
         #
-        pieces = self.regions2pieces(regions)
+        pieces = self._regions2pieces(regions)
 
         # 3] Package into a board.
         #
@@ -204,18 +205,26 @@ class FromLayer(centroidMulti):
 
         return desired_cnts
 
-    def mask2regions(self, I, M, verbose=False):
-        """
+    #============================= mask2regions ============================
+    #
+    def _mask2regions(self, I, M, verbose=False):
+        '''!
         @brief Convert the selection mask into a bunch of regions.
                Mainly based on findContours function.
 
-        Args:
-            I:  RGB image.
-            M:  Mask image.
+        @param[in]  I           RGB image.
+        @param[in]  M           Mask image.
+        @param[in]  verbose     Verbose output flag (T/F).
 
-        Returns:
-            regions: A list of regions (mask, segmented image, location in the source image).
-        """
+        @return     regions     List of regions (mask, segmented image, location in source image).
+        '''
+
+        #TODO   This code seems to be old in relation to the implementations in basic01.
+        #TODO   Need to address the difference.  Who wrote this one?  - PAV 10/05/2024.
+        #TODO   Based on complexity of code and how done, most likely Yunzhi.
+        #TODO   It may not work well.  Or at least there are implementation differences
+        #TODO   that impact compatibility with the other code.
+        #
         # Convert mask to an image
         mask = M.astype('uint8')
 
@@ -285,21 +294,20 @@ class FromLayer(centroidMulti):
 
         return regions
 
-    def regions2pieces(self, regions):
-        """
+    #============================ regions2pieces ===========================
+    #
+    def _regions2pieces(self, regions):
+        '''!
         @brief Convert the region information into puzzle pieces.
 
-        Args:
-            regions: A list of region pairs (mask, segmented image, location in the source image).
-
-        Returns:
-            pieces: A list of puzzle pieces instances.
-        """
+        @param[in] regions  List of region pairs (mask, segmented image, location in source image).
+        @return     pieces  List of puzzle piece instances.
+        '''
         pieces = []
         for region in regions:
             theMask = region[0]
             theImage = region[1]
-            rLoc = region[2]
+            rLoc = np.array(region[2])
 
             # # Debug only
             # cv2.imshow('debug_mask', theMask)
@@ -307,6 +315,8 @@ class FromLayer(centroidMulti):
 
             thePiece = self.pieceConstructor.buildFromMaskAndImage(theMask, theImage, rLoc, 
                                                 rLoc=rLoc, pieceStatus=self.params.pieceStatus)
+            #TODO   This looks like the traditional implementation based on regions.
+            #TODO   Maybe it is OK.  Why is basic01parser failing?
             # # Debug only
             # cv2.imshow('debug_piece', thePiece.toImage())
             # cv2.waitKey()
@@ -315,22 +325,20 @@ class FromLayer(centroidMulti):
 
         return pieces
 
-    # ============================== correct ==============================
+    #=============================== correct ===============================
     #
     # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
 
-    # =============================== adapt ===============================
+    #================================ adapt ================================
     #
-    # DEFINE ONLY IF OVERLOADING. OTHERWISE REMOVE.
-
     def process(self, I, M):
-        """
+        '''!
         @brief  Run the tracking pipeline for image measurement.
 
-        Args:
-            I: RGB image.
-            M: Mask image.
-        """
+        @param[in]  I           RGB image.
+        @param[in]  M           Mask image.
+        '''
+
         self.measure(I, M)
 
 #

@@ -95,6 +95,7 @@ class CfgBoardMeasure(CfgCentMulti):
                               default settings.
     '''
     default_dict = CfgCentMulti.get_default_settings()
+    default_dict['minArea'] = 1
     default_dict.update(dict(measProps = True,  #override
           lengthThresholdLower = 1000,  \
           pieceBuilder = 'Template', pieceStatus = PieceStatus.MEASURED.value))
@@ -215,10 +216,13 @@ class boardMeasure(centroidMulti):
       #      Extract the color image patch from mask, and vectorized image data
       #      based on mask and region pixel coords.
       #
+      #DEBUG
+      #print(self.tparams)
       pImage = I[ri.slice]
       pMask  = ri.image
       pImage = pImage.reshape( np.append(np.shape(pMask), imdims[2]) )
 
+      #DEBUG VISUAL
       #print("Image and Mask shapes.")
       #print(pImage.shape)
       #print(pMask.shape)

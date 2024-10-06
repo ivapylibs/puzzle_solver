@@ -23,10 +23,7 @@
 
 # ===== Environment / Dependencies
 #
-<<<<<<< HEAD:puzzle/parse/simple.py
-import camera.utils.display as display
-=======
->>>>>>> yunzhi:puzzle/parser/simple.py
+import ivapy.display_cv as display
 import perceiver.perceiver as Perceiver
 
 from puzzle.board import Board
@@ -82,8 +79,8 @@ class Simple(Perceiver.Perceiver):
         detState = self.detector.getState()
 
         #DEBUG
-        #display.binary_cv(detState.x)
-        #display.wait_cv()
+        #display.binary(detState.x)
+        #display.wait()
 
         # --[2] Parse detector output to reconstitute recognized puzzle
         #      pieces into a board.
