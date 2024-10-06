@@ -93,7 +93,7 @@ class FromLayer(centroidMulti):
 
         # 1] Extract pieces based on disconnected component regions
         #
-        regions = self._mask2regions(I, M, true)
+        regions = self._mask2regions(I, M, True)
 
         # 2] Instantiate puzzle piece elements from extracted data
         #

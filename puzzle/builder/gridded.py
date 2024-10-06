@@ -304,41 +304,41 @@ class Gridded(Interlocking):
     return x_labels, y_labels
         
 
-    #============================= assert_gc =============================
-    #
-    def assert_gc(self, verbose=False):
-      '''!
-      @brief    Assert the assigned grid coordinates are correct.
+  #============================= assert_gc =============================
+  #
+  def assert_gc(self, verbose=False):
+    '''!
+    @brief    Assert the assigned grid coordinates are correct.
 
-      Criteria for correctness of the gridding:
-        1. The distinct coordinate number is equal to the solution board piece number
-        2. The max grid coordinate number is equal to the solution board piece number
+    Criteria for correctness of the gridding:
+      1. The distinct coordinate number is equal to the solution board piece number
+      2. The max grid coordinate number is equal to the solution board piece number
 
-      @return   flag (bool) True if grid cooridnates are correct, else False.
-      '''
-      flag = True       #! Set flag to true, returns false when testing fails.
+    @return   flag (bool) True if grid cooridnates are correct, else False.
+    '''
+    flag = True       #! Set flag to true, returns false when testing fails.
 
-      # 1. Check the unique of the gc
-      gc_unique = np.unique(self.gc, axis=1)
-      num_unique = gc_unique.shape[1]
+    # 1. Check the unique of the gc
+    gc_unique = np.unique(self.gc, axis=1)
+    num_unique = gc_unique.shape[1]
 
-      if num_unique != self.size():
-        flag = False
-        if verbose:
-          Warning("Grid coordinate is wrong. The assigned number does not equal to" +
-                  "the piece number")
+    if num_unique != self.size():
+      flag = False
+      if verbose:
+        Warning("Grid coordinate is wrong. The assigned number does not equal to" +
+                "the piece number")
 
-      # 2. check the max grid coordinate number.
-      elif (np.max(self.gc[0, :])+1) * (np.max(self.gc[1,:]) + 1)  != self.size():
-        flag = False
-        if verbose:
-          Warning(\
-            "The max grid coordinate number does not equal to the piece number." \
-            "Either grid coordinates are wrong, or solution board does not form a square.")
-      elif verbose:
-          print("Grid coordinate assignment passes the check.") 
-            
-      return flag
+    # 2. check the max grid coordinate number.
+    elif (np.max(self.gc[0, :])+1) * (np.max(self.gc[1,:]) + 1)  != self.size():
+      flag = False
+      if verbose:
+        Warning(\
+          "The max grid coordinate number does not equal to the piece number." \
+          "Either grid coordinates are wrong, or solution board does not form a square.")
+    elif verbose:
+        print("Grid coordinate assignment passes the check.") 
+          
+    return flag
 
   #============================== swapPuzzle =============================
   def swapPuzzle(self, num=100):
@@ -360,27 +360,27 @@ class Gridded(Interlocking):
     # Initialize a change dict
     # Old -> New
     change_dict = {}
-      for key in pieceKeysList:
-        change_dict[key]=key
+    for key in pieceKeysList:
+      change_dict[key]=key
 
-      for i in range(num):
-        target_list = np.random.randint(0, epBoard.size(), 2)
+    for i in range(num):
+      target_list = np.random.randint(0, epBoard.size(), 2)
 
-        # Exchange values
-        change_dict[target_list[0]],change_dict[target_list[1]] = change_dict[target_list[1]],change_dict[target_list[0]]
+    # Exchange values
+    change_dict[target_list[0]],change_dict[target_list[1]] = change_dict[target_list[1]],change_dict[target_list[0]]
 
-        # Exchange rLoc
-        epBoard.pieces[pieceKeysList[target_list[0]]].rLoc, \
-        epBoard.pieces[pieceKeysList[target_list[1]]].rLoc = 
+    # Exchange rLoc
+    epBoard.pieces[pieceKeysList[target_list[0]]].rLoc, \
+    epBoard.pieces[pieceKeysList[target_list[1]]].rLoc =  \
                     epBoard.pieces[pieceKeysList[target_list[1]]].rLoc, \
                     epBoard.pieces[pieceKeysList[target_list[0]]].rLoc
 
-      epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
+    epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
-      # Invert mapping
-      # New -> old(solution board order)
-      change_dict = {v: k for k, v in change_dict.items()}
-      return epImage, epBoard, change_dict
+    # Invert mapping
+    # New -> old(solution board order)
+    change_dict = {v: k for k, v in change_dict.items()}
+    return epImage, epBoard, change_dict
 
   #============================ explodedPuzzle ===========================
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0, 0, 0)):
@@ -438,127 +438,127 @@ class Gridded(Interlocking):
 
     return epImage, epBoard
     
-    #=============================== getGc ===============================
-    #
-    def getGc(self):
-      '''!
-      @brief    Obtain the solution board pieces' grid coordinates
+  #=============================== getGc ===============================
+  #
+  def getGc(self):
+    '''!
+    @brief    Obtain the solution board pieces' grid coordinates
 
-      @param[out]   gc  Grid coordinates assigned to each pieces, (2, N_pieces).
-      '''
+    @param[out]   gc  Grid coordinates assigned to each pieces, (2, N_pieces).
+    '''
 
-      return self.gc
+    return self.gc
 
-    #======================== buildFromFile_Puzzle =======================
-    #
-    @staticmethod
-    def buildFromFile_Puzzle(fileName, theParams=None):
-      '''!
-      @brief Load a saved arrangement calibration/solution puzzle board.
+  #======================== buildFromFile_Puzzle =======================
+  #
+  @staticmethod
+  def buildFromFile_Puzzle(fileName, theParams=None):
+    '''!
+    @brief Load a saved arrangement calibration/solution puzzle board.
 
-      @param[in]    fileName    Python file to load.
-      @param[in]    theParams   Gridded configuration instance.
+    @param[in]    fileName    Python file to load.
+    @param[in]    theParams   Gridded configuration instance.
 
-      @return   thePuzzle   Gridded puzzle board instance.
-      '''
+    @return   thePuzzle   Gridded puzzle board instance.
+    '''
 
-      aPuzzle = Arrangement.buildFromFile_Puzzle(fileName, theParams)
+    aPuzzle = Arrangement.buildFromFile_Puzzle(fileName, theParams)
 
-      with open(fileName, 'rb') as fp:
-        data = pickle.load(fp)
+    with open(fileName, 'rb') as fp:
+      data = pickle.load(fp)
 
-      if theParams is None and hasattr(data, 'tauGrid'):  # DELETE WHEN CODE FIXED.
-        theParams = CfgGridded()                        # BAD SAVE/LOAD PROCESS.
-        theParams.tauGrid = data.tauGrid
+    if theParams is None and hasattr(data, 'tauGrid'):  # DELETE WHEN CODE FIXED.
+      theParams = CfgGridded()                        # BAD SAVE/LOAD PROCESS.
+      theParams.tauGrid = data.tauGrid
 
+    thePuzzle = Gridded(aPuzzle, theParams)
+    #TODO: WHAT IS THIS? DELETE IF ABOVE WORKS.
+    #if hasattr(theParams, 'tauGrid'):
+    #    thePuzzle = Gridded(aPuzzle, theParams)
+    #else:
+    #    thePuzzle = Gridded(aPuzzle)
+
+    return thePuzzle
+
+  #===================== buildFromFile_ImageAndMask ====================
+  #
+  @staticmethod
+  def buildFromFile_ImageAndMask(fileName, theParams=None):
+    '''!
+    @brief Load a saved arrangement calibration/solution stored as an image and a mask.
+
+    The python file contains the puzzle board mask and image source data. It gets
+    processed into an arrangement instance. If a threshold variable ``tauDist`` is
+    found, then it is applied to the arrangement instance.
+
+    @param[in]    fileName    Python file to load.
+    @param[in]    theParams   Gridded configuration instance.
+
+    @return   thePuzzle   Gridded puzzle board instance.
+    '''
+    aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
+
+    if hasattr(theParams, 'tauGrid'):
       thePuzzle = Gridded(aPuzzle, theParams)
-      #TODO: WHAT IS THIS? DELETE IF ABOVE WORKS.
-      #if hasattr(theParams, 'tauGrid'):
-      #    thePuzzle = Gridded(aPuzzle, theParams)
-      #else:
-      #    thePuzzle = Gridded(aPuzzle)
+    else:
+      thePuzzle = Gridded(aPuzzle)
 
-      return thePuzzle
+    return thePuzzle
 
-    #===================== buildFromFile_ImageAndMask ====================
-    #
-    @staticmethod
-    def buildFromFile_ImageAndMask(fileName, theParams=None):
-      '''!
-      @brief Load a saved arrangement calibration/solution stored as an image and a mask.
+  #==================== buildFromFiles_ImageAndMask ====================
+  #
+  @staticmethod
+  def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
+    '''!
+    @brief Load a saved arrangement calibration/solution stored as
+           separate image and mask files.
 
-      The python file contains the puzzle board mask and image source data. It gets
-      processed into an arrangement instance. If a threshold variable ``tauDist`` is
-      found, then it is applied to the arrangement instance.
+    The source file contain the puzzle board image and mask data. It gets processed
+    into an arrangement instance. If a threshold variable ``tauDist`` is found, then
+    it is applied to the arrangement instance.
 
-      @param[in]    fileName    Python file to load.
-      @param[in]    theParams   Gridded configuration instance.
+    @param[in]    imFile      Image file to load.
+    @param[in]    maskFile    Mask file to load.
+    @param[in]    theParams   Gridded configuration instance.
 
-      @return   thePuzzle   Gridded puzzle board instance.
-      '''
-      aPuzzle = Arrangement.buildFromFile_ImageAndMask(fileName, theParams)
+    @return   thePuzzle   Gridded puzzle board instance.
+    '''
 
-      if hasattr(theParams, 'tauGrid'):
-        thePuzzle = Gridded(aPuzzle, theParams)
-      else:
-        thePuzzle = Gridded(aPuzzle)
+    aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
 
-      return thePuzzle
+    if hasattr(theParams, 'tauGrid'):
+      thePuzzle = Gridded(aPuzzle, theParams)
+    else:
+      thePuzzle = Gridded(aPuzzle)
 
-    #==================== buildFromFiles_ImageAndMask ====================
-    #
-    @staticmethod
-    def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
-      '''!
-      @brief Load a saved arrangement calibration/solution stored as
-             separate image and mask files.
+    return thePuzzle
 
-      The source file contain the puzzle board image and mask data. It gets processed
-      into an arrangement instance. If a threshold variable ``tauDist`` is found, then
-      it is applied to the arrangement instance.
+  #======================= buildFrom_ImageAndMask ======================
+  #
+  @staticmethod
+  def buildFrom_ImageAndMask(theImage, theMask, theParams=CfgGridded()):
+    '''!
+    @brief Given an image and an image mask, parse both to recover the puzzle
+           calibration/solution.
 
-      @param[in]    imFile      Image file to load.
-      @param[in]    maskFile    Mask file to load.
-      @param[in]    theParams   Gridded configuration instance.
+    Instantiates a puzzle parser that gets applied to the submitted data to create a
+    puzzle board instance. That instance is the calibration/solution.
 
-      @return   thePuzzle   Gridded puzzle board instance.
-      '''
+    @param[in]    theImage    Puzzle image data.
+    @param[in]    theMask     Puzzle mask data.
+    @param[in]    theParams   Gridded configuration instance.
 
-      aPuzzle = Arrangement.buildFromFiles_ImageAndMask(imFile, maskFile, theParams)
+    @return   thePuzzle   Gridded puzzle board instance.
+    '''
 
-      if hasattr(theParams, 'tauGrid'):
-        thePuzzle = Gridded(aPuzzle, theParams)
-      else:
-        thePuzzle = Gridded(aPuzzle)
+    aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
-      return thePuzzle
+    if hasattr(theParams, 'tauGrid'):
+      thePuzzle = Gridded(aPuzzle, theParams)
+    else:
+      thePuzzle = Gridded(aPuzzle)
 
-    #======================= buildFrom_ImageAndMask ======================
-    #
-    @staticmethod
-    def buildFrom_ImageAndMask(theImage, theMask, theParams=CfgGridded()):
-      '''!
-      @brief Given an image and an image mask, parse both to recover the puzzle
-             calibration/solution.
-
-      Instantiates a puzzle parser that gets applied to the submitted data to create a
-      puzzle board instance. That instance is the calibration/solution.
-
-      @param[in]    theImage    Puzzle image data.
-      @param[in]    theMask     Puzzle mask data.
-      @param[in]    theParams   Gridded configuration instance.
-
-      @return   thePuzzle   Gridded puzzle board instance.
-      '''
-
-      aPuzzle = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
-
-      if hasattr(theParams, 'tauGrid'):
-        thePuzzle = Gridded(aPuzzle, theParams)
-      else:
-        thePuzzle = Gridded(aPuzzle)
-
-      return thePuzzle
+    return thePuzzle
 
   #====================== buildFrom_ImageProcessing ======================
   #
