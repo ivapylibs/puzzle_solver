@@ -393,20 +393,33 @@ class Template:
     #========================= buildFromMaskAndImage =========================
     #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, cLoc, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  Usually passed as cropped.
 
+        This can be run in a few different ways.  First, assumiong that the puzzle
+        piece has been cropped along with the mask.  Then providing cLoc is important
+        for it to be placed in correct part of the original (uncropped) image.  If the
+        placement should change for whatever reason, then specifying rLoc will do
+        that.  Otherwise, cLoc and rLoc are set to be the same.
+
+        A less common implementation is to provide the whole image and an image-wide
+        mask for recovering a single piece.  Then cLoc is not needed. rLoc can still
+        be used.
+
+        Not implemented is the case of a whole image plus a cropped mask with cLoc.
+        That is on the todo list.
+
         @param[in] theMask      Mask of individual piece.
         @param[in] theImage     Source image with puzzle piece.
-        @param[in] cLoc         Corner location of puzzle piece.
-
-        @param[in] rLoc         Puzzle piece location [optional].
+        @param[in] cLoc         Corner location of puzzle piece [optional: None].
+        @param[in] rLoc         Alternative puzzle piece location [optional: None].
         @param[in] pieceStatus  Status of the puzzle piece [optional, def:MEASURED]
 
-        Returns:
-            thePiece: The puzzle piece instance.
+        @param[in] thePiece     Puzzle piece instance.
+
+        @todo   Include option to have cropped mask but full image and use cLoc.
         """
 
         #DEBUG CODE: DELETE LATER
@@ -418,14 +431,26 @@ class Template:
         # Populate dimensions.
         # Updated to OpenCV style
         y.size    = [theMask.shape[1], theMask.shape[0]]        # width then height
+        if cLoc is None:
+          cy, cx = np.nonzero(theMask)
+          cLoc = np.array([np.min(cx), np.min(cy)])
+          print(cLoc)
+        
         y.pcorner = cLoc
-        # @note Setting cLoc manually like this seems really weird.  Why should it
-        #       be given externally?   Why isn't it just the min of rcoords?
-        #       Wouldn't that be more natural?? Why was it set but then test code
-        #       does not conform to implementation?  - 09/17/2024 - PAV.
-        # @note What is rLoc role here?  Why considered separate/outside core Template
-        #       information?  Is it to support initial value and changed values?
-        #       Documentation is slim here. - 09/17/2024 - PAV.
+        # I originally though that setting cLoc manually was weird.  Why should it be
+        # given externally?   Why isn't it just the min of rcoords?
+        # But then it made sense if the mask and image were cropped, at which point
+        # not sending cLoc was weird.  Then I ran across a case where the mask was of
+        # the size of the uncropped image but only captured a single piece.  Made
+        # sense and was set to be optional, with code updated to support either
+        # verison.  - 10/05/2024 - PAV.
+        #
+        # The role of rLoc is to support moving the piece to a new location.
+        # In general, it looks like the puzzle piece retains its original cLoc.
+        # Then changes are made to rLoc and that is what is used for display purpsoes.
+        # The two version seem useful, so keeping that old/new corner location
+        # implementation.  An earlier message noted that it was to support initial
+        # and changed corner locations.  Makes sense. - 10/05/2024 - PAV.
         #
 
         y.mask = theMask.astype('uint8')

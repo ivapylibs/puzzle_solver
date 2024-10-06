@@ -21,15 +21,18 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.piece.template import Template
+from puzzle.piece import Template
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
+
+import pkg_resources
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-theImageSol = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+theImageSol = cv2.imread(prefix + 'puzzle_real_sample_black/SinglePiece_mea_1.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
