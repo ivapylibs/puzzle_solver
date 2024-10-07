@@ -1,10 +1,15 @@
 #!/usr/bin/python3
-# ============================ real05_edge ===========================
+#============================== real05_edge ==============================
 #
 # @brief    Test script for assembling the solution board from
-#           well-separated puzzle pieces.
+#           well-separated puzzle pieces, from known information.:w
 #
-# ============================ real05_edge ===========================
+# Here, everything is known, so figuring out how to assemble the puzzle
+# is easy.  Takes a puzzle, creates a new one with pieces moved around,
+# then shifts them back into place.  Final images are the pieces
+# reassmbled.
+#
+#============================== real05_edge ==============================
 
 #
 # @file     real05_edge.py
@@ -12,7 +17,7 @@
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/10/19  [created]
 #
-# ============================ real05_edge ===========================
+#============================== real05_edge ==============================
 
 # ==[0] Prep environment
 
@@ -78,7 +83,6 @@ theBoard.addPiece(theRegular_0)
 for i in range(1, theGridMea.size()):
 
     theRegular_0 = theBoard.pieces[i - 1]
-
     theRegular_1 = theGridMea.pieces[i]
     #theRegular_1 = theRegular_1.rotatePiece(theta=theRegular_1.theta)
 
@@ -93,7 +97,7 @@ for i in range(1, theGridMea.size()):
     y_relative = np.max(piece_B_coord[1, :]) - np.max(piece_A_coord[1, :])
     x_relative = np.max(piece_B_coord[0, :]) - np.max(piece_A_coord[0, :])
 
-    #theRegular_1.setPlacement([int(-x_relative), int(-y_relative)], offset=True)
+    theRegular_1.displace([int(-x_relative), int(-y_relative)])
     theBoard.addPiece(theRegular_1)
 
 # ==[3] Display
@@ -109,4 +113,5 @@ axarr[1].title.set_text('The assembled puzzle pieces')
 
 plt.show()
 
-# ============================ real05_edge ===========================
+#
+#============================== real05_edge ==============================
