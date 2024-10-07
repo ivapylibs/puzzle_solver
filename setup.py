@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-<<<<<<< HEAD
 setup(
     name    = "puzzle",
     version = "1.1.1",
