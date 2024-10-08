@@ -19,9 +19,9 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 
-from puzzle.builder.board import Board
-from puzzle.piece.edge import Edge
-from puzzle.piece.moments import Moments
+from puzzle.board import Board
+from puzzle.pieces.edge import Edge
+from puzzle.pieces.matchDifferent import Moments
 
 
 # ===== Helper Elements
@@ -65,14 +65,14 @@ class ByShape(Board):
             for key in self.pieces:
                 piece = self.pieces[key]
                 # Currently, the label is based on the type of the piece edge
-                self.feature.append(self.feaExtractor.shapeFeaExtract(piece, method='type').flatten())
+                self.feature.append(self.feaExtractor.extractFeature(piece,method='type').flatten())
                 num = np.count_nonzero(self.feature[-1] == 3)
                 self.feaLabel.append(num)
         else:
 
             for key in self.pieces:
                 piece = self.pieces[key]
-                self.feature.append(self.feaExtractor.shapeFeaExtract(piece).flatten())
+                self.feature.append(self.feaExtractor.extractFeature(piece).flatten())
             self.feature = np.array(self.feature)
 
             yhat = hcluster.fclusterdata(self.feature, self.params.tauDist, criterion="distance") - 1

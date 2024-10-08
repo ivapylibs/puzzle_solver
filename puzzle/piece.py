@@ -805,7 +805,7 @@ class EdgeDirection(Enum):
 
 class EdgeDes:
     # Here we save the rotated edges
-    type: int = EdgeType.UNDEFINED  # To save the type: in/out/flat.
+    etype: int = EdgeType.UNDEFINED  # To save the type: in/out/flat.
     image: np.ndarray = np.array([])  # To save the whole image of the edge.
     mask: np.ndarray = np.array([])  # To save the mask image of the edge.
 
@@ -897,7 +897,7 @@ class Regular(Template):
         @todo   Shouldn't this be a private or protected member function?
         '''
 
-        self.edge[direction].type = type
+        self.edge[direction].etype = etype
 
     #============================== printEdgeType ==============================
     #
@@ -907,7 +907,7 @@ class Regular(Template):
         """
 
         for direction in EdgeDirection:
-            print(f'{direction.name}:', self.edge[direction.value].type)
+            print(f'{direction.name}:', self.edge[direction.value].etype)
 
 
     #=============================== rotatePiece ===============================

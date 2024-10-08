@@ -19,9 +19,9 @@ import os
 import copy
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import Board
+from puzzle.board import Board
 from puzzle.clusters.byColor import ByColor
-from puzzle.piece.template import Template
+from puzzle.piece import Template
 
 
 fpath = os.path.realpath(__file__)
@@ -61,7 +61,7 @@ theBoard2 = copy.deepcopy(theBoard)
 for key in theBoard2.pieces:
     theBoard2.pieces[key].id = theColorCluster.feaLabel[key]
 
-theBoard2.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
+theBoard2.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
 
 plt.show()
 

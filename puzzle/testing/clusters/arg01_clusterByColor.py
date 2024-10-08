@@ -148,7 +148,7 @@ if opt.with_cluster:
     print("board.display_mp has been updated.  Check and revise this invocation.")
     theGrid.display_mp(theImageSol,CONTOUR_DISPLAY=True, ID_DISPLAY=True)#, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
     #theGrid.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
-    warning("Code is incomplete.  Missing display by cluster ID.")
+    Warning("Code is incomplete.  Missing display by cluster ID.")
 
 plt.savefig(f'{opt.image}_cluster.png', dpi=300)
 

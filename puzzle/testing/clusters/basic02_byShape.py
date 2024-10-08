@@ -19,9 +19,9 @@ import os
 
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import Board
+from puzzle.board import Board
 from puzzle.clusters.byShape import ByShape
-from puzzle.piece.template import Template
+from puzzle.piece import Template
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -37,7 +37,7 @@ for i in range(3):
     squarePiece_B = Template.buildSphere(40, color=(255, 0, 0), rLoc=(600, i * 150 + 140))
     theBoard.addPiece(squarePiece_B)
 
-theBoard.display(CONTOUR_DISPLAY=False, ID_DISPLAY=True)
+theBoard.display_mp(CONTOUR_DISPLAY=False, ID_DISPLAY=True)
 
 # ==[2] Create a cluster instance and process the puzzle board.
 #

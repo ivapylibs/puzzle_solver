@@ -43,7 +43,7 @@ class Edge(MatchDifferent):
         self.tau_color = tau_color
 
     @staticmethod
-    def shapeFeaExtract(piece, method=None):
+    def extractFeature(piece, method=None):
         """
         @brief  Extract the edge shape feature from an input image of the edge.
 
@@ -66,10 +66,9 @@ class Edge(MatchDifferent):
                     or piece.edge[i].shapeFea:
                 shapeFeaList.append(piece.edge[i].shapeFea)
             else:
-
                 if method == 'type':
-                    piece.edge[i].shapeFea = piece.edge[i].type
-                    shapeFeaList.append(piece.edge[i].type)
+                    piece.edge[i].shapeFea = piece.edge[i].etype
+                    shapeFeaList.append(piece.edge[i].etype)
                 else:
                     y, x = np.nonzero(piece.edge[i].mask)
                     coords = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
@@ -137,7 +136,7 @@ class Edge(MatchDifferent):
             The shape & color feature vectors.
         """
 
-        shapeFea = Edge.shapeFeaExtract(piece, method=method)
+        shapeFea = Edge.extractFeature(piece, method=method)
         colorFea = Edge.colorFeaExtract(piece)
 
         return list(zip(shapeFea, colorFea))
