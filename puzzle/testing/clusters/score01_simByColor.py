@@ -40,6 +40,8 @@
 #==[0] Prep environment and argument parser.
 import copy
 import os
+import argparse
+import pkg_resources
 
 import matplotlib.pyplot as plt
 
@@ -49,18 +51,14 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import ivapy.display_cv as display
 
 import improcessor.basic as improcessor
-from puzzle.builder.gridded import Gridded, ParamGrid
-from puzzle.parser.fromSketch import FromSketch
+from puzzle.piece import Regular
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.parse.fromSketch import FromSketch
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
-
-import argparse
-import pkg_resources
-
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
 
 
 #==[0.1] Argument parser.
@@ -116,22 +114,27 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 #
 # TODO: This step can probably be made cleaner.  Not worrying for now. PAV 10/04/24.
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           cv2.dilate, (np.ones((3, 3), np.uint8),),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((80, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
+#DEBUG VISUAL
+#display.rgb_binary(theImageSol, theMaskSol)
+#display.wait()
+
 #==[1.2] Use puzzle template image to synthesize a gridded puzzle.
 #        Display the original board for viewing with piece ID overlay.
 #
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, 
-            theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
+cfgGrid = CfgGridded()
+cfgGrid.update(dict(minArea=1000, reorder=True, pieceBuilder=Regular))
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
+#DEBUG
+#print(cfgGrid)
+#DEBUG VISUAL
+#theGrid.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True)# TITLE='Original ID')
 
 #==[2] Create a cluster instance and process the puzzle board.
 #      Display image with cluster ID overlay.
@@ -156,15 +159,16 @@ for k, v in theColorCluster.feaLabel_dict.items():
 print('No. of pieces :', len(theColorCluster.feature))
 print('Cluster labels:', theColorCluster.feaLabel)
 
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, 
-                                      ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
+#DEBUG VISUAL
+#theGrid.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True) 
+                                      #ID_DISPLAY_OPTION=1)# TITLE='Cluster ID')
+#plt.pause(1)
 
 #==[3.1] Simulate randomly clustering the pieces.
 #        First explode the puzzle to make space for clustering.
 #        
-_, epBoard = theGrid.explodedPuzzle(dx=500, dy=500)
-
-epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False))
+_, epBoard = theGrid.explodedPuzzle(dx=1200, dy=1200)
+epBoard = Gridded(epBoard, cfgGrid)
 
 #==[3.2] Randomly swap the puzzle pieces.
 #        Set fixed random seed for repeatable execution. 
@@ -172,8 +176,8 @@ epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False)
 np.random.seed(0)
 _, epBoard, _ = epBoard.swapPuzzle()
 
-epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True, 
-                                                ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
+epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True) 
+                                                #ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
 
 #==[3.3] Define image quadrant regions.
 
@@ -234,6 +238,7 @@ cv2.line(epImage, (epImage.shape[1]//2, 0), (epImage.shape[1]//2, epImage.shape[
 plt.figure()
 plt.imshow(epImage)
 plt.title(f'Randomly clustered pieces/Score: {score:.3f}')
+plt.pause(1)
 
 fh = plt.figure()
 for idx, piece_id in enumerate(epBoard.pieces):
@@ -250,7 +255,7 @@ for idx, piece_id in enumerate(epBoard.pieces):
     #       be able to find empty regions for placing pieces. Most likely based on
     #       the current board estimate.
     #
-    if piece_human_cluster_dict[piece_id] 
+    if piece_human_cluster_dict[piece_id] \
                              != cluster_region_dict[epBoard.pieces[piece_id].cluster_id]:
 
         def random_place(rectangle_list):
@@ -303,18 +308,19 @@ for idx, piece_id in enumerate(epBoard.pieces):
         if not opt.only_final_display or idx==len(epBoard.pieces)-1:
 
             print(f"Step {idx}:")
-            epImage = epBoard.toImage(theImage=np.zeros(epImage.shape) ,CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1)
+            epImage = epBoard.toImage(theImage=np.zeros(epImage.shape) ,CONTOUR_DISPLAY=True, ID_DISPLAY=True)# ID_DISPLAY_OPTION=1)
 
             # Add two lines to split the pieces into clusters.
             cv2.line(epImage, (0, epImage.shape[0] // 2), (epImage.shape[1], epImage.shape[0] // 2), (255, 255, 255), 5)
             cv2.line(epImage, (epImage.shape[1] // 2, 0), (epImage.shape[1] // 2, epImage.shape[0]), (255, 255, 255), 5)
 
             score = theColorCluster.score(piece_human_cluster_dict, method=opt.score_method)
-            print('Score:', score)
+            print('Score:', score, ' now plotting ...')
 
             plt.imshow(epImage)
             plt.title(f"Step {idx}/Score: {score:.3f}")
             plt.pause(1)
+            #plt.show()
 
             plt.savefig(f'output/{opt.image}_cluster_Step_{idx}.png', dpi=300)
 

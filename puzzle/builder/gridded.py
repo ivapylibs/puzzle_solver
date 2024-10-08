@@ -151,6 +151,10 @@ class Gridded(Interlocking):
       x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
       y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
 
+      #DEBUG
+      #print(x_list)
+      #print(y_list)
+
       # Use rectangular shape assumptions to get no. of rows and columns.
       # Store in pshape.
       xMin = np.min(x_list)
@@ -158,7 +162,7 @@ class Gridded(Interlocking):
       self.pshape = [ np.count_nonzero(y_list == yMin) , np.count_nonzero(x_list == xMin) ]
 
       #DEBUG
-      print(self.pshape)
+      #print(self.pshape)
 
       # Use known row and column quantities to get the x, y labels of the puzzle
       # pieces by partitioning in vertical and horizontal so that each partition

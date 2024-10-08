@@ -51,6 +51,8 @@
 #==[0] Prep environment
 import copy
 import os
+import argparse
+import pkg_resources
 
 import matplotlib.pyplot as plt
 
@@ -62,8 +64,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import improcessor.basic as improcessor
-from puzzle.builder.gridded import Gridded, ParamGrid
-from puzzle.parser.fromSketch import FromSketch
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.parse.fromSketch import FromSketch
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 from puzzle.utils.dataProcessing import convert_serializable
@@ -75,12 +77,6 @@ import subprocess
 import time
 from std_msgs.msg import String, Int32, Float64
 import json
-
-import argparse
-import pkg_resources
-
-fpath = os.path.realpath(__file__)
-cpath = fpath.rsplit('/', 1)[0]
 
 
 #==[0.1] Argument parser.
@@ -149,10 +145,7 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 #
 # TODO: This step can probably be made cleaner.  Not worrying for now. PAV 10/04/24.
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           cv2.GaussianBlur, ((3, 3), 0,),
-                           cv2.Canny, (30, 200,),
-                           cv2.dilate, (np.ones((3, 3), np.uint8),),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((80, 255, cv2.THRESH_BINARY),))
 
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
@@ -161,9 +154,12 @@ theMaskSol = theDet.getState().x
 #==[1.2] Use puzzle template image to synthesize a gridded puzzle.
 #        Display the original board for viewing with piece ID overlay.
 #
-theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams=ParamGrid(areaThresholdLower=5000, removeBlack=False, reorder=True))
+cfgGrid = CfgGridded()
+cfgGrid.update(dict(minArea=1000, reorder=True, pieceBuilder=Regular))
+theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
+#DEBUG VISUAL
+#theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, TITLE='Original ID')
 
 #==[2] Create a cluster instance and process the puzzle board.
 #      Display image with cluster ID overlay.
@@ -184,14 +180,17 @@ for k, v in theColorCluster.feaLabel_dict.items():
 print('No. of pieces :', len(theColorCluster.feature))
 print('Cluster labels:', theColorCluster.feaLabel)
 
-theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
+#DEBUG VISUAL
+#theGrid.display(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
 
 #==[3.1] Simulate randomly clustering the pieces.
 #        First explode the puzzle to make space for clustering.
 #        
 _, epBoard = theGrid.explodedPuzzle(dx=500, dy=500)
 
-epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False))
+cfgGrid = CfgGridded()
+cfgGrid.update(dict(minArea=1000, pieceBuilder=Regular))
+epBoard = Gridded(epBoard, cfgGrid))
 
 #==[3.2] Randomly swap the puzzle pieces.
 #        Set fixed random seed for repeatable execution. 
@@ -199,8 +198,9 @@ epBoard = Gridded(epBoard, ParamGrid(areaThresholdLower=5000, removeBlack=False)
 np.random.seed(0)
 _, epBoard, _ = epBoard.swapPuzzle()
 
-epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True, 
-                                                ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
+#DEBUG VISUAL
+#epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True) 
+                                                #ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
 
 #==[3.3] Define image quadrant regions.
 
