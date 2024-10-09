@@ -22,9 +22,9 @@ import pkg_resources
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.builder.board import Board
-from puzzle.piece.sift import Sift
-from puzzle.piece.template import Template
+from puzzle.board import Board
+from puzzle.pieces.sift import Sift
+from puzzle.piece import Template
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
 
 fpath = os.path.realpath(__file__)
