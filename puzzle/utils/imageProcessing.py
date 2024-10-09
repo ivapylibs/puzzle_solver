@@ -201,11 +201,15 @@ def extract_region(img, verbose=False):
 
 def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, \
                             BoudingboxThresh = (30,80), cannyThresh=(30, 50), \
-                            WITH_AREA_THRESH=False ,verbose=True):
+                            WITH_AREA_THRESH=False ,verbose=False):
     """!
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle
             area to obtain a mask.  Note that the threshold is very
             important. It requires having prior knowledge.
+
+    Implementation was changed.  It might actuall work for multiple puzzles on the workmat
+    based on flood filling operation.  Will recover binary mark that gets individual pieces
+    assuming none are touching.  If touching, then grabbed as an entity.
 
     @param[in] img      RGB image input.
     @param[in] mask     Mask image input.
@@ -229,6 +233,8 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
         cv2.imshow('img_black_border', img_black_border)
         cv2.waitKey()
 
+    kernel = np.ones((3, 3), np.uint8)
+
     if mask is None:
 
         # 10/09/2024
@@ -247,151 +253,57 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
         # Manually threshold the img if mask is not given. It should not be better than the one
         # obtained by the surveillance system.
         # Right now we will always use this step for now.
+
+        # @note There are two options for processing the old imagery on the work mat.
+        #       The first is to increase the lower threshold to avoid getting the 
+        #       work mat. Use only what passes that mask, or what passes plus edge
+        #       boundary.  the other is to use the circle, shrink, then use that plus
+        #       edges.  They should both give the same outcome.  Rolling with
+        #       first option and getting rid of the extract weird iamge processing.
+        #
         improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                                   cv2.medianBlur, (5,),
                                    improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),)
-                                   #cv2.dilate, (np.ones((5, 5), np.uint8),)
                                    )
         mask = improc.apply(img_black_border)
+        mask = cv2.dilate(mask.astype('uint8'), kernel)
+        mask = mask > 0
 
         if verbose:
             cv2.imshow('mask', mask.astype('uint8')*255)
             cv2.waitKey()
 
+    
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                               # cv2.medianBlur, (5,),
                                cv2.Canny, (cannyThresh[0], cannyThresh[1], None, 3, True,),
-                               improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                               cv2.morphologyEx,  (cv2.MORPH_CLOSE,kernel,),
+                               improcessor.basic.thresh, ((1, 255, cv2.THRESH_BINARY),))
+                               # Lastline just binarizes Canny edge outcome.
 
     # Step 1: with threshold
     im_pre_canny = improc.apply(img_black_border)
+
+    im_pre_canny = cv2.bitwise_and(im_pre_canny.astype('uint8'), 
+                                   mask.astype('uint8')*255)
 
     if verbose:
         cv2.imshow('im_pre_canny+thresh', im_pre_canny.astype('uint8')*255)
         cv2.waitKey()
 
-    # connectedComponents assumption
-    num_labels, labels = cv2.connectedComponents(mask.astype('uint8'))
 
-    regions = []  # The mask region list.
-    for i in range(1, num_labels):
+    # Step 4: Floodfill.  The operation replaces the input image with its flood filled
+    #   version based on reachable pixels from start pixel.  Start pixel is (0,0), which is
+    #   OK given that the boundary was blacked out. It is complement mask to actual puzzle
+    #   piece.  Negate outcome to get final mask.
+    im_floodfill = im_pre_canny.copy().astype(np.uint8)
+    cv2.floodFill(im_floodfill, None, (0, 0), 255)      
+    im_floodfill = cv2.bitwise_not(im_floodfill)
 
-        # Debug only
-        # if i == 1:
-        #     verbose = True
-        # else:
-        #     verbose = False
+    if verbose:
+        cv2.imshow('im_floodfill', im_floodfill)
+        cv2.waitKey()
 
-        im_pre_connected = cv2.bitwise_and(im_pre_canny.astype('uint8'), 
-                                           im_pre_canny.astype('uint8'),
-                                           mask=np.where(labels == i, 1, 0).astype('uint8'))
-
-        if verbose:
-            cv2.imshow('im_pre_connected', im_pre_connected.astype('uint8')*255)
-            cv2.waitKey()
-
-        # 3 will lead to better split while 5 is with fewer holes
-        kernel = np.ones((3, 3), np.uint8)
-        im_pre_dilate = cv2.dilate(im_pre_connected, kernel)
-
-        if verbose:
-            cv2.imshow('im_pre_dilate', im_pre_dilate)
-            cv2.waitKey()
-
-        cnts, hierarchy = cv2.findContours(im_pre_dilate, cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_SIMPLE)
-
-
-        regions_single = []
-        for c in cnts:
-
-            area = cv2.contourArea(c)
-
-            seg_img = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
-            cv2.drawContours(seg_img, [c], -1, (255, 255, 255), thickness=-1)
-
-            # Get ROI, OpenCV style
-            x, y, w, h = cv2.boundingRect(c)
-
-            # Double check if ROI has a large IoU with the previous ones, then discard it
-            skipFlag = False
-            for region in regions_single:
-                if bb_intersection_over_union(region[2], [x, y, x + w, y + h]) > 0.85:
-                    skipFlag = True
-                    break
-            if not skipFlag:
-                regions_single.append((seg_img, area, [x, y, x + w, y + h]))
-
-        # Sort, from small area to large ones
-        regions_single.sort(key=lambda x: x[1])
-
-        # # # Show the debug plot only when we have some big trouble with piece extraction
-        # if verbose:
-        #     for i in range(len(regions_single)):
-        #         cv2.imshow('regions_single',regions_single[i][0])
-        #         cv2.waitKey()
-
-        # Step 2: Filtering by Bounding box area size
-        seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
-
-        if WITH_AREA_THRESH:
-            for i in range(len(regions_single)):
-
-                h = regions_single[i][2][3]-regions_single[i][2][1]
-                w = regions_single[i][2][2]-regions_single[i][2][0]
-
-                if BoudingboxThresh[0] < w < BoudingboxThresh[1] and BoudingboxThresh[0] < h < BoudingboxThresh[1] \
-                        and areaThresholdLower< h*w < areaThresholdUpper:
-                    seg_img_combined = seg_img_combined | regions_single[i][0]
-        else:
-            # They serve to be compatible with previous circle outermost contour removal idea
-            for i in range(len(regions_single) - 1):
-                seg_img_combined = seg_img_combined | regions_single[i][0]
-
-        if verbose:
-            cv2.imshow('seg_img_combined', seg_img_combined)
-            cv2.waitKey()
-
-        # Step 3: Dilation
-        kernel = np.ones((3, 3), np.uint8)
-        im_processed = cv2.dilate(seg_img_combined, kernel)
-
-        # Alternative, not to use dilation
-        # im_processed = seg_img_combined
-
-        if verbose:
-            cv2.imshow('im_processed_dilation', im_processed)
-            cv2.waitKey()
-
-        # Step 4: Floodfill
-        # Copy the threshold image.
-        im_floodfill = im_processed.copy()
-
-        # Mask used to flood filling.
-        # Notice the size needs to be 2 pixels than the image.
-        h, w = im_processed.shape[:2]
-        mask = np.zeros((h + 2, w + 2), np.uint8)
-
-        # Floodfill from point (0, 0)
-        cv2.floodFill(im_floodfill, mask, (0, 0), 255)
-
-        # Invert floodfilled image
-        im_floodfill_inv = cv2.bitwise_not(im_floodfill)
-
-        # Step 5: Combine the two images to get the foreground.
-        im_floodfill = im_processed | im_floodfill_inv
-
-        if verbose:
-            cv2.imshow('im_floodfill', im_floodfill)
-            cv2.waitKey()
-
-        regions.append(im_floodfill)
-
-    seg_img_combined = np.zeros(img.shape[:2], dtype="uint8")  # reset a blank image every time
-    for i in range(len(regions)):
-        seg_img_combined = seg_img_combined | regions[i]
-
-    return seg_img_combined
+    Warning("Only tested on one puzzle piece.  Should work more generally though.")
+    return im_floodfill
 
 def preprocess_synthetic_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, cannyThresh=(20, 80), verbose=False):
     """
