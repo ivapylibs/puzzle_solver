@@ -76,7 +76,16 @@ class Edge(MatchDifferent):
                     piece.edge[i].shapeFea = coords
                     shapeFeaList.append(coords)
 
-        shapeFeaList = np.array(shapeFeaList)
+        shapeFeaList = np.array(shapeFeaList, dtype=object)
+        # @note Edges don't have to be the same length.  np.array craps
+        #       out in that case.  Setting to `dtype=object` prevents that,
+        #       but if later usage require a common shape for the feature,
+        #       then an error will be triggered.  If, however, feature
+        #       comparison is only done with similar types, then it may
+        #       not matter.  If edge comparison uses edge class, there
+        #       there should be no problems. If the edges are matched for
+        #       checking mutual fit, then the curve-based metrics or
+        #       distance functions should be what are used.
 
         return shapeFeaList
 
