@@ -85,7 +85,7 @@ class Edge(MatchDifferent):
         #       not matter.  If edge comparison uses edge class, there
         #       there should be no problems. If the edges are matched for
         #       checking mutual fit, then the curve-based metrics or
-        #       distance functions should be what are used.
+        #       distance functions should be what are used.  
 
         return shapeFeaList
 
