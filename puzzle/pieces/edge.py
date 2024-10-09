@@ -195,8 +195,6 @@ class Edge(MatchDifferent):
         if type(piece_A) != type(piece_B):
             raise TypeError('Input should be of the same type.')
         else:
-            print(type(piece_A))
-            print(type(piece_B))
             if isinstance(piece_A, Regular):
 
                 ret_A = self.process(piece_A, method=method)
