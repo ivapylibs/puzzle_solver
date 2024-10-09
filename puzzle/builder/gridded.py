@@ -360,27 +360,27 @@ class Gridded(Interlocking):
     # Initialize a change dict
     # Old -> New
     change_dict = {}
-      for key in pieceKeysList:
-        change_dict[key]=key
+    for key in pieceKeysList:
+      change_dict[key]=key
 
-      for i in range(num):
-        target_list = np.random.randint(0, epBoard.size(), 2)
+    for i in range(num):
+      target_list = np.random.randint(0, epBoard.size(), 2)
 
-        # Exchange values
-        change_dict[target_list[0]],change_dict[target_list[1]] = change_dict[target_list[1]],change_dict[target_list[0]]
+      # Exchange values
+      change_dict[target_list[0]],change_dict[target_list[1]] = change_dict[target_list[1]],change_dict[target_list[0]]
 
-        # Exchange rLoc
-        epBoard.pieces[pieceKeysList[target_list[0]]].rLoc, \
-        epBoard.pieces[pieceKeysList[target_list[1]]].rLoc = 
-                    epBoard.pieces[pieceKeysList[target_list[1]]].rLoc, \
-                    epBoard.pieces[pieceKeysList[target_list[0]]].rLoc
+      # Exchange rLoc
+      epBoard.pieces[pieceKeysList[target_list[0]]].rLoc, \
+      epBoard.pieces[pieceKeysList[target_list[1]]].rLoc = \
+                  epBoard.pieces[pieceKeysList[target_list[1]]].rLoc, \
+                  epBoard.pieces[pieceKeysList[target_list[0]]].rLoc
 
-      epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
+    epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
 
-      # Invert mapping
-      # New -> old(solution board order)
-      change_dict = {v: k for k, v in change_dict.items()}
-      return epImage, epBoard, change_dict
+    # Invert mapping
+    # New -> old(solution board order)
+    change_dict = {v: k for k, v in change_dict.items()}
+    return epImage, epBoard, change_dict
 
   #============================ explodedPuzzle ===========================
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0, 0, 0)):
