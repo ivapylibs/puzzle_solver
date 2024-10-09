@@ -231,12 +231,25 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
 
     if mask is None:
 
+        # 10/09/2024
+        # Want to pre-process old style puzzle pieces with not perfectly
+        # black background (very dark gray, if you will).
+        # Seems like best option is to have low threshold, get the circle
+        # shrink by a few pixels to get final mask 
+        # Crop out mask circle, then start to apply image processing to it.
+        # get edges, dilate the edge map.
+        # get region from closed puzzle edge boundary.
+        # return that region as a mask.
+        # Right now a bunch of weirder stuff is done.  
+        # Need to recode.  But is this really even necessary?
+        # Is it worth the effort?
+
         # Manually threshold the img if mask is not given. It should not be better than the one
         # obtained by the surveillance system.
         # Right now we will always use this step for now.
         improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                    cv2.medianBlur, (5,),
-                                   improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),)
+                                   improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),)
                                    #cv2.dilate, (np.ones((5, 5), np.uint8),)
                                    )
         mask = improc.apply(img_black_border)
