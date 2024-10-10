@@ -166,7 +166,6 @@ class boardMeasure(centroidMulti):
     self.bMeas = Board()                # Get a new measured board.
     super(boardMeasure, self).measure(M)
 
-
     # DEBUG
     #print("boardMeasure : measure.")
     #print("Made it through here fine.")

@@ -97,10 +97,15 @@ class FromLayer(centroidMulti):
 
         # 1] Extract pieces based on disconnected component regions
         #
-        regions = self._mask2regions(I, M, True)
+        self.bMeas = Board()                # Get a new measured board.
+        super(FromLayer, self).measure(M)
 
         # 2] Instantiate puzzle piece elements from extracted data
         #
+        print("Does not work.  This is very old code.  Replaced by board")
+        print("measurement strategy in parser file.")
+        quit()
+
         pieces = self._regions2pieces(regions)
 
         # 3] Package into a board.
