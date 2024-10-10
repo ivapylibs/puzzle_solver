@@ -133,7 +133,7 @@ score_info_pub   = rospy.Publisher('score_info', Float64, queue_size=5)
 
 #==[1] Read the source image and template.
 #
-prefix = pkg_resources.resource_filename('puzzle', 'testing/data/')
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
 
 theImageSol = cv2.imread(prefix + img_dict[opt.image])
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)

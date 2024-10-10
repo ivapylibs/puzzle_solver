@@ -146,6 +146,7 @@ if opt.with_cluster:
     print('The cluster label:', theColorCluster.feaLabel)
 
     print("board.display_mp has been updated.  Check and revise this invocation.")
+    print("board.display_mp needs the ID_DISPLAY_OPTION and other flags.")
     theGrid.display_mp(theImageSol,CONTOUR_DISPLAY=True, ID_DISPLAY=True)#, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
     #theGrid.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1, TITLE='Cluster ID')
     Warning("Code is incomplete.  Missing display by cluster ID.")
