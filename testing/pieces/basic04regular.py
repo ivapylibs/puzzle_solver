@@ -87,7 +87,7 @@ theRegular  = Regular.upgradeTemplate(theTemplate)
 #==[2] Display the puzzle piece and the extracted info.
 #
 print('Should see [3,1,2,2], which means LEFT: FLAT, RIGHT: IN, TOP: OUT, BOTTOM: OUT')
-theRegular.displayEdgeType()
+theRegular.printEdgeType()
 
 theImage = theRegular.toImage()
 
