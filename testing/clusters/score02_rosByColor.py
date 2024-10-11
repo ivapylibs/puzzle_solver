@@ -155,7 +155,7 @@ theMaskSol = theDet.getState().x
 #        Display the original board for viewing with piece ID overlay.
 #
 cfgGrid = CfgGridded()
-cfgGrid.update(dict(minArea=1000, reorder=True, pieceBuilder=Regular))
+cfgGrid.update(dict(minArea=1000, reorder=True, pieceBuilder='Regular'))
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 
 #DEBUG VISUAL
@@ -189,8 +189,8 @@ print('Cluster labels:', theColorCluster.feaLabel)
 _, epBoard = theGrid.explodedPuzzle(dx=500, dy=500)
 
 cfgGrid = CfgGridded()
-cfgGrid.update(dict(minArea=1000, pieceBuilder=Regular))
-epBoard = Gridded(epBoard, cfgGrid))
+cfgGrid.update(dict(minArea=1000, pieceBuilder='Regular'))
+epBoard = Gridded(epBoard, cfgGrid)
 
 #==[3.2] Randomly swap the puzzle pieces.
 #        Set fixed random seed for repeatable execution. 
@@ -199,7 +199,7 @@ np.random.seed(0)
 _, epBoard, _ = epBoard.swapPuzzle()
 
 #DEBUG VISUAL
-#epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True) 
+epImage = epBoard.toImage(CONTOUR_DISPLAY=True, ID_DISPLAY=True) 
                                                 #ID_DISPLAY_OPTION=1, BOUNDING_BOX=False)
 
 #==[3.3] Define image quadrant regions.
@@ -313,7 +313,7 @@ for idx, piece_id in enumerate(epBoard.pieces):
         if not opt.only_final_display or idx==len(epBoard.pieces)-1:
 
             print(f"Step {idx}:")
-            epImage = epBoard.toImage(theImage=np.zeros(epImage.shape) ,CONTOUR_DISPLAY=True, ID_DISPLAY=True, ID_DISPLAY_OPTION=1)
+            epImage = epBoard.toImage(theImage=np.zeros(epImage.shape) ,CONTOUR_DISPLAY=True, ID_DISPLAY=True)#, ID_DISPLAY_OPTION=1)
 
             # Add two lines to split the pieces into clusters.
             cv2.line(epImage, (0, epImage.shape[0] // 2), (epImage.shape[1], epImage.shape[0] // 2), (255, 255, 255), 5)
