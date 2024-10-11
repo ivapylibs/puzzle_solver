@@ -139,7 +139,6 @@ theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 #==[2] Create a cluster instance and process the puzzle board.
 #      Display image with cluster ID overlay.
 #
-
 if opt.cluster_mode == 'number':
 
     theColorCluster = ByColor(theGrid, theParams=ParamColorCluster(cluster_num=opt.cluster_number, cluster_mode='number'))

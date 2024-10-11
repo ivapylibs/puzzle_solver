@@ -32,6 +32,7 @@
 
 
 import os
+import pkg_resources
 
 import cv2
 import numpy as np
@@ -51,10 +52,12 @@ from puzzle.piece import Regular
 
 #===[1] Read the source image and template.
 #
-theImageSol = cv2.imread('../../testing/data/balloon.png')
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+
+theImageSol = cv2.imread(prefix + 'balloon.png')
 theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 
-theMaskSol_src = cv2.imread('../../testing/data/puzzle_15p_123rf.png')
+theMaskSol_src = cv2.imread(prefix + 'puzzle_15p_123rf.png')
 
 #===[1.1] Create an improcessor to obtain the mask.
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #============================ real01_template ===========================
-#
+##@file
 # @brief    Test script for the most basic functionality of template
 #           puzzle piece class for a real puzzle piece input.
 #
@@ -19,10 +19,7 @@
 #       INSPIRED THIS CODE?
 # 09/15 BROKEN. NEED TO FIX.
 #
-#============================ real01_template ===========================
-
-#
-# @file     real01_template.py
+# @quitf
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/10/09  [created]

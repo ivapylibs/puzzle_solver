@@ -19,8 +19,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.board import Board
-from puzzle.piece.template import Template
+from puzzle.board import Board
+from puzzle.piece import Template
 
 # ==[1] Create raw puzzle piece data.
 #
@@ -72,7 +72,7 @@ print('Board piece locations: ', theBoard.pieceLocations())
 # ==[5] Obtain as image and display in window.
 #
 # ==[5.1] Directly use the baord display function
-fh = theBoard.display()
+fh = theBoard.display_mp()
 
 # ==[5.2] Use the image insertion routine to synthesize an image
 # 5.1 and 5.2 should see the similar result while 5.1 is a cropped view.

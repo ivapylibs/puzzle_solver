@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 #============================ basic01_template ===========================
-#
+##@file
 # @brief    Test script for the most basic functionality of template
 #           puzzle piece class.
 #
 # Creates a few very basic instances of puzzle pieces, then visualizes them
 # in a virtual puzzle board.
 #
-#============================ basic01_template ===========================
-
-#
-# @file     basic01_template.py
+# @quitf
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 #           Yunzhi Lin,             yunzhi.lin@gatech.edu

@@ -203,7 +203,7 @@ class SIFTCV(MatchSimilar):
   #============================== score ==============================
   #
   def score(self, piece_A, piece_B):
-    """
+    """!
     @brief Compute the score between two passed puzzle piece data.
 
     @param[in] piece_A      Template instance saving a piece's info.
@@ -231,7 +231,7 @@ class SIFTCV(MatchSimilar):
   #============================= compare =============================
   #
   def compare(self, piece_A, piece_B):
-    """
+    """!
     @brief  Compare between two passed puzzle piece data.
 
     Note that this code has additional calculations that estimate the transformation
