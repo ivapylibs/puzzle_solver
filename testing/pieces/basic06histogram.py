@@ -49,51 +49,40 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 #====[1.1] Create an improcessor to obtain the mask.
 #
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
-theDet = FromSketch(improc)
-theDet.process(theMaskSol_src.copy())
-theMaskSol = theDet.getState().x
+theMaskSol = improc.apply(theMaskSol_src)
 
-# ==[1.2] Extract info from theImage & theMask to obtain a board instance
+#====[1.2] Create a Grid instance and explode it into two new boards
 #
-theLayer = FromLayer(ParamPuzzle(areaThresholdLower=5000))
-theLayer.process(theImageSol, theMaskSol)
-theBoardSol = theLayer.getState()
-
-# ==[1.3] Create a Grid instance and explode it into two new boards
-#
+#DEBUG VISUAL - IF processing is off, then grid won't be correct. Maybe not even a grid.
+#plt.imshow(theImageSol)
+#plt.figure()
+#plt.imshow(theMaskSol)
+#plt.show()
 
 print('Running through test cases. Will take a bit.')
-
 theParams = CfgGridded()
-theParams.update(dict(minArea=1000, pieceConstructor=Regular, reorder=True))
-
+theParams.update(dict(minArea=100, pieceConstructor=Regular, reorder=True))
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams)
 
-epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 
-# ==[1.4] Create a new Grid instance from the images
+#==[2] Create a new Grid instance by exploding the original board.
+#      Here association or comparison should be easy and known since image is pretty
+#      much duplicated. This grid is considered to be the measured board from a
+#      computer vision process.  The other grid is a ground truth kind of grid.
 #
-
-# @note
-# Not a fair game to directly use the epBoard
-# Instead, should restart from images
-
+epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((1, 255, cv2.THRESH_BINARY),))
 theMaskMea = improc.apply(epImage)
 
-# cv2.imshow('debug', theMaskMea)
-# cv2.waitKey()
-
 theParams = CfgGridded()
-theParams.update(dict(minArea=1000, pieceConstructor=Regular, reorder=True))
-
+theParams.update(dict(minArea=100, pieceConstructor=Regular, reorder=True))
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theParams)
 
-#==[1.5] Focus on a single puzzle piece and duplicate it with a new location
-#
+#==[3] Focus on a single puzzle piece and duplicate it with a new location.
+#      Match should be a hit (True).
 
 theRegular_A = theGrid.pieces[1]
 theRegular_B = theGridMea.pieces[1]

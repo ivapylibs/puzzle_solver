@@ -128,7 +128,7 @@ theMaskSol = theDet.getState().x
 #        Display the original board for viewing with piece ID overlay.
 #
 cfgGrid = CfgGridded()
-cfgGrid.update(dict(minArea=1000, reorder=True, pieceBuilder=Regular))
+cfgGrid.update(dict(minArea=100, reorder=True, pieceBuilder=Regular))
 theGrid = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 
 #DEBUG

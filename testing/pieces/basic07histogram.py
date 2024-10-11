@@ -32,7 +32,14 @@ from puzzle.pieces.sift import Sift
 from puzzle.utils.imageProcessing import cropImage
 from puzzle.pieces.matchDifferent import HistogramCV
 
-from puzzle.parse.fromLayer import FromLayer, ParamPuzzle   # @todo  Needs updating.
+from puzzle.parse.fromLayer import FromLayer, ParamPuzzle   
+# @todo  Needs updating. FromLayer is not the most current way to implement it.
+#        Most of the work equivalent to FromLayer is already in board
+#        measurement/perceiver.
+#
+from puzzle.parse.fromSketch import FromSketch
+
+
 
 
 #==[1] Load data, instantiate puzzle pieces, and create source plus measurement boards
@@ -56,56 +63,42 @@ theImageSol = cropImage(theImageSol, theMaskSol_src)
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
-theDet = FromSketch(improc)     # From Sketch does not work!
+theDet = FromSketch(improc) 
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
-#==[1.2] Extract info from theImage & theMask to obtain a board instance
-#
-puzzParm = CfgBoardMeasure()
-puzzParm.minArea = 500
-
-theLayer = boardMeasure(puzzParm)
-
-theLayer.process(theImageSol, theMaskSol)
-theBoardSol = theLayer.getState()
-
-#==[1.3] Create an Grid instance and explode it into two new boards
+#==[1.2] Create an Grid instance from theImage & theMask.    This is considered to be
+#        the target or ground truth board.
 #
 print('Running through test cases. Will take a bit.')
 
 theParams = CfgGridded()
-theParams.update(dict(minArea=1000, pieceConstructor=Regular, reorder=True))
+theParams.update(dict(minArea=100, pieceBuilder=Regular, reorder=True))
 
 theGrid   = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, theParams)
 
+#==[2] Create a new Grid instance by exploding the original board.
+#      Here association or comparison should be easy and known since image is pretty
+#      much duplicated.
+#
 epImage, epBoard = theGrid.explodedPuzzle(dx=100, dy=100)
-
-#==[1.4] Create a new Grid instance from the images
-#
-
-# @note Not a fair game to directly use the epBoard. Make problem easy??
-#       Instead, should restart from images
-
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),))
-# @todo Dilate does not work here.  Removed.
-#       Most likely applied to get enlarge puzzle pieces so that they fit better.
-#       The implementation is off.  May need override or helper function just like
-#       improcessor.basic.thresh though that one should be thresh_cv or cvThresh or
-#       anything that labels it as coming from OpenCV for programmer to
-#       be aware.    PAV 2023/11/13.
-# @todo To what degree can most of this computation benefit from Perceiver?
-#
+                           improcessor.basic.thresh, ((1, 255, cv2.THRESH_BINARY),))
 theMaskMea = improc.apply(epImage)
 
-theParams = CfgGridded()
-theParams.update(dict(minArea=1000, pieceConstructor=Regular, reorder=True))
+#DEBUG VISUAL - IF processing is off, then grid won't be correct. Maybe not even a grid.
+#plt.imshow(epImage)
+#plt.figure()
+#plt.imshow(theMaskMea)
+#plt.show()
 
+theParams  = CfgGridded()
+theParams.update(dict(minArea=100, pieceBuilder=Regular, reorder=True))
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theParams)
 
-#==[2] Focus on a single puzzle piece for comparison with a Histogram matcher.
-#      Use correct match first, then try a couple of wrong matches.
+#==[3] Focus on a three puzzle pieces for comparison with a Histogram matcher.
+#      Use correct match first, then a couple of wrong matches.
+#
 theRegular_A = theGrid.pieces[1]
 theRegular_B = theGridMea.pieces[1]
 
