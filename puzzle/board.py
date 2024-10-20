@@ -1,7 +1,6 @@
 #=============================== puzzle.board ==============================
-#
-# @class    puzzle.board
-#
+##
+# @package  PuzzleBoard
 # @brief    A base representation for a puzzle board, which is basically
 #           a collection of pieces.  Gets used in many different ways.
 #
@@ -11,21 +10,24 @@
 # possibly the state of a subset of a given jigsaw puzzle.  Think of it
 # as a bag class for puzzle pieces, just that they also have locality.
 #
-# ============================== puzzle.board =============================
+# @ingroup  PuzzleSolver
 #
-# @file     board.py
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
-#           Yiye Chen,              yychen2019@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yiye Chen,              yychen2019@gatech.edu
 # @date     2021/07/28 [created]
-#           2021/08/01 [modified]
-#           2022/07/03 [modified]
+# @date     2021/08/01 [modified]
+# @date     2022/07/03 [modified]
+# @date     2024/10/20 [refactored and merged]
 #
+
+#============================== puzzle.board =============================
 #
 # NOTES:
 #   4 space indent.
 #   100 columns.
+#
 #============================== puzzle.board =============================
 
 
@@ -62,6 +64,7 @@ import puzzle.pieces.matchDifferent as diffScore
 
 class Board:
     """!
+    @ingroup  PuzzleSolver
     @brief  Class description for a board, which is a locality sensitive bag.
     """
 

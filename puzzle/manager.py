@@ -1,7 +1,7 @@
-# ================================ manager ================================
-#
+#================================== manager ==================================
+##
+# @package  PuzzleManager
 # @brief    Manage the tracking of puzzle pieces. 
-#
 #
 # This puzzle piece manager keeps track of the puzzle pieces and their
 # association over time as new imagery of the scene is captured. This
@@ -20,19 +20,19 @@
 # To be able to generate the associations, the puzzle manager should
 # have a template or calibration puzzle board.
 #
-# ================================ manager ================================
-#
-# @file     manager.py
+# @ingroup  Puzzle_Tracking
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/07/26 [created]
-#           2021/08/01 [modified]
+# @date     2021/08/01 [modified]
+# @date     2024/10/20 [refactored & merged]
 #
-#
-# ================================ manager ================================
 
-# ===== Environment / Dependencies
+#================================== manager ==================================
+
+#===== Environment / Dependencies
 #
 from dataclasses import dataclass
 
@@ -62,6 +62,23 @@ class ManagerParms:
 #
 
 class Manager(FromLayer):
+    """!
+    @ingroup    Puzzle_Tracking
+    @brief  A class for associating puzzle pieces across boards.  It "manages"
+            the puzzle interpretation process over time, where each sensing
+            cycle generates a new board instance.
+
+    A puzzle manager is a base class for recovering and identifying or
+    associating puzzle pieces across different board measurements, usually
+    reflecting measurements at different times.  A calibrated solution board
+    can also be associated to a given measured board, which then provides
+    information about how to solve the board.
+
+    There are different scoring systems for matching puzzle pieces.  This
+    class manages that matching process based on a given puzzle piece Matcher
+    instance and compatible feature generator from puzzle piece image patches.
+    """
+
     # Note: trackpointer.centroidMulti -> PUZZLE.PARSER.FROMLAYER -> puzzle.manager
 
     def __init__(self, solution, theParams=ManagerParms):
@@ -95,8 +112,10 @@ class Manager(FromLayer):
         # Save for debug
         self.scoreTable_shape = None
 
+    #============================== measure ==============================
+    #
     def measure(self, *argv):
-        """
+        """!
         @brief Get the match based on the input.
 
         Args:
@@ -145,7 +164,7 @@ class Manager(FromLayer):
         self.pAssignments = pFilteredAssignments
 
     def matchPieces(self):
-        """
+        """!
         @brief  Match all the measured puzzle pieces with the ground truth in a pairwise manner
                 to get meas to sol.
         """
@@ -192,7 +211,7 @@ class Manager(FromLayer):
 
 
     def hungarianAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
-        """
+        """!
         @brief  Run the hungarianAssignment for the score table.
 
         Args:
@@ -223,7 +242,7 @@ class Manager(FromLayer):
         return matched_id
 
     def greedyAssignment(self, scoreTable_shape, scoreTable_color, scoreTable_edge_color):
-        """
+        """!
         @brief  Run the greedyAssignment for the score table.
 
         Args:
@@ -344,7 +363,7 @@ class Manager(FromLayer):
         return matched_id
 
     def process(self, *argv):
-        """
+        """!
         @brief  Run the tracking pipeline for image measurement or directly work
                 on a measured board. Assume two modes: 1. I & M or 2. A measured board.
         Args:
@@ -360,4 +379,4 @@ class Manager(FromLayer):
         self.measure(*argv)
 
 #
-# ================================ manager ================================
+#================================== manager ==================================

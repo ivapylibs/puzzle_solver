@@ -55,6 +55,7 @@ copyreg.pickle(cv2.KeyPoint().__class__, _pickle_keypoints)
 
 class CfgSIFTCV(CfgSimilar):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for OpenCV SIFT matcher class.
   '''
 
@@ -115,6 +116,7 @@ class CfgSIFTCV(CfgSimilar):
 
 class SIFTCV(MatchSimilar):
   """!
+  @ingroup  Puzzle_Tracking
   @brief    Uses sift features to establish similarity.
   """
 

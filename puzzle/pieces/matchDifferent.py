@@ -1,5 +1,5 @@
 #======================= puzzle.piece.matchDifferent =======================
-#
+##
 # @brief    Sub-classes of this derived class branch use difference
 #           scores for determining whether two puzzle pieces match.
 #
@@ -41,6 +41,7 @@ from puzzle.piece import Template
 
 class CfgDistance(CfgDifferent):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for distance matcher class.
   '''
 
@@ -82,6 +83,10 @@ class CfgDistance(CfgDifferent):
 #
 
 class Distance(MatchDifferent):
+  """!
+  @ingroup  Puzzle_Tracking
+  @brief    Distance-based puzzle piece matching.
+  """
 
   #============================= __init__ ============================
   #
@@ -134,6 +139,7 @@ class Distance(MatchDifferent):
 
 class CfgHistogramCV(CfgDifferent):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for Histogram puzzle comparator class.
   '''
 
@@ -193,6 +199,10 @@ class CfgHistogramCV(CfgDifferent):
 #
 
 class HistogramCV(MatchDifferent):
+  '''!
+  @ingroup  Puzzle_Tracking
+  @brief    OpenCV Histogram puzzle comparator class.
+  '''
 
   #============================= __init__ ============================
   #
@@ -268,6 +278,7 @@ class HistogramCV(MatchDifferent):
 
 class CfgMoments(CfgDifferent):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for Moments class.
   '''
 
@@ -305,6 +316,7 @@ class CfgMoments(CfgDifferent):
 
 class Moments(MatchDifferent):
   """! 
+  @ingroup  Puzzle_Tracking
   @brief    Uses shape moments to establish similarity.
   """
 
@@ -350,7 +362,7 @@ class Moments(MatchDifferent):
   #============================== score ==============================
   #
   def score(self, piece_A, piece_B):
-    """
+    """!
     @brief Compute the score between two passed puzzle piece data.
 
     @param[in] piece_A      Template instance saving a piece's info.
@@ -373,6 +385,7 @@ class Moments(MatchDifferent):
 #
 class CfgPCA(CfgDifferent):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for Moments class.
   '''
 
@@ -410,9 +423,10 @@ class CfgPCA(CfgDifferent):
 
 class PCA(MatchDifferent):
   """!
+  @ingroup  Puzzle_Tracking
   @brief    Uses pca to calculate rotation.
 
-  WHAT IS GOING ON HERE???  WHAT IS THE POINT OF THIS PARTICULAR MATCHER??
+  @note     What is the purpose of this particular matcher?
   """
 
   #============================= __init__ ============================

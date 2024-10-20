@@ -1,25 +1,34 @@
 #============================= puzzle.piece.matcher ============================
+##
+# @package  PuzzlePieceMatcher
 #
-# @brief    Class for comparing puzzle pieces in support of puzzle solving and
+# @brief    Classes for comparing puzzle pieces in support of puzzle solving and
 #           puzzle piece association.  The base-type class and most of its member
 #           functions will do nothing. They require overloading.  The ones that 
 #           don't should be for some generic functionality.
 #
-# Sub-classes of this derived class branch use difference or similarity scores for 
-# determining whether two puzzle pieces match.  Difference scores are interpreted as smaller
-# values being more likely to be a match and bigger being less likely to be a match.  Similarity
-# scores are interpreted as bigger value being more likely to be a match and smaller being less
-# likely to be a match.
+# Sub-classes of this derived class branch use difference or similarity scores
+# for determining whether two puzzle pieces match.  Difference scores are
+# interpreted as smaller values being more likely to be a match and bigger
+# being less likely to be a match.  Similarity scores are interpreted as
+# bigger value being more likely to be a match and smaller being less likely
+# to be a match.
 #
-#============================= puzzle.piece.matcher ============================
-
-# @file     matcher.py
+# @ingroup  Puzzle_Tracking
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/07/25 [created]
-#           2021/07/31 [modified]
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 #
+# @date     2024/10/20 [merged from Perceiver branch, updating documentation]
+# @date     2021/07/31 [modified]
+# @date     2021/07/25 [created]
+#
+
+
+#============================= puzzle.piece.matcher ============================
+#
+# NOTE
+#   Using 2 space indents. 84+ column width viewing.
 #
 #============================= puzzle.piece.matcher ============================
 
@@ -42,6 +51,7 @@ from detector.Configuration import AlgConfig
 
 class CfgMatcher(AlgConfig):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for puzzle piece matcher class.
   '''
 
@@ -84,6 +94,11 @@ class CfgMatcher(AlgConfig):
 #
 
 class Matcher:
+  """!
+  @ingroup  Puzzle_Tracking
+  @brief    Generic puzzle piece matching class.  Actual instances should use
+            similarity of difference matching sub-classes.
+  """
 
     #============================== __init__ =============================
     #
@@ -155,6 +170,7 @@ class Matcher:
 
 class CfgDifferent(CfgMatcher):
   """!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for difference matcher class.
   """
 
@@ -196,6 +212,7 @@ class CfgDifferent(CfgMatcher):
 
 class MatchDifferent(Matcher):
     """!
+    @ingroup  Puzzle_Tracking
     @brief  The puzzle piece matching scores are based on differences. Lower is better.
     """
 
@@ -240,6 +257,7 @@ class MatchDifferent(Matcher):
 
 class CfgSimilar(CfgMatcher):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for similar matcher class.
   '''
 
@@ -280,6 +298,10 @@ class CfgSimilar(CfgMatcher):
 #
 
 class MatchSimilar(Matcher):
+  """!
+  @ingroup  Puzzle_Tracking
+  @brief    Similarity matching.
+  """
 
     #============================= __init__ ============================
     #

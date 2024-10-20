@@ -1,19 +1,16 @@
 #============================== puzzle.parser ==============================
-#
-# @class    puzzle.parser
-#
+##
+# @package  PuzzleParser
 # @brief    A basic tracking class that processes a layered image (or mask
 #           and image) detection output and generates a model of the puzzle
 #           pieces in the scene. Converts all accepted, isolated regions
 #           into their own puzzle piece instances.
-#
 #
 # 1] boardMeasure
 #
 # Being a subclass of centroidMulti, this is effectively just a puzzle board
 # measurement strategy.  To be a full fledged system requires integration
 # with some sort of filter (e.g., temporal data association scheme).
-#
 #
 # 2] boardTracker
 #
@@ -25,13 +22,16 @@
 # Monitors the tracker associations and recovers the atomic actions or activities
 # inferred from the track states over time.
 #
-#============================== puzzle.parser ==============================
-#
-# @file     parser.py
+# @ingroup  Puzzle_Tracking
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-#           Patricio A. Vela,       pvela@gatech.edu
+# @author   Patricio A. Vela,       pvela@gatech.edu
+#
+# @date     2024/10/20 [merged from Perceiver branch]
 # @date     2023/09/01 [copied from puzzle.parser.fromLayer master branch]
+#
+
+#============================== puzzle.parser ==============================
 #
 # NOTE:
 #   90 columns.
@@ -39,7 +39,7 @@
 #
 #============================== puzzle.parser ==============================
 
-# ===== Environment / Dependencies
+#===== Environment / Dependencies
 #
 
 from dataclasses import dataclass
@@ -65,6 +65,7 @@ import perceiver.perceiver as Perceiver
 
 class CfgBoardMeasure(CfgCentMulti):
   '''!
+  @ingroup  Puzzle_Tracking
   @brief  Configuration setting specifier for centroidMulti.
   '''
 
@@ -119,6 +120,11 @@ class CfgBoardMeasure(CfgCentMulti):
 #
 
 class boardMeasure(centroidMulti):
+  """!
+  @ingroup  Puzzle_Tracking
+  @brief    Puzzle piece board measurement class, based on puzzle piece layer
+            parsing.
+  """
 
   #============================== __init__ =============================
   #
@@ -514,6 +520,7 @@ class boardMeasure(centroidMulti):
 
 class boardPerceive(Perceiver.Perceiver):
   """!  
+  @ingroup  Puzzle_Tracking
   @brief  A simple perceiver for recovering puzzle pieces from a
           layer mask and an image. If desired, can do piece association.
 

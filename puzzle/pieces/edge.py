@@ -27,6 +27,15 @@ from puzzle.piece import Template
 # ================================ puzzle.piece.edge ================================
 #
 class Edge(MatchDifferent):
+    """!
+    @ingroup  Puzzle_Tracking
+    @brief      Puzzle piece edge based comparison.
+
+
+    @note   Not sure if properly integrated into current code-base. [2024/10/20 - PAV]
+    @todo   Need to confirm that works. [2024/10/20 - PAV]
+    """
+
 
     def __init__(self, tau_shape=100, tau_color=400):
         """

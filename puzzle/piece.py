@@ -1,13 +1,15 @@
 #================================ puzzle.piece code ==================================
-#
-# Classes for puzzle piece specification or description encapsulation. 
-#
-#================================ puzzle.piece code ==================================
+##
+# @package  PuzzlePiece
+# @brief    Classes for puzzle piece specification or description encapsulation. 
+# @ingroup  PuzzleSolver
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20 [merged from Percevier branch]
+# @date     2021/07/28 [modified]
 # @date     2021/07/24 [created]
-#           2021/07/28 [modified]
 #
 # NOTES:
 #   95 columns.
@@ -34,6 +36,7 @@ import ivapy.display_cv as display
 
 class PieceStatus(Enum):
     '''!
+    @ingroup    PuzzleSolver
     @brief PieceStatus used to keep track of the status of pieces.
     '''
 
@@ -54,6 +57,7 @@ class PieceStatus(Enum):
 @dataclass
 class PuzzleTemplate:
     '''!
+    @ingroup    PuzzleSolver
     @brief  Data class containing puzzle piece information.
     '''
 
@@ -72,6 +76,7 @@ class PuzzleTemplate:
 
 class Template:
     '''!
+    @ingroup    PuzzleSolver
     @brief  Stores and encapsulates a template instance of a visual puzzle piece.
 
     The language here is general, but the fact that it lives in the puzzle.piece namespace
@@ -119,7 +124,7 @@ class Template:
     #================================== size =================================
     #
     def size(self):
-        """
+        """!
         @brief  Return the dimensions of the puzzle piece image.
 
         Returns:
@@ -131,7 +136,7 @@ class Template:
     #============================== setPlacement =============================
     #
     def setPlacement(self, r, isOffset=False, isCenter=False):
-        """
+        """!
         @brief  Provide pixel placement location information.
 
         @param[in]  r           Location of puzzle piece "frame origin."
@@ -163,7 +168,7 @@ class Template:
     #================================ displace ===============================
     #
     def displace(self, dr):
-        """
+        """!
         @brief  Displace puzzle piece.
 
         @param[in]  dr          Displacement to apply.
@@ -207,7 +212,7 @@ class Template:
     #================================ getMask ================================
     #
     def getMask(self, theMask, offset=[0, 0]):
-        """
+        """!
         @brief Get an updated mask of the target.
 
         @param[in] theMask  Original mask of the target.
@@ -263,7 +268,7 @@ class Template:
     #============================== placeInImage =============================
     #
     def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
-        """
+        """!
         @brief  Insert the puzzle piece into the image in the original location.
 
         @param[in] theImage     Source image to put puzzle piece into.
@@ -309,7 +314,7 @@ class Template:
     #============================= placeInImageAt ============================
     #
     def placeInImageAt(self, theImage, rc, theta=None, isCenter=False, CONTOUR_DISPLAY=True):
-        """
+        """!
         @brief  Insert the puzzle piece into the image at the given location.
 
         Args:
@@ -345,7 +350,7 @@ class Template:
     #================================ toImage ================================
     #
     def toImage(self):
-        """
+        """!
         @brief  Return the puzzle piece image (cropped).
 
         Returns:
@@ -360,7 +365,7 @@ class Template:
     #================================ display ================================
     #
     def display(self, fh=None):
-        """
+        """!
         @brief  Display the puzzle piece contents in an image window.
 
         Args:
@@ -390,7 +395,7 @@ class Template:
     #
     @staticmethod
     def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
-        """
+        """!
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  Usually passed as cropped.
 
@@ -517,7 +522,7 @@ class Template:
     #============================== rotatePiece ==============================
     #
     def rotatePiece(self, theta):
-        """
+        """!
         @brief Rotate the puzzle template instance by the given angle.
 
         Args:
@@ -587,7 +592,7 @@ class Template:
     #
     @staticmethod
     def getEig(img):
-        """
+        """!
         @brief  To find the major and minor axes of a blob and then return the aligned rotation.
                 See https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/ for details.
                 PCA is our default method which does not perform very well.
@@ -642,7 +647,7 @@ class Template:
     #
     @staticmethod
     def buildSquare(size, color, rLoc=[0,0]):
-        """
+        """!
         @brief  Build a square piece.
 
         @param[in] size     Side length of the square
@@ -689,7 +694,7 @@ class Template:
     #
     @staticmethod
     def buildSphere(radius, color, rLoc=[0,0]):
-        """
+        """!
         @brief  Build a sphere piece.
 
         Args:
@@ -781,7 +786,7 @@ from puzzle.utils.sideExtractor import sideExtractor
 # ===== Helper Elements
 #
 class EdgeType(Enum):
-    """
+    """!
     @brief EdgeType used to keep track of the type of edges
     """
 
@@ -793,7 +798,7 @@ class EdgeType(Enum):
 
 # Todo: May need to upgrade to other forms when we have rotations
 class EdgeDirection(Enum):
-    """
+    """!
     @brief EdgeDirection used to keep track of the direction of edges
     """
 
