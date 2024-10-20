@@ -1,20 +1,24 @@
 #!/usr/bin/python3
-#================================ basic08sift ================================
+#================================ basic09sift ================================
 ##@file
-# @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (60p img)
+# @brief    Test script that matches a single piece against all other pieces
+#           in a puzzle. Ideally there should be a single match, but that's
+#           not how things go.
 #
-# @ingroup  TestPuzzle_Tracking
-#
-# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-#
-# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/09/01  [created]
 #
-#================================ basic08sift ================================
+# @ingroup  TestPuzzle_Tracking
+# @quitf
 
-# ==[0] Prep environment
+#================================ basic09sift ================================
+#
+# NOTE
+#   Indent is 2 spaces. Column width is 85+.
+#
+#================================ basic09sift ================================
+
+#==[0] Prep environment
 
 import os
 import pkg_resources
@@ -93,30 +97,19 @@ theParams = CfgGridded()
 theParams.update(dict(areaThresholdLower=1000, pieceConstructor=Regular, reorder=False))
 theGridMea = Gridded.buildFrom_ImageAndMask(epImage, theMaskMea, theGridOpt)
 
-# ==[1.5] Focus on a single puzzle piece and duplicate it with a new location
+#==[1.5] Focus on a single puzzle piece and compare to all pieces in the "duplicate" puzzle.
+#        The matching approach employs SIFT.
 #
-
-theRegular_A = theGrid.pieces[36]
-theRegular_B = theGridMea.pieces[36]
-
-# ==[2] Create a new board
-#
-theBoard = Board()
-theBoard.addPiece(theRegular_A)
-theBoard.addPiece(theRegular_B)
-
-# ==[3] Create an edge matcher
-#
-
 theMatcher = SIFTCV()
+theRegular_A = theGrid.pieces[36]
 
-# ==[4] Display the new board and the comparison result.
+isMatch = []
+for k in theGridMea.pieces:
+  print(f"---- {k} ----")
+  result = theMatcher.compare(theRegular_A, theGridMea.pieces[k])
+  isMatch.append(result[0])
+
+print(isMatch)
+
 #
-print('Should see True.')
-print(theMatcher.compare(theRegular_A, theRegular_B))
-
-theBoard.display_mp()
-plt.show()
-
-#
-#================================ basic08sift ================================
+#================================ basic09sift ================================

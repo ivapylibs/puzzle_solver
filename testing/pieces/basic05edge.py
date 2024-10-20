@@ -9,11 +9,15 @@
 # two different puzzles but with exact same appearance.  Matching can
 # be controlled by selecting similar or different indices.
 #
-# @ingroup  TestingPuzzle
-# @quitf
+# @ingroup  TestPuzzle_Tracking
 #
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/09/01  [created]
+#
+# @quitf
 #
 #================================= basic05_edge ================================
 

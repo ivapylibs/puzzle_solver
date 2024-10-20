@@ -1,21 +1,21 @@
 #!/usr/bin/python3
-# ============================ basic02_moments ===========================
-#
+#============================== basic02_moments ==============================
+##@file
 # @brief    Test script for the most basic functionality of moments. Create
 #           two puzzles (rotate 1 for 90 degree) and compare them by moments
 #           feature.
 #
-# ============================ basic02_moments ===========================
-
+# @ingroup  TestPuzzle_Tracking
 #
-# @file     basic02_moments.py
-#
-# @author   Patricio A. Vela        pvela@gatech.edu
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/08/02  [created]
 #
-# ============================ basic02_moments ===========================
-
+# @quitf
+#
+#============================== basic02_moments ==============================
 
 #==[0] Prep environment
 import numpy as np

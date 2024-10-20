@@ -1,17 +1,20 @@
 #!/usr/bin/python3
-#============================== basic07_histogram ==============================
-## @file
+#=============================== basic07histogram ==============================
+##@file
 # @brief    Test script for the most basic functionality of histogram features
 #           for puzzle pieces. (60p img)
 #
-# @ingroup  TestPuzzlePieces
-# @quitf
+# @ingroup  TestPuzzle_Tracking
 #
 # @author   Patricio A. Vela        pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/09/29  [created]
 #
-#============================== basic07_histogram ==============================
+# @quitf
+#
+#=============================== basic07histogram ==============================
 
 #==[0] Prep environment
 #
@@ -133,4 +136,4 @@ theBoard3.display_mp()
 plt.show()
 
 #
-#============================== basic07_histogram ==============================
+#=============================== basic07histogram ==============================

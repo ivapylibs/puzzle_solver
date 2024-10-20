@@ -4,13 +4,15 @@
 # @brief    Test script for the most basic functionality of histogram features
 #           for puzzle pieces. This was first attempt. (60p img)
 #
-# @group    TestPuzzleClustering
-# @quitf
+# @ingroup  TestPuzzle_Tracking
 #
-# TODO  WHAT IS THE PROPER NAME OF THE GROUP!!! NEED TO FIX BEFORE COMMITING/PUSHING.
-#
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/09/29  [created]
+#
+# @quitf
 #
 #============================== basic06histogram =============================
 

@@ -1,8 +1,18 @@
 #!/usr/bin/python3
-#============================ real01_template ===========================
+#============================= real01_template =============================
 ##@file
 # @brief    Test script for the most basic functionality of template
 #           puzzle piece class for a real puzzle piece input.
+#
+# @ingroup  TestPuzzle_Tracking
+#
+# @author   Patricio A. Vela,       pvela@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
+# @date     2021/10/09  [created]
+#
+# @quitf
 #
 # 2024
 # 10/09 This runs now, but not the best outcomes since imagery is old
@@ -19,12 +29,7 @@
 #       INSPIRED THIS CODE?
 # 09/15 BROKEN. NEED TO FIX.
 #
-# @quitf
-#
-# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/10/09  [created]
-#
-#============================ real01_template ===========================
+#============================= real01_template =============================
 
 #==[0] Prep environment
 

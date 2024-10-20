@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 #============================ basic03_pca ===========================
-#
+##@file
 # @brief    Test script for the most basic functionality of pca. Create
 #           two puzzles (rotate 1 for 90 degree) and compare them by moments
 #           pca.
 #
-#============================ basic03_pca ===========================
-
+# @ingroup  TestPuzzle_Tracking
 #
-# @file     basic03_pca.py
-#
-# @author   Patricio A. Vela        pvela@gatech.edu
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/08/03  [created]
+#
+# @quitf
 #
 #============================ basic03_pca ===========================
 
@@ -60,4 +61,4 @@ print('Create a PCA instance and compare puzzle 1 and 2. Should see -90.')
 print(ret)
 
 #
-# ============================ basic02_moments ===========================
+#============================ basic03_pca ===========================

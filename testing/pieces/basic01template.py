@@ -7,13 +7,17 @@
 # Creates a few very basic instances of puzzle pieces, then visualizes them
 # in a virtual puzzle board.
 #
-# @quitf
+# @ingroup  TestPuzzle_Tracking
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
-#           Yiye Chen,              yychen2019@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yiye Chen,              yychen2019@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
+# @date     2021/07/31  [modified]
 # @date     2021/07/28  [created]
-#           2021/07/31  [modified]
+#
+# @quitf
 #
 #============================ basic01_template ===========================
 

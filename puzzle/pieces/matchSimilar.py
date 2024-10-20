@@ -110,7 +110,7 @@ class CfgSIFTCV(CfgSimilar):
                               default settings.
     '''
     default_dict = CfgSimilar.get_default_settings()
-    default_dict.update(dict(tau = float(10.0) , slambda = 0.9 , custSettings = False,
+    default_dict.update(dict(tau = float(15.0) , slambda = 0.6 , custSettings = False,
                 custParams = dict(nfeatures = 0, nOctaveLayers = 3, 
                                 tauContrast = 0.04, tauEdge = 10, sigma = 1.6),
                 detKP = True, useKP = None) ) 
@@ -287,8 +287,8 @@ class SIFTCV(MatchSimilar):
       distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
 
     # DEBUG
-    #print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
-    #print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
+    print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
+    print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
     isaMatch = distance > self.params.tau
 
     # If not a match then don't bother with additional calculations.

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-#============================== real05_edge ==============================
-#
+#=============================== real05edge ==============================
+##@file
 # @brief    Test script for assembling the solution board from
 #           well-separated puzzle pieces, from known information.:w
 #
@@ -9,15 +9,17 @@
 # then shifts them back into place.  Final images are the pieces
 # reassmbled.
 #
-#============================== real05_edge ==============================
-
+# @ingroup  TestPuzzle_Tracking
 #
-# @file     real05_edge.py
-#
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/10/19  [created]
 #
-#============================== real05_edge ==============================
+# @quitf
+#
+#=============================== real05edge ==============================
 
 # ==[0] Prep environment
 
@@ -114,4 +116,4 @@ axarr[1].title.set_text('The assembled puzzle pieces')
 plt.show()
 
 #
-#============================== real05_edge ==============================
+#=============================== real05edge ==============================

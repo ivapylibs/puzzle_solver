@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #=============================== basic04_regular ===============================
-#
+##@file
 # @brief    Test script for the most basic functionality of regular
 #           puzzle piece class; a regular piece with 4 edges.
 #
@@ -19,13 +19,12 @@
 # piece carve outs.   These need to be excluded.  Four pieces need to be
 # consistently obtained.
 # 
-#=============================== basic04_regular ===============================
-
+# @ingroup  TestPuzzle_Tracking
 #
-# @file     basic04_regular.py
-#
-# @author   Patricio A. Vela        pvela@gatech.edu
+# @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2024/10/20  [aligned with Perceiver updates and documented]
 # @date     2021/08/17  [created]
 #
 #=============================== basic04_regular ===============================
