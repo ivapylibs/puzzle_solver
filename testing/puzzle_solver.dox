@@ -1,0 +1,60 @@
+/*!
+
+@defgroup   TestPuzzleSolver Puzzle Solver
+
+@brief  Code for testing the Puzzle Solver package. 
+
+The puzzle solver codebase revolves around the Board class, which is a bag of
+puzzle Pieces.  As a bag, there is no need for the pieces to actually be put in
+such a way as to create a solved puzzle.  Rather, the board class simply
+consists of pieces on a planar workspce.  To this base class, there are
+extensions that perform image processing to extract a puzzle board from a
+processed image (or partially processed image), that associate puzzle pieces
+across Board instances, and that cluster pieces in a Board instance.
+
+### Puzzles
+
+An additional set of extensions provides structure to the Board bag as would
+actually occur for a puzzle.  These are the Adjacent, Arrangement,
+Interlocking, and Gridded class packages.  Briefly, an Arrangement is just a
+set of pieces placed in particular locations; an Adjacent puzzle is one for
+which adjacency rules apply; an Interlocking puzzle is one where adjacency
+involes interlocking pieces together; and a Gridded puzzle is one where the
+adjacency is along a north-south, east-west grid such that the puzzle is
+rectangular.  This last case covers most commonlgy found puzzles.  The
+Interlocking case covers irregularly shaped puzzle.
+
+### Puzzle Tracking
+
+Additional code for tracking the completion process of a puzzle exists here,
+as does code for calibrating what the puzzle solution looks like.  Puzzle
+tracking requires creating a unique signature for each puzzle piece, then
+using it to keep track of how the pieces move around.  If all of the pieces
+can indeed have a unique signature, then data association against the
+signature with a calibrated solution board supports robotic puzzle solving, by
+indicating where puzzle pieces need to be placed to create the solution.
+
+
+### Puzzle Clustering
+
+Because a first step in solving a puzzle involves clustering the pieces
+according to their appearance, there exist approaches to breaking up a puzzle
+into different clusters for sorting.
+
+@addtogroup TestPuzzleSolver
+@{
+
+@defgroup   TestPuzzle_Clusters     Puzzle Clustering
+@brief      Interfaces for clustering puzzle pieces.
+
+
+@defgroup   TestPuzzle_Types        Puzzle Types
+@brief      Classes that abstract different puzzle (arrangement) types.
+
+@defgroup   TestPuzzle_Tracking     Puzzle Tracking
+@brief      Code that assists with tracking the movement of puzzle pieces and
+            also associating them to a known solution.
+
+@}
+
+*/
