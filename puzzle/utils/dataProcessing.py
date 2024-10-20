@@ -104,19 +104,19 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
     bf = cv2.BFMatcher()
     try:
         # First match keypoint descriptors from 1 to 2.
-        matches = bf.knnMatch(des1, des2, k=2)
+        matches12 = bf.knnMatch(des1, des2, k=2)
 
         # Then match keypoint descriptors from 2 to 1.
-        matches = bf.knnMatch(des2, des1, k=2)
+        matches21 = bf.knnMatch(des2, des1, k=2)
 
         # Keep only matches are closer than next best option
         topResults1 = []
         topResults2 = []
-        for m, n in matches:
+        for m, n in matches12:
             if m.distance < ratio_threshold * n.distance:
                 topResults1.append([m])
     
-        for m, n in matches:
+        for m, n in matches21:
             if m.distance < ratio_threshold * n.distance:
                 topResults2.append([m])
 

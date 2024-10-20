@@ -1,5 +1,6 @@
 #========================== puzzle.piece.matchSimilar ==========================
-#
+##
+# @package  PuzzlePieceSimilarity
 # @brief    Sub-classes of this derived class branch use similarity
 #           scores for determining wheter two puzzle pieces match.
 #
@@ -7,7 +8,8 @@
 # match and smaller being less likely to be a match. There will usually
 # be lower and upper limits for the similarity score.
 #
-#========================== puzzle.piece.matchSimilar ==========================
+# @ingroup  Puzzle_Tracking
+#
 #
 # @file     matchSimilar.py
 #
@@ -17,6 +19,12 @@
 # @date     2021/07/24 [created]
 #           2023/11/03 [modified]
 #
+#
+
+#========================== puzzle.piece.matchSimilar ==========================
+#
+# NOTE
+#   indent is 2 spaces.  column width is 100 due to wide comments.
 #
 #========================== puzzle.piece.matchSimilar ==========================
 
@@ -33,9 +41,11 @@ from skimage.measure    import ransac               # Not used. Commented and to
 from skimage.transform  import AffineTransform      # Will be deleted or moved at some point.
 
 #-- Puzzle processing imports.
-from puzzle.piece.matcher   import CfgSimilar, MatchSimilar
-from puzzle.piece.template  import Template
+from puzzle.pieces.matcher   import CfgSimilar, MatchSimilar
+from puzzle.piece  import Template
 from puzzle.utils.dataProcessing    import calculateMatches
+
+import ivapy.display_cv as display
 
 
 #
@@ -81,7 +91,7 @@ class CfgSIFTCV(CfgSimilar):
   #
   # Parameters are:
   # tau             Threshold to determine similarity for SIFT feature.
-  # lambda          Proximity scaling factor, relative to second closest, used to identify matches (0-1).
+  # slambda         Proximity scaling factor, relative to second closest, used to identify matches (0-1).
   #
   # custSettings    Flag indicating whether to use custom SIFT parameter settings or not.
   # custParams      Dictionary consisting of the revised settings (initially set to SIFT defaults).
@@ -100,9 +110,7 @@ class CfgSIFTCV(CfgSimilar):
                               default settings.
     '''
     default_dict = CfgSimilar.get_default_settings()
-    default_dict.update( 
-            dict(tau = float(10.0) , lambda=0.5 ,
-                custSettings = False,
+    default_dict.update(dict(tau = float(10.0) , slambda = 0.9 , custSettings = False,
                 custParams = dict(nfeatures = 0, nOctaveLayers = 3, 
                                 tauContrast = 0.04, tauEdge = 10, sigma = 1.6),
                 detKP = True, useKP = None) ) 
@@ -122,7 +130,7 @@ class SIFTCV(MatchSimilar):
 
   #================================ __init__ ===============================
   #
-  def __init__(self, theParams=CfgSIFTCV()) tau=10, theThreshMatch=0.5):
+  def __init__(self, theParams=CfgSIFTCV()): #, tau=10, theThreshMatch=0.5):
     """!
     @brief  Constructor for the puzzle piece sift class.
 
@@ -135,10 +143,12 @@ class SIFTCV(MatchSimilar):
     """!
     @brief  Compute SIFT features from the raw puzzle data.
 
+    This function just extracts the SIFT features from the piece information.
+    The calling scope needs to deal with the feature storage and matching part.
+
     @param[in]  piece   Puzzle piece to use.
 
-    @param[out]  kp     SIFT keypoints.
-    @param[out]  des    SIFT descriptor.
+    @return     (kp, des)   Image patch keypoints and SIFT descriptors.
     """
 
     #if issubclass(type(piece), Template):
@@ -150,7 +160,7 @@ class SIFTCV(MatchSimilar):
 
     # https://stackoverflow.com/questions/60065707/cant-use-sift-in-python-opencv-v4-20
     # For opencv-python
-    if self.params.customSettings:
+    if self.params.custSettings:
       sift_builder = cv2.SIFT_create(self.params.customParams.nfeatures,
                                      self.params.customParams.nOctaveLayers,
                                      self.params.customParams.tauContrast,
@@ -159,25 +169,25 @@ class SIFTCV(MatchSimilar):
     else:
       sift_builder = cv2.SIFT_create()
 
-    # Focus on the puzzle piece image with mask
+    # Focus on the puzzle piece image with mask. Code below reconstitutes the puzzle piece
+    # visual information with zeros in the background region.  
+    #
+    # @note Why is the masked image not stored upon creation of puzzle piece template?
+    #
     theImage = np.zeros_like(piece.y.image)
     theImage[piece.y.rcoords[1], piece.y.rcoords[0], :] = piece.y.appear
 
-    # @note Why is the image being duplicated?? To zero out the background?
-    #       Isn't that already the case??  Need to double check.
-    #       But, why not just provide mask? Is mask for only for detection?
-    #       Or apply mask to the image to get the same as the above.
-    #       One way is to multiply pixelwise mask and image. May need to duplicate mask.
-    #           or can python know to do so itself?
-    #       Like, why not just do a bitwise and of image and mask?
+    # VISUAL DEBUG
+    #display.rgb(theImage)
+    #display.wait();
 
     if self.params.detKP:
       kp, des = sift_builder.detectAndCompute(theImage, None)
       theFeat = (kp, des)
-    else
+    else:
       # @todo   Need to provide scheme for keypoints.  This might be a bad idea since
       #         the rotation is unknown.  The keypoints would have to have some kind
-      #         of rotational symmetric, which makes things harder.  The alternative is
+      #         of rotational symmetry, which makes things harder.  The alternative is
       #         to use a single keypoint at the center spanning multiple octaves. Is that
       #         what SIFT does anyhow?  Need to review.
       # @note   Per https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html,
@@ -195,10 +205,8 @@ class SIFTCV(MatchSimilar):
       #
       #theKP = piece.center + self.params.useKP
       #theFeat = sift_builder.Compute(theImage, theKP)
+      Warning("detKP is set to False.  The option is not coded out yet.")
       pass
-
-    #piece.y.kpFea = (kp, des)
-    # Assigned outside of here.  This function just extracts from the piece information.
 
     return theFeat
 
@@ -225,7 +233,7 @@ class SIFTCV(MatchSimilar):
     # Compute matches and use percentage relative to max possible matches as the "distance" score.
     # Should be close to 100 if the pieces are similar. Of course, some image variation or skewing
     # of puzzle pieces may impact achieving a perfect match.
-    matches = calculateMatches(feat_A[1], feat_B[1], self.params.lambda)
+    matches = calculateMatches(feat_A[1], feat_B[1], self.params.slambda)
     distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
 
     return distance
@@ -265,34 +273,38 @@ class SIFTCV(MatchSimilar):
     feat_A = piece_A.getFeature(self)
     feat_B = piece_B.getFeature(self)
 
-    # Check that descriptor sets are non-empty. If any empty, then no match. Else try matching.
+    # Check that descriptor sets are non-empty. If any empty, then no match.
+    # Else try matching.
     #
-    # Compute matches and use percentage relative to max possible matches as the "distance" score.
-    # Should be close to 100 if the pieces are similar. Of course, some image variation or skewing
-    # of puzzle pieces may impact achieving a perfect match.
+    # Compute matches and use percentage relative to max possible matches as
+    # the "distance" score.  Should be close to 100 if the pieces are similar.
+    # Of course, some image variation or skewing of puzzle pieces may impact
+    # achieving a perfect match.
     if feat_A[1] is None or feat_B[1] is None:  
       distance = 0
     else:
-      matches = calculateMatches(feat_A[1], feat_B[1], self.params.lambda)
+      matches = calculateMatches(feat_A[1], feat_B[1], self.params.slambda)
       distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
 
-    isaMatch = distance > self.tau
+    # DEBUG
+    #print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
+    #print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
+    isaMatch = distance > self.params.tau
 
     # If not a match then don't bother with additional calculations.
     if not isaMatch:
       return False, None, None
 
-    # If a match, then continue with additional calculations: estimate affine transform model using
-    # keypoint coordinates and matched descriptors.  Being a match means that there are sufficient
-    # matched keypoints.
+    # If a match, then continue with additional calculations: estimate affine
+    # transform model using keypoint coordinates and matched descriptors.
+    # Being a match means that there are sufficient matched keypoints.
 
-    #if len(matches)!=0:        # Already true if here.  DELETE WHEN CODE VERIFIED.
     src = []
     dst = []
 
     for match in matches:
-      src.append(kp_A[match[0].queryIdx].pt)
-      dst.append(kp_B[match[0].trainIdx].pt)
+      src.append(feat_A[0][match[0].queryIdx].pt)
+      dst.append(feat_B[0][match[0].trainIdx].pt)
 
     src = np.array(src)
     dst = np.array(dst)

@@ -94,11 +94,11 @@ class CfgMatcher(AlgConfig):
 #
 
 class Matcher:
-  """!
-  @ingroup  Puzzle_Tracking
-  @brief    Generic puzzle piece matching class.  Actual instances should use
-            similarity of difference matching sub-classes.
-  """
+    """!
+    @ingroup  Puzzle_Tracking
+    @brief    Generic puzzle piece matching class.  Actual instances should use
+              similarity of difference matching sub-classes.
+    """
 
     #============================== __init__ =============================
     #
@@ -298,10 +298,10 @@ class CfgSimilar(CfgMatcher):
 #
 
 class MatchSimilar(Matcher):
-  """!
-  @ingroup  Puzzle_Tracking
-  @brief    Similarity matching.
-  """
+    """!
+    @ingroup  Puzzle_Tracking
+    @brief    Similarity matching.
+    """
 
     #============================= __init__ ============================
     #
