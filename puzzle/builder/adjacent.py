@@ -1,10 +1,9 @@
 #======================== puzzle.builder.adjacent ========================
 ##
-# @package  PuzzleAdjacent
+# @package  puzzle.builder.adjacent
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations with adjacency permitted.  Touching or
 #           very close proximity should hold for most or all pieces.
-#
 #
 # @ingroup  Puzzle_Types
 #

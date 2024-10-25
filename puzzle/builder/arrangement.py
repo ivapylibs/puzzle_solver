@@ -1,6 +1,6 @@
 #======================= puzzle.builder.arrangement ======================
 ##
-# @package  PuzzleArrangement 
+# @package  puzzle.builder.arrangement 
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations in the image with no occlusion or
 #           overlap. Touching is not necessary (typically not the case)

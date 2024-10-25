@@ -1,6 +1,6 @@
 #========================== puzzle.piece.matchSimilar ==========================
 ##
-# @package  PuzzlePieceSimilarity
+# @package  puzzle.pieces.matchSimilar
 # @brief    Sub-classes of this derived class branch use similarity
 #           scores for determining wheter two puzzle pieces match.
 #

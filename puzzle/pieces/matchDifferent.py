@@ -1,5 +1,6 @@
-#======================= puzzle.piece.matchDifferent =======================
+#======================= puzzle.pieces.matchDifferent ======================
 ##
+# @package  puzzle.pieces.matchDifferent
 # @brief    Sub-classes of this derived class branch use difference
 #           scores for determining whether two puzzle pieces match.
 #
@@ -7,17 +8,19 @@
 # match and bigger being less likely to be a match. There will usually
 # be lower and upper limits for the difference score.
 #
-#======================= puzzle.piece.matchDifferent =======================
-
-# @file     matchDifferent.py
+# @ingroup  Puzzle_Tracking
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/07/24 [created]
-#           2021/07/30 [modified]
+# @date     2021/07/30 [modified]
+#
+
+#======================= puzzle.pieces.matchDifferent ======================
 #
 #
-#======================= puzzle.piece.matchDifferent =======================
+#======================= puzzle.pieces.matchDifferent ======================
 
 #====== Environment / Dependencies
 #

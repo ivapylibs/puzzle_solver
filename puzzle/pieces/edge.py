@@ -1,15 +1,17 @@
-# ================================ puzzle.piece.edge ================================
-#
+#================================ puzzle.piece.edge ================================
+##
+# @package  puzzle.pieces.edge
 # @brief    Uses edge features to establish similarity.
 #
-# ================================ puzzle.piece.edge ================================
-
 #
-# @file     edge.py
+# @ingroup  Puzzle_Tracking
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/08/26 [created]
 #
+
+#================================ puzzle.piece.edge ================================
 #
 # ================================ puzzle.piece.edge ================================
 

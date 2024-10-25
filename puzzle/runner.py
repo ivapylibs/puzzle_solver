@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================= puzzle.runner =============================
 #
-# @class    puzzle.runner
+# @package    puzzle.runner
 #
 # @brief    A wrapper class for deployment in the real-world cases
 #

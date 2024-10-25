@@ -1,16 +1,20 @@
-# ================================ puzzle.clusters.byShape ================================
-#
+#============================== puzzle.clusters.byShape ==============================
+##
+# @package  puzzle.clusters.byShape
 # @brief    Extract shape features for all the pieces in a given puzzle board.
 #
-# ================================ puzzle.clusters.byShape ================================
 #
-# @file     byShape.py
+# @ingroup  Puzzle_Clusters
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/08/29 [created]
 #
+
+#============================== puzzle.clusters.byShape ==============================
 #
-# ================================ puzzle.clusters.byShape ================================
+#
+#============================== puzzle.clusters.byShape ==============================
 
 from dataclasses import dataclass
 
@@ -33,12 +37,16 @@ class ParamShapeCluster:
 
 
 #
-# ================================ puzzle.clusters.byShape ================================
+#============================ puzzle.clusters.byShape ============================
 #
 class ByShape(Board):
+    """!
+    @ingroup    Puzzle_Clusters
+    @brief      Clustering by shape.
+    """
 
     def __init__(self, thePuzzle, extractor=Moments(), theParams=ParamShapeCluster):
-        """
+        """!
         @brief  Constructor for the byShape class.
 
         Args:
@@ -57,7 +65,7 @@ class ByShape(Board):
         self.params = theParams
 
     def process(self):
-        """
+        """!
         @ brief Extract shape features from the data.
         """
 

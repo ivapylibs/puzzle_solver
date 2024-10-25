@@ -1,7 +1,6 @@
 #====================== puzzle.builder.interlocking ======================
 ##
-# @package  PuzzleInterlocking
-#
+# @package  puzzle.builder.interlocking
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations that should actually interlock. Placement
 #           for them is less forgiving. In principle, they need to fit
@@ -42,6 +41,7 @@ from puzzle.board import Board
 
 class CfgInterlocking(CfgAdjacent):
     '''!
+    @ingroup    Puzzle_Types
     @brief  Configuration setting specifier for centroidMulti.
     '''
   

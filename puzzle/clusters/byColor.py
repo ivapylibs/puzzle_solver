@@ -1,14 +1,19 @@
 #============================= puzzle.clusters.byColor =============================
-#
+##
+# @package  puzzle.clusters.byColor
 # @brief    Extract color features for all the pieces in a given puzzle board.
 #
-#============================= puzzle.clusters.byColor =============================
+# @note     This code is out of date.
+# @todo     Uses a ParamColorCluster structure rather than a CfgByColor instances.
 #
-# @file     byColor.py
+# @ingroup  Puzzle_Clusters
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/08/29 [created]
 #
+
+#============================= puzzle.clusters.byColor =============================
 #
 #============================= puzzle.clusters.byColor =============================
 
@@ -47,6 +52,7 @@ class ParamColorCluster:
 #
 class ByColor(Board):
     '''!
+    @ingroup    Puzzle_Clusters
     @brief  A puzzle piece clustering method based on color.  The feature extractor
             should be based on color.
     '''

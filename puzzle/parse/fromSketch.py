@@ -1,22 +1,22 @@
-# ======================== puzzle.parser.fromSketch ========================
-#
-# @class    puzzle.parser.fromSketch
-#
+#======================== puzzle.parser.fromSketch ========================
+##
+# @package  puzzle.parser.fromSketch
 # @brief    A derived detector class that can process an image & mask
 #           image to create a binary mask.
 #
-#           @todo Not fully developed yet.
+# @todo     Not fully developed yet.
 #
-#
-# ======================== puzzle.parser.fromSketch ========================
-
-#
-# @file     fromSketch.py
+# @ingroup  PuzzleSolver
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/08/10 [created]
 #
-# ======================== puzzle.parser.fromSketch ========================
+
+#======================== puzzle.parser.fromSketch ========================
+#
+#
+#======================== puzzle.parser.fromSketch ========================
 
 # ===== Environment / Dependencies
 #
@@ -32,6 +32,10 @@ from detector.inImage import inImage
 #
 
 class FromSketch(inImage):
+    """!
+    @ingroup PuzzleSolver
+    @brief   What is FromSketch??
+    """
 
     def __init__(self, processor=None):
         super(FromSketch, self).__init__(processor)
@@ -40,7 +44,7 @@ class FromSketch(inImage):
         pass
 
     def measure(self, I, M=None):
-        """
+        """!
         @brief Process the passed imagery to get the mask.
 
         Args:
@@ -57,7 +61,7 @@ class FromSketch(inImage):
                 self.Ip = self.processor.apply(I)
 
     def process(self, I, M=None):
-        """
+        """!
         @brief Process the passed imagery.
 
         Args:

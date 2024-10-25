@@ -1,7 +1,6 @@
 #============================= puzzle.piece.matcher ============================
 ##
-# @package  PuzzlePieceMatcher
-#
+# @package  puzzle.pieces.matcher
 # @brief    Classes for comparing puzzle pieces in support of puzzle solving and
 #           puzzle piece association.  The base-type class and most of its member
 #           functions will do nothing. They require overloading.  The ones that 

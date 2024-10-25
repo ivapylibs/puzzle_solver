@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # ============================= puzzle.runnerROS =============================
 #
-# @class    puzzle.runnerROS
+# @package    puzzle.runnerROS
 #
 # @brief    A sub-wrapper class for deployment in the real-world cases.
 #           We further add some minimal ROS support.

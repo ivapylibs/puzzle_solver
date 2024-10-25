@@ -1,6 +1,6 @@
 #================================ puzzle.piece code ==================================
 ##
-# @package  PuzzlePiece
+# @package  puzzle.piece
 # @brief    Classes for puzzle piece specification or description encapsulation. 
 # @ingroup  PuzzleSolver
 #

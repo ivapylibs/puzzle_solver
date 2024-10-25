@@ -51,6 +51,12 @@ into different clusters for sorting.
 @defgroup   Puzzle_Types        Puzzle Types
 @brief      Classes that abstract different puzzle (arrangement) types.
 
+While the documentation refers to this set of classes as _Puzzle Types_, the
+actual naming convention used in the python code is that of ``builder`` in the
+sense that ``puzzle.builder`` will be the import prefix for the described classes.
+The naming choice has to do with the fact that there is code to build and
+interpret a puzzle based on its arrangement properties.
+
 @defgroup   Puzzle_Tracking     Puzzle Tracking
 @brief      Code that assists with tracking the movement of puzzle pieces and
             also associating them to a known solution.

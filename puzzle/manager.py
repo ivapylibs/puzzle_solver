@@ -1,6 +1,6 @@
 #================================== manager ==================================
 ##
-# @package  PuzzleManager
+# @package  puzzle.manager
 # @brief    Manage the tracking of puzzle pieces. 
 #
 # This puzzle piece manager keeps track of the puzzle pieces and their
@@ -21,6 +21,10 @@
 # have a template or calibration puzzle board.
 #
 # @ingroup  Puzzle_Tracking
+#
+# @note     This code may be outdated.  A review on 2024/10/25 led to the
+# understanding that the manager is quite similar to board correspondences.
+# The newer code seems to use board correspondences over board.manager.
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu

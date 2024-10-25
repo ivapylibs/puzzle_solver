@@ -1,6 +1,6 @@
 #=============================== puzzle.board ==============================
 ##
-# @package  PuzzleBoard
+# @package  puzzle.board
 # @brief    A base representation for a puzzle board, which is basically
 #           a collection of pieces.  Gets used in many different ways.
 #
@@ -12,10 +12,10 @@
 #
 # @ingroup  PuzzleSolver
 #
-#
 # @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @author   Yiye Chen,              yychen2019@gatech.edu
+#
 # @date     2021/07/28 [created]
 # @date     2021/08/01 [modified]
 # @date     2022/07/03 [modified]

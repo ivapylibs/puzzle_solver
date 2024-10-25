@@ -1,6 +1,6 @@
 #=========================== puzzle.builder.gridded ==========================
 ##
-# @package  PuzzleGridded
+# @package  puzzle.builder.gridded
 # @brief    An interlocking puzzle for which the pieces are arranged in a nice
 #           gridded manner with a rectangular shape when complete.
 #

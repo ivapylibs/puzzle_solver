@@ -1,6 +1,6 @@
 #============================== puzzle.parser ==============================
 ##
-# @package  PuzzleParser
+# @package  puzzle.parser
 # @brief    A basic tracking class that processes a layered image (or mask
 #           and image) detection output and generates a model of the puzzle
 #           pieces in the scene. Converts all accepted, isolated regions

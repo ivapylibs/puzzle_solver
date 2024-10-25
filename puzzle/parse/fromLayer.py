@@ -1,19 +1,21 @@
 #========================= puzzle.parser.fromLayer =========================
-#
-# @class    puzzle.parser.fromLayer
-#
+##
+# @package  puzzle.parser.fromLayer
 # @brief    A basic detector class that processes a layered image
 #           (or mask and image) detection output. Converts all isolated
 #           regions into their own puzzle piece instances.
 #
-#========================= puzzle.parser.fromLayer =========================
-#
-# @file     fromLayer.py
+# @ingroup  PuzzleSolver
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
 # @date     2021/07/29 [created]
-#           2021/08/01 [modified]
+# @date     2021/08/01 [modified]
+#
+#
+
+#========================= puzzle.parser.fromLayer =========================
 #
 #
 #========================= puzzle.parser.fromLayer =========================
@@ -52,13 +54,14 @@ class ParamPuzzle:
 
 class FromLayer(centroidMulti):
     '''!
+    @ingroup    PuzzleSolver
     @brief  A basic detector class that processes a layered image
             (or mask and image) detection output. Converts all isolated
             regions into their own puzzle piece instances.
     '''
 
     def __init__(self, theParams=ParamPuzzle):
-        """
+        """!
         @brief  Constructor for the puzzle piece layer parsing class.
 
         Args:
@@ -130,7 +133,7 @@ class FromLayer(centroidMulti):
 
 
     def findCorrectedContours(self, mask, FILTER=True):
-        """
+        """!
         @brief Find the right contours given a binary mask image.
 
         Args:
