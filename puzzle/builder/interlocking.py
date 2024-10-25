@@ -1,28 +1,27 @@
-# ====================== puzzle.builder.interlocking ======================
-#
-# @class    puzzle.builder.interlocking
+#====================== puzzle.builder.interlocking ======================
+##
+# @package  PuzzleInterlocking
 #
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations that should actually interlock. Placement
 #           for them is less forgiving. In principle, they need to fit
 #           together.
 #
-# This class is a step up from the adjacency class. The adjacent puzzle
-# pieces actually interlock.
-#
-# It also includes a scoring mechanism to indicate how "close" a current
-# solution would be to the calibrated solution.
-#
-# ====================== puzzle.builder.interlocking ======================
-#
-# @file     interlocking.py
+# @ingroup  Puzzle_Types
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2021/08/04 [created]
-#           2021/08/05 [modified]
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 #
-# ====================== puzzle.builder.interlocking ======================
+# @date     2021/08/05 [modified]
+# @date     2021/08/04 [created]
+#
+
+#====================== puzzle.builder.interlocking ======================
+#
+# NOTE
+#   90 columns, 4 space indent.
+#
+#====================== puzzle.builder.interlocking ======================
 
 # ===== Environment / Dependencies
 #
@@ -36,71 +35,68 @@ from puzzle.builder.adjacent import Adjacent, CfgAdjacent
 from puzzle.builder.arrangement import Arrangement
 from puzzle.board import Board
 
-
-# ===== Helper Elements
-#
-
-#@dataclass
-#class ParamInter(ParamAdj):
-#    tauInter: float = 35
-#
-# DELETE WHEN CODE RUNS. BROKEN IN MANY PLACE RIGHT NOW.
-
 #---------------------------------------------------------------------------
 #==================== Configuration Node : Interlocking ====================
 #---------------------------------------------------------------------------
 #
 
 class CfgInterlocking(CfgAdjacent):
-  '''!
-  @brief  Configuration setting specifier for centroidMulti.
-  '''
-
-  #============================= __init__ ============================
-  #
-  def __init__(self, init_dict=None, key_list=None, new_allowed=True):
     '''!
-    @brief        Constructor of configuration instance.
+    @brief  Configuration setting specifier for centroidMulti.
+    '''
   
-    @param[in]    cfg_files   List of config files to load to merge settings.
-    '''
-    if (init_dict == None):
-      init_dict = CfgInterlocking.get_default_settings()
-
-    super().__init__(init_dict, key_list, new_allowed)
-
-  #========================= get_default_settings ========================
-  #
-  # @brief    Recover the default settings in a dictionary.
-  #
-  @staticmethod
-  def get_default_settings():
-    '''!
-    @brief  Defines most basic, default settings for RealSense D435.
-
-    @param[out] default_dict  Dictionary populated with minimal set of
-                              default settings.
-    '''
-    default_dict = super(CfgInterlocking,CfgInterlocking).get_default_settings()
-    default_dict.update(dict(tauInter = 35))
-
-    return default_dict
-
-
-
+    #============================= __init__ ============================
+    #
+    def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+        '''!
+        @brief        Constructor of configuration instance.
+      
+        @param[in]    cfg_files   List of config files to load to merge settings.
+        '''
+        if (init_dict == None):
+          init_dict = CfgInterlocking.get_default_settings()
+    
+        super().__init__(init_dict, key_list, new_allowed)
+    
+    #========================= get_default_settings ========================
+    #
+    # @brief    Recover the default settings in a dictionary.
+    #
+    @staticmethod
+    def get_default_settings():
+        '''!
+        @brief  Defines most basic, default settings for RealSense D435.
+    
+        @param[out] default_dict  Dictionary populated with minimal set of
+                                  default settings.
+        '''
+        default_dict = super(CfgInterlocking,CfgInterlocking).get_default_settings()
+        default_dict.update(dict(tauInter = 35))
+    
+        return default_dict
+  
+  
+  
 #
-# ====================== puzzle.builder.interlocking ======================
+#====================== puzzle.builder.interlocking ======================
 #
 
 class Interlocking(Adjacent):
+    """!
+    @ingroup    Puzzle_Types
+    @brief      Puzzle with interlocking pieces.
 
-    # ============================== adjacent =============================
-    #
-    # @brief  Constructor for the puzzle.builder.adjacent class.
-    #
+    This class is a step up from the adjacency class. The adjacent puzzle
+    pieces actually interlock.
+    
+    It also includes a scoring mechanism to indicate how "close" a current
+    solution would be to the calibrated solution.
+    """
+
+    #============================== adjacent =============================
     #
     def __init__(self, theBoard=[], theParams=CfgInterlocking):
-        """
+        """!
         @brief  Constructor for the puzzle.builder.adjacent class.
 
         Args:
@@ -118,7 +114,7 @@ class Interlocking(Adjacent):
         self.processInterlocking()
 
     def processInterlocking(self):
-        """
+        """!
         @brief Process the solution board and determine what pieces are
                interlocking or adjacent.
 
@@ -150,7 +146,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution puzzle board.
 
         Args:
@@ -184,7 +180,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution stored as an image and a mask.
 
         The python file contains the puzzle board mask and image source
@@ -211,7 +207,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution stored as
                separate image and mask files.
 
@@ -239,7 +235,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
-        """
+        """!
         @brief Given an image and an image mask, parse both to recover
                the puzzle calibration/solution.
 
@@ -266,7 +262,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
-        """
+        """!
         @brief Given an image with regions clearly separated by some
                color or threshold, parse it to recover the puzzle
                calibration/solution. Can source alternative detector.
@@ -295,7 +291,7 @@ class Interlocking(Adjacent):
 
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
-        """
+        """!
         @brief Given an image with regions clearly separated by some
                color or threshold, parse it to recover the puzzle
                calibration/solution. Can source alternative detector.
@@ -323,4 +319,4 @@ class Interlocking(Adjacent):
         return thePuzzle
 
 #
-# ====================== puzzle.builder.interlocking ======================
+#====================== puzzle.builder.interlocking ======================

@@ -11,6 +11,8 @@
 # @date     2021/07/28 [modified]
 # @date     2021/07/24 [created]
 #
+
+#================================ puzzle.piece code ==================================
 # NOTES:
 #   95 columns.
 #   indent is 4 spaces.

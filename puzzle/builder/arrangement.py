@@ -1,28 +1,29 @@
 #======================= puzzle.builder.arrangement ======================
-#
-# @class    puzzle.builder.arrangement
-#
+##
+# @package  PuzzleArrangement 
 # @brief    This type of puzzle is simply a set of shapes arranged at
 #           specific locations in the image with no occlusion or
 #           overlap. Touching is not necessary (typically not the case)
-#
-#
-# This class is the most basic type of puzzle specification.  It
-# provide a tempalte puzzle board consisting of puzzle pieces that
-# should be placed at specific locations.  It also includes a scoring
-# mechanism to indicate how "close" a current solution would be to the
-# calibrated solution.
-#
-#======================= puzzle.builder.arrangement ======================
-#
-# @file     arrangement.py
+# @ingroup  Puzzle_Types
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+#
+# @date     2021/08/05 [modified]
 # @date     2021/07/30 [created]
-#           2021/08/05 [modified]
+#
+# @todo     May need more work to align with current revisions.
+# @todo     Some of the test scripts may have bad Cfg parameter names.
+#
+
+#======================= puzzle.builder.arrangement ======================
+#
+# NOTES:
+#   90 columns.
+#   indent is 4 spaces.
 #
 #======================= puzzle.builder.arrangement ======================
+
 
 import pickle
 from dataclasses import dataclass
@@ -49,6 +50,7 @@ from puzzle.parser import boardMeasure, CfgBoardMeasure
 
 class CfgArrangement(CfgBoardMeasure):
   '''!
+  @ingroup  Puzzle_Types
   @brief  Configuration setting specifier for centroidMulti.
   '''
 
@@ -88,9 +90,18 @@ class CfgArrangement(CfgBoardMeasure):
 #
 
 class Arrangement(Board):
+    """!
+    @ingroup    Puzzle_Types
+    @brief  A puzzle that simply needs to arrange pieces on a workspace.
+
+    This class is the most basic type of puzzle specification.  It provide a
+    template puzzle board consisting of puzzle pieces that should be placed
+    at specific locations.  It also includes a scoring mechanism to indicate
+    how 'close' a current solution would be to the calibrated solution.
+    """
 
     def __init__(self, theBoard=[], theParams=CfgArrangement):
-        """
+        """!
         @brief  Constructor for the puzzle.builder.arrangement class.
 
         Args:
@@ -104,17 +115,15 @@ class Arrangement(Board):
         # to be correctly placed.
 
     def corrections(self, pLoc):
-        """
+        """!
         @brief  Given an array of locations that correspond to the puzzle
                 board (e.g., in the same order as puzzle board list), provide
                 the correction vector that would move them to the calibrated
                 locations.
 
-        Args:
-            pLoc: A dict of puzzle piece id & location.
+        @param[in]  pLoc        A dict of puzzle piece id & location.
 
-        Returns:
-            theVects: A dict of puzzle piece id & vectors.
+        @return     theVects    A dict of puzzle piece id & vectors.
         """
 
         theVects = {}
@@ -133,17 +142,15 @@ class Arrangement(Board):
         return theVects
 
     def distances(self, pLoc):
-        """
+        """!
         @brief  Given an array of locations that correspond to the puzzle
                 board (e.g., in same order as puzzle board list), provide
                 the distances between the locations and the calibrated
                 locations.
 
-        Args:
-            pLoc: A dict of puzzle piece id & location.
+        @param[in]  pLoc        Dict of puzzle piece id & location.
 
-        Returns:
-            theDists(A dict of puzzle piece id & distance to the solution)
+        @return     theDists    Dict of puzzle piece id & distance to solution
         """
 
         theDists = {}
@@ -162,7 +169,7 @@ class Arrangement(Board):
         return theDists
 
     def scoreByLocation(self, pLoc):
-        """
+        """!
         @brief  Given an array of locations that correspond to the puzzle
                 board (e.g., in same order as puzzle board list), provide a
                 score for the distance between the locations and the
@@ -173,11 +180,9 @@ class Arrangement(Board):
         are assumed to be ordered according to puzzle piece ordering in the
         calibrated puzzle board.
 
-        Args:
-            pLoc: A dict of puzzle piece id & location.
+        @param[in]  pLoc        Dict of puzzle piece id & location.
 
-        Returns:
-            theScore: The score for the current board.
+        @return     theScore    Completion score for the current board.
         """
 
         errDists = self.distances(pLoc)
@@ -190,7 +195,7 @@ class Arrangement(Board):
         return theScore
 
     def scoreBoard(self, theBoard):
-        """
+        """!
         @brief  Given a puzzle board with in ordered correspondence with the
                 calibrated puzzle board, in the same order as puzzle board
                 list), provide a score for the distance between the puzzle
@@ -199,11 +204,9 @@ class Arrangement(Board):
         The score here is just the sum of the error norms (or the incorrect
         distance of the placed part to the true placement).
 
-        Args:
-            theBoard: A puzzle board in 1-1 ordered correspondence with solution.
+        @param[in] theBoard     Puzzle board in 1-1 ordered correspondence with solution.
 
-        Returns:
-            theScore: The score compared with the given board.
+        @return     theScore    The score compared with the given board.
         """
 
         if theBoard.size() == self.size():
@@ -215,7 +218,7 @@ class Arrangement(Board):
         return theScore
 
     def piecesInPlace(self, pLoc, tauDist=None):
-        """
+        """!
         @brief  Return boolean array indicating whether the piece is
                 correctly in place or not.
 
@@ -239,7 +242,7 @@ class Arrangement(Board):
 
     @staticmethod
     def buildFromFile_Puzzle(fileName, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution puzzle board.
 
         Args:
@@ -277,7 +280,7 @@ class Arrangement(Board):
 
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution stored as an image and a mask.
 
         The python file contains the puzzle board mask and image source
@@ -313,7 +316,7 @@ class Arrangement(Board):
 
     @staticmethod
     def buildFromFiles_ImageAndMask(imFile, maskFile, theParams=None):
-        """
+        """!
         @brief Load a saved arrangement calibration/solution stored as
                separate image and mask files.
 
@@ -380,7 +383,7 @@ class Arrangement(Board):
 
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
-        """
+        """!
         @brief Given an image with regions clearly separated by some
                color or threshold, parse it to recover the puzzle
                calibration/solution. Can source alternative detector.
@@ -436,7 +439,7 @@ class Arrangement(Board):
 
     @staticmethod
     def buildFrom_Sketch(theImage, theMask, theProcessor=None, theDetector=None, theParams=None):
-        """
+        """!
         @brief Given an image with regions clearly separated by some
                color or threshold, parse it to recover the puzzle
                calibration/solution. Can source alternative detector.

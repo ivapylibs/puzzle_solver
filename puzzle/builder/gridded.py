@@ -1,18 +1,24 @@
 #=========================== puzzle.builder.gridded ==========================
+##
+# @package  PuzzleGridded
+# @brief    An interlocking puzzle for which the pieces are arranged in a nice
+#           gridded manner with a rectangular shape when complete.
 #
-# @class    puzzle.builder.gridded
-#
-#
-#=========================== puzzle.builder.gridded ==========================
-#
-# @file     gridded.py
+# @ingroup  Puzzle_Types
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
-#           Yunzhi Lin,             yunzhi.lin@gatech.edu
-#           Yiye Chen,              yychen2019@gatech.edu
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Yiye Chen,              yychen2019@gatech.edu
+#
+# @date     2022/07/15 [modified]
+# @date     2021/08/05 [modified]
 # @date     2021/08/04 [created]
-#           2021/08/05 [modified]
-#           2022/07/15 [modified]
+#
+
+#=========================== puzzle.builder.gridded ==========================
+#
+# NOTE
+#   85 columns, 2 spaces indent.
 #
 #=========================== puzzle.builder.gridded ==========================
 
@@ -43,6 +49,7 @@ from puzzle.utils.dataProcessing import updateLabel, partition_even
 
 class CfgGridded(CfgInterlocking):
   '''!
+  @ingroup  Puzzle_Types
   @brief  Configuration setting specifier for gridded puzzle.
 
   '''
@@ -89,6 +96,7 @@ class CfgGridded(CfgInterlocking):
 
 class Gridded(Interlocking):
   '''!
+  @ingroup  Puzzle_Types
   @brief    Puzzle type that is a set of interlocking puzzle pieces that get put
             together in a grid structure.  All rows/columns have same number of pieces.
 
