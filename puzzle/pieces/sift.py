@@ -50,6 +50,8 @@ class Sift(MatchSimilar):
         """
 
         self.theThreshMatch = theThreshMatch
+        self.tau = tau
+        
         super(Sift, self).__init__(tau)
 
     @staticmethod

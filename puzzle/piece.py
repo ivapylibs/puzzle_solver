@@ -71,7 +71,7 @@ class PuzzleTemplate:
     mask:           np.ndarray = np.array([], dtype='uint8')    # @< Binary mask image.
     contour:        np.ndarray = np.array([], dtype='uint8')    # @< Binary contour image.
     contour_pts:    np.ndarray = np.array([])   # @< Template contour points.
-
+    kpFea:          np.ndarray = np.array([])   # @< Sift Kp Features>
 #
 #==================================== Template ===================================
 #

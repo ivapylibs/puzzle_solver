@@ -76,7 +76,7 @@ print(theMatcher.compare(thePiece_A, thePiece_B))
 # cv2.imshow('A_transformed',dst)
 # cv2.waitKey()
 
-theBoard.display()
+theBoard.display_cv()
 
 plt.show()
 #

@@ -55,8 +55,8 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
 theMaskSol_A = improc.apply(theImageSol_A)
 
 #DEBUG VISUAL
-#plt.imshow(theMaskSol_A)
-#plt.show()
+# plt.imshow(theMaskSol_A)
+# plt.show()
 
 theParams  = CfgGridded();
 print(theParams)
