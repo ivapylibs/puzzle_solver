@@ -282,6 +282,7 @@ class SIFTCV(MatchSimilar):
     # achieving a perfect match.
     if feat_A[1] is None or feat_B[1] is None:  
       distance = 0
+      matches = []
     else:
       matches = calculateMatches(feat_A[1], feat_B[1], self.params.slambda)
       distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
