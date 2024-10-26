@@ -534,6 +534,27 @@ class Template:
             thePiece: A new puzzle template instance.
         """
 
+        # THE CODE BELOW DOESN'T SEEM LIKE A GOOD IDEA.
+        # IT WOULD BE BETTER TO JUST COPY THE APPEARANCE, COPY THE MASK.
+        # ROTATE BOTH.  GENERATE A NEWER CLEANER MASK.  
+        # GET CHANGE IN SIZE TO ESTABLISH A NEW rLoc COORDINATE
+        # RELATIVE TO THE ORIGINA ONE.  INSTANTIATE A NEW PIECE
+        # WITH THE NEW SOURCE INFORMATION. NOTED BELOW FROM A COPY OF
+        # THE CONSTRUCTOR:
+        #
+        # y:PuzzleTemplate=None, r=None, id=None, theta=0, 
+        # pieceStatus=PieceStatus.UNKNOWN):
+        #
+        # ESTABLISH SENSIBLE OVERRIDES FOR THE ABOVE.
+        # THE PROBLEM WITH THE CODE BELOW IS THAT IS REPEATS SOME OF THE
+        # CODE IN THE CONSTRUCTOR BUT APPEARS TO HAVE SOME KIND OF BUG
+        # IN IT BECAUSE THE INVOCATION NOW FAILS WITH real03_sift.
+        # CORRECT, IMPROVE, THEN SHOW THAT real03_sift WORKS.
+        #
+        print("\nThis rotatePiece code will fail.  Please correct it.")
+        print("This rotatePiece code will fail.  Please correct it.")
+        print("This rotatePiece code will fail.  Please correct it.\n")
+
         # Create a new instance. Without rLoc.
         thePiece = Template(y=deepcopy(self.y), id=deepcopy(self.id))
 

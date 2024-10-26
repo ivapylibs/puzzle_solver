@@ -297,6 +297,7 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
     im_floodfill = im_pre_canny.copy().astype(np.uint8)
     cv2.floodFill(im_floodfill, None, (0, 0), 255)      
     im_floodfill = cv2.bitwise_not(im_floodfill)
+    im_floodfill = im_floodfill > 0
 
     if verbose:
         cv2.imshow('im_floodfill', im_floodfill)

@@ -595,6 +595,9 @@ class Gridded(Interlocking):
 
     aPuzzle   = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
+    aPuzzle.display_mp()
+    plt.show()
+
     thePuzzle = Gridded(aPuzzle, theParams)
 
     return thePuzzle

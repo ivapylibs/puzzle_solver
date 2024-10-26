@@ -76,8 +76,8 @@ print(theMatcher.compare(thePiece_A, thePiece_B))
 # cv2.imshow('A_transformed',dst)
 # cv2.waitKey()
 
-theBoard.display_cv()
-
+theBoard.display_mp()
 plt.show()
+
 #
 # ============================ real02_sift ===========================

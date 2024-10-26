@@ -338,6 +338,7 @@ class Arrangement(Board):
 
         # Sometimes the value in M may not be strictly 0 or 255
         if np.bitwise_and(M > 0, M < 255).any():
+            Warning("Dangerous assumptions underlying code here. (arrangement)")
             _, M = cv2.threshold(M, 10, 255, cv2.THRESH_BINARY)
 
         if isinstance(I, np.ndarray) and isinstance(M, np.ndarray):
@@ -358,13 +359,11 @@ class Arrangement(Board):
         Instantiates a puzzle parser that gets applied to the submitted data
         to create a puzzle board instance. That instance is the calibration/solution.
 
-        Args:
-            theImage: The puzzle image data.
-            theMask: The puzzle mask data.
-            theParams: The params.
+        @param[in]  theImage    The puzzle image data.
+        @param[in]  theMask     The puzzle mask data.
+        @param[in]  theParams   The params.
 
-        Returns:
-            thePuzzle: The arrangement puzzle board instance.
+        @return     thePuzzle   The arrangement puzzle board instance.
         """
 
         if theParams is None:
