@@ -21,22 +21,26 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-from puzzle.builder.arrangement import Arrangement, ParamArrange
-from puzzle.builder.board import Board
-from puzzle.piece.sift import Sift
+from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.board import Board
+from puzzle.pieces.matchSimilar import SIFTCV, CfgSIFTCV
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
+
+## == OLD STUFF
+# from puzzle.builder.board import Board
+# from puzzle.builder.arrangement import Arrangement, ParamArrange
+# from puzzle.piece.sift import Sift
+## == OLD STUFF
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
-theImageSol_A = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_2.png')
+theImageSol_A = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/SinglePiece_mea_2.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
-theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/SinglePiece_mea_1.png')
-# theImageSol_B = cv2.imread(cpath + '/../../testing/data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
-
+theImageSol_B = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/SinglePiece_mea_1.png')
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
@@ -47,11 +51,18 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 
 # ==[1.2] Create raw puzzle piece data.
 #
+theParams = CfgGridded()
+theParams.update(dict(areaThresholdLower=1000))
 
-theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-                                                theParams=ParamArrange(areaThresholdLower=1000))
-theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-                                                theParams=ParamArrange(areaThresholdLower=1000))
+theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams=theParams)
+theGridMea = Gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams=theParams)
+
+## == OLD STUFF
+# theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
+#                                                 theParams=ParamArrange(areaThresholdLower=1000))
+# theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
+#                                                 theParams=ParamArrange(areaThresholdLower=1000))
+## == OLD STUFF
 
 # ==[2] Create a new board
 #
@@ -61,7 +72,14 @@ thePiece_B = theGridSol.pieces[0]
 
 # ==[3] Create a sift matcher
 #
-theMatcher = Sift()
+
+## == OLD STUFF
+# theMatcher = Sift()
+## == OLD STUFF
+SIFTParams = CfgSIFTCV()
+SIFTParams.update(dict(tau = 5.0))  # Reduced threshold
+theMatcher = SIFTCV(theParams=SIFTParams)
+theMatcher = SIFTCV()
 
 # ==[4] Display the new board and the comparison result.
 #
@@ -74,26 +92,29 @@ print(ret)
 #
 print('Should see two 100% overlapped pieces')
 
-thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
+if ret[0]:
+    thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
 
-# # Method 1: without knowing thePiece_B's rLoc
-# # The most important part is to recompute the relative position from the
-# # transformed top-left to new top-left for a specific piece
-# trans = np.eye(3)
-# trans[0:2]= ret[2][0:2]
-# rLoc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
-# rLoc_new = rLoc_new.flatten()[:2]
-# rLoc_relative = rLoc_new -thePiece_A.rLoc - thePiece_C.rLoc_relative
-# thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
+    # # Method 1: without knowing thePiece_B's rLoc
+    # # The most important part is to recompute the relative position from the
+    # # transformed top-left to new top-left for a specific piece
+    # trans = np.eye(3)
+    # trans[0:2]= ret[2][0:2]
+    # rLoc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
+    # rLoc_new = rLoc_new.flatten()[:2]
+    # rLoc_relative = rLoc_new -thePiece_A.rLoc - thePiece_C.rLoc_relative
+    # thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
 
-# Method 2:
-thePiece_C.setPlacement(r=thePiece_B.rLoc - thePiece_A.rLoc, offset=True)
+    # Method 2:
+    thePiece_C.setPlacement(r=thePiece_B.rLoc - thePiece_A.rLoc, offset=True)
 
-theBoard.addPiece(thePiece_B)
-theBoard.addPiece(thePiece_C)
+    theBoard.addPiece(thePiece_B)
+    theBoard.addPiece(thePiece_C)
 
-theBoard.display(ID_DISPLAY=True)
+    theBoard.display(ID_DISPLAY=True)
 
-plt.show()
+    plt.show()
+else:
+    print('Pieces do not match')
 #
 # ============================ real03_sift ===========================
