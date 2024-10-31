@@ -22,16 +22,10 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from puzzle.builder.gridded import Gridded, CfgGridded
+from puzzle.builder.arrangement import Arrangement, CfgArrangement
 from puzzle.board import Board
 from puzzle.pieces.matchSimilar import SIFTCV
 from puzzle.utils.imageProcessing import preprocess_real_puzzle
-
-## == OLD STUFF
-# from puzzle.builder.board import Board
-# from puzzle.builder.arrangement import Arrangement, ParamArrange
-# from puzzle.piece.sift import Sift
-## == OLD STUFF
 
 fpath = os.path.realpath(__file__)
 cpath = fpath.rsplit('/', 1)[0]
@@ -53,19 +47,11 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 # ==[1.2] Create raw puzzle piece data.
 #
 
-theParams = CfgGridded()
-theParams.update(dict(areaThresholdLower=1000))
+theParams = CfgArrangement()
+theParams.update(dict(minArea=400))
 
-theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams=theParams)
-theGridMea = Gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams=theParams)
-
-## == OLD STUFF
-# theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B,
-#                                                 theParams=ParamArrange(areaThresholdLower=1000))
-# theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A,
-#                                                 theParams=ParamArrange(areaThresholdLower=1000))
-## == OLD STUFF
-
+theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams=theParams)
+theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams=theParams)
 
 # ==[3] Create a sift matcher and display the match
 #
@@ -73,9 +59,6 @@ theGridMea = Gridded.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, thePara
 print('Should see the match pieces one by one. Some fail to match.')
 
 for i in range(theGridMea.size()):
-    ## == OLD STUFF
-    # theMatcher = Sift()
-    ## == OLD STUFF
     theMatcher = SIFTCV()
 
     ret = theMatcher.compare(theGridMea.pieces[i], theGridSol.pieces[0])
@@ -96,7 +79,7 @@ for i in range(theGridMea.size()):
         theBoard.addPiece(theGridSol.pieces[0])
         theBoard.addPiece(thePiece_C)
 
-        theBoard.display(ID_DISPLAY=True)
+        theBoard.display_mp(ID_DISPLAY=True)
 
         plt.show()
 #
