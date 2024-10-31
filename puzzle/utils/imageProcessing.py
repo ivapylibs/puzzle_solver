@@ -21,6 +21,8 @@ import cv2
 import improcessor.basic as improcessor
 import numpy as np
 
+from scipy.ndimage import rotate as rotate_image
+
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 
@@ -59,21 +61,65 @@ def cropImage(image, template):
 
     return dst
 
-def rotate_im(image, angle, mask=None):
+#=============================== rotate_nd ===============================
+#
+def rotate_nd(image, angle, mask=None):
+    """!
+    @brief Generate rotated image and return working elements of it. 
+
+    This code is from the [stackoverflow solution](https://stackoverflow.com/questions/43892506/opencv-python-rotate-image-without-cropping-sides/47290920#47290920) for an OpenCV non-cropping image rotation.  Someone provided a
+    scipiy ndimage version as a solution too.  
+
+    The image and the mask should be the same dimension. No checking for that
+    being the case.  Outer scope should deal with ensuring match or dealing
+    with mismatch.
+
+    @param[in]   image  Input image.
+    @param[in]   angle  Rotation angle (in degrees).
+    @param[in]   mask   Optional mask to rotate also.
+
+    @return rotResults  Either the rotate image or a tuple of rotated image
+                        and mask.
     """
-    @brief Compute the rotated image. See https://stackoverflow.com/a/47290920/5269146.
+
+    if mask is not None:
+      rotma = rotate_image(mask, angle, cval = False)
+      rotma = rotma > 0
+    else:
+      rotma = None
+
+    rotim = rotate_image(image, angle, cval = 0)
+
+    # If needs to be padded.  Avoiding for now. 2024/10/31 - PAV.
+    # Only essential is image data MUST NOT be on edge/border.
+    #
+    #rotim = np.pad(rotim, pad_width=((1,1),(1,1),(0,0)), mode='constant', constant_values=0)
+    #rotma = np.pad(rotma, pad_width=1,   mode='constant', constant_values=False)
+
+    return (rotim, rotma)
+
+    
+
+#=============================== rotate_im ===============================
+#
+def rotate_im(image, angle, mask=None):
+    """!
+    @brief Generate rotated image and return working elements of it. 
+
+    See [code example](https://stackoverflow.com/a/47290920/5269146).
     (clockwise)
 
-    Args:
-        image: The input image.
-        angle: The rotated angle.
+   @param[in]   image   Input image.
+   @param[in]   angle   Rotation angle.
+   @param[in]   mask    Optional mask to rotate also.
 
-    Returns:
-        The rotated image (cropped) & The rotated image (not cropped) & the rotation matrix & padding_left & padding_top.
+   @return rotResults   A tuple of: rotated image (cropped) & rotated image
+                        (not cropped) & the rotation matrix & padding_left 
+                        & padding_top.
     """
 
     image_height = image.shape[0]
-    image_width = image.shape[1]
+    image_width  = image.shape[1]
 
     diagonal_square = (image_width * image_width) + (
             image_height * image_height

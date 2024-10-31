@@ -60,20 +60,20 @@ theParams = CfgArrangement()
 theParams.update(dict(minArea=100))
 
 # DEBUG VISUAL
-plt.imshow(theMaskSol_A)
-plt.figure()
-plt.imshow(theMaskSol_B)
-print("Review Masks. Hit q on windows to close them")
-plt.show()
+#plt.imshow(theMaskSol_A)
+#plt.figure()
+#plt.imshow(theMaskSol_B)
+#print("Review Masks. Hit q on windows to close them")
+#plt.show()
 
 theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams)
 theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams)
 
 # DEBUG VISUAL
-theGridSol.display_mp()
-theGridMea.display_mp()
-print("Review boards. Hit q on windows to close them")
-plt.show()
+#theGridSol.display_mp()
+#theGridMea.display_mp()
+#print("Review boards. Hit q on windows to close them")
+#plt.show()
 
 ## == OLD STUFF
 # USING AN ARRANGEMENT WAS CORRECT.  DID YOU LOOK AT THE IMAGE?
@@ -117,26 +117,16 @@ print('Should see True')
 # DELETE WHEN REVIEWED.
 # 
 ret = theMatcher.compare(thePiece_A, thePiece_B)
+print('\nSIFT Matching information:')
 print(ret)
+print('\n\n')
 
 #==[5] Manipulate the pieces following sift result.
 #
-print('Should see two 100% overlapped pieces')
+print('Should see two 100% overlapped pieces (or nearly so).')
 
 if ret[0]:
     thePiece_C = thePiece_A.rotatePiece(theta=-ret[1])
-
-    # # Method 1: without knowing thePiece_B's rLoc
-    # # The most important part is to recompute the relative position from the
-    # # transformed top-left to new top-left for a specific piece
-    # trans = np.eye(3)
-    # trans[0:2]= ret[2][0:2]
-    # rLoc_new = trans @ np.array([thePiece_A.rLoc[0],thePiece_A.rLoc[1],1]).reshape(-1,1)
-    # rLoc_new = rLoc_new.flatten()[:2]
-    # rLoc_relative = rLoc_new -thePiece_A.rLoc - thePiece_C.rLoc_relative
-    # thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
-
-    # Method 2:
     thePiece_C.setPlacement(r=thePiece_B.rLoc - thePiece_A.rLoc, isOffset=True)
 
     theBoard.addPiece(thePiece_B)
@@ -144,6 +134,7 @@ if ret[0]:
 
     theBoard.display_mp(ID_DISPLAY=True)
     plt.show()
+    print('Pieces do match.  Piece 2 on top of Piece 1.')
 else:
     print('Pieces do not match')
 #
