@@ -1002,7 +1002,9 @@ class Regular(Template):
 
         # Hacked to disable rotation operation
         thePiece.theta = 0
-        theRegular = Regular(thePiece)
+        #theRegular = Regular(thePiece)  # Original code.  Seems wrong.
+        # @todo Why did this use Regular(thePiece) instead of upgrade option?
+        theRegular = Regular.upgradeTemplate(thePiece)
 
         return theRegular
 

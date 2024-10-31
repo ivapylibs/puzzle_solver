@@ -95,7 +95,6 @@ def rotate_nd(image, angle, mask=None):
     #
     #rotim = np.pad(rotim, pad_width=((1,1),(1,1),(0,0)), mode='constant', constant_values=0)
     #rotma = np.pad(rotma, pad_width=1,   mode='constant', constant_values=False)
-
     return (rotim, rotma)
 
     
