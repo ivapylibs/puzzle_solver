@@ -99,13 +99,15 @@ for i in range(theGridMea.size()):
     
   print(np.any(matchMat[i,::]))
   if not np.any(matchMat[i,::]):
-    theGridMea.pieces[i].setPlacement(np.array([-200,-200]), isOffset=True)
+    theGridMea.pieces[i].setPlacement(np.array([-250,-250]), isOffset=True)
     theBoard.addPiece(theGridMea.pieces[i])
 
 theBoard.display_mp()
 theGridSol.display_mp()
 print('--------------')
 print(matchMat)
+print("Pieces that failed to match are above and left-ish of the main set.")
+print("The other visualized board is the solution board.")
 plt.show()
 #
 # ============================ real05sift ===========================
