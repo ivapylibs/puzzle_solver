@@ -1,19 +1,20 @@
-# ====================== puzzle.utils.imageProcessing ======================
-#
+#======================= puzzle.utils.imageProcessing ======================
+# @file     imageProcessing.py
 # @brief    Some image processing functions.
 #
-# ====================== puzzle.utils.imageProcessing ======================
-#
-# @file     imageProcessing.py
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/09/01 [created]
 #
+
+#======================= puzzle.utils.imageProcessing ======================
 #
-# ====================== puzzle.utils.imageProcessing ======================
+# NOTE
+#   100 columns viewing. 4 space indent.
+#
+#======================= puzzle.utils.imageProcessing ======================
 
-
-# ============================== Dependencies =============================
+#============================== Dependencies =============================
 
 import math
 
@@ -26,10 +27,10 @@ from scipy.ndimage import rotate as rotate_image
 from puzzle.utils.shapeProcessing import bb_intersection_over_union
 
 
-# ====================== puzzle.utils.imageProcessing ======================
-
+#=============================== cropImage ===============================
+#
 def cropImage(image, template):
-    """
+    """!
     @brief  Crop and resize a cover image, which has the same shape with the mask.
 
     Args:
@@ -187,6 +188,9 @@ def rotate_im(image, angle, mask=None):
 
     return final_image, rotated_image, transform_matrix, (padding_left, - x, 2), (padding_top, -y, 2), rLoc_relative
 
+
+#============================= white_balance =============================
+#
 def white_balance(img):
     """
     @brief Change the white balance of the image.
@@ -244,17 +248,25 @@ def extract_region(img, verbose=False):
 
     return regions
 
-def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, \
-                            BoudingboxThresh = (30,80), cannyThresh=(30, 50), \
-                            WITH_AREA_THRESH=False ,verbose=False):
+#========================= preprocess_real_puzzle ========================
+#
+def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, 
+                                           areaThresholdUpper=8000, \
+                           BoudingboxThresh = (30,80), cannyThresh=(30, 60), \
+                           WITH_AREA_THRESH=False ,verbose=False):
     """!
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle
             area to obtain a mask.  Note that the threshold is very
             important. It requires having prior knowledge.
 
-    Implementation was changed.  It might actuall work for multiple puzzles on the workmat
-    based on flood filling operation.  Will recover binary mark that gets individual pieces
-    assuming none are touching.  If touching, then grabbed as an entity.
+    Implementation was changed.  It might actually work for multiple puzzles on
+    the workmat based on flood filling operation.  Will recover binary mark that
+    gets individual pieces assuming none are touching.  If touching, then grabbed
+    as an entity.
+
+    Limited testing was done to confirm functionality of the revised implementation.
+    It seems to work, but can sometimes fail to match though other processing
+    may lead to a match.
 
     @param[in] img      RGB image input.
     @param[in] mask     Mask image input.
@@ -270,33 +282,37 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
     """
 
     # Manually add a black bounding box on the edges,
-    # otherwise, the region connected to the border will be removed
+    # Otherwise, the region connected to the border will be removed
+    # Create dilation kernel. Then ready to rock and roll.
+    #
     img_black_border = np.zeros_like(img, 'uint8')
     img_black_border[2:-2,2:-2,:] = img[2:-2,2:-2,:]
 
+    kernel = np.ones((3, 3), np.uint8)
+
+
     if verbose:
+        # @todo Change to ivapy display routines.
         cv2.imshow('img_black_border', img_black_border)
         cv2.waitKey()
 
-    kernel = np.ones((3, 3), np.uint8)
-
+    #==[1]  If no mask is given, then pre-processing image to obtain some kind
+    #       of binary mask to work from.  It need not be perfect as later steps
+    #       will correct.
+    #
     if mask is None:
 
-        # 10/09/2024
-        # Want to pre-process old style puzzle pieces with not perfectly
-        # black background (very dark gray, if you will).
-        # Seems like best option is to have low threshold, get the circle
-        # shrink by a few pixels to get final mask 
-        # Crop out mask circle, then start to apply image processing to it.
-        # get edges, dilate the edge map.
-        # get region from closed puzzle edge boundary.
-        # return that region as a mask.
-        # Right now a bunch of weirder stuff is done.  
-        # Need to recode.  But is this really even necessary?
-        # Is it worth the effort?
+        # 10/09/2024 - PAV
+        # If no mask, then pre-processing old style puzzle pieces with not perfectly
+        # black background (dark gray, if you will).  Seems like best option is to
+        # have low threshold, get the circle shrink by a few pixels to get
+        # preliminary region, then start to apply image processing to it.
+        # Get edges, dilate the edge map.
+        # Get region from closed puzzle edge boundary.
+        # Return that region as a mask.
 
-        # Manually threshold the img if mask is not given. It should not be better than the one
-        # obtained by the surveillance system.
+        # Manually threshold the img if mask is not given. It should not be better
+        # than the one obtained by the surveillance system.
         # Right now we will always use this step for now.
 
         # @note There are two options for processing the old imagery on the work mat.
@@ -304,13 +320,14 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
         #       work mat. Use only what passes that mask, or what passes plus edge
         #       boundary.  the other is to use the circle, shrink, then use that plus
         #       edges.  They should both give the same outcome.  Rolling with
-        #       first option and getting rid of the extract weird iamge processing.
+        #       first option and getting rid of the extract weird image processing.
         #
-        improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                                   improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),)
-                                   )
+        improc = improcessor.basic(
+                        cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
+                        improcessor.basic.thresh, ((50, 255, cv2.THRESH_BINARY),)
+                                  )
         mask = improc.apply(img_black_border)
-        mask = cv2.dilate(mask.astype('uint8'), kernel)
+        mask = cv2.dilate(mask.astype('uint8'), kernel, iterations=3)
         mask = mask > 0
 
         if verbose:
@@ -318,54 +335,76 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, areaThreshol
             cv2.waitKey()
 
     
+    #==[2]  Generate edge map and use it to find the puzzle region through
+    #       a floodfill.  This can be problematic if the edges are not strong.
+    #
+    #       The improcessor below applies the edge detection and additional
+    #       adjustments to obtain a binary mask.
+    #       It is then combined with the mask to get candidate pixel regions.
+    #       The binary image is a sketch that needs "filling."
+    #
     improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                                cv2.Canny, (cannyThresh[0], cannyThresh[1], None, 3, True,),
-                               cv2.morphologyEx,  (cv2.MORPH_CLOSE,kernel,),
+                               cv2.morphologyEx,  (cv2.MORPH_CLOSE,kernel,2),
                                improcessor.basic.thresh, ((1, 255, cv2.THRESH_BINARY),))
-                               # Lastline just binarizes Canny edge outcome.
+                               # Lastline binarizes Canny edge outcome.
 
-    # Step 1: with threshold
-    im_pre_canny = improc.apply(img_black_border)
+    im_pre_canny = improc.apply(img_black_border)           # Binary edges.
 
-    im_pre_canny = cv2.bitwise_and(im_pre_canny.astype('uint8'), 
-                                   mask.astype('uint8')*255)
+    if verbose:
+        cv2.imshow('im_pre_canny+thresh', im_pre_canny.astype('uint8')*255)
+        cv2.waitKey()
+
+    # Apply mask and close open edges.
+    np.logical_and(im_pre_canny, mask, out=im_pre_canny)    
+    im_pre_canny = cv2.morphologyEx(im_pre_canny.astype('uint8'),
+                                                      cv2.MORPH_CLOSE,kernel, iterations=2)
 
     if verbose:
         cv2.imshow('im_pre_canny+thresh', im_pre_canny.astype('uint8')*255)
         cv2.waitKey()
 
 
-    # Step 4: Floodfill.  The operation replaces the input image with its flood filled
-    #   version based on reachable pixels from start pixel.  Start pixel is (0,0), which is
-    #   OK given that the boundary was blacked out. It is complement mask to actual puzzle
-    #   piece.  Negate outcome to get final mask.
-    im_floodfill = im_pre_canny.copy().astype(np.uint8)
-    cv2.floodFill(im_floodfill, None, (0, 0), 255)      
-    im_floodfill = cv2.bitwise_not(im_floodfill)
+    #==[3] Floodfill.  The operation replaces the input image with its flood filled
+    #   version based on reachable pixels from start pixel.  Start pixel (0,0) is good, 
+    #   given that the boundary was padded and blacked out. The filled mask is complement 
+    #   to the actual puzzle piece mask.  Negate the outcome to get final mask.
+    #
+    #im_floodfill = im_pre_canny.copy().astype(np.uint8)     Not Needed.
+    cv2.floodFill(im_pre_canny, None, (0, 0), 255)      
+    im_floodfill = im_pre_canny < 255
+
+    #   Dilate by a little to get boundary neighbors that may be useful. Binarize.
+    im_floodfill = cv2.dilate(im_floodfill.astype('uint8'), kernel)
     im_floodfill = im_floodfill > 0
 
     if verbose:
-        cv2.imshow('im_floodfill', im_floodfill)
+        cv2.imshow('im_floodfill', im_floodfill.astype('uint8')*255)
         cv2.waitKey()
 
-    Warning("Only tested on one puzzle piece.  Should work more generally though.")
     return im_floodfill
 
-def preprocess_synthetic_puzzle(img, mask=None, areaThresholdLower=1000, areaThresholdUpper=8000, cannyThresh=(20, 80), verbose=False):
-    """
-    @brief Preprocess the RGB image of a segmented puzzle piece in a circle area to obtain a mask.
-    Todo: Maybe we can combine preprocess_real_puzzle and preprocess_synthetic_puzzle together
 
-    Args:
-        img: RGB image input.
-        mask: Mask image input.
-        areaThresholdLower: The lower threshold of the area.
-        areaThresholdUpper: The upper threshold of the area.
-        cannyThresh: The threshold for canny.
-        verbose: The flag of whether to debug.
+#====================== preprocess_synthetic_puzzle ======================
+#
+def preprocess_synthetic_puzzle(img, mask=None, areaThresholdLower=1000, 
+                                                areaThresholdUpper=8000, 
+                                                cannyThresh=(20, 80), verbose=False):
+    """!
+    @brief  Preprocess the RGB image of a segmented puzzle piece in a circle 
+            area to obtain a mask.
 
-    Returns:
-        seg_img_combined: The mask region list.
+    @todo   Maybe can combine preprocess_real_puzzle and preprocess_synthetic_puzzle 
+            together?
+
+    @param[in]  img                 RGB image input.
+    @param[in]  mask                Mask image input.
+    @param[in]  areaThresholdLower  The lower threshold of the area.
+    @param[in]  areaThresholdUpper  The upper threshold of the area.
+    @param[in]  cannyThresh         The threshold for canny.
+    @param[in]  verbose             The flag of whether to debug.
+
+    @return     seg_img_combined    Mask region list.
     """
 
     # Manually add a black bounding box on the edges,
@@ -511,15 +550,15 @@ def preprocess_synthetic_puzzle(img, mask=None, areaThresholdLower=1000, areaThr
 
     return seg_img_combined
 
+#=========================== find_nonzero_mask ===========================
+#
 def find_nonzero_mask(mask):
-    """
+    """!
     @brief Extract the coordinates of the non-zero elements (x,y style) from a mask image
 
-    Args:
-        mask: The input mask image with 0 or 1
+    @param[in]  mask    Input mask image with 0 or 1
 
-    Returns:
-        rcoords: The coordinates of the non-zero elements (x,y style)
+    @return     rcoords Coordinates of the non-zero elements (x,y) style
     """
 
     rcoords = list(np.nonzero(mask))  # 2 (row,col) x N

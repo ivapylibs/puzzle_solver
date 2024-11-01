@@ -170,12 +170,15 @@ class SIFTCV(MatchSimilar):
       sift_builder = cv2.SIFT_create()
 
     # Focus on the puzzle piece image with mask. Code below reconstitutes the puzzle piece
-    # visual information with zeros in the background region.  
+    # visual information with zeros in the background region.  Also pads the image by
+    # a couple of pixels because SIFT relies on feature detection, which does not work
+    # at image boundaries.  The padding keeps puzzle piece image data away from boundary.
     #
     # @note Why is the masked image not stored upon creation of puzzle piece template?
     #
     theImage = np.zeros_like(piece.y.image)
     theImage[piece.y.rcoords[1], piece.y.rcoords[0], :] = piece.y.appear
+    theImage = np.pad(theImage, ((2,2),(2,2),(0,0)), mode='constant', constant_values=0)
 
     # VISUAL DEBUG
     #display.rgb(theImage)
@@ -189,7 +192,9 @@ class SIFTCV(MatchSimilar):
       #         the rotation is unknown.  The keypoints would have to have some kind
       #         of rotational symmetry, which makes things harder.  The alternative is
       #         to use a single keypoint at the center spanning multiple octaves. Is that
-      #         what SIFT does anyhow?  Need to review.
+      #         what SIFT does anyhow?  Need to review. Could use a circular set of pixels
+      #         relative to the centroid.  That might work, but depends on coarseness of
+      #         angular sampling of the key points relative to puzzle piece size.
       # @note   Per https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html,
       #         > Each keypoint is a special structure which has many attributes like its (x,y)
       #         > coordinates, size of the meaningful neighbourhood, angle which specifies its

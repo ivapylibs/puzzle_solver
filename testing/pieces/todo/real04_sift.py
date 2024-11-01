@@ -2,7 +2,8 @@
 # ============================ real04_sift ===========================
 #
 # @brief    Test script for the most basic functionality of sift features
-#           for puzzle pieces. (well-separated pieces + connected solution from real images)
+#           for puzzle pieces. (well-separated pieces + connected solution from
+#           real images)
 #
 # ============================ real04_sift ===========================
 
@@ -35,14 +36,23 @@ cpath = fpath.rsplit('/', 1)[0]
 theImageSol_A = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/Exploded_mea_0.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
-theImageSol_B = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/GTSolBoard_mea_0.png')
+# Used to be '/../../data/puzzle_real_sample_black/GTSolBoard_mea_0.png' which doesn't make
+# sense because the individual pieces cannot be extracted.  Why did this exist??  Changed
+# to be two exploded pieces with intent to match.  Really this should use board to board
+# data association, which is what the board manager does (right?).
+#
+theImageSol_B = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
 #
 
 theMaskSol_A = preprocess_real_puzzle(theImageSol_A, verbose=False)
-theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
+theMaskSol_B = preprocess_real_puzzle(theImageSol_B, verbose=False)
+
+# DEBUG VISUAL
+#plt.imshow(theMaskSol_A)
+#plt.imshow(theMaskSol_B)
 
 # ==[1.2] Create raw puzzle piece data.
 #
@@ -50,37 +60,41 @@ theMaskSol_B = preprocess_real_puzzle(theImageSol_B)
 theParams = CfgArrangement()
 theParams.update(dict(minArea=400))
 
-theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams=theParams)
-theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams=theParams)
+theGridSol = Arrangement.buildFrom_ImageAndMask(theImageSol_A, theMaskSol_A, theParams=theParams)
+theGridMea = Arrangement.buildFrom_ImageAndMask(theImageSol_B, theMaskSol_B, theParams=theParams)
 
 # ==[3] Create a sift matcher and display the match
 #
 
-print('Should see the match pieces one by one. Some fail to match.')
+print('Matched pieces in new board for comparison to solution board. Some fail to match.')
+print('This is where assignment strategy might work, with lower bound on acceptable.')
+
+# DEBUG VISUAL
+#theGridSol.display_mp(ID_DISPLAY=True)
+#theGridMea.display_mp(ID_DISPLAY=True)
+#plt.show()
+
+matchMat = np.full((theGridMea.size(), theGridSol.size()), False)
+
+theMatcher = SIFTCV()
+theBoard = Board()
 
 for i in range(theGridMea.size()):
-    theMatcher = SIFTCV()
+  print('--------------')
 
-    ret = theMatcher.compare(theGridMea.pieces[i], theGridSol.pieces[0])
+  for j in range(theGridSol.size()):
+
+    ret = theMatcher.compare(theGridMea.pieces[i], theGridSol.pieces[j])
+    matchMat[i,j] = ret[0]
+
     if ret[0]:
-        theBoard = Board()
         thePiece_C = theGridMea.pieces[i].rotatePiece(theta=-ret[1])
-
-        # Method 1: without knowing thePiece_B's rLoc
-        # The most important part is to recompute the relative position from the
-        # transformed top-left to new top-left for a specific piece
-        trans = np.eye(3)
-        trans[0:2] = ret[2][0:2]
-        rLoc_new = trans @ np.array([theGridMea.pieces[i].rLoc[0], theGridMea.pieces[i].rLoc[1], 1]).reshape(-1, 1)
-        rLoc_new = rLoc_new.flatten()[:2]
-        rLoc_relative = rLoc_new - theGridMea.pieces[i].rLoc - thePiece_C.rLoc_relative
-        thePiece_C.setPlacement(r=rLoc_relative.astype('int'), offset=True)
-
-        theBoard.addPiece(theGridSol.pieces[0])
         theBoard.addPiece(thePiece_C)
 
-        theBoard.display_mp(ID_DISPLAY=True)
-
-        plt.show()
+theBoard.display_mp()
+theGridSol.display_mp()
+print('--------------')
+print(matchMat)
+plt.show()
 #
 # ============================ real04_sift ===========================
