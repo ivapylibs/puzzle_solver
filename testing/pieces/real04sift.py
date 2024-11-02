@@ -1,27 +1,24 @@
 #!/usr/bin/python3
-#================================= real05sift ================================
-##@file
-# @brief    Testing SIFT on more involved puzzle piece comparison.
-#           Pieces are not in same place in both boards, but differ.
+# ============================ real04_sift ===========================
 #
+# @brief    Test script for the most basic functionality of sift features
+#           for puzzle pieces. (well-separated pieces + connected solution from
+#           real images)
 #
-# @ingroup  TestPuzzle_Tracking
+# ============================ real04_sift ===========================
+
 #
-# @author   Patricio A. Vela        pvela@gatech.edu
+# @file     real04_sift.py
 #
-# @date     2024/11/01  [created from real04sift]
+# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @date     2021/10/17  [created]
 #
-# @quitf
-#================================= real05sift ================================
-#
-# NOTE
-#   100 columns. Indent 4 spaces.
-#
-#================================= real05sift ================================
+# ============================ real04_sift ===========================
 
 # ==[0] Prep environment
 
 import os
+import pkg_resources
 
 import cv2
 import matplotlib.pyplot as plt
@@ -37,8 +34,9 @@ cpath = fpath.rsplit('/', 1)[0]
 
 # ==[1] Read the source image and template.
 #
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
 
-theImageSol_A = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/Exploded_mea_0.png')
+theImageSol_A = cv2.imread(prefix + 'puzzle_real_sample_black/Exploded_mea_0.png')
 theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 
 # Used to be '/../../data/puzzle_real_sample_black/GTSolBoard_mea_0.png' which doesn't make
@@ -46,7 +44,7 @@ theImageSol_A = cv2.cvtColor(theImageSol_A, cv2.COLOR_BGR2RGB)
 # to be two exploded pieces with intent to match.  Really this should use board to board
 # data association, which is what the board manager does (right?).
 #
-theImageSol_B = cv2.imread(cpath + '/../../data/puzzle_real_sample_black/ExplodedWithRotationAndExchange_mea_0.png')
+theImageSol_B = cv2.imread(prefix + 'puzzle_real_sample_black/ExplodedWithRotation_mea_0.png')
 theImageSol_B = cv2.cvtColor(theImageSol_B, cv2.COLOR_BGR2RGB)
 
 # ==[1.1] Create an improcessor to obtain the mask.
@@ -94,20 +92,12 @@ for i in range(theGridMea.size()):
 
     if ret[0]:
         thePiece_C = theGridMea.pieces[i].rotatePiece(theta=-ret[1])
-        thePiece_C.setPlacement(theGridSol.pieces[j].rLoc)
         theBoard.addPiece(thePiece_C)
-    
-  print(np.any(matchMat[i,::]))
-  if not np.any(matchMat[i,::]):
-    theGridMea.pieces[i].setPlacement(np.array([-250,-250]), isOffset=True)
-    theBoard.addPiece(theGridMea.pieces[i])
 
 theBoard.display_mp()
 theGridSol.display_mp()
 print('--------------')
 print(matchMat)
-print("Pieces that failed to match are above and left-ish of the main set.")
-print("The other visualized board is the solution board.")
 plt.show()
 #
-# ============================ real05sift ===========================
+# ============================ real04_sift ===========================
