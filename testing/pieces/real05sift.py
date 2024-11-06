@@ -101,9 +101,11 @@ for i in range(theGridMea.size()):
     
   print(np.any(matchMat[i,::]))
   if not np.any(matchMat[i,::]):
-    theGridMea.pieces[i].setPlacement(np.array([-250,-250]), isOffset=True)
-    theBoard.addPiece(theGridMea.pieces[i])
+    thePiece_C = theGridMea.pieces[i].rotatePiece(theta=0)
+    thePiece_C.setPlacement(np.array([-250,-250]), isOffset=True)
+    theBoard.addPiece(thePiece_C)
 
+theGridMea.display_mp()
 theBoard.display_mp()
 theGridSol.display_mp()
 print('--------------')

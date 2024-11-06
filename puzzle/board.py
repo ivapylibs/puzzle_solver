@@ -735,7 +735,7 @@ class Correspondences:
     is an implicit static assumption underlying the elements temporal evolution.
     """
 
-    def __init__(self, theParams=CorrespondenceParms, initBoard = None):
+    def __init__(self, theParams=CfgCorrespondences(), initBoard = None):
         """!
         @brief  Constructor for the board matcher class.
 

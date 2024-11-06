@@ -71,8 +71,10 @@ binDet     = detector.inImage(improc)
 
 theLayer   = boardMeasure()
 
-CfgTrack   = board.CfgCorrespondences(dict(matcher = 'SIFTCV',  
-                   matchParams = simScore.CfgSIFTCV.get_default_settings()))
+CfgTrack   = board.CfgCorrespondences()
+CfgTrack.matcher = 'SIFTCV'  
+CfgTrack.matchParams = None
+print(CfgTrack)
 theTracker = board.Correspondences(CfgTrack)
 
 boardPer   = boardPerceive(None, binDet, theLayer, theTracker)
