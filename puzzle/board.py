@@ -54,6 +54,7 @@ from detector.Configuration import AlgConfig
 from puzzle.pieces.matcher import MatchDifferent
 from puzzle.pieces.matcher import MatchSimilar
 import puzzle.pieces.matchDifferent as diffScore
+import puzzle.pieces.matchSimilar as simScore
 
 
 #
@@ -1150,6 +1151,9 @@ class Correspondences:
       elif (typeStr == 'ColorHistCV'):
         theConfig = diffScore.CfgHistogramCV()
         matchType = diffScore.HistogramCV
+      elif (typeStr == 'SIFTCV'):
+        theConfig = simScore.CfgSIFTCV()
+        matchType = simScore.SIFTCV
 
       if (matchConfig is not None):
         theConfig.merge_from_other_cfg(matchConfig)

@@ -39,6 +39,7 @@ import improcessor.basic as improcessor
 from puzzle.parser import boardPerceive
 from puzzle.parser import boardMeasure, CfgBoardMeasure
 import puzzle.board as board
+import puzzle.pieces.matchSimilar as simScore
 
 
 from puzzle.piece import Template
@@ -70,7 +71,8 @@ binDet     = detector.inImage(improc)
 
 theLayer   = boardMeasure()
 
-CfgTrack   = board.CfgCorrespondences.buildColorMatchCV()
+CfgTrack   = board.CfgCorrespondences(dict(matcher = 'SIFTCV',  
+                   matchParams = simScore.CfgSIFTCV.get_default_settings()))
 theTracker = board.Correspondences(CfgTrack)
 
 boardPer   = boardPerceive(None, binDet, theLayer, theTracker)
