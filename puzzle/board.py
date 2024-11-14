@@ -667,7 +667,22 @@ SCORE_SIMILAR = 1
 
 class CfgCorrespondences(AlgConfig):
   '''!
+  @ingroup  PuzzleSolver
   @brief  Configuration setting specifier for Correspondences class.
+  
+
+  The different configuration settings are:
+  | field        | influences or controls |
+  | ------------ | ---------------------- | 
+  | doUpdate     | Boolean indicating whether to update IDs with assigned piece IDs or not. |
+  | haveGarbage  | Include garbage classes for pieces? Pemits non-assignment if too off. |
+  | tauGarbage   | Value to apply to garbage classes. How threshold applies is based on matcher type |
+  | forceMatches | Boolean indicating whether matches should be forced or post-filtered and removed. |
+  | matcher      | String indicating what Matcher to use. |
+  | matchParams  | Matcher parameter settings as a dictionary. |
+
+  @note Added but not yet implemented: haveGarbage, tauGarbage, forceMatches.
+        They have no influence on processing.  This is being worked on.
   '''
 
   #============================= __init__ ============================
@@ -696,7 +711,9 @@ class CfgCorrespondences(AlgConfig):
     @param[out] default_dict  Dictionary populated with minimal set of
                               default settings.
     '''
-    default_dict = dict(doUpdate = True, matcher = 'Moments',  
+    default_dict = dict(doUpdate = True, haveGarbage = False, tauGarbage = float('inf'),
+                   forceMatches = True,
+                   matcher = 'Moments',  
                    matchParams = diffScore.CfgMoments.get_default_settings())
 
     return default_dict
@@ -728,6 +745,7 @@ class CfgCorrespondences(AlgConfig):
 
 class Correspondences:
     """!
+    @ingroup  PuzzleSolver
     @brief    Class that compares two boards and generates correspondences across them.
    
     The comparison technique and properties are completely up to the programmer/engineer
@@ -796,7 +814,7 @@ class Correspondences:
           # Associations are stored in member variable (pAssignments).
           self.matchPieces()
 
-          # Generate a new board for association, filtered by the matcher threshold At this point,
+          # Generate a new board for association, filtered by the matcher threshold. At this point,
           # the associations are candidate associations.  They are not locked in.  If the matcher
           # comparator indicates that the two associated elements are the same, then the
           # assignment is preserved.  Otherwise, it is effectively tossed out.
@@ -810,6 +828,11 @@ class Correspondences:
           #
           pFilteredAssignments = {}
           for assignment in self.pAssignments.items():
+              # @todo   If adding option to have no match, taht means a match to a garbage class
+              #         whose index will be greater than the number of pieces in the compared board.
+              #         When that happens, the comparison should be rejected. ret = False.
+              #         Need to add this when haveGarbage option is coded up.
+
               ret = self.matcher.compare(self.boardMeasurement.pieces[assignment[0]], self.boardEstimate.pieces[assignment[1]])
   
               # @todo PAV[10/16] Need to remove this part.  A different process should try to 
@@ -817,18 +840,31 @@ class Correspondences:
               #       update function.  This is part of the tracker to work out, not part of the
               #       assignment system though it might need or benefit from the displacement
               #       information.
+              # @todo PAV[11/14] Changing would break to much code.  Need to first do a review or
+              #       where needed and used, what impacts on code there would be, and what all needs
+              #       to happen at once to resolve.  Will require a branch to resolve.
+              #       Looks like uses internally derived orientation to
+              #       establish rotation alignment if the SIFT approach is not
+              #       used.
               #
               # Some matchers calculate the rotation as well from mea to sol (counter-clockwise)
               if isinstance(ret, tuple):
-                  if ret[0]:
+                  if (self.params.forceMatches):
+                      self.pAssignments_rotation[assignment[0]]=ret[1]
+                      pFilteredAssignments[assignment[0]] = assignment[1]
+                  elif ret[0]:
                       self.pAssignments_rotation[assignment[0]]=ret[1]
                       pFilteredAssignments[assignment[0]] = assignment[1]
               else:
-                  if ret:
+                  if (self.params.forceMatches):
                       self.pAssignments_rotation[assignment[0]] = \
                                           self.boardMeasurement.pieces[assignment[0]].theta \
                                           - self.boardEstimate.pieces[assignment[1]].theta
-  
+                      pFilteredAssignments[assignment[0]] = assignment[1]
+                  elif ret:
+                      self.pAssignments_rotation[assignment[0]] = \
+                                          self.boardMeasurement.pieces[assignment[0]].theta \
+                                          - self.boardEstimate.pieces[assignment[1]].theta
                       pFilteredAssignments[assignment[0]] = assignment[1]
   
   
@@ -859,6 +895,8 @@ class Correspondences:
         #scoreTable_color = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size()))
         #scoreTable_edge_color = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size(), 4))
 
+        # @todo What about having a garbage collecting match? with score?
+        #
         scoreTable = np.zeros((self.boardMeasurement.size(), self.boardEstimate.size()))
 
         for idx_x, MeaPiece in enumerate(self.boardMeasurement.pieces):
@@ -870,12 +908,11 @@ class Correspondences:
                 ret = self.matcher.score(self.boardMeasurement.pieces[MeaPiece], self.boardEstimate.pieces[SolPiece])
                 scoreTable[idx_x][idx_y] = ret
 
-                # If above craps out during operation due to multiple return values, it is because the scoring
-                # method is improper.
+                # If above craps out during operation due to multiple return
+                # values, it is because the scoring method is improper.
 
                 #DEBUG 
                 #print( (self.boardMeasurement.pieces[MeaPiece].rLoc, self.boardEstimate.pieces[SolPiece].rLoc) )
-
                 #if type(ret) is tuple and len(ret) > 0:
                 #    scoreTable_shape[idx_x][idx_y] = np.sum(ret[0])
                 #    scoreTable_color[idx_x][idx_y] = np.sum(ret[1])
@@ -883,26 +920,45 @@ class Correspondences:
                 #else:
                 #    scoreTable_shape[idx_x][idx_y] = ret
 
-        # Save for debug
+        # Save for debug or post-matching processing if needed.
         self.scoreTable = scoreTable.copy()
         #DEBUG
         #print(self.scoreTable)
 
-        # The measured piece will be assigned a solution piece
+        # The measured piece will be assigned a solution piece.
         # Some measured piece may not have a match according to the threshold.
         # self.pAssignments = self.greedyAssignment(scoreTable_shape, scoreTable_color, scoreTable_edge_color)
-        self.pAssignments = self.hungarianAssignment(scoreTable)
+        self.pAssignments = self.HungarianAssignment(scoreTable)
 
 
-    #======================= hungarianAssignment =======================
+    #======================= HungarianAssignment =======================
     #
-    def hungarianAssignment(self, scoreTable):
+    def HungarianAssignment(self, scoreTable, getInverse = False):
         """!
         @brief  Run Hungarian Assignment for the score table.
 
+        Atempts to associate row elements with column elements to define an assignment
+        mapping that gives column elements (ideally) the same ID as the row elements.
+        Per [scipy documentation for linear_sum_assignment]
+        (https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html):
+        > Can also solve a generalization of the classic assignment problem
+        > where the cost matrix is rectangular. If it has more rows than
+        > columns, then not every row needs to be assigned to a column, and
+        > vice versa.
+
+        The score table shape will influence the operation of the Hungarian Assignment implementation.
+        If the matrix is:
+        - square, then association will be a 1-1 assignment;
+        - wide, then the associated will be a 1-1 assignment with unassigned columns;
+        - tall, then the association is permissive of unassigned row elements, not 1-1.
+
+        It is up to the outer scope to establish what is the best way to pass
+        in the scoreTable and then to interpret the results.  If the 1-1 association
+        should operate in the opposite direction, then set getInverse to True.
+
+        Returning assignments as a dictionary to permit non-assignment. 
 
         @param[in]  scoreTAble  Score table for the pairwise comparison.
-
         @param[out] matched_id  Matched pair dict.
         """
 
@@ -912,17 +968,20 @@ class Correspondences:
 
         matched_id = {}
 
+        #
         if self.scoreType == SCORE_DIFFERENCE:
             row_ind, col_ind = linear_sum_assignment(scoreTable)
         else:
             row_ind, col_ind = linear_sum_assignment(scoreTable, maximize=True)
 
-        for i, idx in enumerate(col_ind):
-            matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
+        if getInverse:
+          for i, idx in enumerate(col_ind):
+              matched_id[pieceKeysList_solution[i]] = pieceKeysList_bMeas[idx]
+        else:
+          for i, idx in enumerate(col_ind):
+              matched_id[pieceKeysList_bMeas[i]] = pieceKeysList_solution[idx]
 
         return matched_id
-        # @todo     What is best way to return result? Dict permits non-assignment. Maybe good.
-        #           That way can establish measured, missing, estimated boards.
 
 
     #========================= greedyAssignment ========================
