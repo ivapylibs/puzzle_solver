@@ -595,7 +595,7 @@ class Board:
 
     #============================= display =============================
     #
-    def display_mp(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
+    def display_mp(self, theImage=None, ax=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
                                                                    BOUNDING_BOX=False):
         """!
         @brief  Display the puzzle board as an image using matplot library.
@@ -604,23 +604,27 @@ class Board:
         @param[in]  fh                  Figure handle if available.
         @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
         @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
+        @param[in]  ax                  Subplot Axes if available
 
         @param[out] fh                  Figure handle.
         """
-
-        if fh:
-            # See https://stackoverflow.com/a/7987462/5269146
-            fh = plt.figure(fh.number)
-        else:
-            fh = plt.figure()
-
+        
         theImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY, 
                                 CONTOUR_DISPLAY=CONTOUR_DISPLAY,
                                 BOUNDING_BOX=BOUNDING_BOX)
+        
+        if ax is not None:  # Plot in a subplot
+            ax.clear()  
+            ax.imshow(theImage) 
 
-        plt.imshow(theImage)
+        else:  # Create or update a full figure
+            if fh:  
+                fh = plt.figure(fh.number)  
+            else:  
+                fh = plt.figure()
+            plt.imshow(theImage)
 
-        return fh
+            return fh
 
     #============================= display_cv ============================
     #
