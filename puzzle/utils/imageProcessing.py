@@ -253,7 +253,7 @@ def extract_region(img, verbose=False):
 def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000, 
                                            areaThresholdUpper=8000, \
                            BoudingboxThresh = (30,80), cannyThresh=(30, 60), \
-                           WITH_AREA_THRESH=False ,verbose=False):
+                           WITH_AREA_THRESH=False ,verbose=False, ret_thresh_mask = False):
     """!
     @brief Preprocess the RGB image of a segmented puzzle piece in a circle
             area to obtain a mask.  Note that the threshold is very
@@ -382,7 +382,10 @@ def preprocess_real_puzzle(img, mask=None, areaThresholdLower=1000,
         cv2.imshow('im_floodfill', im_floodfill.astype('uint8')*255)
         cv2.waitKey()
 
-    return im_floodfill
+    if ret_thresh_mask:
+        return mask
+    else:
+        return im_floodfill
 
 
 #====================== preprocess_synthetic_puzzle ======================
