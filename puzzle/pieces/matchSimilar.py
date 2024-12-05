@@ -293,13 +293,13 @@ class SIFTCV(MatchSimilar):
       distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
 
     # DEBUG
-    print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
-    print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
+    #print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
+    #print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
     isaMatch = distance > self.params.tau
 
     # If not a match then don't bother with additional calculations.
     if not isaMatch:
-      return False, None, None
+      return False, 0, None     # Not a match, no rotation, no match parameters.
 
     # If a match, then continue with additional calculations: estimate affine
     # transform model using keypoint coordinates and matched descriptors.
