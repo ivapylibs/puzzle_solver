@@ -523,6 +523,7 @@ class Board:
 
                         y, x = np.nonzero(piece.y.mask)
 
+                        # @todo  This should be rLoc or y.pcorner?
                         pos = (int(piece.rLoc[0] + np.mean(x)) - char_size[0] + abs(enlarge[0]),
                                int(piece.rLoc[1] + np.mean(y)) + char_size[1] + abs(enlarge[1]))
 

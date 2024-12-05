@@ -157,7 +157,10 @@ class Template:
                 #self.cLoc = np.array(self.y.pcorner + r - self.y.pcorner) #todo Need to double check.
                 self.rLoc = np.array(r)
 
-            self.y.pcorner = self.rLoc      # Why do this rather than shift by (rLoc' - rLoc)?
+            self.y.pcorner = self.rLoc      
+            # Why do this rather than shift by (rLoc' - rLoc)?
+            # What is the proper way to do this given the interpretations of rLoc and pcorner?
+            # Make sure that printed ID location agrees with image location.
 
     #    if isCenter:        # Specifying center and not top-left corner.
     #        if isOffset:
