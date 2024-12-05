@@ -813,7 +813,7 @@ class Correspondences:
 
         else:
           #DEBUG
-          #print('Generating correspondences.')
+          #print('C-process | Generating correspondences.')
 
           # Compare with previous board and generate associations
           # Associations are stored in member variable (pAssignments).
@@ -876,6 +876,9 @@ class Correspondences:
           # pAssignments refers to the id of the puzzle piece
           #
           self.pAssignments = pFilteredAssignments
+
+          #DEBUG
+          #print(self.pAssignments)
 
     #=========================== matchPieces ===========================
     #

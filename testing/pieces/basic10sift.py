@@ -22,6 +22,7 @@
 # ==[0] Prep environment
 import os
 from copy import deepcopy
+import random 
 
 import matplotlib.pyplot as plt
 
@@ -118,13 +119,12 @@ theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 theGridSol.display_mp(ID_DISPLAY=True) # Display the board 
 
 
-# ==[2] Explode the board, randomize orientations, randomize locations
+#==[2] Explode the board, randomize orientations, randomize locations
 #
-
 epImage, theGridMea = theGridSol.explodedPuzzle(dx=200, dy=200) # Explode
 
 # DEBUG VISUAL
-theGridMea.display_mp(ID_DISPLAY=True) # Exploded Board
+#theGridMea.display_mp(ID_DISPLAY=True) # Exploded Board
 
 # Gridded.swapPuzzle does not work
 
@@ -132,15 +132,21 @@ pieceLocations = theGridMea.pieceLocations()
 pieceLocations = [value for value in pieceLocations.values()]
 random.shuffle(pieceLocations)
 
+keyOrig = list(theGridMea.pieces)
+keyShuf = keyOrig.copy()
+random.shuffle(keyShuf)
+keyMap  = dict(zip(keyOrig, keyShuf))
+
 for key in theGridMea.pieces.keys():
     piece = theGridMea.pieces[key]
     piece.setPlacement(pieceLocations[key]) # Randomize Locations
     rotatedPiece = piece.rotatePiece(random.uniform(0, 30)) # Randomize Orientations
+    rotatedPiece.id = keyMap[key]+1
     theGridMea.pieces[key] = rotatedPiece
 
 theGridMea.display_mp(ID_DISPLAY=True) 
 
-# ==[3] Correspondences
+#==[3] Correspondences
 
 CfgTrack   = board.CfgCorrespondences()
 CfgTrack.matcher = 'SIFTCV'  
@@ -149,7 +155,6 @@ CfgTrack.forceMatches = opt.forceMatches
 theTracker = board.Correspondences(CfgTrack, theGridSol)
 
 theTracker.process(theGridMea)
-
 theGridMea.display_mp(ID_DISPLAY=True)
 
 plt.show()
