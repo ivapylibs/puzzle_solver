@@ -578,7 +578,7 @@ class Gridded(Interlocking):
   #======================= buildFrom_ImageAndMask ======================
   #
   @staticmethod
-  def buildFrom_ImageAndMask(theImage, theMask, theParams=CfgGridded()):
+  def buildFrom_ImageAndMask(theImage, theMask, theParams=CfgGridded(), show_grid=False):
     '''!
     @brief Given an image and an image mask, parse both to recover the puzzle
            calibration/solution.
@@ -595,8 +595,9 @@ class Gridded(Interlocking):
 
     aPuzzle   = Arrangement.buildFrom_ImageAndMask(theImage, theMask, theParams)
 
-    aPuzzle.display_mp()
-    plt.show()
+    if show_grid:
+      aPuzzle.display_mp()
+      plt.show()
 
     thePuzzle = Gridded(aPuzzle, theParams)
 
