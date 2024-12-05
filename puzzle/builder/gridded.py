@@ -478,6 +478,8 @@ class Gridded(Interlocking):
       piece.placeInImageAt(epImage, rc=r_new)
       piece.setPlacement(r_new)
 
+    # @todo Doesn't seem to have copied the piece IDs.  Need to double check that.
+
     return epImage, epBoard
     
   #=============================== getGc ===============================
