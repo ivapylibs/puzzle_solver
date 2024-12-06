@@ -147,8 +147,10 @@ CfgTrack.forceMatches = opt.forceMatches
 theTracker = board.Correspondences(CfgTrack, theGridSol)
 
 theTracker.process(theGridMea)
+theGridMea.retile(300,300)
 theGridMea.display_mp(ID_DISPLAY=True)
 print(idMap)
+print(theGridMea.pshape)
 plt.show()
 
 #

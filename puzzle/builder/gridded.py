@@ -383,7 +383,7 @@ class Gridded(Interlocking):
           
     return flag
 
-  #============================== shuffle =============================
+  #============================== shuffle ==============================
   def shuffle(self, numPieces=None, reorient=False, rotRange=[0,30]):
     '''!
     @brief  Randomly shuffle location of puzzle pieces of the puzzle.
@@ -426,6 +426,61 @@ class Gridded(Interlocking):
 
     return idMap
 
+  #================================ retile ===============================
+  #
+  def retile(self, dx=150, dy=150, inOrder = True):
+    '''!
+    @brief  Organize puzzle pieces according to gridding.
+
+    Takes the puzzle pieces as ordered in the list and attaches them to
+    a gridding respecting the puzzle shape. If there are not enough
+    puzzle pieces, then it will stop at last one.  If there are too many,
+    then these will be dumped below the gridding with extra vertical offset.
+
+    @param[in]  dx          Horizontal step increment of grid.
+    @param[in]  dy          Vertical   step increment of grid.
+    @param[in]  inOrder     Sort by puzzle piece ID.
+    '''
+
+    pSize = self.pshape[0]*self.pshape[1]
+
+    if (inOrder):
+      pieceIDs = list(enumerate([self.pieces[i].id for i in range(self.size())]))
+      sortIDs = sorted(pieceIDs, key=lambda x:x[1])
+      sortInd = [index for index, _ in sortIDs]
+    else:
+      sortInd = list(range(0,self.size()))
+
+    pcnt  = 0;
+    for py in range(self.pshape[1]):
+      for px in range(self.pshape[0]):
+        self.pieces[sortInd[pcnt]].setPlacement(np.array([px*dx, py*dy]))
+        pcnt = pcnt + 1
+
+        if (pcnt >= pSize):
+          break
+
+      if (pcnt >= pSize):
+        break
+    
+    if (pcnt < pSize):
+      numLeft = (self.size() - pcnt)
+
+      numRows, numRem = divmod(numLeft, self.pshape[0])
+      if (numRem > 0):
+        numRows = numRows + 1
+
+      for py in range(self.pshape[1]+2,self.pshape[1]+2+numRows):
+        for px in range(self.pshape[0]):
+          self.pieces[sortInd[pcnt]].setPlacement(np.array([px*dx, py*dy]))
+          pcnt = pcnt + 1
+
+          if (pcnt >= self.size()):
+            break
+
+        if (pcnt >= self.size()):
+          break
+    
   #============================ explodedPuzzle ===========================
   #
   def explodedPuzzle(self, dx=100, dy=50, bgColor=(0, 0, 0)):
