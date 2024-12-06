@@ -26,6 +26,8 @@
 #
 import pickle
 import math
+import random
+
 from copy import deepcopy
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
@@ -381,47 +383,48 @@ class Gridded(Interlocking):
           
     return flag
 
-  #============================== swapPuzzle =============================
-  def swapPuzzle(self, num=100):
+  #============================== shuffle =============================
+  def shuffle(self, numPieces=None, reorient=False, rotRange=[0,30]):
     '''!
-    @brief  Randomly swap rLoc of two puzzle pieces for num times.
+    @brief  Randomly shuffle location of puzzle pieces of the puzzle.
 
-    @param[in] num  The number of times to swap.
+    Basically takes random mapping of puzzle pieces to each other, then swaps
+    locations and IDs.  That should shuffle everything up.
 
-    @param[out] epImage     Generated puzzle image.
-    @param[out] epBoard     Generated puzzle board.
-    @param[out] change_map  Ground truth change dict mapping (Old -> New).
+    # @todo The numPieces argument does nothing as of now.  Should address.
+
+    @param[in]  numPieces   Number of pieces to shuffle (default: None = All pieces).
+    @param[in]  reorient    Also apply random rotation (default: False).
+    @param[in]  rotRange    Range of random rotation if reorienting.
+
+    @param[out] idMap       The ground truth shuffling as a dict [oldId -> newId]
     '''
 
-    # Note: We do not care about id in this function.
-    epBoard = deepcopy(self)
+    keyOrig = list(self.pieces)
+    keyShuf = keyOrig.copy()
+    random.shuffle(keyShuf)
 
-    pieceKeysList = list(epBoard.pieces.keys())
+    pieceLocations = self.pieceLocations()
+    pieceLocations = np.transpose(np.array([value for value in pieceLocations.values()]))
+    pieceLocations = pieceLocations[:,np.array(keyShuf)]
 
-    # Initialize a change dict
-    # Old -> New
-    change_dict = {}
-    for key in pieceKeysList:
-      change_dict[key]=key
+    pieceIDs = np.array([self.pieces[i].id for i in range(self.size())])
+    shuffIDs = pieceIDs[keyShuf]
+    key2id = dict(zip(keyOrig, shuffIDs))
+    idMap  = dict(zip(pieceIDs, shuffIDs))
 
-    for i in range(num):
-      target_list = np.random.randint(0, epBoard.size(), 2)
+    for key in self.pieces.keys():
+      piece = self.pieces[key]
 
-    # Exchange values
-    change_dict[target_list[0]],change_dict[target_list[1]] = change_dict[target_list[1]],change_dict[target_list[0]]
+      if reorient:
+        piece = piece.rotatePiece(random.uniform(rotRange[0], rotRange[1]))    # Random reorientation
 
-    # Exchange rLoc
-    epBoard.pieces[pieceKeysList[target_list[0]]].rLoc, \
-    epBoard.pieces[pieceKeysList[target_list[1]]].rLoc =  \
-                    epBoard.pieces[pieceKeysList[target_list[1]]].rLoc, \
-                    epBoard.pieces[pieceKeysList[target_list[0]]].rLoc
+      piece.setPlacement(pieceLocations[:,key])             # shuffled location.
+      piece.id = key2id[key]
 
-    epImage = epBoard.toImage(CONTOUR_DISPLAY=False)
+      self.pieces[key] = piece
 
-    # Invert mapping
-    # New -> old(solution board order)
-    change_dict = {v: k for k, v in change_dict.items()}
-    return epImage, epBoard, change_dict
+    return idMap
 
   #============================ explodedPuzzle ===========================
   #

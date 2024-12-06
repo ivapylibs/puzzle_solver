@@ -1,25 +1,32 @@
 #!/usr/bin/python3
-#============================ arg01_clusterByColor ===========================
+#================================== corr02sift =================================
 ## @file
-# @brief    Test the clustering methods and provide more options to the user.
+# @brief    Test the SIFT data association for various puzzle configurations.
 #
 # Loads the desired puzzle and applies process according to arguments to create a
-# puzzle.  The puzzle is displayed.  If specified, the puzzle pieces will be
-# clusters and a separate image will be created with cluster ID overlay.
+# puzzle.  The exploded and shuffled puzzle pieces are then matched against the
+# original extracted puzzle.  If all went well, the associations should be 
+# correct.
 #
 #  Use the ``--help`` flag to see what the options are.  Sending no option swill
 #  default to a 48 piece fish puzzle.
 #
+# Since the original puzzle shuffle member function did not work, this script
+# performs the shuffling process.  The next iteration runs from within the
+# shuffle member function.
+#
 # @ingroup TestCluster
+#
+# @author   Devesh Nath
+# @author   Patricio A. Vela,   pvela@gatech.edu
+# @date     2024/12/06  [created]
+#
 # @quitf
 #
-# @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
-# @date     2022/10/26  [created]
-#
-#============================ arg01_clusterByColor ===========================
+#================================== corr02sift =================================
 
 
-# ==[0] Prep environment
+#==[0] Prep environment
 import os
 from copy import deepcopy
 import random 
@@ -87,7 +94,7 @@ mask_dict = {
     60: 'puzzle_60p_AdSt408534841.png'
 }
 
-# ==[1] Read the source image and template.
+#==[1] Read the source image and template.
 #
 
 prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
@@ -98,53 +105,38 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol_src = cv2.imread(prefix + mask_dict[opt.mask])
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
-# ==[1.1] Create an improcessor to obtain the mask.
+#==[1.1] Create an improcessor to obtain the mask.
 #
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
-# ==[1.2] Create Gridded Board
+#==[1.2] Create Gridded Board
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
 
 cfgGrid = CfgGridded()
 cfgGrid.tauGrid = 5000
-cfgGrid.reorder=False
+cfgGrid.reorder = False
 
 theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 
 # DEBUG VISUAL 
-theGridSol.display_mp(ID_DISPLAY=True) # Display the board 
+theGridSol.display_mp(ID_DISPLAY=True)  # Display the original board 
 
 
 #==[2] Explode the board, randomize orientations, randomize locations
-#
+#       Not using the Gridded.swapPuzzle
 epImage, theGridMea = theGridSol.explodedPuzzle(dx=200, dy=200) # Explode
 
-# DEBUG VISUAL
+#DEBUG VISUAL
 #theGridMea.display_mp(ID_DISPLAY=True) # Exploded Board
 
-# Gridded.swapPuzzle does not work
+idMap = theGridMea.shuffle(reorient=True)
 
-pieceLocations = theGridMea.pieceLocations()
-pieceLocations = [value for value in pieceLocations.values()]
-random.shuffle(pieceLocations)
-
-keyOrig = list(theGridMea.pieces)
-keyShuf = keyOrig.copy()
-random.shuffle(keyShuf)
-keyMap  = dict(zip(keyOrig, keyShuf))
-
-for key in theGridMea.pieces.keys():
-    piece = theGridMea.pieces[key]
-    piece.setPlacement(pieceLocations[key]) # Randomize Locations
-    rotatedPiece = piece.rotatePiece(random.uniform(0, 30)) # Randomize Orientations
-    rotatedPiece.id = keyMap[key]+1
-    theGridMea.pieces[key] = rotatedPiece
-
-theGridMea.display_mp(ID_DISPLAY=True) 
+#DEBUG VISUAL
+#theGridMea.display_mp(ID_DISPLAY=True) 
 
 #==[3] Correspondences
 
@@ -156,8 +148,8 @@ theTracker = board.Correspondences(CfgTrack, theGridSol)
 
 theTracker.process(theGridMea)
 theGridMea.display_mp(ID_DISPLAY=True)
-
+print(idMap)
 plt.show()
 
 #
-#============================ arg01_clusterByColor ===========================
+#================================== corr02sift =================================
