@@ -6,14 +6,11 @@
 # Loads the desired puzzle and applies process according to arguments to create a
 # puzzle.  The exploded and shuffled puzzle pieces are then matched against the
 # original extracted puzzle.  If all went well, the associations should be 
-# correct.
+# correct.  The pieces are numerically ordered by ID for easy comparison against
+# the solution pieces.
 #
 #  Use the ``--help`` flag to see what the options are.  Sending no option swill
 #  default to a 48 piece fish puzzle.
-#
-# Since the original puzzle shuffle member function did not work, this script
-# performs the shuffling process.  The next iteration runs from within the
-# shuffle member function.
 #
 # @ingroup TestCluster
 #
@@ -105,13 +102,12 @@ theImageSol = cv2.cvtColor(theImageSol, cv2.COLOR_BGR2RGB)
 theMaskSol_src = cv2.imread(prefix + mask_dict[opt.mask])
 theImageSol = cropImage(theImageSol, theMaskSol_src)
 
-#==[1.1] Create an improcessor to obtain the mask.
+#==[2] Create an improcessor to obtain the mask from which to obtain a
+#       puzzle solution.  Display the puzzle solution with ID overlay.
 #
-
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                            improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 
-#==[1.2] Create Gridded Board
 theDet = FromSketch(improc)
 theDet.process(theMaskSol_src.copy())
 theMaskSol = theDet.getState().x
@@ -126,14 +122,14 @@ theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 theGridSol.display_mp(ID_DISPLAY=True)  # Display the original board 
 
 
-#==[2] Explode the board, randomize orientations, randomize locations
+#==[3] Explode the board, swap locations, randomize orientations. 
 #       Not using the Gridded.swapPuzzle
 epImage, theGridMea = theGridSol.explodedPuzzle(dx=200, dy=200) # Explode
 
 #DEBUG VISUAL
 #theGridMea.display_mp(ID_DISPLAY=True) # Exploded Board
 
-idMap = theGridMea.shuffle(reorient=True)
+idMap = theGridMea.shuffle(reorient=True, rotRange=[-50, 80])
 
 #DEBUG VISUAL
 #theGridMea.display_mp(ID_DISPLAY=True) 
@@ -147,10 +143,11 @@ CfgTrack.forceMatches = opt.forceMatches
 theTracker = board.Correspondences(CfgTrack, theGridSol)
 
 theTracker.process(theGridMea)
+
 theGridMea.retile(300,300)
 theGridMea.display_mp(ID_DISPLAY=True)
+
 print(idMap)
-print(theGridMea.pshape)
 plt.show()
 
 #
