@@ -133,7 +133,7 @@ shMask = theDet.getState().x
 theGridMea = Gridded.buildFrom_ImageAndMask(shImage, shMask, cfgGrid)
 
 #DEBUG VISUAL
-theGridMea.display_mp(ID_DISPLAY=True) 
+#theGridMea.display_mp(ID_DISPLAY=True) 
 
 #==[3] Correspondences
 
@@ -146,12 +146,11 @@ theTracker = board.Correspondences(CfgTrack, theGridSol)
 theTracker.process(theGridMea)
 
 #DEBUG VISUAL
-theGridMea.display_mp(ID_DISPLAY=True)
+#theGridMea.display_mp(ID_DISPLAY=True)
 
 theGridMea.pshape = theGridSol.pshape
 theGridMea.retile(300,300)
-theGridMea.display_mp(ID_DISPLAY=True)
-print(theGridMea.pshape)
+#theGridMea.display_mp(ID_DISPLAY=True)
 
 theTracker.matcher.solveMatchedPuzzle(theGridMea, theGridSol)
 

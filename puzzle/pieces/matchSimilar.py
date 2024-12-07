@@ -393,11 +393,19 @@ class SIFTCV(MatchSimilar):
       si = solMap[puzzle.pieces[pi].id]
       cout = self.compare(puzzle.pieces[pi], sol.pieces[si], 0)
 
-      puzzle.pieces[pi].rotate(-cout[1])
       #DEBUG
-      #print(cout[1])
+      #print([-cout[1], sol.pieces[si].y.pcorner, sol.pieces[si].rLoc])
       #print([puzzle.pieces[pi].theta, sol.pieces[si].theta])
+
+      if (np.isnan(cout[1])):
+        cout[1] = 0
+      puzzle.pieces[pi].rotate(-cout[1])
       puzzle.pieces[pi].setPlacement(sol.pieces[si].rLoc)
+
+      # @todo   2024/12/06 - Piece rotation does not shrink puzzle shape when
+      #         height or width gets smaller.  Only adjusts when gets bigger.
+      #         Need to correct that by shrinking the shape appropriately.
+      #         First figure out if there is padding. I think so, maybe not though.
 
 #
 #========================== puzzle.piece.matchSimilar ==========================
