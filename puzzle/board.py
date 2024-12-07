@@ -337,6 +337,8 @@ class Board:
         # @todo This part is untested as of 10/26 but should work. No detected births in current test suite.
         #
         iUnlabeled = set(range(self.size())).difference( iLabeled )
+        #DEBUG
+        #print(iUnlabeled)
         idSet = idContinue
         for i in iUnlabeled:
           self.pieces[i].id = idSet

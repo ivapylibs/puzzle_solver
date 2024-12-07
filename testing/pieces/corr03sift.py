@@ -121,7 +121,7 @@ theGridSol = Gridded.buildFrom_ImageAndMask(theImageSol, theMaskSol, cfgGrid)
 #        Process the image to get the measured board.
 epImage, theGridExp = theGridSol.explodedPuzzle(dx=200, dy=200) # Explode
 
-idMap   = theGridExp.shuffle(reorient=True, rotRange=[40, 40])
+idMap   = theGridExp.shuffle(reorient=True, rotRange=[-180, 180])
 shImage = theGridExp.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
