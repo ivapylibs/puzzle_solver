@@ -514,7 +514,7 @@ class Template:
         @param[in]  matchedPiece    Latest matched measurement of a piece.
         """
 
-        # Should update self (own properties) and (feature vector properties).
+        # @note Should update self (own properties) and (feature vector properties).
         # How to do this has high variation, especially given that the feature
         # vector derives from the piece properties.  Updating the piece properties
         # may require non-trivial updates to the feature vector.  The degrees
@@ -524,8 +524,70 @@ class Template:
         # template, or use sub-classes?   More complex case is to perform a
         # mix of the two.
         #
-        self.featVec = matchedPiece.featVec
+        #self.featVec = matchedPiece.featVec
 
+    #========================== _updatedSource =========================
+    def _updateSource(self, newImage, newMask, cLoc, rLoc):
+
+        y = PuzzleTemplate()
+
+        # Populate dimensions.
+        # Updated to OpenCV style
+        y.size    = [newMask.shape[1], newMask.shape[0]]        # width then height
+        y.pcorner = cLoc
+
+        y.mask = newMask.astype('uint8')
+
+        # Create a contour of the mask.  Find version gets the contour/boundary.
+        # Draw version creates binary contour mask.
+        cnts = cv2.findContours(y.mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        y.contour_pts = cnts[0][0]
+        y.contour = np.zeros_like(y.mask).astype('uint8')
+        cv2.drawContours(y.contour, cnts[0], -1, 255, thickness=2)
+
+        y.rcoords = list(np.nonzero(newMask))  # 2 (row,col) x N
+
+        # Get individual pixel colors from image patch.  Updated to OpenCV style -> (x,y)
+        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0] # 2 (x;y) x N
+        y.rcoords = np.array(y.rcoords)
+
+        y.appear = newImage[y.rcoords[1], y.rcoords[0], :]      # Vectorized appearance.
+
+        # Store template image. Not concerned about bad image data outside of mask.
+        y.image = newImage
+
+        # Set up the rotation (with theta, we can correct the rotation)
+        self.theta = -Template.getEig(y.mask)
+        self.y = y
+        self.rLoc = rLoc
+        self.featVec = None
+
+    #================================= rotate ================================
+    #
+    def rotate(self, theta):
+        """!
+        @brief Rotate piece appearance by given angle.
+
+        @param[in]  theta       Rotation angle.
+        """
+        # First, generate rotated copies of the image data.
+        # Then figure out how to shift location based on new size.
+        # The shift is not sub-pixel, which will cause a small offset
+        # if the new size is an odd difference from old size.
+        # Apply the shift and instantiate a new puzzle piece from
+        # the rotated mask and image.
+        #
+        (rIm, rMa) = rotate_nd(self.y.image, theta, self.y.mask)
+
+        imdims = np.array(self.y.image.shape[0:2])
+        rodims = np.array(rIm.shape[0:2])
+
+        cDelta = (rodims - imdims)/2            # Piece offset (dH,dW).
+        cDelta = cDelta[-1]                     # Piece offset (dx,dy).
+        cLoc   = self.y.pcorner - cDelta.astype('uint8')
+        rLoc   = self.rLoc - cDelta.astype('uint8')
+
+        self._updateSource(rIm, rMa, cLoc, rLoc)
 
     #============================== rotatePiece ==============================
     #

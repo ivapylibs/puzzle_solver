@@ -157,6 +157,23 @@ class Matcher:
 
         raise NotImplementedError
 
+    #======================== solveMatchedPuzzle =======================
+    #
+    def solveMatchedPuzzle(self, puzzle, sol):
+
+      puzIDs = [puzzle.pieces[i].id for i in range(puzzle.size())]
+      puzKey = range(puzzle.size())
+      puzMap = dict(zip(puzIDs, puzKey))
+
+      solIDs = [sol.pieces[i].id for i in range(sol.size())]
+      solKey = range(sol.size())
+      solMap = dict(zip(solIDs, solKey))
+
+      for pi in puzKey:
+        si = solMap[puzzle.pieces[pi].id]
+        puzzle.pieces[pi].setPlacement(sol.pieces[si].rLoc)
+
+
 #
 #---------------------------------------------------------------------------
 #============================== MatchDifferent =============================

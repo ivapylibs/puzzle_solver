@@ -245,7 +245,7 @@ class SIFTCV(MatchSimilar):
 
   #============================= compare =============================
   #
-  def compare(self, piece_A, piece_B):
+  def compare(self, piece_A, piece_B, tauMatch = None):
     """!
     @brief  Compare between two passed puzzle piece data.
 
@@ -270,6 +270,9 @@ class SIFTCV(MatchSimilar):
     @param[out] Comparison result & rotation angle(degree) & other params.
     """
 
+    if tauMatch is None:
+      tauMatch = self.params.tau
+
     # Normally should just call score rather than have duplicate code.  But this
     # function takes advantage of intermediate data created during processing to
     # support puzzle piece registrations.
@@ -293,9 +296,9 @@ class SIFTCV(MatchSimilar):
       distance = 100 * (len(matches) / min(len(feat_A[0]), len(feat_B[0])))
 
     # DEBUG
-    #print(f"Distance = {distance} ?? {self.params.tau} from {matches}")
+    #print(f"Distance = {distance} ?? {tauMatch} from {matches}")
     #print(f"{len(feat_A[0])} vs {len(feat_B[0])}")
-    isaMatch = distance > self.params.tau
+    isaMatch = distance > tauMatch
 
     # If not a match then don't bother with additional calculations.
     if not isaMatch:
@@ -315,6 +318,8 @@ class SIFTCV(MatchSimilar):
     src = np.array(src)
     dst = np.array(dst)
 
+    #DEBUG
+    #print([src, dst])
     # It only makes sense for translation if both piece images have the same origin
     src = np.array(src) + piece_A.rLoc
     dst = np.array(dst) + piece_B.rLoc
@@ -373,6 +378,26 @@ class SIFTCV(MatchSimilar):
     # else:
     #     return distance > self.tau, np.rad2deg(model.rotation), model.params
 
+  #======================== solveMatchedPuzzle =======================
+  #
+
+  def solveMatchedPuzzle(self, puzzle, sol):
+
+    puzKey = range(puzzle.size())
+
+    solIDs = [sol.pieces[i].id for i in range(sol.size())]
+    solKey = range(sol.size())
+    solMap = dict(zip(solIDs, solKey))
+
+    for pi in puzKey:
+      si = solMap[puzzle.pieces[pi].id]
+      cout = self.compare(puzzle.pieces[pi], sol.pieces[si], 0)
+
+      puzzle.pieces[pi].rotate(-cout[1])
+      #DEBUG
+      #print(cout[1])
+      #print([puzzle.pieces[pi].theta, sol.pieces[si].theta])
+      puzzle.pieces[pi].setPlacement(sol.pieces[si].rLoc)
 
 #
 #========================== puzzle.piece.matchSimilar ==========================
