@@ -148,6 +148,7 @@ theGridMea.retile(300,300)
 theGridMea.display_mp(ID_DISPLAY=True)
 
 print(idMap)
+print(theTracker.pAssignments)
 plt.show()
 
 #

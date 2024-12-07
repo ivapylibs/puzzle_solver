@@ -571,6 +571,7 @@ class Template:
         @param[in]  theta       Rotation angle.
         """
         # First, generate rotated copies of the image data.
+        # Second, crop out the black padded area to get tight image/mask patch.
         # Then figure out how to shift location based on new size.
         # The shift is not sub-pixel, which will cause a small offset
         # if the new size is an odd difference from old size.
@@ -579,15 +580,41 @@ class Template:
         #
         (rIm, rMa) = rotate_nd(self.y.image, theta, self.y.mask)
 
+        rowMa = rMa.any(axis=1)
+        colMa = rMa.any(axis=0)
+
+        rowInds = np.argwhere(rowMa)
+        colInds = np.argwhere(colMa)
+
+        cropIm = rIm[rowInds,np.transpose(colInds)]
+        cropMa = rMa[rowInds,np.transpose(colInds)]
+
+        #DEBUG
+        #print([np.shape(rMa), np.shape(colMa), sum(colMa) , np.shape(rowMa), sum(rowMa)])
+
+        #DEBUG
+        #if (sum(colMa) == 285) and (sum(rowMa) == 188) :
+        #  display.rgb(self.y.image,window_name="imorig")
+        #  display.binary(self.y.mask,window_name="maorig")
+        #  display.rgb(rIm,window_name="imrote")
+        #  display.binary(rMa,window_name="marote")
+        #
+        #  print([rowInds[0], rowInds[-1]])
+        #  print([colInds[0], colInds[-1]])
+        #
+        #  display.rgb(cropIm)
+        #  display.binary(cropMa)
+        #  display.wait()
+
         imdims = np.array(self.y.image.shape[0:2])
-        rodims = np.array(rIm.shape[0:2])
+        rodims = np.array(cropIm.shape[0:2])
 
         cDelta = (rodims - imdims)/2            # Piece offset (dH,dW).
         cDelta = cDelta[-1]                     # Piece offset (dx,dy).
         cLoc   = self.y.pcorner - cDelta.astype('uint8')
         rLoc   = self.rLoc - cDelta.astype('uint8')
 
-        self._updateSource(rIm, rMa, cLoc, rLoc)
+        self._updateSource(cropIm, cropMa, cLoc, rLoc)
 
     #============================== rotatePiece ==============================
     #

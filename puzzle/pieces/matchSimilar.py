@@ -398,8 +398,11 @@ class SIFTCV(MatchSimilar):
       #print([puzzle.pieces[pi].theta, sol.pieces[si].theta])
 
       if (np.isnan(cout[1])):
-        cout[1] = 0
-      puzzle.pieces[pi].rotate(-cout[1])
+        angle = 0
+      else:
+        angle = -cout[1]
+
+      puzzle.pieces[pi].rotate(angle)
       puzzle.pieces[pi].setPlacement(sol.pieces[si].rLoc)
 
       # @todo   2024/12/06 - Piece rotation does not shrink puzzle shape when
