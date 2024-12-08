@@ -125,12 +125,17 @@ idMap   = theGridExp.shuffle(reorient=True, rotRange=[-180, 180])
 shImage = theGridExp.toImage(CONTOUR_DISPLAY=False, BOUNDING_BOX=False)
 
 improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
-                           improcessor.basic.thresh, ((10, 255, cv2.THRESH_BINARY),))
+                           improcessor.basic.thresh, ((5, 255, cv2.THRESH_BINARY),))
 theDet = FromSketch(improc)
 theDet.process(shImage)
 shMask = theDet.getState().x
 
-theGridMea = Gridded.buildFrom_ImageAndMask(shImage, shMask, cfgGrid)
+try:
+  theGridMea = Gridded.buildFrom_ImageAndMask(shImage, shMask, cfgGrid)
+except:
+  display.binary(theMaskSol)
+  display.wait()
+
 
 #DEBUG VISUAL
 #theGridMea.display_mp(ID_DISPLAY=True) 

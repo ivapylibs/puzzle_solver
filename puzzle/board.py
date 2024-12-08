@@ -332,11 +332,24 @@ class Board:
             #               No checking for correctness: not possible given what is known
             #               in this context.
 
+        iUnlabeled = set(range(self.size())).difference( iLabeled )
+
         # [2] Get un-matched pieces and assign new IDs
         #
         # @todo This part is untested as of 10/26 but should work. No detected births in current test suite.
         #
-        iUnlabeled = set(range(self.size())).difference( iLabeled )
+        # @todo 2024/12/07 Did get some errors here.  Not sure why though.  They don't happen
+        #       anymore, so the problem may be from elsewhere.  Nevertheless, this routine should
+        #        not be crashing!  Somehow there is an unlabeled piece (whose index might be too
+        #        big/invalid) and then it bonks out because pieces[i] can't be indexed.  Why?
+
+        # DEBUG - Trying to figure out problem from 2024/12/07 above.
+        #print(type(self))
+        #print(self.size())
+        #print(self.pshape)
+        #print(newLabels)
+        #print(idContinue)
+        #print(iLabeled)
         #DEBUG
         #print(iUnlabeled)
         idSet = idContinue

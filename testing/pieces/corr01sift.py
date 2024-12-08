@@ -149,7 +149,7 @@ idMap  = dict(zip(pieceIDs, shuffIDs))
 for key in theGridMea.pieces.keys():
     piece = theGridMea.pieces[key]
     piece.setPlacement(pieceLocations[:,key]) # Randomize Locations
-    rotatedPiece = piece.rotatePiece(random.uniform(0, 30)) # Random reorientation
+    rotatedPiece = piece.rotatePiece(random.uniform(10, 10)) # Random reorientation
     rotatedPiece.id = key2id[key]
     theGridMea.pieces[key] = rotatedPiece
 
