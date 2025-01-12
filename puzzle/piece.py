@@ -806,6 +806,105 @@ class Template:
 
         return theta
 
+    #=========================== replaceSourceData ===========================
+    #
+    def replaceSourceData(self, theImage, pOff = None):
+        """!
+        @brief Replace a puzzle pieces source data by grabbing from an image. 
+
+        Takes the template puzzle piece source pixels and uses the image data 
+        at those pixel locations to define a new puzzle piece. 
+
+        @param[in]  pOff        Offset in (dx,dy) coordinates.
+
+        @return     newPiece    New puzzle template instance.
+        """
+        #! NOT IMPLEMENTED.
+        #!If an offset or rotation is given then it applies that to the source data.
+        #!@param[in]  theta       Applied rotation angle.
+
+        #! Copied from rotatePiece since it had the right logic.
+        rIm = self.y.image
+        rMa = self.y.mask
+
+        rowMa = rMa.any(axis=1)
+        colMa = rMa.any(axis=0)
+
+        rowInds = np.argwhere(rowMa)
+        colInds = np.argwhere(colMa)
+
+        cropMa = rMa[rowInds,np.transpose(colInds)]
+
+        # Reconsitute a puzzle template from cropped mask and image 
+
+        imdims = np.array(self.y.image.shape[0:2])
+        rodims = np.array(cropMa.shape[0:2])
+
+        cDelta = (rodims - imdims)/2            # Piece offset (dH,dW).
+        cDelta = cDelta[-1]                     # Piece offset (dx,dy).
+        cLoc   = self.y.pcorner - cDelta
+        rLoc   = self.rLoc - cDelta
+
+        cLoc   = np.maximum(cLoc, 0)            # Keep in bounds at min edges.
+        rLoc   = np.maximum(rLoc, 0)            # No problems with max edges.
+
+        cLoc   = cLoc.astype(int)
+        rLoc   = rLoc.astype(int)
+
+        #! DEBUG
+        #!print(cLoc)
+        #!print(rLoc)
+        #!print(rowInds[0])
+        #!print(colInds[0])
+
+        print(pOff)
+
+        if (pOff is not None):
+          cLoc   = cLoc + pOff
+          cLoc   = cLoc.astype(int)
+
+        rowInds = rowInds - rowInds[0]
+        colInds = colInds - colInds[0]
+
+        colInds = colInds + cLoc[0]
+        rowInds = rowInds + cLoc[1]
+
+        if (colInds[0] < 0):
+          colInds = colInds - colInds[0]
+          cLoc[0] = 0
+
+        if (colInds[-1] >= theImage.shape[1]):
+          colInds = colInds - (colInds[-1] - theImage.shape[1]);
+          cLoc[0] = colInds[0]
+
+        if (rowInds[0] < 0):
+          rowInds = rowInds - rowInds[0]
+          cLoc[1] = 0
+
+        if (rowInds[-1] >= theImage.shape[0]):
+          rowInds = rowInds - (rowInds[-1] - theImage.shape[0]);
+          cLoc[1] = rowInds[0]
+
+        #!if (colInds[-1]
+        cropIm = theImage[rowInds, np.transpose(colInds), :]
+
+        #! DEBUG
+        #!print(rowInds[:,0])
+        #!print(colInds[:,0])
+        #!print(colInds[-1])
+        #!print(theImage.shape)
+        #!print(cropIm.shape)
+
+        #! DEBUG VISUAL
+        #!display.rgb(self.y.image,window_name="original")
+        #!display.rgb(cropIm,window_name="replacement")
+        #!display.wait()
+
+        newPiece = Template.buildFromMaskAndImage(cropMa, cropIm, cLoc, rLoc, \
+                                                  pieceStatus=self.status)
+
+        return newPiece
+
     #============================== buildSquare ==============================
     #
     @staticmethod

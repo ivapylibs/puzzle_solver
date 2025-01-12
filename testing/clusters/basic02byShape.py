@@ -1,17 +1,16 @@
 #!/usr/bin/python3
-# ============================ basic01_byColor ===========================
+#============================= basic01byShape ============================
+##
+# @brief    Test script for basic clustering functionality by shape.
 #
-# @brief    Test script for basic functionality of byColor
 #
-# ============================ basic01_byColor ===========================
-
-#
-# @file     basic01_byColor.py
+# @ingroup  TestCluster
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/08/29  [created]
 #
-# ============================ basic01_byColor ===========================
+# @quitf
+#============================= basic01byShape ============================
 
 
 # ==[0] Prep environment
@@ -55,4 +54,4 @@ print('The cluster label:', theShapeCluster.feaLabel)
 plt.show()
 
 #
-# ============================ basic01_byColor ===========================
+#============================= basic01byShape ============================

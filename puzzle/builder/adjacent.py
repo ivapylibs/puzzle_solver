@@ -175,10 +175,12 @@ class Adjacent(Arrangement):
 
         return thePuzzle
 
+    #===================== buildFromFile_ImageAndMask ====================
+    #
     @staticmethod
     def buildFromFile_ImageAndMask(fileName, theParams=None):
         """!
-        @brief Load a saved arrangement calibration/solution stored as an image and a mask.
+        @brief Load a saved puzzle design/solution stored as an image and a mask.
 
         The python file contains the puzzle board mask and image source
         data. It gets processed into an arrangement instance. If a threshold
@@ -230,11 +232,13 @@ class Adjacent(Arrangement):
 
         return thePuzzle
 
+    #======================= buildFrom_ImageAndMask ======================
+    #
     @staticmethod
     def buildFrom_ImageAndMask(theImage, theMask, theParams=None):
         """!
-        @brief Given an image and an image mask, parse both to recover
-               the puzzle calibration/solution.
+        @brief Given an image and an image mask, process both to recover
+               and instantiate a puzzle calibration/solution.
 
         Instantiates a puzzle parser that gets applied to the submitted data
         to create a puzzle board instance. That instance is the calibration/solution.
@@ -257,6 +261,8 @@ class Adjacent(Arrangement):
 
         return thePuzzle
 
+    #===================== buildFrom_ImageProcessing =====================
+    #
     @staticmethod
     def buildFrom_ImageProcessing(theImage, theProcessor=None, theDetector=None, theParams=None):
         """!

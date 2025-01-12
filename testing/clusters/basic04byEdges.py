@@ -1,17 +1,16 @@
 #!/usr/bin/python3
-# ============================ edge_byShape ===========================
-#
+#============================= basic04byEdges ============================
+##
 # @brief    Test script for basic functionality of byColor
 #
-# ============================ edge_byShape ===========================
-
 #
-# @file     edge_byShape.py
+# @ingroup  TestCluster
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2021/09/29  [created]
 #
-# ============================ edge_byShape ===========================
+# @quitf
+#============================= basic04byEdges ============================
 
 
 # ==[0] Prep environment
@@ -76,4 +75,4 @@ theGrid.display_mp(ID_DISPLAY=True)
 plt.show()
 
 #
-# ============================ edge_byShape ===========================
+#============================= basic04byEdges ============================

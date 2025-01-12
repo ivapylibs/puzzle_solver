@@ -1,17 +1,16 @@
 #!/usr/bin/python3
-# ============================ basic03_byColor ===========================
-#
+#============================= basic03byColor ============================
+##
 # @brief    Test script for basic functionality of byColor on simulated puzzle pieces
 #
-# ============================ basic03_byColor ===========================
-
 #
-# @file     basic03_byColor.py
+# @ingroup  TestCluster
 #
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @date     2022/10/09  [created]
 #
-# ============================ basic01_byColor ===========================
+# @quitf
+#============================= basic03byColor ============================
 
 
 # ==[0] Prep environment
@@ -94,4 +93,4 @@ theGrid2.display_mp(CONTOUR_DISPLAY=True, ID_DISPLAY=True)
 plt.show()
 
 #
-# ============================ basic03_byColor ===========================
+#============================= basic03byColor ============================

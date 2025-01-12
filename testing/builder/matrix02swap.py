@@ -1,0 +1,98 @@
+#!/usr/bin/python3
+#============================= matrix01build =============================
+##
+# @brief    Tests construction of a Matrix puzzle.
+#
+# Loads the desired puzzle (from set of puzzles) and applies process according to
+# arguments to create a puzzle.  The puzzle is displayed.  
+#
+# UPDATD:::: If specified, the puzzle
+# pieces will be clusters and a separate image will be created with cluster ID
+# overlay.
+#
+#  Use the ``--help`` flag to see what the options are.  Sending no option swill
+#  default to a 8x6 = 48 piece puzzle with a fish puzzle image.
+#
+# @ingroup TestBuilder
+#
+# @author   Patricio A. Vela,       pvela@gatech.edu
+# @date     2024/01/11 [created]
+#
+# @quitf
+#
+#============================= matrix01build =============================
+
+#==[0] Prep environment.
+#
+import argparse
+import pkg_resources
+import os
+import numpy as np
+
+import cv2
+
+import ivapy.display_cv as display
+import puzzle.builder.matrix as pzzl
+
+img_dict = {
+    'duck': 'duck.jpg',
+    'earth': 'earth.jpg',
+    'balloon': 'balloon.png',
+    'elsa1': 'FrozenII_Elsa_1.jpg',
+    'elsa2': 'FrozenII_Elsa_2.jpg',
+    'rapunzel': 'Rapunzel.jpg',
+    'dinos': 'Amazon_Dinos_2.jpg',
+    'fish': 'fish.jpg',
+    'gradient' : 'Buhah_GradientPuzzle.jpg'
+}
+
+psize_dict = {15: [5,3], 35: [7,5], 48: [8,6], 60: [10,6]}
+isize_dict = {15: [500,300], 35: [700,500], 48: [800,600], 60: [800,480]}
+
+
+#==[1] Parse command line arguments or set to default specs if none.
+#
+fpath = os.path.realpath(__file__)
+cpath = fpath.rsplit('/', 1)[0]
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--image', type=str, default='fish', choices=list(img_dict.keys()),
+                       help='The image to be used for the puzzle.')
+argparser.add_argument('--size', type=int, default=48, choices=[15, 35, 48, 60],
+                       help = 'Number of pieces in the puzzle. Implicitly its shape too.')
+argparser.add_argument('--swap', action='store_true',
+                       help='Use to swap tiles.')
+
+opt = argparser.parse_args()
+
+#==[2] Read the source image.
+#
+prefix = pkg_resources.resource_filename('puzzle', '../testing/data/')
+
+theImage = cv2.imread(prefix + img_dict[opt.image])
+theImage = cv2.cvtColor(theImage, cv2.COLOR_BGR2RGB)
+theImage = np.array(theImage)
+
+#==[3] Generate the Matrix puzzle specifications.
+#
+specPuzzle = pzzl.CfgMatrix()
+specPuzzle.psize = psize_dict[opt.size]
+specPuzzle.isize = isize_dict[opt.size]
+specPuzzle.lengthThresholdLower = 0
+
+thePuzzle = pzzl.Matrix.buildFrom_ImageAndSpecs(theImage, specPuzzle)
+
+#FISH DEFAULT
+if (opt.swap):
+  if (opt.image == 'fish') and (opt.size == 48):
+    theswaps = np.array([[2, 5],[4, 8]]);
+  elif (opt.image == 'gradient') and (opt.size == 48):
+    theswaps = np.array([[0, 8],[5, 13]]);
+
+  thePuzzle.swap(theswaps)
+
+thePuzzle.display_cv()
+display.wait()
+
+#
+#============================= matrix01build =============================

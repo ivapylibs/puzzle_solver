@@ -11,6 +11,10 @@
 # is simply fictitious data placed into an array (same as fake data in
 # earlier test scripts).
 #
+# @todo Why is this (from sketch) binary mask approach taken and not one based on
+#       region labels?  Seems really weird. Region props gives the full pixel listing
+#       of the regions.  Ignoring for now, but may need to revisit. - PAV.
+#
 # @ingroup TestPuzzleParser
 # @quitf
 #
@@ -78,9 +82,6 @@ improc = improcessor.basic(cv2.cvtColor, (cv2.COLOR_BGR2GRAY,),
                  improcessor.basic.thresh, ((150, 255, cv2.THRESH_BINARY),))
 theDet = FromSketch(improc)
 
-# Why is this approach taken and not one based on region labels?
-# Seems really weird. Region props gives the full pixel listing of the regions.
-# Ignoring for now, but may need to revisit.
 
 #==[3] Apply and visualize.
 #
