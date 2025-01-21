@@ -127,13 +127,14 @@ class Matrix(Adjacent):
       # We do not have to worry about the index or id here since they are the same in
       # the solution board.
       self.gc = np.zeros((2, theBoard.size()))      # @< Puzzle piece grid locations.
-      #!self.pshape = []                              # @< Puzzle grid dims (width x height)
+      #!self.pshape = []                            # @< Puzzle grid dims (width x height)
     else:
       raise TypeError('Not initialized properly')
 
     # @todo Running but does not seem needed for Matrix puzzle. - PAV 01/11/2025.
     self.xcoords = []
     self.ycoords = []
+    self.shape   = []
     self.__processGrid(verbose = False)
 
 
@@ -170,15 +171,13 @@ class Matrix(Adjacent):
     self.xcoords = x_parts[:,1]
     self.ycoords = y_parts[:,1]
 
+    self.shape = self.params.psize
+
     #!if self.params.gridding == 'rectangular':
     #!  # Code below works for a rectangular gridding of the puzzle based on assumption
     #!  # in the documentation above.
     #!  x_list = np.array([rLoc[0] for _, rLoc in pLoc.items()]).reshape(-1, 1)
     #!  y_list = np.array([rLoc[1] for _, rLoc in pLoc.items()]).reshape(-1, 1)
-
-    #!  #DEBUG
-    #!  #print(x_list)
-    #!  #print(y_list)
 
     #!  # Use rectangular shape to get no. of rows and columns. Store in pshape.
     #!  xMin = np.min(x_list)
@@ -261,6 +260,61 @@ class Matrix(Adjacent):
     return x_labels, y_labels
         
 
+  #============================== getCoordinates =============================
+  #
+  def getCoordinates(self):
+    '''!
+    @brief  Obtain solution board coordinates for the pieces.
+
+    @param[out]   gc  Grid coordinates assigned to each pieces, (2, N_pieces).
+    '''
+
+    # @todo Doesn't seem to be populated for Matrix.  Need to resolve this.
+    #       Fornow going with default row, col approach: data row-wise.
+    return self.gc
+
+  #============================== sub2ind ==============================
+  #
+  def sub2ind(self, theSubs):
+    '''!
+    @brief  Uses puzzle shape to convert puzzle piece subscripts to linear index/key.
+
+    Assumes that pieces are ordered according to their matrix placement.
+    Normally gc would permit some kind of re-indexing/re-keying, but it doesn't
+    seem to be implemented.  Chugging through for now.
+
+    @param[in]  theSubs   Given in (i,j) subscripting coordinates.
+
+    @todo   Make sure not impacted by other operations.  Right now depends on outer
+            scope to figure that out or to not disturb piece ordering.
+    '''
+
+    return np.ravel_multi_index( theSubs, self.shape[::-1]) 
+
+  #============================= coord2ind =============================
+  #
+  def coord2ind(self, theCoords):
+    '''!
+    @brief  Uses puzzle shape to convert puzzle piece coordinate to linear index/key.
+
+    Assumes that pieces are ordered according to their matrix placement.
+    Normally gc would permit some kind of re-indexing/re-keying, but it doesn't
+    seem to be implemented.  Chugging through for now.
+
+    @param[in]  theCoords   Given in (x,y) coordinates.
+
+    @todo   Make sure not impacted by other operations.  Right now depends on outer
+            scope to figure that out or to not disturb piece ordering.
+    '''
+
+    theSubs = []
+    for coords in theCoords:
+      #! DEBUG
+      #!print(coords)
+      theSubs.append(coords[::-1])
+
+    return np.ravel_multi_index( np.transpose(theSubs), self.shape[::-1]) 
+
   #============================== shuffle ==============================
   #
   def shuffle(self, numPieces=None, reorient=False):
@@ -305,6 +359,31 @@ class Matrix(Adjacent):
 
     return idMap
 
+
+  #============================ swapByCoords ===========================
+  #
+  def swapByCoords(self, swapCoords):
+    '''!
+    @brief  Specify puzzle piece coordinates that should be swapped.
+
+    Given a list of coordinate pairs, apply the swap. Each list entry consists
+    of a tuple of swap coordinates. Invalid coordinates with result in no swap.
+
+    @param[in]  swapCoords  List of swap tuples. 
+    @param[out] idMap       The ground truth swap as a dict [oldId -> newId]
+    '''
+
+    # loop over list length
+    theswap = np.empty( (len(swapCoords),2) )
+    si = 0
+    for cSwap in swapCoords:
+      theswap[si,:] = [self.coord2ind(cSwap[0]), self.coord2ind(cSwap[1])]
+      si = si+1
+
+    #! DEBUG
+    #! print(theswap)
+    self.swap(theswap.astype('int'))
+
   #================================ swap ===============================
   #
   def swap(self, theswap=None, reorient=False):
@@ -323,25 +402,19 @@ class Matrix(Adjacent):
     @param[out] idMap       The ground truth swap as a dict [oldId -> newId]
     '''
 
-    # @todo This is a copy of shuffle.  Need to redo the code to it swaps only
+    # @todo This is a copy of shuffle.  Need to redo the code so it swaps only
     #       those specified.  Basically just remap according to theswap.
     #
+    #!print('Hello')
     keyOrig = list(self.pieces)
-    keyShuf = keyOrig.copy()
-    random.shuffle(keyShuf)
-    print(keyOrig)
-    print(keyShuf)
-
     keySwap = keyOrig.copy()
     numSwaps = theswap.shape[0]
-    print(theswap.shape)
-    print(numSwaps)
-    print(theswap)
     for ii in range(numSwaps):
       keySwap[theswap[ii,0]] = theswap[ii,1]
       keySwap[theswap[ii,1]] = theswap[ii,0]
 
-    print(keySwap)
+    # @note Currently doing a brute force swap over all.  Not the cleanest
+    #       Should be able to do only subset affected.
 
     pieceLocations = self.pieceLocations()
     pieceLocations = np.transpose(np.array([value for value in pieceLocations.values()]))
@@ -479,18 +552,6 @@ class Matrix(Adjacent):
 
     return epImage, epBoard
     
-  #============================== getCoordinates =============================
-  #
-  def getCoordinates(self):
-    '''!
-    @brief  Obtain solution board coordinates for the pieces.
-
-    @param[out]   gc  Grid coordinates assigned to each pieces, (2, N_pieces).
-    '''
-
-    return self.gc
-
-
 
   #======================== buildFromFile_Puzzle =======================
   #

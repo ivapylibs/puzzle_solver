@@ -124,6 +124,13 @@ class Template:
         self.lifespan = 0           # @< Save life count, only useful in the tracking function.
         self.featVec  = None        # @< If assigned, feature descriptor vector of puzzle piece.
 
+
+    def deepcopy(self):
+
+      thePiece = Template(y=deepcopy(self.y), r=self.rLoc, id=deepcopy(self.id), 
+                          theta=self.theta, pieceStatus=self.status)
+      return thePiece
+
     #================================== size =================================
     #
     def size(self):
@@ -857,7 +864,8 @@ class Template:
         #!print(rowInds[0])
         #!print(colInds[0])
 
-        print(pOff)
+        #! DEBUG
+        #!print(pOff)
 
         if (pOff is not None):
           cLoc   = cLoc + pOff
