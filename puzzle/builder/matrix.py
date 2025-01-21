@@ -307,6 +307,9 @@ class Matrix(Adjacent):
             scope to figure that out or to not disturb piece ordering.
     '''
 
+    if (len(theCoords) == 0):
+      return []
+
     theSubs = []
     for coords in theCoords:
       #! DEBUG
