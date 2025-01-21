@@ -288,6 +288,8 @@ class Matrix(Adjacent):
     @todo   Make sure not impacted by other operations.  Right now depends on outer
             scope to figure that out or to not disturb piece ordering.
     '''
+    if (len(theSubs) == 0):
+      return []
 
     return np.ravel_multi_index( theSubs, self.shape[::-1]) 
 
