@@ -692,7 +692,7 @@ class Board:
     #============================= display_cv ============================
     #
     def display_cv(self, theImage=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
-                                                                   BOUNDING_BOX=False):
+                                                 BOUNDING_BOX=False, window_name='Puzzle'):
         """!
         @brief  Display the puzzle board as an image using matplot library.
 
@@ -713,8 +713,9 @@ class Board:
 
         #DEBUG
         #print("display now")
-        display.rgb(theImage)
+        display.rgb(theImage, window_name = window_name)
         #print("display done")
+
 
 
 #---------------------------------------------------------------------------
@@ -788,6 +789,7 @@ class CfgCorrespondences(AlgConfig):
   #============================= buildNearest ============================
   #
   #
+  @staticmethod
   def buildNearest():
     matchCfg = CfgCorrespondences();
     matchCfg.matcher = 'Distance'
@@ -797,6 +799,7 @@ class CfgCorrespondences(AlgConfig):
   #=========================== buildColorMatchCV===========================
   #
   #
+  @staticmethod
   def buildColorMatchCV():
     matchCfg = CfgCorrespondences();
     matchCfg.matcher = 'ColorHistCV'
@@ -1270,6 +1273,13 @@ class Correspondences:
     #
     @staticmethod
     def buildMatcher(typeStr, matchConfig = None):
+      """!
+      @brief    Build out a Matcher instance for data association / puzzle
+                correspondences.
+
+      @param[in]    typeStr     Matching approach as string specification.
+      @param[in]    matchConfig Matching configuration (optional: uses default)
+      """
 
       if (typeStr == 'Moments'):
         theConfig = diffScore.CfgMoments()
