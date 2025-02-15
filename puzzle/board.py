@@ -129,6 +129,36 @@ class Board:
         self.addPiece(piece)
 
 
+    #===================== addPieceFromMaskAndImage ====================
+    #
+    def addPieceFromImageAndMask(self, theImage, theMask, cLoc=None):
+        """!
+        @brief  Given a mask and an image of same base dimensions, use to
+                instantiate a puzzle piece template.  
+
+        This implementation assumes that a whole image and an image-wide mask 
+        are provided for recovering a single piece.  Then cLoc is not needed. 
+        rLoc can still be used.
+
+        @param[in]  theMask     Mask of individual piece.
+        @param[in]  theImage    Source image with puzzle piece.
+        @param[in]  cLoc        Corner location of puzzle piece [optional: None].
+        """
+
+        mi, mj = np.nonzero(theMask)
+        bbTL = np.array([np.min(mi), np.min(mj)])
+        bbBR = np.array([np.max(mi), np.max(mj)])+1
+
+        pcMask  = theMask[bbTL[0]:bbBR[0], bbTL[1]:bbBR[1]]
+        pcImage = theImage[bbTL[0]:bbBR[0], bbTL[1]:bbBR[1], :]
+
+        if (cLoc is None):
+          pcLoc = np.array([bbTL[1],bbTL[0]])
+        else:
+          pcLoc = cLoc
+
+        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc))
+
     #============================= rmPiece =============================
     #
     def rmPiece(self, id):
@@ -160,6 +190,19 @@ class Board:
         """
         assert id in self.pieces.keys(), "The required piece is not in the board."
         return self.pieces[id]
+
+    #============================== offset =============================
+    #
+    def offset(self, dr):
+        """!
+        @brief  Offset the location of the entire puzzle in the board.
+
+        @param[in]  dr  Offset in pixel units (dx, dy).
+        """
+
+        for pk in self.pieces:
+          self.pieces[pk].setPlacement(dr, isOffset = True)
+
 
     #============================== clear ==============================
     #

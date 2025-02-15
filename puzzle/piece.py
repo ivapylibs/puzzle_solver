@@ -301,9 +301,6 @@ class Template:
         #print(self.y.rcoords)
         #print(self.y.size)
         rcoords = np.array(offset).reshape(-1, 1) + self.rLoc.reshape(-1, 1) + self.y.rcoords
-        # @todo @WHY ADDING pcorner AND rcoords ???? WHAT IS GOING ON ???
-        # @todo WHAT ABOUT OFFSET??? WHAT DOES THAT DO??
-
         #DEBUG
         #print(np.array(offset))
         #print(np.array(self.rLoc))
