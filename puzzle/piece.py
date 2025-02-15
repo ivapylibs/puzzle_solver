@@ -282,7 +282,7 @@ class Template:
 
     #============================== placeInImage =============================
     #
-    def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=True):
+    def placeInImage(self, theImage, offset=[0, 0], CONTOUR_DISPLAY=False):
         """!
         @brief  Insert the puzzle piece into the image in the original location.
 
@@ -406,13 +406,46 @@ class Template:
 
         return fh
 
+    #======================= buildFromFullMaskAndImage =======================
+    #
+    @staticmethod
+    def buildFromFullMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+        """!
+        @brief  Given a mask and an image of same base dimensions, use to
+                instantiate a puzzle piece template.  
+
+        This implementation assumes that a whole image and an image-wide mask 
+        are provided for recovering a single piece.  Then cLoc is not needed. 
+        rLoc can still be used.
+
+        @param[in]  theMask     Mask of individual piece.
+        @param[in]  theImage    Source image with puzzle piece.
+        @param[in]  cLoc        Corner location of puzzle piece [optional: None].
+        @param[in]  rLoc        Alternative puzzle piece location [optional: None].
+        @param[in]  pieceStatus Status of the puzzle piece [optional, def:MEASURED]
+
+        @param[out] thePiece     Puzzle piece instance.
+
+        @todo   Include option to have cropped mask but full image and use cLoc.
+        """
+
+        mi, mj = np.nonzero(theMask)
+        bbTL = np.array([np.min(mi), np.min(mj)])
+        bbBR = np.array([np.max(mi), np.max(mj)])+1
+
+        pcMask = theMask[bbTL[0]:bbBR[0], bbTL[1]:bbBR[1]]
+        pcImage = theImage[bbTL[0]:bbBR[0], bbTL[1]:bbBR[1], :]
+        pcLoc   = np.array([bbTL[1],bbTL[0]])
+
+        return Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc)
+
     #========================= buildFromMaskAndImage =========================
     #
     @staticmethod
     def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
         """!
         @brief  Given a mask (individual) and an image of same base dimensions, use to
-                instantiate a puzzle piece template.  Usually passed as cropped.
+                instantiate a puzzle piece template.  Passed as cropped mask/image pair.
 
         This can be run in a few different ways.  First, assumiong that the puzzle
         piece has been cropped along with the mask.  Then providing cLoc is important
@@ -420,20 +453,14 @@ class Template:
         placement should change for whatever reason, then specifying rLoc will do
         that.  Otherwise, cLoc and rLoc are set to be the same.
 
-        A less common implementation is to provide the whole image and an image-wide
-        mask for recovering a single piece.  Then cLoc is not needed. rLoc can still
-        be used.
 
-        Not implemented is the case of a whole image plus a cropped mask with cLoc.
-        That is on the todo list.
+        @param[in]  theMask     Mask of individual piece.
+        @param[in]  theImage    Source image with puzzle piece.
+        @param[in]  cLoc        Corner location of puzzle piece [optional: None].
+        @param[in]  rLoc        Alternative puzzle piece location [optional: None].
+        @param[in]  pieceStatus Status of the puzzle piece [optional, def:MEASURED]
 
-        @param[in] theMask      Mask of individual piece.
-        @param[in] theImage     Source image with puzzle piece.
-        @param[in] cLoc         Corner location of puzzle piece [optional: None].
-        @param[in] rLoc         Alternative puzzle piece location [optional: None].
-        @param[in] pieceStatus  Status of the puzzle piece [optional, def:MEASURED]
-
-        @param[in] thePiece     Puzzle piece instance.
+        @param[out] thePiece     Puzzle piece instance.
 
         @todo   Include option to have cropped mask but full image and use cLoc.
         """
@@ -450,7 +477,6 @@ class Template:
         if cLoc is None:
           cy, cx = np.nonzero(theMask)
           cLoc = np.array([np.min(cx), np.min(cy)])
-          print(cLoc)
         
         y.pcorner = cLoc
         # I originally though that setting cLoc manually was weird.  Why should it be
@@ -927,38 +953,39 @@ class Template:
         @return Puzzle piece instance.
         """
 
-        y = PuzzleTemplate()
+        pmask = np.ones((size, size), dtype=bool) 
+        pimage = np.full((size, size, 3), color, dtype=np.uint8)
 
-        # the tight bbox is just the square itself, so size is just size
-        y.size = np.array([size, size])
-        y.mask = np.ones((size, size), dtype=np.uint8) * 255
-        y.pcorner = np.array(rLoc)
+        return Template.buildFromMaskAndImage(pmask, pimage, rLoc)
 
-        # Create a contour of the mask
-        cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
-                                cv2.CHAIN_APPROX_SIMPLE)
+        ## the tight bbox is just the square itself, so size is just size
+        #y.size = np.array([size, size])
 
-        y.contour_pts = cnts[0][0]
-        y.contour = np.zeros_like(y.mask).astype('uint8')
-        cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
+        ## Create a contour of the mask
+        #cnts = cv2.findContours(y.mask, cv2.RETR_TREE,
+        #                        cv2.CHAIN_APPROX_SIMPLE)
 
-        y.rcoords = list(np.nonzero(y.mask))  # 2 (row,col) x N
-        # Updated to OpenCV style -> (x,y)
-        y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
-        y.rcoords = np.array(y.rcoords)
+        #y.contour_pts = cnts[0][0]
+        #y.contour = np.zeros_like(y.mask).astype('uint8')
+        #cv2.drawContours(y.contour, cnts[0], -1, (255, 255, 255), thickness=2)
 
-        # y.image = np.zeros((size, size, 3), dtype=np.uint8)
-        # y.image = cv2.rectangle(y.image, (0, 0), (size - 1, size - 1), color=color, thickness=-1)
-        y.image = np.full((size, size, 3), color, dtype=np.uint8)
+        #y.rcoords = list(np.nonzero(y.mask))  # 2 (row,col) x N
+        ## Updated to OpenCV style -> (x,y)
+        #y.rcoords[0], y.rcoords[1] = y.rcoords[1], y.rcoords[0]
+        #y.rcoords = np.array(y.rcoords)
 
-        y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
+        ## y.image = np.zeros((size, size, 3), dtype=np.uint8)
+        ## y.image = cv2.rectangle(y.image, (0, 0), (size - 1, size - 1), color=color, thickness=-1)
+        #y.image = np.full((size, size, 3), color, dtype=np.uint8)
 
-        if not rLoc:
-            thePiece = Template(y)
-        else:
-            thePiece = Template(y, np.array(rLoc))
+        #y.appear = y.image[y.rcoords[1], y.rcoords[0], :]
 
-        return thePiece
+        #if not rLoc:
+        #    thePiece = Template(y)
+        #else:
+        #    thePiece = Template(y, np.array(rLoc))
+
+        #return thePiece
 
     #============================== buildSphere ==============================
     #

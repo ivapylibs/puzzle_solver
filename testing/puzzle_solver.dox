@@ -55,6 +55,12 @@ into different clusters for sorting.
 @brief      Code that assists with tracking the movement of puzzle pieces and
             also associating them to a known solution.
 
+@defgroup   TestPuzzle_Solver     Puzzle Solver
+@brief      Code that assists with puzzle solution information or process.
+
+Code for interpreting image or puzzle information.  and indicating how to
+solve it or how to generate a solution board (e.g., calibrate a puzzle). 
+
 @}
 
 */

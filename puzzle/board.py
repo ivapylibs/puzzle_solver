@@ -16,17 +16,12 @@
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
 # @author   Yiye Chen,              yychen2019@gatech.edu
 #
-# @date     2021/07/28 [created]
-# @date     2021/08/01 [modified]
-# @date     2022/07/03 [modified]
 # @date     2024/10/20 [refactored and merged]
+# @date     2022/07/03 [modified]
+# @date     2021/08/01 [modified]
+# @date     2021/07/28 [created]
 #
-
-#============================== puzzle.board =============================
-#
-# NOTES:
-#   4 space indent.
-#   100 columns.
+#! NOTES: 4 space indent. 100 columns.
 #
 #============================== puzzle.board =============================
 
@@ -470,6 +465,15 @@ class Board:
                 pLocs[piece.id] = piece.rLoc
 
         return pLocs
+
+    #======================== fromImageAndLabels =======================
+    #
+    def fromImageAndLabels(self, theImage, theLabels):
+
+      lMax = np.amax(theLabels)
+
+      for ii in range(1,1+lMax.astype(int)):
+        self.addPiece(Template.buildFromFullMaskAndImage(theLabels == ii, theImage))
 
     #============================= toImage =============================
     #
