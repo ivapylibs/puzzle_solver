@@ -6,7 +6,9 @@
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Nihit Agarwal,          nagarwal90@gatech.edu
 #
+# @date     2025/05/08 [modified]
 # @date     2024/10/20 [merged from Percevier branch]
 # @date     2021/07/28 [modified]
 # @date     2021/07/24 [created]
@@ -91,7 +93,7 @@ class Template:
 
     #================================ __init__ ===============================
     #
-    def __init__(self, y:PuzzleTemplate=None, r=None, id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
+    def __init__(self, y:PuzzleTemplate=None, r=None, centroidLoc=None, id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         '''!
         @brief  Constructor for template class.
 
@@ -105,6 +107,7 @@ class Template:
 
         self.y = y                  # @< A PuzzleTemplate instance.
         self.gLoc = None            # grasp location initialized to None
+        self.centroidLoc = centroidLoc     # centroid location of piece
         if (r is None):
           self.rLoc = y.pcorner     # @< The default location is the top left corner.
         else:
@@ -129,7 +132,7 @@ class Template:
 
     def deepcopy(self):
 
-      thePiece = Template(y=deepcopy(self.y), r=self.rLoc, id=deepcopy(self.id), 
+      thePiece = Template(y=deepcopy(self.y), r=self.rLoc, centroidLoc=self.centroidLoc, id=deepcopy(self.id), 
                           theta=self.theta, pieceStatus=self.status)
       return thePiece
 
@@ -470,7 +473,7 @@ class Template:
     #========================= buildFromMaskAndImage =========================
     #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, centroidLoc = None, pieceStatus=PieceStatus.MEASURED):
         """!
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  Passed as cropped mask/image pair.
@@ -486,6 +489,7 @@ class Template:
         @param[in]  theImage    Source image with puzzle piece.
         @param[in]  cLoc        Corner location of puzzle piece [optional: None].
         @param[in]  rLoc        Alternative puzzle piece location [optional: None].
+        @param[in]  centroidLoc Centroid location of piece
         @param[in]  pieceStatus Status of the puzzle piece [optional, def:MEASURED]
 
         @param[out] thePiece     Puzzle piece instance.
@@ -552,9 +556,9 @@ class Template:
         y.image = theImage
 
         if rLoc is None:
-            thePiece = Template(y, cLoc)
+            thePiece = Template(y, cLoc, centroidLoc)
         else:
-            thePiece = Template(y, rLoc)
+            thePiece = Template(y, rLoc, centroidLoc)
 
         # Set up the rotation (with theta, we can correct the rotation)
         thePiece.theta = -Template.getEig(thePiece.y.mask)

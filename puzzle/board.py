@@ -131,7 +131,7 @@ class Board:
 
     #===================== addPieceFromMaskAndImage ====================
     #
-    def addPieceFromImageAndMask(self, theImage, theMask, cLoc=None):
+    def addPieceFromImageAndMask(self, theImage, theMask, centroidLoc=None, cLoc=None):
         """!
         @brief  Given a mask and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  
@@ -157,7 +157,7 @@ class Board:
         else:
           pcLoc = cLoc
 
-        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc))
+        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc, centroidLoc=centroidLoc))
 
     #============================= rmPiece =============================
     #

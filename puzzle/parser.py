@@ -261,7 +261,7 @@ class boardMeasure(centroidMulti):
       
       if (ri.area > self.tparams.minArea and ri.area < self.tparams.maxArea):
         thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, 
-                                                               pCorn, None, pStat)
+                                                               pCorn, None, pCent, pStat)
         # @todo I was sending the centroid as a coordinate. Why was that??
         #       Why do we need the centroid?  Is it to better test for proximity?
         #       Otherwise, the corner may not be a great way to do so? PAV 10/04/2024.
