@@ -412,7 +412,7 @@ class Board:
           #DEBUG
           #print("Missing: " + str(i) + " == " + str(self.pieces[i].id))
           if i in self.pieces:
-          self.pieces[i].status = PieceStatus.GONE
+            self.pieces[i].status = PieceStatus.GONE
 
         # @todo What is proper status for these pieces?  Shouldn't it agree with
         #       the puzzle piece status enumerations?? Need to resolve.
