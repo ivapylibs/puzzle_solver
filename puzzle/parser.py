@@ -180,7 +180,6 @@ class boardMeasure(centroidMulti):
     # Override since some regions might be too small or large. Check again.
     # Also regenerate the list of "track points."
     self.haveMeas = len(self.bMeas.pieces) > 0  
-
     if self.haveMeas:
       #self.tpt = self.bMeas.getPieceLocations()
       # MOVE THIS TO BOARD FUNCTION getPieceLocations() . ALREADY a pieceLocations.
@@ -215,7 +214,6 @@ class boardMeasure(centroidMulti):
 
     imdims = np.shape(I)
     #vI = I.reshape(-1, imdims[2])        # Vectorized image.
-
     for ri in self.trackProps:
       #--[1] Region label process recovers bounding box mask and sliced image coords.
       #      Extract the color image patch from mask, and vectorized image data
@@ -260,9 +258,10 @@ class boardMeasure(centroidMulti):
       #print(pCent)
       #print(pStat)
       #print('EEEEE')
-      if (ri.area > self.tparams.minArea):
+      
+      if (ri.area > self.tparams.minArea and ri.area < self.tparams.maxArea):
         thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, 
-                                                               pCorn, None, pStat)
+                                                               pCorn, None, pCent, pStat)
         # @todo I was sending the centroid as a coordinate. Why was that??
         #       Why do we need the centroid?  Is it to better test for proximity?
         #       Otherwise, the corner may not be a great way to do so? PAV 10/04/2024.

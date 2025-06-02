@@ -101,7 +101,7 @@ class Adjacent(Arrangement):
     solution would be to the calibrated solution.
     """
 
-    def __init__(self, theBoard=[], theParams=CfgAdjacent):
+    def __init__(self, theBoard=[], theParams=CfgAdjacent()):
         """!
         @brief Constructor for the puzzle.builder.adjacent class.
 
@@ -134,7 +134,6 @@ class Adjacent(Arrangement):
 
         # Reset
         self.adjMat[:,:] = np.eye(self.size()).astype('bool')
-
 
         pieceKeysList = list(self.pieces.keys())
 

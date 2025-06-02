@@ -131,7 +131,7 @@ class Board:
 
     #===================== addPieceFromMaskAndImage ====================
     #
-    def addPieceFromImageAndMask(self, theImage, theMask, cLoc=None):
+    def addPieceFromImageAndMask(self, theImage, theMask, centroidLoc=None, cLoc=None):
         """!
         @brief  Given a mask and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  
@@ -157,7 +157,7 @@ class Board:
         else:
           pcLoc = cLoc
 
-        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc))
+        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc, centroidLoc=centroidLoc))
 
     #============================= rmPiece =============================
     #
@@ -411,7 +411,8 @@ class Board:
         for i in indUnlabeled:
           #DEBUG
           #print("Missing: " + str(i) + " == " + str(self.pieces[i].id))
-          self.pieces[i].status = PieceStatus.GONE
+          if i in self.pieces:
+            self.pieces[i].status = PieceStatus.GONE
 
         # @todo What is proper status for these pieces?  Shouldn't it agree with
         #       the puzzle piece status enumerations?? Need to resolve.

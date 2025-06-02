@@ -111,7 +111,7 @@ class Gridded(Interlocking):
   '''
 
   #=========================== __init__ Gridded ==========================
-  def __init__(self, theBoard=[], theParams=CfgGridded):
+  def __init__(self, theBoard=[], theParams=CfgGridded()):
     '''!
     @brief Constructor for the puzzle.builder.adjacent class.
 

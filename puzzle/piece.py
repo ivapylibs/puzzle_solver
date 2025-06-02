@@ -6,7 +6,9 @@
 #
 # @author   Patricio A. Vela,       pvela@gatech.edu
 # @author   Yunzhi Lin,             yunzhi.lin@gatech.edu
+# @author   Nihit Agarwal,          nagarwal90@gatech.edu
 #
+# @date     2025/05/08 [modified]
 # @date     2024/10/20 [merged from Percevier branch]
 # @date     2021/07/28 [modified]
 # @date     2021/07/24 [created]
@@ -34,6 +36,7 @@ from puzzle.utils.imageProcessing import rotate_nd
 import matplotlib.pyplot as plt
 import ivapy.display_cv as display
 
+from scipy.signal import convolve2d
 # ===== Helper Elements
 #
 
@@ -90,7 +93,7 @@ class Template:
 
     #================================ __init__ ===============================
     #
-    def __init__(self, y:PuzzleTemplate=None, r=None, id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
+    def __init__(self, y:PuzzleTemplate=None, r=None, centroidLoc=None, id=None, theta=0, pieceStatus=PieceStatus.UNKNOWN):
         '''!
         @brief  Constructor for template class.
 
@@ -103,6 +106,8 @@ class Template:
         '''
 
         self.y = y                  # @< A PuzzleTemplate instance.
+        self.gLoc = None            # grasp location initialized to None
+        self.centroidLoc = centroidLoc     # centroid location of piece
         if (r is None):
           self.rLoc = y.pcorner     # @< The default location is the top left corner.
         else:
@@ -127,7 +132,7 @@ class Template:
 
     def deepcopy(self):
 
-      thePiece = Template(y=deepcopy(self.y), r=self.rLoc, id=deepcopy(self.id), 
+      thePiece = Template(y=deepcopy(self.y), r=self.rLoc, centroidLoc=self.centroidLoc, id=deepcopy(self.id), 
                           theta=self.theta, pieceStatus=self.status)
       return thePiece
 
@@ -279,6 +284,35 @@ class Template:
             theMask[:, :] = theMask_enlarged[:theMask.shape[0], :theMask.shape[1]]
 
         return theMask
+    
+    #============================= getGraspLoc ===============================
+    #
+    def getGraspLoc(self, kernel_size=10):
+        """!
+        @brief Get the location in pixel coordinates to send the suction cup
+               gripper to grasp the piece.
+        
+        @param[in]  kernel_size     Size of square kernel used in convolution.
+        
+        Returns:
+            loc:    [x, y] coordinates in image to send suction cup
+        """
+        if self.gLoc is not None:
+            return self.gLoc
+        kernel = np.ones((kernel_size,kernel_size))
+
+        # Convolve across image with 1 piece to get scores
+        output_scores = convolve2d(self.y.mask, kernel, mode='same', boundary='fill', fillvalue=0)
+        max_val = np.max(output_scores)
+        max_val_loc = np.where(output_scores == max_val)
+        max_val_loc = np.array(max_val_loc).T
+  
+        diff = max_val_loc - np.array([self.y.size[1] / 2, self.y.size[0] / 2])
+        distances = np.linalg.norm(diff, axis=1)
+
+        target = max_val_loc[np.argmin(distances)] + self.y.pcorner[::-1]
+        self.gLoc = target[::-1]
+        return self.gLoc
 
     #============================== placeInImage =============================
     #
@@ -439,7 +473,7 @@ class Template:
     #========================= buildFromMaskAndImage =========================
     #
     @staticmethod
-    def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, pieceStatus=PieceStatus.MEASURED):
+    def buildFromMaskAndImage(theMask, theImage, cLoc=None, rLoc=None, centroidLoc = None, pieceStatus=PieceStatus.MEASURED):
         """!
         @brief  Given a mask (individual) and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  Passed as cropped mask/image pair.
@@ -455,6 +489,7 @@ class Template:
         @param[in]  theImage    Source image with puzzle piece.
         @param[in]  cLoc        Corner location of puzzle piece [optional: None].
         @param[in]  rLoc        Alternative puzzle piece location [optional: None].
+        @param[in]  centroidLoc Centroid location of piece
         @param[in]  pieceStatus Status of the puzzle piece [optional, def:MEASURED]
 
         @param[out] thePiece     Puzzle piece instance.
@@ -521,9 +556,9 @@ class Template:
         y.image = theImage
 
         if rLoc is None:
-            thePiece = Template(y, cLoc)
+            thePiece = Template(y, cLoc, centroidLoc)
         else:
-            thePiece = Template(y, rLoc)
+            thePiece = Template(y, rLoc, centroidLoc)
 
         # Set up the rotation (with theta, we can correct the rotation)
         thePiece.theta = -Template.getEig(thePiece.y.mask)
