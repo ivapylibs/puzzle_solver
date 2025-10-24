@@ -38,6 +38,7 @@ from scipy.spatial.distance import cdist
 
 from puzzle.piece import Template
 from puzzle.piece import PieceStatus
+from scipy.signal import convolve2d
 
 #===== Environment / Dependencies [Correspondences]
 #
@@ -131,7 +132,8 @@ class Board:
 
     #===================== addPieceFromMaskAndImage ====================
     #
-    def addPieceFromImageAndMask(self, theImage, theMask, centroidLoc=None, cLoc=None):
+    def addPieceFromMaskAndImage(self, theImage, theMask, \
+                                 centroidLoc=None, cLoc=None):
         """!
         @brief  Given a mask and an image of same base dimensions, use to
                 instantiate a puzzle piece template.  
@@ -157,7 +159,8 @@ class Board:
         else:
           pcLoc = cLoc
 
-        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc, centroidLoc=centroidLoc))
+        self.addPiece(Template.buildFromMaskAndImage(pcMask, pcImage, pcLoc, \
+                                                     centroidLoc=centroidLoc))
 
     #============================= rmPiece =============================
     #
@@ -717,7 +720,69 @@ class Board:
         display.rgb(theImage, window_name = window_name)
         #print("display done")
 
+#
+#---------------------------------------------------------------------------
+#================================== SolutionBoard ==========================
+#---------------------------------------------------------------------------
+#
 
+class SolutionBoard(Board):
+    """!
+    @ingroup  PuzzleSolver
+    @brief  Solution board stores information about the solution board.
+    """
+    def __init__(self, *argv):
+        """!
+        @brief  Constructor for puzzle solution board. Can pass contents at
+                instantiation time or delay until later.
+
+        Args:
+            *argv: The input params.
+        """
+
+        super().__init__(*argv)
+        # Dict containing id to zone mapping
+        self.zones = {}
+ 
+    #===================== addPieceFromMaskAndImage ====================
+    #
+    def addPieceFromMaskAndImage(self, theImage, theMask, centroidLoc=None, cLoc=None, zone=0):
+        """!
+        @brief: Overrides parent method with zone value
+        """
+        super().addPieceFromMaskAndImage(theImage, theMask, centroidLoc, cLoc)
+        self.zones[self.id_count-1] = zone
+
+    #======================== createPartialBoard =======================
+    def createPartialBoard(self, recordedBoard, solutionStateMask: np.ndarray, threshold=0.1):
+        """!
+        @brief  Create a partial board from the recorded board and solution state mask.
+
+        @param[in]  recordedBoard      The recorded board to create the partial board from.
+        @param[in]  solutionStateMask  The mask indicating the solution state.
+        """
+        # Implementation goes here
+
+        # Apply a convolution operation on solutionStateMask to get scores at
+        # each potential piece location.
+        kernel = np.ones((5, 5), dtype=np.float32) / 25.0
+        convolved = convolve2d(solutionStateMask, kernel, mode='same')
+
+
+        # For each piece in recordedBoard, check if its location
+        # corresponds to a low score in the convolved mask.
+        # If so, add it to the partial board.
+
+        for key in recordedBoard.pieces:
+            piece = recordedBoard.pieces[key]
+
+            # Check the score at centroid location
+            centroid = piece.centroidLoc.astype(int)
+            score = convolved[centroid[1], centroid[0]]
+
+            if score < threshold:
+                self.addPiece(piece, ORIGINAL_ID=False)
+                self.zones[self.id_count-1] = recordedBoard.zones.get(key, 0)
 
 #---------------------------------------------------------------------------
 #=================== Configuration Node : Correspondences ==================
