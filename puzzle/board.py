@@ -682,7 +682,7 @@ class Board:
         
         if ax is not None:  # Plot in a subplot
             ax.clear()  
-            ax.imshow(theImage) 
+            plt.imshow(theImage) 
 
         else:  # Create or update a full figure
             if fh:  
