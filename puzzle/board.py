@@ -741,7 +741,7 @@ class SolutionBoard(Board):
         """
 
         super().__init__(*argv)
-        # Dict containing id to zone mapping
+        # Dict containing solution piece key to zone mapping
         self.zones = {}
  
     #===================== addPieceFromMaskAndImage ====================
