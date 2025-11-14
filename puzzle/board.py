@@ -113,7 +113,8 @@ class Board:
         piece_copy = deepcopy(piece)
 
         if ORIGINAL_ID:
-            self.pieces[piece_copy.id] = piece_copy
+            self.pieces[self.id_count] = piece_copy
+            self.id_count += 1
         else:
             piece_copy.id = self.id_count+1
             self.pieces[self.id_count] = piece_copy
@@ -765,7 +766,7 @@ class SolutionBoard(Board):
 
         # Apply a convolution operation on solutionStateMask to get scores at
         # each potential piece location.
-        kernel = np.ones((5, 5), dtype=np.float32) / 25.0
+        kernel = np.ones((10, 10), dtype=np.float32) / 25.0
         convolved = convolve2d(solutionStateMask, kernel, mode='same')
 
 
@@ -777,11 +778,16 @@ class SolutionBoard(Board):
             piece = recordedBoard.pieces[key]
 
             # Check the score at centroid location
+            # can use bounding box center also
+            width, height = piece.size()
+            expected_cent = piece.y.pcorner + np.array([width, height]) / 2
             centroid = piece.centroidLoc.astype(int)
+
+            # print(f'Expected centroid: {expected_cent} and actual {centroid}')
             score = convolved[centroid[1], centroid[0]]
 
             if score < threshold:
-                self.addPiece(piece, ORIGINAL_ID=False)
+                self.addPiece(piece, ORIGINAL_ID=True)
                 self.zones[self.id_count-1] = recordedBoard.zones.get(key, 0)
 
 #---------------------------------------------------------------------------
