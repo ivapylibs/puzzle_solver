@@ -121,7 +121,7 @@ def calculateMatches(des1, des2, ratio_threshold=0.7):
                 topResults2.append([m])
 
     except:
-        print('No matches')
+        # print('No matches')
         return []
 
     # Cross-compare matches and retain symmetric ones.
