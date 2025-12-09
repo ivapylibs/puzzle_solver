@@ -755,7 +755,7 @@ class SolutionBoard(Board):
         self.zones[self.id_count-1] = zone
 
     #======================== createPartialBoard =======================
-    def createPartialBoard(self, recordedBoard, solutionStateMask: np.ndarray, threshold=0.1):
+    def createPartialBoard(self, recordedBoard, solutionStateMask: np.ndarray, threshold=0.5):
         """!
         @brief  Create a partial board from the recorded board and solution state mask.
 
@@ -766,7 +766,9 @@ class SolutionBoard(Board):
 
         # Apply a convolution operation on solutionStateMask to get scores at
         # each potential piece location.
-        kernel = np.ones((10, 10), dtype=np.float32) / 25.0
+        boolean_mask = solutionStateMask != 0
+        solutionStateMask[boolean_mask] = 1
+        kernel = np.ones((5, 5), dtype=np.float32) / 25.0
         convolved = convolve2d(solutionStateMask, kernel, mode='same')
 
 
@@ -783,8 +785,23 @@ class SolutionBoard(Board):
             expected_cent = piece.y.pcorner + np.array([width, height]) / 2
             centroid = piece.centroidLoc.astype(int)
 
+            
+            piece_locations = np.argwhere(piece.y.mask)
+            offset = np.array([piece.y.pcorner[1], piece.y.pcorner[0]])
+            piece_locations = piece_locations + offset
+            # print("Piece locations: ", piece_locations[:10])
+            # print("shape of convolved is ", convolved.shape)
+            rows = piece_locations[: ,0]
+            cols = piece_locations[:, 1]
+            # print("All scores are: ", convolved[rows, cols])
+            # print("aveage score is", np.mean(convolved[rows, cols]))
+                
+            # print("Piece locations for ")
             # print(f'Expected centroid: {expected_cent} and actual {centroid}')
-            score = convolved[centroid[1], centroid[0]]
+
+            # Compute average score:
+            
+            score = np.mean(convolved[rows, cols])
 
             if score < threshold:
                 self.addPiece(piece, ORIGINAL_ID=True)
