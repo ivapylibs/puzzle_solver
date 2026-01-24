@@ -661,10 +661,129 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
+
+    #============================= toImageExpaned =====================
+    def toImageExpanded(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
+                ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=True, BOUNDING_BOX=False):
+        """!
+        @brief  Uses puzzle piece locations to create an image for visualizing them.  If given
+                an image, then will place in it.
+                Recommended to provide theImage & BOUNDING_BOX option off.
+                Currently, we have four cases:
+                - Image provided & BOUNDING_BOX off -> An exact region is visible
+                - Image provided & BOUNDING_BOX on -> The visible region will be adjusted. Should have the same size image output.
+                - Image not provided & BOUNDING_BOX off -> May have some trouble if some region is out of the bounds (e.g., -2) then they will be shown on the other boundary.
+                - Image not provided & BOUNDING_BOX on -> A bounding box region is visible.
+
+        @param[in]  theImage            Image to insert pieces into.
+        @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
+        @param[in]  COLOR               Background color.
+        @param[in]  ID_COLOR            ID color.
+        @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
+        @param[in]  BOUNDING_BOX        Flag indicating outputting a bounding box area 
+                                        (with updated (0,0)) or not (with original (0,0)).
+
+        @param[out] theImage            Rendered image.
+        """
+
+        S = 1.5
+
+        lengths = self.extents()
+
+       
+        if lengths is None:
+            # No piece found
+            raise RuntimeError('No piece found')
+
+        lengths = lengths.astype('int')
+        bbox    = self.boundingBox().astype('int')
+
+        C = np.array(bbox[1, 0] / 2, bbox[1, 1] / 2)
+
+        if BOUNDING_BOX:
+            # Just the exact bounding box size
+            theImage = np.full((lengths[1] , lengths[0] , 3), COLOR, dtype='uint8')
+        else:
+            # The original (0,0) and outermost point size
+            theImage = np.full((int( S * bbox[1, 1]), int(S* bbox[1, 0]), 3), COLOR, dtype='uint8')
+
+        for key in self.pieces:
+
+            piece = self.pieces[key]
+            # piece.rLoc = piece.rLoc * expansion
+            # piece.y.rcoords = expansion * piece.y.rcoords
+            if BOUNDING_BOX:
+                piece.placeInImage(theImage, offset=-bbox[0], CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+            else:
+                rLoc = piece.rLoc
+                rLoc_rel = rLoc - C
+                rLoc_scaled = rLoc_rel * S
+                new_rLoc = rLoc_scaled + C
+                new_rLoc = np.round(new_rLoc).astype(int)
+                piece.rLoc = new_rLoc
+                piece.placeInImage(theImage, CONTOUR_DISPLAY=CONTOUR_DISPLAY)
+
+            if ID_DISPLAY == True:
+                txt = str(piece.id)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                char_size = cv2.getTextSize(txt, font, 0.15, 2)[0]
+
+                y, x = np.nonzero(piece.y.mask)
+
+                if BOUNDING_BOX:
+                    print("bbox")
+                    pos = (int(piece.rLoc[0] - bbox[0][0] + np.mean(x)) - char_size[0],
+                            int(piece.rLoc[1] - bbox[0][1] + np.mean(y)) + char_size[1])
+                else:
+                    pos = (int(piece.y.pcorner[0] + np.mean(x)) - 3*char_size[0],
+                            int(piece.y.pcorner[1] + np.mean(y)) + char_size[1])
+
+                font_scale = 1 #np.floor(min((max(x) - min(x)), (max(y) - min(y))) / 100)
+                cv2.putText(theImage, str(piece.id), pos, font,
+                            font_scale, ID_COLOR, 2, cv2.LINE_AA)
+
+            # # For better segmentation result, we need some black paddings
+            # # However, it may cause some problems
+            # theImage_enlarged = np.zeros((lengths[1] + 4, lengths[0] + 4, 3), dtype='uint8')
+            # theImage_enlarged[2:-2, 2:-2, :] = theImage
+            # theImage = theImage_enlarged
+        return theImage
+    #============================= display_mp_expanded ================
+    def display_mp_expanded(self, theImage=None, ax=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
+                                                                   BOUNDING_BOX=False):
+        """!
+        @brief  Display the puzzle board as an image using matplot library.
+
+        @param[in]  theImage
+        @param[in]  fh                  Figure handle if available.
+        @param[in]  ID_DISPLAY          Flag indicating displaying ID or not.
+        @param[in]  CONTOUR_DISPLAY     Flag indicating drawing contour or not.
+        @param[in]  ax                  Subplot Axes if available
+
+        @param[out] fh                  Figure handle.
+        """
+        
+        theImage = self.toImageExpanded(theImage=theImage, ID_DISPLAY=ID_DISPLAY, 
+                                CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+                                BOUNDING_BOX=BOUNDING_BOX)
+        if ax is not None:  # Plot in a subplot
+            ax.clear()  
+            plt.imshow(theImage) 
+
+        else:  # Create or update a full figure
+            if fh:  
+                fh = plt.figure(fh.number)  
+            else:  
+                fh = plt.figure()
+            plt.imshow(theImage)
+
+            return theImage
+        
+
     #============================= display =============================
     #
     def display_mp(self, theImage=None, ax=None, fh=None, ID_DISPLAY=False, CONTOUR_DISPLAY=False, 
-                                                                   BOUNDING_BOX=False):
+                                                                   BOUNDING_BOX=True):
         """!
         @brief  Display the puzzle board as an image using matplot library.
 
