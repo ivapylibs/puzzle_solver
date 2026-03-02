@@ -925,6 +925,19 @@ class SolutionBoard(Board):
             if score < threshold:
                 self.addPiece(piece, ORIGINAL_ID=True)
                 self.zones[self.id_count-1] = recordedBoard.zones.get(key, 0)
+    
+    def createBoardByZone(self, recordedBoard, zone):
+        """!
+        @brief  Create a partial board from the recorded board and solution state mask.
+
+        @param[in]  recordedBoard      The recorded board to create the partial board from.
+        @param[in]  zone               The zone to filter pieces by.
+        """
+        for key in recordedBoard.pieces:
+            piece = recordedBoard.pieces[key]
+            if recordedBoard.zones.get(key, 0) == zone:
+                self.addPiece(piece, ORIGINAL_ID=True)
+                self.zones[self.id_count-1] = zone
 
 #---------------------------------------------------------------------------
 #=================== Configuration Node : Correspondences ==================
