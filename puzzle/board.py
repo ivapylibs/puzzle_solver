@@ -926,18 +926,79 @@ class SolutionBoard(Board):
                 self.addPiece(piece, ORIGINAL_ID=True)
                 self.zones[self.id_count-1] = recordedBoard.zones.get(key, 0)
     
-    def createBoardByZone(self, recordedBoard, zone):
+    def createBoardByZone(self, recordedBoard, zone, checkStatus=None):
         """!
-        @brief  Create a partial board from the recorded board and solution state mask.
+        @brief  Create a partial board from the recorded board based on zone and status.
 
         @param[in]  recordedBoard      The recorded board to create the partial board from.
         @param[in]  zone               The zone to filter pieces by.
+        @param[in]  checkStatus        Extract pieces of a certain status only in zone
         """
         for key in recordedBoard.pieces:
             piece = recordedBoard.pieces[key]
-            if recordedBoard.zones.get(key, 0) == zone:
+            if checkStatus is None:
+                if recordedBoard.zones.get(key, 0) == zone:
+                    self.addPiece(piece, ORIGINAL_ID=True)
+                    self.zones[self.id_count-1] = zone
+            else:
+                if recordedBoard.zones.get(key, 0) == zone and piece.status == checkStatus:
+                    self.addPiece(piece, ORIGINAL_ID=True)
+                    self.zones[self.id_count-1] = zone
+    
+    def createBoardByStatus(self, recordedBoard, status):
+        """!
+        @brief: Create a partial board from the recorded board based on the status
+        @param[in]: recordedBoard Estimate board 
+        @param[in]: status status of piece
+        """
+        for key in recordedBoard.pieces:
+            piece = recordedBoard.pieces[key]
+            if piece.status == status:
                 self.addPiece(piece, ORIGINAL_ID=True)
-                self.zones[self.id_count-1] = zone
+                self.zones[self.id_count-1] = recordedBoard.zones.get(key, 0)
+
+        
+    def setPieceStatus(self, solutionMask, threshold=0.5):
+        """!
+        @brief: Method to iterate through piece locations and set the
+                status of the solution board pieces.
+        @param[in] solutionMask - a boolean / int mask for solution region
+        @param[in] threshold - threshold to determine if piece is present or not
+        """
+
+        # Apply a convolution operation on solutionMask to get scores at
+        # each potential piece location.
+        boolean_mask = solutionMask != 0
+        solutionMask[boolean_mask] = 1
+        kernel = np.ones((5, 5), dtype=np.float32) / 25.0
+        convolved = convolve2d(solutionMask, kernel, mode='same')
+
+         # For each piece in recordedBoard, check if its location
+        # corresponds to a low score in the convolved mask.
+        # If so, add it to the partial board.
+
+        for key in self.pieces:
+            piece = self.pieces[key]
+
+            # Check the average score across the pixel locations
+            
+            piece_locations = np.argwhere(piece.y.mask)
+            offset = np.array([piece.y.pcorner[1], piece.y.pcorner[0]])
+            piece_locations = piece_locations + offset
+           
+            rows = piece_locations[: ,0]
+            cols = piece_locations[:, 1]
+            
+            
+            score = np.mean(convolved[rows, cols])
+
+            if score < threshold:
+                self.pieces[key].setStatus(PieceStatus.GONE)
+            else:
+                self.pieces[key].setStatus(PieceStatus.MEASURED)
+    
+
+
 
 #---------------------------------------------------------------------------
 #=================== Configuration Node : Correspondences ==================
