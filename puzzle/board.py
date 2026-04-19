@@ -399,7 +399,7 @@ class Board:
           self.pieces[i].id = idSet
           idSet = idSet + 1
           #DEBUG
-          print("New piece. New ID. Displaying to confirm functionality. Delete once confirmed.")
+          #print("New piece. New ID. Displaying to confirm functionality. Delete once confirmed.")
 
       
     #=========================== markMissing ===========================
