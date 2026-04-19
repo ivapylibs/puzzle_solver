@@ -99,6 +99,9 @@ class CfgBoardMeasure(CfgCentMulti):
     default_dict['minArea'] = 1
     default_dict.update(dict(measProps = True,  #override
           lengthThresholdLower = 1000,  \
+          useRectExtentFilter = True,
+          rectAspectMax = 3.0,
+          rectExtentMin = 0.60,
           pieceBuilder = 'Template', pieceStatus = PieceStatus.MEASURED.value))
 
     return default_dict
@@ -196,6 +199,40 @@ class boardMeasure(centroidMulti):
       #print(self.tpt)
 
 
+  #========================= _passesRectExtentTest =====================
+  #
+  def _passesRectExtentTest(self, ri):
+    '''!
+    @brief  Check if a region is rectangle/square-like via ratio and extent.
+
+    @param[in]  ri    Region properties from centroidMulti labeling.
+
+    @param[out] ok    True if region passes ratio + extent tests.
+    '''
+
+    if not getattr(self.tparams, 'useRectExtentFilter', True):
+      return True
+
+    # Axis-aligned bounding box from regionprops style bbox:
+    # [min_row, min_col, max_row, max_col]
+    bb_h = float(ri.bbox[2] - ri.bbox[0])
+    bb_w = float(ri.bbox[3] - ri.bbox[1])
+
+    if bb_h <= 0 or bb_w <= 0:
+      return False
+
+    aspect_ratio = max(bb_w, bb_h) / min(bb_w, bb_h)
+    extent = float(ri.area) / (bb_w * bb_h)
+
+    if aspect_ratio > float(self.tparams.rectAspectMax):
+      return False
+
+    if extent < float(self.tparams.rectExtentMin):
+      return False
+
+    return True
+
+
   #=========================== _regions2board ==========================
   #
   def _regions2board(self, I):
@@ -259,7 +296,8 @@ class boardMeasure(centroidMulti):
       #print(pStat)
       #print('EEEEE')
       
-      if (ri.area > self.tparams.minArea and ri.area < self.tparams.maxArea):
+      if (ri.area > self.tparams.minArea and ri.area < self.tparams.maxArea and
+          self._passesRectExtentTest(ri)):
         thePiece = self.pieceConstructor.buildFromMaskAndImage(pMask, pImage, 
                                                                pCorn, None, pCent, pStat)
         # @todo I was sending the centroid as a coordinate. Why was that??
