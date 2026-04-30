@@ -6,6 +6,10 @@
 #           robot. After scene estimation performs a decision about
 #           which action to perform based on priorities.
 #           After performing action, repeat the process.
+#           Uses the look rate to determine how often
+#           to re-assess priorities and switch actions.
+#           Assumes continuous solving with human, so no tending.
+#         
 #
 #
 #
@@ -37,7 +41,7 @@ class Priority_Solver(Base):
         self.sort_pty = rospy.get_param('sort_priority')
         self.place_pty = rospy.get_param('place_priority')
         self.dir_place_pty = rospy.get_param('direct_place_priority')
-        self.PIECES_IN_CYCLE = rospy.get_param('measure_frequency')
+        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
         
         self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
     
@@ -47,7 +51,7 @@ class Priority_Solver(Base):
                 most populated zones to least populated zones.
         """
         
-        pieces_left = self.PIECES_IN_CYCLE
+        pieces_left = self.PIECES_BEFORE_LOOK
         plan = []
         for zone in range(1, Base.NUM_ZONES + 1):
             measured_board = self.createMeasuredBoard(rgbd, scene, [zone])
@@ -89,7 +93,12 @@ class Priority_Solver(Base):
             List of pieces, Next operation state
         
         """
-        
+        # Retreive the priorities and relevant rates.
+        self.sort_pty = rospy.get_param('sort_priority')
+        self.place_pty = rospy.get_param('place_priority')
+        self.dir_place_pty = rospy.get_param('direct_place_priority')
+        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
+
         scores = []
         # Sort score
         # Number of pieces in unorganized zone
@@ -127,17 +136,17 @@ class Priority_Solver(Base):
         if i == 0:
             # Sort
             self.performMatching(unorganized_measured_board, solution_board)
-            pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_IN_CYCLE)
+            pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_State.SORT
-        elif i == 2:
-            # Direct Place
-            self.performMatching(unorganized_measured_board, solution_board)
-            pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_IN_CYCLE)
-            return pieces, Priority_State.DIRECT_PLACE
-        else:
+        elif i == 1:
             # Place
             pieces = self.computePlacePlan(scene, rgbd)
             return pieces, Priority_State.PLACE
+        else:
+            # Direct Place
+            self.performMatching(unorganized_measured_board, solution_board)
+            pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
+            return pieces, Priority_State.DIRECT_PLACE
             
             
             
