@@ -101,7 +101,7 @@ class CfgBoardMeasure(CfgCentMulti):
           lengthThresholdLower = 1000,  \
           useRectExtentFilter = True,
           rectAspectMax = 3.0,
-          rectExtentMin = 0.60,
+          rectExtentMin = 0.50,
           pieceBuilder = 'Template', pieceStatus = PieceStatus.MEASURED.value))
 
     return default_dict
