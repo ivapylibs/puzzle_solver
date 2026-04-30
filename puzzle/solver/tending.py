@@ -46,7 +46,7 @@ class Tending_Solve(Base):
         # Update solution estimate
         self.updateSolutionRegEstimate(scene)
         # Create a measured board for unorganized region
-        measured_board = self.createMeasuredBoard(rgbd, scene, Base.UNORGANIZED)
+        measured_board = self.createMeasuredBoard(rgbd, scene, [Base.UNORGANIZED])
         # Create a solution board based on estimate for unorganized zone matching
         solution_board = self.createSolutionBoard(Base.UNORGANIZED)
         # Pre-emptively end if solution board is filled
@@ -55,28 +55,8 @@ class Tending_Solve(Base):
         # Peform correspondence tracking to find a piece to direct place
         self.performMatching(measured_board, solution_board)
 
-        plan = []
-        for key in list(measured_board.pieces)[:self.PIECES_IN_CYCLE]:
-            solKey = self.correspondence_tracker.pAssignments[key]
-            solID = solution_board.pieces[solKey].id 
-
-            plan.append((key, solID))
-        # Sort by the ID
-        plan.sort(key=lambda x: x[-1])
-        
-        pieces = []
-        for item in plan:
-            meaKey, solID = item
-            # Can proceed to place the match
-            solKey = self.correspondence_tracker.pAssignments[meaKey]
-            meaPiece = measured_board.pieces[meaKey]
-            solPiece = solution_board.pieces[solKey]
-            rot = self.correspondence_tracker.pAssignments_rotation[meaKey]
-            # Convert to rad
-            rot = np.deg2rad(-1*rot)
-            if np.isnan(rot):
-                rot = 0
-            pieces.append((meaPiece, solPiece, rot))
+        # Get the sequential (id-wise) piece placement plan
+        pieces = self.getSequentialPlan(measured_board, solution_board, self.PIECES_IN_CYCLE)
         
         return pieces
 
@@ -135,7 +115,7 @@ class Tending_Solve(Base):
                 nextOperation = Tending_State.ASKHELP
                 nextNumPieces = -1
             else:
-                meaPiece, solPiece, rot = previous.pc_list[previous.num_pieces]
+                meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
                 action = Action(type=Action.PICKPLACE, \
                                 measured_pc=meaPiece,\
                                 solution_pc=solPiece, rotation=rot)
