@@ -45,7 +45,7 @@ class Cycle_Place(Base):
         # Update solution estimate
         self.updateSolutionRegEstimate(scene)
         # Create a measured board for unorganized region
-        measured_board = self.createMeasuredBoard(rgbd, scene, zone)
+        measured_board = self.createMeasuredBoard(rgbd, scene, [zone])
         # Create a solution board based on estimate for unorganized zone matching
         solution_board = self.createSolutionBoard(zone)
         # Peform correspondence tracking to find a piece to direct place
