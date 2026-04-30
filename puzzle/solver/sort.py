@@ -62,7 +62,7 @@ class Sort_Mode(Base):
             for key in unorganized_measured_board.pieces:
                 pieceMea = unorganized_measured_board.pieces[key]
                 solKey = self.correspondence_tracker.pAssignments[key]
-                pieceSol = solution_board[solKey]
+                pieceSol = solution_board.pieces[solKey]
                 rot = self.correspondence_tracker.pAssignments_rotation[key]
                 zone = solution_board.zones[solKey]
                 if zone != 0:
@@ -79,7 +79,7 @@ class Sort_Mode(Base):
             for key in unorganized_measured_board.pieces:
                 pieceMea = unorganized_measured_board.pieces[key]
                 solKey = self.correspondence_tracker.pAssignments[key]
-                pieceSol = solution_board[solKey]
+                pieceSol = solution_board.pieces[solKey]
                 rot = self.correspondence_tracker.pAssignments_rotation[key]
                 zone = solution_board.zones[solKey]
                 if zone != 0:
@@ -92,7 +92,7 @@ class Sort_Mode(Base):
             for key in unorganized_measured_board.pieces:
                 pieceMea = unorganized_measured_board.pieces[key]
                 solKey = self.correspondence_tracker.pAssignments[key]
-                pieceSol = solution_board[solKey]
+                pieceSol = solution_board.pieces[solKey]
                 rot = self.correspondence_tracker.pAssignments_rotation[key]
                 zone = solution_board.zones[solKey]
                 if zone != 0:
@@ -107,7 +107,7 @@ class Sort_Mode(Base):
             for key in unorganized_measured_board.pieces:
                 pieceMea = unorganized_measured_board.pieces[key]
                 solKey = self.correspondence_tracker.pAssignments[key]
-                pieceSol = solution_board[solKey]
+                pieceSol = solution_board.pieces[solKey]
                 rot = self.correspondence_tracker.pAssignments_rotation[key]
                 zone = solution_board.zones[solKey]
                 if zone != 0:
@@ -146,6 +146,8 @@ class Sort_Mode(Base):
                 return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             # Compute the priorities and action plan
             nextPcList = self.getSortPlan(rgbd, scene)
+            action = Action(type=Action.NULL)
+            # Simply move to next state to start sorting
             nextOperation = Sort_State.SORT
             nextNumPieces = 0
         elif previous.operation == Sort_State.SORT:
