@@ -30,7 +30,7 @@ class Tending_State:
 class Tending_Solve(Base):
     def __init__(self, cfgSolver: CfgSolver):
         super().__init__(cfgSolver)
-        self.PIECES_IN_CYCLE=5
+        self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
     
 
     def getNextPieces(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
@@ -56,7 +56,7 @@ class Tending_Solve(Base):
         self.performMatching(measured_board, solution_board)
 
         # Get the sequential (id-wise) piece placement plan
-        pieces = self.getSequentialPlan(measured_board, solution_board, self.PIECES_IN_CYCLE)
+        pieces = self.getSequentialPlan(measured_board, solution_board, self.PIECES_BEFORE_TEND)
         
         return pieces
 
