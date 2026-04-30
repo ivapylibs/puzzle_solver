@@ -31,6 +31,8 @@ from puzzle.builder.arrangement import Arrangement, CfgArrangement
 from puzzle import board
 from puzzle.piece import PieceStatus
 from puzzle.piece import Template
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 # ===== Helper Elements
@@ -122,9 +124,9 @@ class Base(ABC):
         segIm = scene.segIm
         zone_mask = np.isin(self.imRegions, zones)
         zoneReg = segIm * zone_mask
-        plt.imshow(zoneReg)
-        plt.title(f"Measured region mask for zones {zones}")
-        plt.show()
+        # plt.imshow(zoneReg)
+        # plt.title(f"Measured region mask for zones {zones}")
+        # plt.show()
         measured_board = Arrangement.buildFrom_ImageAndMask(rgbd.color,
                                                         zoneReg, 
                                                         theParams=self.puzzle_params)
