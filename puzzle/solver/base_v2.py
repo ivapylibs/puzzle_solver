@@ -40,18 +40,16 @@ import matplotlib.pyplot as plt
 @dataclass
 class Action:
     PICKPLACE = 0
-    OUTLEFT = 1
-    OUTRIGHT = 2
+    OUTLEFT = 1 # Go left and estimate
+    OUTRIGHT = 2 # Go right and estimate
     HELP = 3
-    PICKHOVER = 4
-    GETZONE = 5
-    END = 6
+    SORT = 4
+    END = 5
     NULL = -1
     
     type: int
     help: str = ""
-    pick: np.ndarray = None
-    place: np.ndarray = None
+    tgt_zone: int = -1
     estimate_zone: List[int] = None
     measured_pc: Template = None
     solution_pc: Template = None
@@ -120,10 +118,13 @@ class Base(ABC):
         # plt.show()
         self.board_estimate.setPieceStatus(solutionReg)
     
-    def createMeasuredBoard(self, rgbd:ImageRGBD, scene:StatePuzzleScene, zone: int):
+    def createMeasuredBoard(self, rgbd:ImageRGBD, scene:StatePuzzleScene, zones: List[int]):
         segIm = scene.segIm
-        zone_mask = self.imRegions == zone
+        zone_mask = np.isin(self.imRegions, zones)
         zoneReg = segIm * zone_mask
+        plt.imshow(zoneReg)
+        plt.title(f"Measured region mask for zones {zones}")
+        plt.show()
         measured_board = Arrangement.buildFrom_ImageAndMask(rgbd.color,
                                                         zoneReg, 
                                                         theParams=self.puzzle_params)
@@ -181,6 +182,48 @@ class Base(ABC):
                 break
 
         return found  
+    
+    def getSequentialPlan(self, measured_board, solution_board, numPieces):
+        """
+        @brief  Generate a sequential placement plan by sorting matched pieces by solution ID.
+        
+        Args:
+            measured_board: The board with measured/detected pieces.
+            solution_board: The reference solution board to match against.
+            numPieces: Number of pieces to include in the plan.
+        
+        Returns:
+            List of tuples containing (measured_piece, solution_piece, rotation).
+        """
+        
+        plan = []
+        for key in list(measured_board.pieces)[:numPieces]:
+            solKey = self.correspondence_tracker.pAssignments[key]
+            solID = solution_board.pieces[solKey].id 
+            plan.append((key, solID))
+        # Sort by the ID
+        plan.sort(key=lambda x: x[-1])
+        pieces = []
+        # Ensure that the first id is placeable and plan is non empty
+        if len(plan) == 0 or not self.checkIDplaceability(plan[0][1]):
+            print("First piece in plan not placeable, skipping sequential plan")
+            return pieces
+        
+        for item in plan:
+            meaKey, solID = item
+            # Can proceed to place the match
+            solKey = self.correspondence_tracker.pAssignments[meaKey]
+            meaPiece = measured_board.pieces[meaKey]
+            solPiece = solution_board.pieces[solKey]
+            rot = self.correspondence_tracker.pAssignments_rotation[meaKey]
+            tgt_zone = solution_board.zones[solKey]
+            # Convert to rad
+            rot = np.deg2rad(-1*rot)
+            if np.isnan(rot):
+                rot = 0
+            pieces.append((meaPiece, solPiece, rot, tgt_zone))
+        return pieces
+            
     @abstractmethod
     def getNextAction(self):
         """
