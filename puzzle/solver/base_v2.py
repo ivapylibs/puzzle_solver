@@ -197,7 +197,7 @@ class Base(ABC):
         """
         
         plan = []
-        for key in list(measured_board.pieces)[:numPieces]:
+        for key in list(measured_board.pieces):
             solKey = self.correspondence_tracker.pAssignments[key]
             solID = solution_board.pieces[solKey].id 
             plan.append((key, solID))
@@ -222,7 +222,7 @@ class Base(ABC):
             if np.isnan(rot):
                 rot = 0
             pieces.append((meaPiece, solPiece, rot, tgt_zone))
-        return pieces
+        return pieces[:numPieces]
             
     @abstractmethod
     def getNextAction(self):
