@@ -64,7 +64,7 @@ class Priority_Solver(Base):
         pieces = []
         while pieces_left > 0 and i < Base.NUM_ZONES:
             num_pieces, measured_board, solution_board = plan[i]
-            if len(solution_board.pieces) == 0:
+            if len(solution_board.pieces) == 0 or len(measured_board.pieces) == 0:
                 # No pieces to place in this zone, skip
                 i += 1
                 continue
