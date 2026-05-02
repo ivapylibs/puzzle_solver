@@ -20,6 +20,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
+import cv2
 import numpy as np
 import copy
 
@@ -34,6 +35,7 @@ from puzzle.piece import Template
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+
 
 # ===== Helper Elements
 #
@@ -184,6 +186,62 @@ class Base(ABC):
                 break
 
         return found  
+    
+    def isPieceThere(self, meaPiece, scene:StatePuzzleScene):
+        """
+        @brief  Check if the measured piece is actually present in the scene by analyzing the segmentation mask.
+        Args:
+            meaPiece: The measured piece whose presence we want to verify.
+            scene: The current puzzle scene containing the segmentation mask.
+            
+        Returns:
+            True if the piece is likely present based on the segmentation mask, False otherwise.
+        """
+        segIm = scene.segIm
+        tooHigh = scene.tooHighMat
+        occlusion_mask = np.logical_or((segIm == 150), ( tooHigh > 0))
+        mask = (segIm == 75).astype(np.float32)
+
+        piece_rows, piece_cols = np.nonzero(meaPiece.y.mask)
+        if piece_rows.size == 0:
+            return False
+
+        row_offset = meaPiece.y.pcorner[1]
+        col_offset = meaPiece.y.pcorner[0]
+        rows = piece_rows + row_offset
+        cols = piece_cols + col_offset
+
+        valid = (
+            (rows >= 0)
+            & (rows < mask.shape[0])
+            & (cols >= 0)
+            & (cols < mask.shape[1])
+        )
+        if not np.any(valid):
+            return False
+
+        rows = rows[valid]
+        cols = cols[valid]
+
+        pad = 2
+        points = np.column_stack((cols, rows)).astype(np.int32)
+        x, y, w, h = cv2.boundingRect(points)
+
+        x0 = max(x - pad, 0)
+        y0 = max(y - pad, 0)
+        x1 = min(x + w + pad, mask.shape[1])
+        y1 = min(y + h + pad, mask.shape[0])
+
+        mask_crop = mask[y0:y1, x0:x1]
+        kernel = np.ones((5, 5), dtype=np.float32) / 25.0
+        filtered = cv2.filter2D(mask_crop, -1, kernel, borderType=cv2.BORDER_CONSTANT)
+
+        score = np.mean(filtered[rows - y0, cols - x0])
+
+        is_occluded = np.any(occlusion_mask[rows, cols])
+        is_visible = score > 0.5
+        print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
+        return is_visible or is_occluded  # Assuming a threshold of 0.5 for presence
     
     def getSequentialPlan(self, measured_board, solution_board, numPieces):
         """
