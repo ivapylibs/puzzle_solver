@@ -38,12 +38,14 @@ class Priority_State:
 class Priority_Solver(Base):
     def __init__(self, cfgSolver: CfgSolver):
         super().__init__(cfgSolver)
+        self.updatePriorities()
+        self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
+    
+    def updatePriorities(self):
         self.sort_pty = rospy.get_param('sort_priority')
         self.place_pty = rospy.get_param('place_priority')
         self.dir_place_pty = rospy.get_param('direct_place_priority')
         self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
-        
-        self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
     
     def computePlacePlan(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
         """
@@ -94,10 +96,7 @@ class Priority_Solver(Base):
         
         """
         # Retreive the priorities and relevant rates.
-        self.sort_pty = rospy.get_param('sort_priority')
-        self.place_pty = rospy.get_param('place_priority')
-        self.dir_place_pty = rospy.get_param('direct_place_priority')
-        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
+        self.updatePriorities()
 
         scores = []
         # Sort score
