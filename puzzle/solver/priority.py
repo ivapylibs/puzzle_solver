@@ -133,6 +133,10 @@ class Priority_Solver(Base):
         print("Pieces in organized zones: ", organized_zone_pieces, " and in unorganized zone: ", unorganized_zone_pieces, " with empty spots in solution board: ", empty_spots)
         print("Scores: Sort: ", sort_score, " Place: ", place_score, " Direct Place: ", direct_place_score)
         i = np.argmax(scores)
+
+        if scores[i] == 0:
+            # No piece to perform highest priority task, keep looking
+            return [], Priority_State.OUTRIGHT
         if i == 0:
             # Sort
             self.performMatching(unorganized_measured_board, solution_board)
@@ -199,6 +203,8 @@ class Priority_Solver(Base):
             # End if no empty spots in solution board
             if nextOperation == Priority_State.END:
                 action  = Action(type=Action.END)
+            elif nextOperation == Priority_State.OUTRIGHT:
+                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
                 # Simply move to next state
                 action = Action(type=Action.NULL)
@@ -213,11 +219,17 @@ class Priority_Solver(Base):
                 nextNumPieces = -1
             else:
                 meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.PICKPLACE, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot)
-                nextOperation = previous.operation
-                nextNumPieces = previous.num_pieces + 1
+                # Add a check to see if the piece is already placed correctly, if so skip
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                    nextOperation = previous.operation
+                    nextNumPieces = previous.num_pieces + 1
+                else:
+                    action = Action(type=Action.PICKPLACE, \
+                                    measured_pc=meaPiece,\
+                                    solution_pc=solPiece, rotation=rot)
+                    nextOperation = previous.operation
+                    nextNumPieces = previous.num_pieces + 1
         elif previous.operation == Priority_State.SORT:
             if previous.num_pieces == len(previous.pc_list):
                 # Re-estimate
@@ -226,12 +238,17 @@ class Priority_Solver(Base):
                 nextNumPieces = -1
             else:
                 meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.SORT, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot,
-                                tgt_zone=tgt_zone)
-                nextOperation = previous.operation
-                nextNumPieces = previous.num_pieces + 1
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                    nextOperation = previous.operation
+                    nextNumPieces = previous.num_pieces + 1
+                else:
+                    action = Action(type=Action.SORT, \
+                                    measured_pc=meaPiece,\
+                                    solution_pc=solPiece, rotation=rot,
+                                    tgt_zone=tgt_zone)
+                    nextOperation = previous.operation
+                    nextNumPieces = previous.num_pieces + 1
         
         # Update state
         self.state.operation = nextOperation
