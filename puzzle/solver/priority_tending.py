@@ -17,6 +17,7 @@
 
 import rospy
 from puzzle.solver.base_v2 import Base, Action , CfgSolver
+from puzzle.solver.priority import Priority_Solver
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from camera.base import ImageRGBD
 import numpy as np
@@ -37,58 +38,16 @@ class Priority_Tending_State:
     tend_counter: int
     pc_list: any
 
-class Priority_Tending_Solver(Base):
+class Priority_Tending_Solver(Priority_Solver):
     def __init__(self, cfgSolver: CfgSolver):
         super().__init__(cfgSolver)
-        self.sort_pty = rospy.get_param('sort_priority')
-        self.place_pty = rospy.get_param('place_priority')
-        self.dir_place_pty = rospy.get_param('direct_place_priority')
-        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
 
         # Logically, the robot can estimate when in ask for help state
         # so, the pices before look is the minimum of (look_rate, tend_rate)
-
-
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
         
-        self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
-    
-    def computePlacePlan(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
-        """
-        @brief  Computes a custom place plan. Starts by filling in pieces from 
-                most populated zones to least populated zones.
-        """
-        
-        pieces_left = self.PIECES_BEFORE_LOOK
-        plan = []
-        for zone in range(1, Base.NUM_ZONES + 1):
-            measured_board = self.createMeasuredBoard(rgbd, scene, [zone])
-            solution_board = self.createSolutionBoard(zone)
-            plan.append((len(measured_board.pieces), measured_board, solution_board))
-        
-        # Sort most to least pieces
-        plan.sort(key=lambda x: x[0], reverse=True)
-        i = 0
-        pieces = []
-        while pieces_left > 0 and i < Base.NUM_ZONES:
-            num_pieces, measured_board, solution_board = plan[i]
-            if len(solution_board.pieces) == 0:
-                # No pieces to place in this zone, skip
-                i += 1
-                continue
-            self.performMatching(measured_board, solution_board)
-            zone_pieces = self.getSequentialPlan(measured_board, solution_board, pieces_left)
-            if len(zone_pieces) != 0:
-                pieces.extend(zone_pieces)
-                pieces_left -= len(zone_pieces)
-            i += 1
-        
-        return pieces
-            
-            
-        
-        
+
         
     def getNextOperation(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
         """
@@ -103,10 +62,7 @@ class Priority_Tending_Solver(Base):
         
         """
         # Retreive the priorities and relevant rates.
-        self.sort_pty = rospy.get_param('sort_priority')
-        self.place_pty = rospy.get_param('place_priority')
-        self.dir_place_pty = rospy.get_param('direct_place_priority')
-        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
+        self.updatePriorities()
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
 
@@ -145,6 +101,10 @@ class Priority_Tending_Solver(Base):
         print("Pieces in organized zones: ", organized_zone_pieces, " and in unorganized zone: ", unorganized_zone_pieces, " with empty spots in solution board: ", empty_spots)
         print("Scores: Sort: ", sort_score, " Place: ", place_score, " Direct Place: ", direct_place_score)
         i = np.argmax(scores)
+
+        if scores[i] == 0:
+            # No piece to perform highest priority task, keep looking
+            return [], Priority_Tending_State.OUTRIGHT
         if i == 0:
             # Sort
             self.performMatching(unorganized_measured_board, solution_board)
@@ -212,11 +172,13 @@ class Priority_Tending_Solver(Base):
             # End if no empty spots in solution board
             if nextOperation == Priority_Tending_State.END:
                 action  = Action(type=Action.END)
+            elif nextOperation == Priority_Tending_State.OUTRIGHT:
+                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
                 # Simply move to next state
                 action = Action(type=Action.NULL)
                 nextNumPieces = 0
-                nextTendCounter = 0
+            nextTendCounter = previous.tend_counter
         elif previous.operation == Priority_Tending_State.DIRECT_PLACE or previous.operation == Priority_Tending_State.PLACE:
             # previous action was an estimation followed with a place
             # this one is going to be a place / or go back to estimation
@@ -232,6 +194,7 @@ class Priority_Tending_Solver(Base):
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
                 nextOperation = Priority_Tending_State.OUTRIGHT
                 nextNumPieces = -1
+                nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
                 action = Action(type=Action.PICKPLACE, \
@@ -252,6 +215,7 @@ class Priority_Tending_Solver(Base):
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
                 nextOperation = Priority_Tending_State.OUTRIGHT
                 nextNumPieces = -1
+                nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
                 action = Action(type=Action.SORT, \
@@ -266,6 +230,7 @@ class Priority_Tending_Solver(Base):
             # Next: estimate board again
             action = Action(type=Action.NULL)
             nextOperation = Priority_Tending_State.OUTRIGHT
+            nextTendCounter = 0
         
         # Update state
         self.state.operation = nextOperation
