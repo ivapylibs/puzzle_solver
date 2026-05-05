@@ -175,8 +175,11 @@ class Priority_Tending_Solver(Priority_Solver):
             elif nextOperation == Priority_Tending_State.OUTRIGHT:
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
-                # Simply move to next state
-                action = Action(type=Action.NULL)
+                # Move to next state if direct place / sort, but if place, then go to left.
+                if nextOperation == Priority_Tending_State.PLACE:
+                    action = Action(type=Action.OUTLEFT, estimate_zone=[])
+                else:
+                    action = Action(type=Action.NULL)
                 nextNumPieces = 0
             nextTendCounter = previous.tend_counter
         elif previous.operation == Priority_Tending_State.DIRECT_PLACE or previous.operation == Priority_Tending_State.PLACE:

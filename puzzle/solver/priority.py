@@ -205,8 +205,11 @@ class Priority_Solver(Base):
             elif nextOperation == Priority_State.OUTRIGHT:
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
-                # Simply move to next state
-                action = Action(type=Action.NULL)
+                # Move to next state if direct place / sort, but if place, then go to left.
+                if nextOperation == Priority_State.PLACE:
+                    action = Action(type=Action.OUTLEFT, estimate_zone=[])
+                else:
+                    action = Action(type=Action.NULL)
                 nextNumPieces = 0
         elif previous.operation == Priority_State.DIRECT_PLACE or previous.operation == Priority_State.PLACE:
             # previous action was an estimation followed with a place
