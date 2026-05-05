@@ -151,7 +151,7 @@ class Priority_Tending_Solver(Priority_Solver):
             # Start by estimating scene and solving
             # for first k pieces
             action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=-1, pc_list=None)
+            self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
             return action
         
         previous = self.state
