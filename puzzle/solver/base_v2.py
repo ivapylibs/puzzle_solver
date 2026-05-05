@@ -121,6 +121,11 @@ class Base(ABC):
         # plt.title("solution region mask")
         # plt.show()
         self.board_estimate.setPieceStatus(solutionReg)
+
+        # DEBUG
+        # print the empty spot ids
+        empty_spots = [piece.id for key, piece in self.board_estimate.pieces.items() if piece.status == PieceStatus.GONE]
+        print(f"Empty spots: {empty_spots}")
     
     def createMeasuredBoard(self, rgbd:ImageRGBD, scene:StatePuzzleScene, zones: List[int]):
         segIm = scene.segIm
@@ -169,19 +174,25 @@ class Base(ABC):
         down = solID + 10
         right = solID + 1
         left = solID - 1
-        neighbors = [up - 1, down - 1, right - 1, left - 1]
+        neighbor_ids = [up , down , right , left ]
+        potential_ids = [pc.id for pc in self.board_estimate.pieces.values()]
+        # Find the id to key mapping for the estimate board
+        id_to_key = {pc.id: key for key, pc in self.board_estimate.pieces.items()}
         found = False
-        for neighbor in neighbors:
+        for neighbor in neighbor_ids:
             # Check for edge piece
             if solID % 10 == 0 or solID % 10 == 1 or solID <= 10 or solID >= 61:
+                print("Edge piece detected, allowing placement")
                 found = True
                 break
             # Check if neighbor even exists in board estimate, if not , it is an edge piece
-            if neighbor not in self.board_estimate.pieces:
+            if neighbor not in potential_ids:
+                print("Neighbor not found, treating as edge piece")
                 found = True
                 break
 
-            if self.board_estimate.pieces[neighbor].status == PieceStatus.MEASURED:
+            if self.board_estimate.pieces[id_to_key[neighbor]].status == PieceStatus.MEASURED:
+                print(f"Found adjacent placed piece with ID {neighbor}, allowing placement")
                 found = True
                 break
 
@@ -265,7 +276,10 @@ class Base(ABC):
         plan.sort(key=lambda x: x[-1])
         pieces = []
         # Ensure that the first id is placeable and plan is non empty
-        if len(plan) == 0 or not self.checkIDplaceability(plan[0][1]):
+        if len(plan) == 0:
+            print("Measured board is empty, skipping sequential plan")
+            return pieces
+        elif not self.checkIDplaceability(plan[0][1]):
             print("First piece in plan not placeable, skipping sequential plan")
             return pieces
         
