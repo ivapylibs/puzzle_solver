@@ -252,7 +252,7 @@ class Base(ABC):
         is_occluded = np.any(occlusion_mask[rows, cols])
         is_visible = score > 0.5
         print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
-        return is_visible or is_occluded  # Assuming a threshold of 0.5 for presence
+        return is_visible and not is_occluded  # Assuming a threshold of 0.5 for presence
     
     def getSequentialPlan(self, measured_board, solution_board, numPieces):
         """
