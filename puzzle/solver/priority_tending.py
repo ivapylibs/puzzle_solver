@@ -171,6 +171,7 @@ class Priority_Tending_Solver(Priority_Solver):
 
             # End if no empty spots in solution board
             if nextOperation == Priority_Tending_State.END:
+                print("Ending operations")
                 action  = Action(type=Action.END)
             elif nextOperation == Priority_Tending_State.OUTRIGHT:
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
@@ -200,7 +201,10 @@ class Priority_Tending_Solver(Priority_Solver):
                 nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.PICKPLACE, \
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                else:
+                    action = Action(type=Action.PICKPLACE, \
                                 measured_pc=meaPiece,\
                                 solution_pc=solPiece, rotation=rot)
                 nextOperation = previous.operation
@@ -221,7 +225,10 @@ class Priority_Tending_Solver(Priority_Solver):
                 nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.SORT, \
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                else:
+                    action = Action(type=Action.SORT, \
                                 measured_pc=meaPiece,\
                                 solution_pc=solPiece, rotation=rot,
                                 tgt_zone=tgt_zone)
