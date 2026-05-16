@@ -190,8 +190,14 @@ class Permute_Solver(Priority_Solver):
 
             # End if no operations available (e.g., solved)
             if nextPcList is None:
+                print("Ending operations")
                 action  = Action(type=Action.END)
                 nextOperation = Permute_State.END
+                nextNumPieces = -1
+            elif len(nextPcList) == 0:
+                print("No pieces to operate on, re-assessing")
+                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+                nextOperation = Permute_State.OUTRIGHT
                 nextNumPieces = -1
             else:
                 nextNumPieces = 0
