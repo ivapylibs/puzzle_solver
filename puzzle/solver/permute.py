@@ -189,7 +189,7 @@ class Permute_Solver(Priority_Solver):
                 print("Next operations: ", nextOpList, " with pieces: ", len(nextPcList))
 
             # End if no operations available (e.g., solved)
-            if not nextOpList:
+            if nextPcList is None:
                 action  = Action(type=Action.END)
                 nextOperation = Permute_State.END
                 nextNumPieces = -1
