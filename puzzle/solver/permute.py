@@ -185,7 +185,8 @@ class Permute_Solver(Priority_Solver):
                 return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             # Compute the priorities and action plan
             nextPcList, nextOpList = self.getNextOperation(scene, rgbd)
-            print("Next operations: ", nextOpList, " with pieces: ", len(nextPcList))
+            if nextOpList is not None and nextPcList is not None:
+                print("Next operations: ", nextOpList, " with pieces: ", len(nextPcList))
 
             # End if no operations available (e.g., solved)
             if not nextOpList:
@@ -220,9 +221,12 @@ class Permute_Solver(Priority_Solver):
                 nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.PICKPLACE, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot)
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                else:
+                    action = Action(type=Action.PICKPLACE, \
+                                    measured_pc=meaPiece,\
+                                    solution_pc=solPiece, rotation=rot)
                 nextNumPieces = previous.num_pieces + 1
                 if nextNumPieces == len(previous.pc_list):
                     nextOperation = previous.operation
@@ -244,7 +248,10 @@ class Permute_Solver(Priority_Solver):
                 nextTendCounter = previous.tend_counter
             else:
                 meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.SORT, \
+                if not self.isPieceThere(meaPiece, scene):
+                    action = Action(type=Action.NULL)
+                else:
+                    action = Action(type=Action.SORT, \
                                 measured_pc=meaPiece,\
                                 solution_pc=solPiece, rotation=rot,
                                 tgt_zone=tgt_zone)
