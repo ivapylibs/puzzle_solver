@@ -122,7 +122,7 @@ class Priority_Solver(Base):
         solution_board = self.createSolutionBoard(Base.UNORGANIZED)
         empty_spots = len(solution_board.pieces)
 
-        direct_place_score = empty_spots * self.dir_place_pty
+        direct_place_score = unorganized_zone_pieces * self.dir_place_pty
         scores.append(direct_place_score)
         
         # Pre-emptively finish if no empty spots in solution board
