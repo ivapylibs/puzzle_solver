@@ -16,6 +16,8 @@ from camera.base import ImageRGBD
 import numpy as np
 from puzzle.piece import PieceStatus
 from dataclasses import dataclass
+import cv2
+import ivapy.display_cv as display
 
 @dataclass
 class Sort_State:
@@ -172,3 +174,40 @@ class Sort_Mode(Base):
             self.state.pc_list = nextPcList
         # Send action
         return action
+
+
+    #============================= display_plan ============================
+    #
+    def display_plan(self, Imeas, sortPlan, window_name="Sort Plan"):
+        """!
+        @brief  Display the sort plan via sort zone overlay on puzzle piece.
+
+        @param[in]  IMeas       The measured image.
+        @param[in]  sortPlan    Recovered plan.
+        @param[in]  window_name Optional window name (default:"Sort Plan")
+
+        @note   Quick and dirty solution given that I don't know code well.
+                2027/07/28 - PAV.
+        """
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.5
+        char_size = cv2.getTextSize("0", font, 0.15, 2)[0]
+
+        ID_COLOR=(255, 255, 255)
+        MK_COLOR=(255, 0, 0)
+
+        I = Imeas.copy()
+        for pplan in sortPlan:
+            pmeas  = pplan[0]
+            pmatch = pplan[1]
+            ptxt = (int(pmeas.centroidLoc[0] - 3*char_size[0]) ,
+                    int(pmeas.centroidLoc[1] + 2*char_size[1]) )
+            pcnt = (int(pmatch.centroidLoc[0]),int(pmatch.centroidLoc[1]))
+
+            zoneStr = str(pplan[3])
+            cv2.putText(I, zoneStr, ptxt, font,
+                      font_scale, ID_COLOR, 2, cv2.LINE_AA)
+            cv2.drawMarker(I, pcnt, MK_COLOR, cv2.MARKER_CROSS, 10, 2)
+
+        display.rgb(I, window_name=window_name)

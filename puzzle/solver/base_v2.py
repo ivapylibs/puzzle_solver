@@ -103,6 +103,8 @@ class Base(ABC):
         # Initialize the estimate board to all pieces unsolved
         self.reset_estimate_board()
 
+        self.verbose = 1
+
     def reset_estimate_board(self):
         """!
         @brief: Sets the estimate board to all pieces unsolved,
@@ -125,7 +127,8 @@ class Base(ABC):
         # DEBUG
         # print the empty spot ids
         empty_spots = [piece.id for key, piece in self.board_estimate.pieces.items() if piece.status == PieceStatus.GONE]
-        print(f"Empty spots: {empty_spots}")
+        if self.verbose:
+          print(f"Empty spots: {empty_spots}")
     
     def createMeasuredBoard(self, rgbd:ImageRGBD, scene:StatePuzzleScene, zones: List[int]):
         segIm = scene.segIm
@@ -182,17 +185,20 @@ class Base(ABC):
         for neighbor in neighbor_ids:
             # Check for edge piece
             if solID % 10 == 0 or solID % 10 == 1 or solID <= 10 or solID >= 61:
-                print("Edge piece detected, allowing placement")
+                if self.verbose:
+                    print("Edge piece detected, allowing placement")
                 found = True
                 break
             # Check if neighbor even exists in board estimate, if not , it is an edge piece
             if neighbor not in potential_ids:
-                print("Neighbor not found, treating as edge piece")
+                if self.verbose:
+                    print("Neighbor not found, treating as edge piece")
                 found = True
                 break
 
             if self.board_estimate.pieces[id_to_key[neighbor]].status == PieceStatus.MEASURED:
-                print(f"Found adjacent placed piece with ID {neighbor}, allowing placement")
+                if self.verbose:
+                    print(f"Found adjacent placed piece with ID {neighbor}, allowing placement")
                 found = True
                 break
 
@@ -251,7 +257,8 @@ class Base(ABC):
 
         is_occluded = np.any(occlusion_mask[rows, cols])
         is_visible = score > 0.5
-        print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
+        if self.verbose:
+            print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
         return is_visible and not is_occluded  # Assuming a threshold of 0.5 for presence
     
     def getSequentialPlan(self, measured_board, solution_board, numPieces):
@@ -277,10 +284,12 @@ class Base(ABC):
         pieces = []
         # Ensure that the first id is placeable and plan is non empty
         if len(plan) == 0:
-            print("Measured board is empty, skipping sequential plan")
+            if self.verbose:
+                print("Measured board is empty, skipping sequential plan")
             return pieces
         elif not self.checkIDplaceability(plan[0][1]):
-            print("First piece in plan not placeable, skipping sequential plan")
+            if self.verbose:
+                print("First piece in plan not placeable, skipping sequential plan")
             return pieces
         
         for item in plan:
