@@ -66,7 +66,6 @@ class Priority_Tending_Solver(Priority_Solver):
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
 
-
         scores = []
         # Sort score
         # Number of pieces in unorganized zone
@@ -91,12 +90,13 @@ class Priority_Tending_Solver(Priority_Solver):
         solution_board = self.createSolutionBoard(Base.UNORGANIZED)
         empty_spots = len(solution_board.pieces)
 
-        direct_place_score = empty_spots * self.dir_place_pty
+        direct_place_score = unorganized_zone_pieces * self.dir_place_pty
         scores.append(direct_place_score)
         
         # Pre-emptively finish if no empty spots in solution board
         if empty_spots == 0:
             return [], Priority_Tending_State.END
+
         # Pick the highest priority score
         print("Pieces in organized zones: ", organized_zone_pieces, " and in unorganized zone: ", unorganized_zone_pieces, " with empty spots in solution board: ", empty_spots)
         print("Scores: Sort: ", sort_score, " Place: ", place_score, " Direct Place: ", direct_place_score)
@@ -252,9 +252,6 @@ class Priority_Tending_Solver(Priority_Solver):
         return action
             
     
-
-
-
 
 
 
