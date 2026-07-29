@@ -178,7 +178,7 @@ class Sort_Mode(Base):
 
     #============================= display_plan ============================
     #
-    def display_plan(self, Imeas, sortPlan, window_name="Sort Plan"):
+    def display_plan(self, Imeas, sortPlan, window_name="Sort Plan", doRotate=False):
         """!
         @brief  Display the sort plan via sort zone overlay on puzzle piece.
 
@@ -209,5 +209,53 @@ class Sort_Mode(Base):
             cv2.putText(I, zoneStr, ptxt, font,
                       font_scale, ID_COLOR, 2, cv2.LINE_AA)
             cv2.drawMarker(I, pcnt, MK_COLOR, cv2.MARKER_CROSS, 10, 2)
+
+        if doRotate:
+          I = cv2.rotate(I, cv2.ROTATE_180)
+
+        display.rgb(I, window_name=window_name)
+
+    #============================= display_solution_hint ============================
+    #
+    def display_solution_hint(self, Imeas, sortPlan, window_name="Sort Plan", doRotate=False):
+        """!
+        @brief  Display the solution as pick/place vector hints.  
+
+        Can be messy if applied to too many puzzle pieces.  Either pieces should be
+        organized in some manner, or fewer used (can be problematic).  For many
+        piece, it is better to synthesize a virtual solve puzzle image and check
+        that it looks good.
+
+        @note   Unsure where virtual solve image creation is.  We used to have it
+                but code has changed a lot. 2027/07/29 - PAV.
+
+        @param[in]  IMeas       The measured image.
+        @param[in]  sortPlan    Recovered plan.
+        @param[in]  window_name Optional window name (default:"Sort Plan")
+
+        @note   Quick and dirty solution given that I don't know code well.
+                2027/07/28 - PAV.
+        """
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.5
+        char_size = cv2.getTextSize("0", font, 0.15, 2)[0]
+
+        ID_COLOR=(255, 255, 255)
+        MK_COLOR=(255, 0, 0)
+
+        I = Imeas.copy()
+        for pplan in sortPlan:
+            pmeas  = pplan[0]       # Measured piece.
+            pmatch = pplan[1]       # Estimated matched solution piece.
+
+            mPos = ( int( pmeas.centroidLoc[0]) , int( pmeas.centroidLoc[1]) )
+            sPos = ( int(pmatch.centroidLoc[0]) , int(pmatch.centroidLoc[1]) )
+
+            zoneStr = str(pplan[3])
+            cv2.arrowedLine(I, mPos, sPos, (0, 255, 0), 1, tipLength=0.03)
+
+        if doRotate:
+          I = cv2.rotate(I, cv2.ROTATE_180)
 
         display.rgb(I, window_name=window_name)
