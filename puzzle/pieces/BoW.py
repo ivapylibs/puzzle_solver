@@ -248,6 +248,53 @@ def histogram_distance(
 #=================================== BoW Class =================================
 #===============================================================================
 
+#---------------------------------------------------------------------------
+#================----------------- CfgBoW ==================================
+#---------------------------------------------------------------------------
+
+class CfgBoW(CfgSimilar):
+    """!
+    @ingroup  Puzzle_Tracking
+    @brief  Configuration setting specifier for ColorBoWMatcher class.
+    """
+
+    #============================= __init__ ============================
+    #
+    def __init__(self, init_dict=None, key_list=None, new_allowed=True):
+        """!
+        @brief  Constructor of configuration instance.
+
+        @param[in]  init_dict   Dictionary to use that expands default settings.
+        @param[in]  key_list    List of keys.
+        @param[in]  new_allowed Whether new entries are allowed.
+        """
+        if init_dict is None:
+            init_dict = CfgBoW.get_default_settings()
+
+        super().__init__(init_dict, key_list, new_allowed)
+
+    #========================= get_default_settings ========================
+    #
+    @staticmethod
+    def get_default_settings():
+        """!
+        @brief  Defines default configuration parameters for ColorBoWMatcher.
+
+        @param[out] default_dict  Dictionary populated with default settings.
+        """
+        default_dict = CfgSimilar.get_default_settings()
+        default_dict.update(dict(
+            tau = 0.25,
+            n_words = 20,
+            metric = "chi2",
+            max_iter = 100,
+            epsilon = 1.0,
+            attempts = 5,
+            random_seed = 42,
+        ))
+        return default_dict
+
+
 # ---------------------------------------------------------------------------
 # 4.  Matcher
 # ---------------------------------------------------------------------------
@@ -267,7 +314,7 @@ class ColorBoWMatcher(MatchSimilar):
 
     Typical usage:
     @code
-    matcher = ColorBoWMatcher(n_words=20)
+    matcher = ColorBoWMatcher()
     matcher.fit(groups)               # build vocabulary + encode database
     results = matcher.query(q_group)  # rank database groups by similarity
     @endcode
@@ -276,33 +323,53 @@ class ColorBoWMatcher(MatchSimilar):
     #============================== __init__ =============================
     def __init__(
         self,
-        tau: float = 0.25,
-        n_words: int = 20,
-        metric: DistanceMetric = "chi2",
+        theConfig: CfgBoW | str | None = None,
+        n_words: int | None = None,
+        metric: DistanceMetric | None = None,
+        tau: float | None = None,
         **kmeans_kwargs,
     ):
         """
-        @brief Initialise the matcher with vocabulary size and distance metric.
+        @brief Initialise the matcher with configuration node or parameter settings.
 
-        The query threshold can be 0, in which case it always returns a label match.
-
-        @param tau              Threshold for accepting query as similar or rejecting. Default 0.25.
-        @param n_words          Number of K-Means cluster centroids (vocabulary size). Default 20.
-        @param metric           Distance metric for histogram comparison. Default "chi2".
-        @param kmeans_kwargs    Additional keyword arguments forwarded to build_vocabulary()
-                                (e.g., max_iter, epsilon, attempts, random_seed).
+        @param[in] theConfig        Configuration instance (CfgBoW), YAML filepath, or None.
+        @param[in] n_words          Optional override for number of K-Means cluster centroids.
+        @param[in] metric           Optional override for histogram distance metric.
+        @param[in] tau              Optional override for similarity threshold.
+        @param[in] **kmeans_kwargs  Optional extra K-Means parameter overrides (max_iter, epsilon, attempts, random_seed).
         """
+        if theConfig is None:
+            theConfig = CfgBoW()
+        elif isinstance(theConfig, str):
+            theConfig = CfgBoW.load_cfg(theConfig)
+        elif not isinstance(theConfig, CfgSimilar):
+            if isinstance(theConfig, (int, float)):
+                cfg = CfgBoW()
+                cfg.tau = float(theConfig)
+                theConfig = cfg
 
-        if isinstance(tau, (int, float)):
-            cfg = CfgSimilar()
-            cfg.tau = float(tau)
-            super(ColorBoWMatcher, self).__init__(cfg)
-        else:
-            super(ColorBoWMatcher, self).__init__(tau)
+        # Apply keyword parameter overrides to configuration instance
+        if tau is not None:
+            theConfig.tau = float(tau)
+        if n_words is not None:
+            theConfig.n_words = int(n_words)
+        if metric is not None:
+            theConfig.metric = str(metric)
 
-        self.n_words = n_words
-        self.metric  = metric
-        self._kmeans_kwargs = kmeans_kwargs
+        for k, v in kmeans_kwargs.items():
+            if k in theConfig:
+                theConfig[k] = v
+
+        super(ColorBoWMatcher, self).__init__(theConfig)
+
+        self.n_words = self.params.n_words
+        self.metric  = self.params.metric
+        self._kmeans_kwargs = {
+            "max_iter": getattr(self.params, "max_iter", 100),
+            "epsilon": getattr(self.params, "epsilon", 1.0),
+            "attempts": getattr(self.params, "attempts", 5),
+            "random_seed": getattr(self.params, "random_seed", 42),
+        }
 
         ## @var centroids_
         #  @brief (n_words, 3) float32 array of discovered color centroids. None before fit().
@@ -579,8 +646,34 @@ class ColorBoWMatcher(MatchSimilar):
         return img
 
     # ------------------------------------------------------------------
-    # Serialization / Persistence (HDF5)
+    # Serialization / Persistence (YAML & HDF5)
     # ------------------------------------------------------------------
+
+    #=========================== loadFromYAML ============================
+    #
+    @staticmethod
+    def loadFromYAML(fileName: str) -> "ColorBoWMatcher":
+        """!
+        @brief  Instantiate ColorBoWMatcher from a YAML configuration file.
+
+        @param[in]  fileName  Path to the YAML configuration file.
+
+        @return ColorBoWMatcher instance initialized with configuration settings from file.
+        """
+        theConfig = CfgBoW()
+        theConfig.merge_from_file(fileName)
+        return ColorBoWMatcher(theConfig)
+
+    #============================ saveToYAML =============================
+    #
+    def saveToYAML(self, fileName: str) -> None:
+        """!
+        @brief  Save current configuration parameters to a YAML file.
+
+        @param[in]  fileName  Target path for the YAML configuration file.
+        """
+        with open(fileName, "w") as f:
+            f.write(self.params.dump())
 
     #================================= save ==============================
     #
@@ -597,14 +690,13 @@ class ColorBoWMatcher(MatchSimilar):
     #
     def saveTo(self, fPtr: h5py.File | h5py.Group) -> None:
         """!
-        @brief  Save ColorBoWMatcher attributes to an HDF5 group or file pointer.
+        @brief  Save ColorBoWMatcher attributes and configuration to an HDF5 group or file pointer.
 
         @param[in]  fPtr    Opened HDF5 file or group pointer.
         """
         grp = fPtr.create_group("ColorBoWMatcher")
-        grp.create_dataset("tau", data=float(self.params.tau if hasattr(self, "params") and hasattr(self.params, "tau") else 0.25))
-        grp.create_dataset("n_words", data=int(self.n_words))
-        grp.create_dataset("metric", data=str(self.metric))
+        configStr = self.params.dump()
+        grp.create_dataset("configuration", data=configStr)
 
         if self.centroids_ is not None:
             grp.create_dataset("centroids", data=self.centroids_)
@@ -644,12 +736,22 @@ class ColorBoWMatcher(MatchSimilar):
         """
         grp = fPtr["ColorBoWMatcher"] if "ColorBoWMatcher" in fPtr else fPtr
 
-        tau = float(grp["tau"][()]) if "tau" in grp else 0.25
-        n_words = int(grp["n_words"][()]) if "n_words" in grp else 20
-        metric_val = grp["metric"][()]
-        metric = metric_val.decode("utf-8") if isinstance(metric_val, bytes) else str(metric_val)
+        if "configuration" in grp:
+            configStr = grp["configuration"][()]
+            if isinstance(configStr, bytes):
+                configStr = configStr.decode("utf-8")
+            theConfig = CfgBoW.load_cfg(configStr)
+        else:
+            theConfig = CfgBoW()
+            if "tau" in grp:
+                theConfig.tau = float(grp["tau"][()])
+            if "n_words" in grp:
+                theConfig.n_words = int(grp["n_words"][()])
+            if "metric" in grp:
+                metric_val = grp["metric"][()]
+                theConfig.metric = metric_val.decode("utf-8") if isinstance(metric_val, bytes) else str(metric_val)
 
-        matcher = ColorBoWMatcher(tau=tau, n_words=n_words, metric=metric)
+        matcher = ColorBoWMatcher(theConfig)
 
         if "centroids" in grp:
             matcher.centroids_ = np.array(grp["centroids"][()], dtype=np.float32)
