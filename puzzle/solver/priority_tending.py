@@ -120,11 +120,6 @@ class Priority_Tending_Solver(Priority_Solver):
             pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_Tending_State.DIRECT_PLACE
             
-            
-            
-        
-        
-    
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the next action to execute from current solver state.
