@@ -1,4 +1,4 @@
-#=============== puzzle.solver.priority_tending.py =====================
+#======================== puzzle.solver.priority_tending =======================
 #
 # @class    puzzle.solver.priority_tending.py
 # @brief    Priority based solving. Involves estimating the
@@ -13,20 +13,27 @@
 #
 #
 #
-#=============== puzzle.solver.priority_tending.py =====================
+#======================== puzzle.solver.priority_tending =======================
+
+
+import numpy as np
+from dataclasses import dataclass
 
 import rospy
+
+from camera.base import ImageRGBD
+from Surveillance.layers.PuzzleScene import StatePuzzleScene
+from puzzle.piece import PieceStatus
+
 from puzzle.solver.base_v2 import Base, Action , CfgSolver
 from puzzle.solver.priority import Priority_Solver
-from Surveillance.layers.PuzzleScene import StatePuzzleScene
-from camera.base import ImageRGBD
-import numpy as np
-from puzzle.piece import PieceStatus
-from dataclasses import dataclass
 
 
 @dataclass
 class Priority_Tending_State:
+    """!
+    @ingroup    Puzzle_Solving
+    """
     DIRECT_PLACE = 0
     PLACE = 1
     SORT = 2
@@ -39,32 +46,62 @@ class Priority_Tending_State:
     pc_list: any
 
 class Priority_Tending_Solver(Priority_Solver):
+    """!
+    @brief      Priority-driven solver with human tending action/mode added.
+    @ingroup    Puzzle_Solving
+
+    Augment Priority_Solver with a worker tending mode.  Not much changes
+    except for the fact that the robot provides an opportunity for the 
+    human worker to fix the puzzle pieces to improve their arrangement
+    (in the sort zones or in the solution proper) before proceeding.
+    """
+
+
+    #============================= __init___ =============================
+    #
     def __init__(self, cfgSolver: CfgSolver):
+        """!
+        @brief  Constructor for Priority Tending Solver instance.
+
+        @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
+        """
+
         super().__init__(cfgSolver)
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
 
         # Logically, the robot can estimate when in ask for help state
         # so, the pices before look is the minimum of (look_rate, tend_rate)
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
-        
 
         
+    #========================== getNextOperation =========================
+    #
     def getNextOperation(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
-        """
+        """!
         @brief  Compute the composite priority of each operation and
                 return the operation with highest composite priority.
-        Args:
-            rgbd:  RGBD image for the current scene.
-            scene:  current scene state.
+
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
         
-        Returns: 
-            List of pieces, Next operation state
-        
+        @return     Tuple: List of pieces, Next operation state
+
+        @note   This code essentially duplicates the same code in priority solver
+                which causes problems when there are mistakes.  Common elements
+                should go into a common member function.  It complicates understanding
+                but simplifies gross changes.  That's more important when developing
+                and iterating towards final implementation. 2026/08/02 - PAV.
         """
+
         # Retreive the priorities and relevant rates.
+        #
         self.updatePriorities()
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
+        # @note Looks like minimum of tend and look will dominate.  How does that actually
+        #       implement what is specified?  Will not interleave.  These two actions
+        #       are fundamentally different.  Web priority interface miscontrues the
+        #       values. 2026/08/02 - PAV.
 
         scores = []
         # Sort score
@@ -120,26 +157,26 @@ class Priority_Tending_Solver(Priority_Solver):
             pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_Tending_State.DIRECT_PLACE
             
+    #=========================== getNextAction ===========================
+    #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the next action to execute from current solver state.
-
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
+       
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
         
-        Returns:
-            Action
-        """
+        @return     Action to take.
         
-        '''
-        Logic
-        Assumption is that re-assessing
-        priorities / switching actions requires the robot
-        to measure again.
+        Logic: Assumption is that re-assessing priorities / switching actions 
+        requires the robot to measure again.
         
         Assess -> perform -> assess
-        '''
+
+        @note   In this implementation, if performance of a pick/place action is 
+                rejected because piece is missing, then the action is presumed done
+                for this cycle. So it appears. 2026/08/02 - PAV.
+        """
         # Start of the solving logic
         
         if self.state is None:
@@ -149,10 +186,10 @@ class Priority_Tending_Solver(Priority_Solver):
             self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
             return action
         
-        previous = self.state
-        nextOperation = -1
-        nextNumPieces = -1
-        nextPcList = None
+        previous        = self.state
+        nextOperation   = -1
+        nextNumPieces   = -1
+        nextPcList      = None
         nextTendCounter = -1
         
         if previous.operation == Priority_Tending_State.OUTRIGHT:
@@ -246,8 +283,6 @@ class Priority_Tending_Solver(Priority_Solver):
         # Send action
         return action
             
-    
 
-
-
-#=============== puzzle.solver.priority_tending.py =====================
+#
+#======================== puzzle.solver.priority_tending =======================

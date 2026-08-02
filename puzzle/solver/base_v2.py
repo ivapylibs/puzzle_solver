@@ -1,21 +1,18 @@
-# ========================= puzzle.solver.base_v2 ========================
-#
-# @class    puzzle.solver.base_v2
-#
+#============================ puzzle.solver.base_v2 ============================
+##
+# @package  puzzle.solver.base_v2
 # @brief    Abstract base puzzle solver interface with explicit solver
 #           state/action modes.
 #
-# ========================= puzzle.solver.base_v2 ========================
-#
-# @file     base_v2.py
+# @ingroup  Puzzle_Solving
 #
 # @author   Nihit Agarwal,         nagarwal90@gatech.edu
 # @date     2026/04/13 [created]
 #           2026/04/13 [modified]
 #
-# ========================= puzzle.solver.base_v2 ========================
+#============================ puzzle.solver.base_v2 ============================
 
-# ===== Environment / Dependencies
+#===== Environment / Dependencies
 #
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -37,74 +34,94 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
-# ===== Helper Elements
+#===== Helper Elements
 #
 
 
 @dataclass
 class Action:
-    PICKPLACE = 0
-    OUTLEFT = 1 # Go left and estimate
-    OUTRIGHT = 2 # Go right and estimate
-    HELP = 3
-    SORT = 4
-    END = 5
-    NULL = -1
+    """!
+    @brief      Action instance for puzzle solver.
+    @ingroup    Puzzle_Solving
+    """
+    PICKPLACE = 0       #< Perform a puzzle piece pick and place .
+    OUTLEFT = 1         #< Go left and estimate
+    OUTRIGHT = 2        #< Go right and estimate
+    HELP = 3            #< Request help (with what? tending?)
+    SORT = 4            #< Sort action.
+    END = 5             #< Puzzle solving ended.
+    NULL = -1           #< Unknown.
     
-    type: int
-    help: str = ""
-    tgt_zone: int = -1
-    estimate_zone: List[int] = None
-    measured_pc: Template = None
-    solution_pc: Template = None
-    rotation: float = None
+    type:           int                 #< Action type.
+    help:           str = ""            #< Help string.
+    tgt_zone:       int = -1            #< Target zone of action.
+    estimate_zone:  List[int] = None    #< Unsure. List of estimated pieces in the zone?
+    measured_pc:    Template = None     #< The measured pieces in the zone.
+    solution_pc:    Template = None     #< Solution pieces (in the zone?).
+    rotation:       float = None        #< Orientation to align measured w/solution. (??)
 
 
 @dataclass
 class CfgSolver:
-    reference_board: SolutionBoard
-    display: bool = False
-    cfgMatching: CfgCorrespondences = None
-    imRegions: np.ndarray = None
-    puzzle_params: CfgArrangement = None
+    """!
+    @brief      Configuration instance for puzzle solver.
+    @ingroup    Puzzle_Solving
+    """
+    reference_board:    SolutionBoard               #< Reference board.
+    display:            bool = False                #< Display approach.
+    cfgMatching:        CfgCorrespondences = None   #< Correspondences.
+    imRegions:          np.ndarray = None           #< Image regions specification (zones).
+    puzzle_params:      CfgArrangement = None       #< PUzzle board parameters.
 
 #
-# ========================= puzzle.solver.base_v2 ========================
+#============================ puzzle.solver.base_v2 ============================
 #
 
 class Base(ABC):
+    """!
+    @brief      Abstract base class for puzzle solver.
+    @ingroup    Puzzle_Solving
+
+    This class collects all of the functional parts needed to solve a
+    puzzle.  A reference (solution) board specification, a matching strategy,
+    a description of the piece sort zones, an estimate of the current board,
+    and other gluing elements.  All together, these permit an agent to get
+    a sense for the state of progress and plan out how to complete the puzzle.
+
+    Naturally, there can be mistaked in the automation.
+    """
+
     NUM_ZONES = 4
     UNORGANIZED = 6
     SOL = 5
 
+    #============================= __init___ =============================
+    #
     def __init__(self, cfgSolver: CfgSolver):
         """
         @brief  Constructor for the abstract base puzzle solver.
 
-        Args:
-            cfgSolver: Configuration for the solver, including reference board and parameters.
+        @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
         """
-        # Debug display
-        self.display = cfgSolver.display
-        # Solution Reference to compare against
-        self.reference_board = cfgSolver.reference_board
-        # Correspondences configs
-        self.cfgMatching = cfgSolver.cfgMatching
-        # Image region definitions for zones
-        self.imRegions = cfgSolver.imRegions
-        # Puzzle-specific parameters for arrangement building
-        self.puzzle_params = cfgSolver.puzzle_params
+        self.display = cfgSolver.display                    #< Debug display
+        self.reference_board = cfgSolver.reference_board    #< Solution reference 
+        self.cfgMatching = cfgSolver.cfgMatching            #< Correspondences configs
+        self.imRegions = cfgSolver.imRegions                #< Region definitions for puzzle zones
+        self.puzzle_params = cfgSolver.puzzle_params        #< Puzzle-specific parameters for arrangement building
         
-        # Internal state variables
-        self.state = None
-        self.board_estimate = None
-        self.correspondence_tracker = None
+        self.state = None                                   #< Internal state.
+        self.board_estimate = None                          #< Board estimate from state history.
+        self.correspondence_tracker = None                  #< Puzzle piece correspondence tracker.
+
+        self.verbose = 1                                    #< Verbosity level.
         
         # Initialize the estimate board to all pieces unsolved
         self.reset_estimate_board()
 
-        self.verbose = 1
-
+    #======================== reset_estimate_board =======================
+    #
+    # @todo Changing to reset_board_estimate reads better.
+    #
     def reset_estimate_board(self):
         """!
         @brief: Sets the estimate board to all pieces unsolved,
@@ -114,71 +131,134 @@ class Base(ABC):
         for key in self.board_estimate.pieces:
             self.board_estimate.pieces[key].setStatus(PieceStatus.GONE)
            
+    #===================== updateSolutionRegEstimate =====================
+    #
     def updateSolutionRegEstimate(self, scene:StatePuzzleScene):
-        segIm = scene.segIm
-        soln_mask = (self.imRegions == Base.SOL).astype(np.uint8)
+        """!
+        @brief  Review pieces in solution region and update estimate.
+
+        @param[in]  scene   Puzzle scene state.
+        """
+
+        segIm       = scene.segIm
+        soln_mask   = (self.imRegions == Base.SOL).astype(np.uint8)
         solutionReg = segIm * soln_mask
-        # Verify mask
+
+        # @todo Switch to generic ivapy display.  Not a fan of matplotlib for this. - 2026/08/02 - PAV.
+        # DEBUG: Verify mask
         # plt.imshow(solutionReg)
         # plt.title("solution region mask")
         # plt.show()
+
         self.board_estimate.setPieceStatus(solutionReg)
+
+        empty_spots = [piece.id for key, piece in self.board_estimate.pieces.items() if piece.status == PieceStatus.GONE]
 
         # DEBUG
         # print the empty spot ids
-        empty_spots = [piece.id for key, piece in self.board_estimate.pieces.items() if piece.status == PieceStatus.GONE]
         if self.verbose:
           print(f"Empty spots: {empty_spots}")
     
+    #======================== createMeasuredBoard ========================
+    #
     def createMeasuredBoard(self, rgbd:ImageRGBD, scene:StatePuzzleScene, zones: List[int]):
-        segIm = scene.segIm
-        zone_mask = np.isin(self.imRegions, zones)
-        zoneReg = segIm * zone_mask
-        # plt.imshow(zoneReg)
-        # plt.title(f"Measured region mask for zones {zones}")
-        # plt.show()
+        """!
+        @brief  Take in raw inputs and create (generic) board measurement.
+
+        @param[in]  rgbd    RGBD image.
+        @param[in]  scene   Puzzle scene state.
+        @param[in]  zones   Zone listing for assignment during board measurement.
+        """
+
+        segIm       = scene.segIm
+        zone_mask   = np.isin(self.imRegions, zones)
+        zoneReg     = segIm * zone_mask
+
         measured_board = Arrangement.buildFrom_ImageAndMask(rgbd.color,
                                                         zoneReg, 
                                                         theParams=self.puzzle_params)
+
+        # DEBUG
+        # plt.imshow(zoneReg)
+        # plt.title(f"Measured region mask for zones {zones}")
+        # plt.show()
         # print(f"Created measured board with {len(measured_board.pieces)} pieces")
+
         return measured_board
     
+    #=========================== isBoardSolved ===========================
+    #
     def isBoardSolved(self):
-        # Check if all pieces are placed
-        all_placed = True
+        """!
+        @brief  Check if all puzzle pieces are in place.
+
+        This check may not be a hard-core matching based check.  
+
+        @return Boolean flag indicating all pieces placed or at least one missing.
+        """
+
+        all_placed = True       # Assume true.  If any missing, then false.
         for key in self.board_estimate.pieces:
             if self.board_estimate.pieces[key].status == PieceStatus.GONE:
                 all_placed = False
                 break
         return all_placed
     
+    #======================== createSolutionBoard ========================
+    #
     def createSolutionBoard(self, zone_to_match: int):
-        # Create a solution board based on the zone we want to match against
+        """!
+        @brief  Create a solution board based on the zone we want to match against
+        """
+
         solution_board = board.SolutionBoard()
         if zone_to_match == Base.UNORGANIZED:
             solution_board.createBoardByStatus(self.board_estimate, PieceStatus.GONE)
         else:
             solution_board.createBoardByZone(self.board_estimate, zone_to_match, PieceStatus.GONE)
+
+        # DEBUG
         # print(f"Created solution board with {len(solution_board.pieces)} pieces")
 
         return solution_board
 
+    #========================== performMatching ==========================
+    #
     def performMatching(self, measured_board:Arrangement, solution_board:SolutionBoard):
-        # Perform correspondence tracking to find a piece to direct place
+        """!
+        @brief  Perform correspondence tracking to find a piece to direct place
+
+
+        @param[in]  measured_board  Latest measured board.
+        @param[in]  solution_board  Known solution board.
+        """
+
+        # @todo Why does this look like it gets instantiated each time?  Might be bad idea
+        #       as it is a strong assumption on how correspondences work. 2026/08/02 - PAV.
+        #
         self.correspondence_tracker = Correspondences(self.cfgMatching, solution_board)
         self.correspondence_tracker.process(measured_board)
 
+    #======================== checkIDplaceability =======================
+    #
     def checkIDplaceability(self, solID):
-        # checks if piece with solID can be placed
-        # must have an adjacent placed piece, or should
-        # be on an edge/corner
+        """!
+        @brief  Checks if piece with solID can be placed must have an adjacent 
+                placed piece, or should be on an edge/corner.
 
-        up = solID - 10
-        down = solID + 10
-        right = solID + 1
-        left = solID - 1
-        neighbor_ids = [up , down , right , left ]
-        potential_ids = [pc.id for pc in self.board_estimate.pieces.values()]
+        @param[in]  solID   ID of piece to check for visibility / graspability.
+        """
+
+        # @note Looks like gridding is hard-coded to be #rows x 10 columns.  Oops
+        #       Need to fix eventually. 2026/08/02 - PAV.
+        up      = solID - 10
+        down    = solID + 10
+        right   = solID + 1
+        left    = solID - 1
+
+        neighbor_ids    = [up , down , right , left ]
+        potential_ids   = [pc.id for pc in self.board_estimate.pieces.values()]
+
         # Find the id to key mapping for the estimate board
         id_to_key = {pc.id: key for key, pc in self.board_estimate.pieces.items()}
         found = False
@@ -204,15 +284,16 @@ class Base(ABC):
 
         return found  
     
+    #============================ isPieceThere ===========================
+    #
     def isPieceThere(self, meaPiece, scene:StatePuzzleScene):
         """
         @brief  Check if the measured piece is actually present in the scene by analyzing the segmentation mask.
-        Args:
-            meaPiece: The measured piece whose presence we want to verify.
-            scene: The current puzzle scene containing the segmentation mask.
+
+        @param[in]  meaPiece    Measured piece whose presence we want to verify.
+        @param[in]  scene       Current puzzle scene containing the segmentation mask.
             
-        Returns:
-            True if the piece is likely present based on the segmentation mask, False otherwise.
+        @return True if the piece is likely present based on the segmentation mask, False otherwise.
         """
         segIm = scene.segIm
         tooHigh = scene.tooHighMat
@@ -261,17 +342,17 @@ class Base(ABC):
             print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
         return is_visible and not is_occluded  # Assuming a threshold of 0.5 for presence
     
+    #========================= getSequentialPlan =========================
+    #
     def getSequentialPlan(self, measured_board, solution_board, numPieces):
         """
         @brief  Generate a sequential placement plan by sorting matched pieces by solution ID.
         
-        Args:
-            measured_board: The board with measured/detected pieces.
-            solution_board: The reference solution board to match against.
-            numPieces: Number of pieces to include in the plan.
+        @param[in]  measured_board  The board with measured/detected pieces.
+        @param[in]  solution_board  The reference solution board to match against.
+        @param[in]  numPieces       Number of pieces to include in the plan.
         
-        Returns:
-            List of tuples containing (measured_piece, solution_piece, rotation).
+        @return List of tuples containing (measured_piece, solution_piece, rotation).
         """
         
         plan = []
@@ -279,9 +360,11 @@ class Base(ABC):
             solKey = self.correspondence_tracker.pAssignments[key]
             solID = solution_board.pieces[solKey].id 
             plan.append((key, solID))
+
         # Sort by the ID
         plan.sort(key=lambda x: x[-1])
         pieces = []
+
         # Ensure that the first id is placeable and plan is non empty
         if len(plan) == 0:
             if self.verbose:
@@ -307,16 +390,17 @@ class Base(ABC):
             pieces.append((meaPiece, solPiece, rot, tgt_zone))
         return pieces[:numPieces]
             
+    #=========================== getNextAction ===========================
+    #
     @abstractmethod
     def getNextAction(self):
         """
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            thePlan: Optional desired action plan.
+        @param[in]  thePlan     Optional desired action plan.
         """
 
         raise NotImplementedError()
 
 #
-# ========================= puzzle.solver.base_v2 ========================
+#========================= puzzle.solver.base_v2 =========================

@@ -61,6 +61,9 @@ interpret a puzzle based on its arrangement properties.
 @brief      Code that assists with tracking the movement of puzzle pieces and
             also associating them to a known solution.
 
+@defgroup   Puzzle_Solving     Puzzle Solving
+@brief      Code that generates puzzle solving actions based on an estimated
+            puzzled board compared to a known solution board. Considers human worker.
 @}
 
 */

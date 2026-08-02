@@ -1,13 +1,13 @@
-#=============== puzzle.solver.sort.py =====================
+#============================== puzzle.solver.sort =============================
 #
-# @class    puzzle.solver.sort.py
-# @brief    Robot only performs sort according to different
-#           policies as specified in the parameter.
+# @package  puzzle.solver.sort
+# @brief    Robot only performs sort according to a specified policy.
 #
+# There are different approaches to sorting that align with different instructions
+# that can be provided to a human worker.  Here, the next action to take is
+# determined by such a policy applied to the current puzzle scene state.
 #
-#
-#
-#=============== puzzle.solver.sort.py =====================
+#============================== puzzle.solver.sort =============================
 
 import rospy
 from puzzle.solver.base_v2 import Base, Action , CfgSolver
@@ -21,6 +21,9 @@ import ivapy.display_cv as display
 
 @dataclass
 class Sort_State:
+    """!
+    @ingroup    Puzzle_Solver
+    """
     SORT = 0
     OUTRIGHT = 1
     END = 2
@@ -30,16 +33,33 @@ class Sort_State:
 
 
 class Sort_Mode(Base):
-    STRUCTURED_ORDERED = 0
-    STRUCTURED_UNORDERED = 1
-    UNSTRUCTURED_ORDERED = 2
-    UNSTRUCTURED_UNORDERED = 3
+    """!
+    @brief      Sort only puzzle solving implementation.
+    @ingroup    Puzzle_Solving
+    """
+
+    STRUCTURED_ORDERED      = 0
+    STRUCTURED_UNORDERED    = 1
+    UNSTRUCTURED_ORDERED    = 2
+    UNSTRUCTURED_UNORDERED  = 3
+
+
+    #============================= __init___ =============================
+    #
     def __init__(self, cfgSolver: CfgSolver, policy: int):
+        """!
+        @brief  Constructor for Sort Solver instance.
+
+        @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
+        """
+
         super().__init__(cfgSolver)
         self.policy = policy
         
         self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
 
+    #============================ getSortPlan ============================
+    #
     def getSortPlan(self, rgbd: ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the sort plan with correct piece ordering for robot
@@ -118,16 +138,16 @@ class Sort_Mode(Base):
         return plan
 
 
+    #=========================== getNextAction ===========================
+    #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
         
-        Returns:
-            Action
+        @return     Action to take.
         """
         
         # Start by estimation
