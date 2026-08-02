@@ -1,74 +1,105 @@
-#=============== puzzle.solver.tending.py =======================
+#============================ puzzle.solver.tending ============================
 #
-# @class    puzzle.solver.tending
-#
+# @package  puzzle.solver.tending
 # @brief    Tending puzzle solving strategy. Robot goes right, 
 #           estimates scene, performs k direct
 #           places, asks for human help. Then repeats.
 # 
 # ========================= puzzle.solver.tending ========================
 
+import numpy as np
+from dataclasses import dataclass
 
 import rospy
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
-from Surveillance.layers.PuzzleScene import StatePuzzleScene
+
+
 from camera.base import ImageRGBD
-import numpy as np
+from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from puzzle.piece import PieceStatus
-from dataclasses import dataclass
+
+from puzzle.solver.base_v2 import Base, Action , CfgSolver
 
 
 @dataclass
 class Tending_State:
+    """!
+    @ingroup    Puzzle_Solving
+    """
+
     DIRECT_PLACE = 0
-    OUTRIGHT = 1
-    ASKHELP = 2
+    OUTRIGHT     = 1
+    ASKHELP      = 2
     operation: int
     num_pieces: int
     pc_list: any
 
 class Tending_Solve(Base):
+    """!
+    @brief      Standard approach to puzzle solving w/periodic tending.
+    @ingroup    Puzzle_Solving
+    """
+
+    #============================= __init___ =============================
+    #
     def __init__(self, cfgSolver: CfgSolver):
+        """!
+        @brief  Constructor for Solver w/Tending instance.
+
+        @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
+        """
+
         super().__init__(cfgSolver)
+
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
     
 
+    #=========================== getNextPieces ===========================
+    #
     def getNextPieces(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
         """
         @brief  Returns list of pieces to pick drop. Gives them in 
                 order of ids as it will be top left to bottom right
                 which in general always satisfies constraint of
                 piece placement.
-        Args:
-            scene
-            rgbd
+
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
+        
+        @return     Pieces to solve as plan.
         """
+
         # Update solution estimate
-        self.updateSolutionRegEstimate(scene)
         # Create a measured board for unorganized region
-        measured_board = self.createMeasuredBoard(rgbd, scene, [Base.UNORGANIZED])
         # Create a solution board based on estimate for unorganized zone matching
+        self.updateSolutionRegEstimate(scene)
+
+        measured_board = self.createMeasuredBoard(rgbd, scene, [Base.UNORGANIZED])
         solution_board = self.createSolutionBoard(Base.UNORGANIZED)
+
         # Pre-emptively end if solution board is filled
         if len(solution_board.pieces) == 0:
             return []
-        # Peform correspondence tracking to find a piece to direct place
-        self.performMatching(measured_board, solution_board)
 
-        # Get the sequential (id-wise) piece placement plan
+        # Peform correspondence tracking to find a piece to direct place
+        # Get the sequential (id-wise) piece placement plan up to next tend request.
+        self.performMatching(measured_board, solution_board)
         pieces = self.getSequentialPlan(measured_board, solution_board, self.PIECES_BEFORE_TEND)
         
         return pieces
 
 
-
+    #=========================== getNextAction ===========================
+    #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
+        
+        @return     Action to take.
+
+        @brief  Return the next action to execute from current solver state.
         """
 
         # Start of the solving logic
@@ -135,23 +166,5 @@ class Tending_Solve(Base):
         # Send action
         return action
 
-
-
-                
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ========================= puzzle.solver.tending ========================
+#
+#============================ puzzle.solver.tending ============================

@@ -71,7 +71,7 @@ class CfgSolver:
     display:            bool = False                #< Display approach.
     cfgMatching:        CfgCorrespondences = None   #< Correspondences.
     imRegions:          np.ndarray = None           #< Image regions specification (zones).
-    puzzle_params:      CfgArrangement = None       #< PUzzle board parameters.
+    puzzle_params:      CfgArrangement = None       #< Puzzle board parameters.
 
 #
 #============================ puzzle.solver.base_v2 ============================
