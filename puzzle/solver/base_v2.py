@@ -113,6 +113,8 @@ class Base(ABC):
         self.board_estimate = None                          #< Board estimate from state history.
         self.correspondence_tracker = None                  #< Puzzle piece correspondence tracker.
 
+        self.correspondence_tracker = Correspondences(self.cfgMatching)
+
         self.verbose = 1                                    #< Verbosity level.
         
         # Initialize the estimate board to all pieces unsolved
@@ -235,8 +237,7 @@ class Base(ABC):
 
         # @todo Why does this look like it gets instantiated each time?  Might be bad idea
         #       as it is a strong assumption on how correspondences work. 2026/08/02 - PAV.
-        #
-        self.correspondence_tracker = Correspondences(self.cfgMatching, solution_board)
+        self.correspondence_tracker.setBoard(solution_board)
         self.correspondence_tracker.process(measured_board)
 
     #======================== checkIDplaceability =======================

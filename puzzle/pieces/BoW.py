@@ -25,12 +25,14 @@
 
 from __future__ import annotations
 
+import  os
 import  numpy as np
 import  cv2
 import  h5py
 from    typing import Literal
 
 from puzzle.pieces.matcher import MatchSimilar, CfgSimilar
+from puzzle.piece          import Template
 
 # ---------------------------------------------------------------------------
 # Type aliases
@@ -48,6 +50,10 @@ Histogram = np.ndarray
 #  @brief Literal type enumerating supported histogram distance metrics.
 #  Valid values: "chi2", "intersection", "hellinger", "l2", "cosine".
 DistanceMetric = Literal["chi2", "intersection", "hellinger", "l2", "cosine"]
+
+# @note Careful with this matcher because some of the distance metrics are
+#       similarity scores and some are difference distances.  May need to modify
+#       how this particular class works.
 
 #===============================================================================
 #=============================== Helper Functions ==============================
@@ -282,12 +288,12 @@ class CfgBoW(CfgSimilar):
         """
         default_dict = CfgSimilar.get_default_settings()
         default_dict.update(dict(
-            tau = 0.25,
-            n_words = 20,
-            metric = "chi2",
-            max_iter = 100,
-            epsilon = 1.0,
-            attempts = 5,
+            tau         = 0.25,
+            n_words     = 20,
+            metric      = "chi2",
+            max_iter    = 100,
+            epsilon     = 1.0,
+            attempts    = 5,
             random_seed = 42,
         ))
         return default_dict
@@ -317,6 +323,46 @@ class ColorBoWMatcher(MatchSimilar):
     results = matcher.query(q_group)  # rank database groups by similarity
     @endcode
     """
+
+    #=============================== loader ==============================
+    #
+    @classmethod
+    def loader(cls, theConfig: CfgBoW | str | None = None) -> "ColorBoWMatcher":
+        """!
+        @brief  Build a matcher from a configuration, filename prefix, or defaults.
+
+        @param[in] theConfig  A CfgBoW instance, a filename prefix (for ``.h5``
+                              or ``.yaml``), or None.
+
+        @return A ColorBoWMatcher.  When both files exist for a string prefix,
+                the persisted HDF5 model is preferred over the YAML configuration.
+        """
+        if theConfig is None:
+            return cls(CfgBoW())
+
+        if isinstance(theConfig, CfgBoW):
+            return cls(theConfig)
+
+        if isinstance(theConfig, str):
+            hdf5_name = theConfig + ".h5"
+            yaml_name = theConfig + ".yaml"
+
+            if os.path.exists(hdf5_name):
+                return cls.load(hdf5_name)
+            if os.path.exists(yaml_name):
+                config = CfgBoW()
+                config.merge_from_file(yaml_name)
+                return cls(config)
+
+            raise FileNotFoundError(
+                f"No BoW model or configuration found for prefix {theConfig!r}: "
+                f"expected {hdf5_name!r} or {yaml_name!r}."
+            )
+
+        raise TypeError(
+            "theConfig must be a string filename prefix, CfgBoW instance, or None; "
+            f"got {type(theConfig).__name__}."
+        )
 
     #============================== __init__ =============================
     def __init__(
@@ -479,6 +525,70 @@ class ColorBoWMatcher(MatchSimilar):
         )
         self.histograms_ = encode_all(groups, self.centroids_)
         return self
+
+    #========================== extractFeature ==========================
+    #
+    def extractFeature(self, piece) -> Histogram:
+        """!
+        @brief  Encode a puzzle piece's foreground colors as a BoW histogram.
+
+        @param[in] piece  Template puzzle piece containing foreground color samples
+                          in ``piece.y.appear``.
+
+        @return An L1-normalized histogram over the fitted color vocabulary.
+
+        @throws TypeError if @p piece is not a Template.
+        @throws RuntimeError if no vocabulary has been fitted or loaded.
+        @throws ValueError if the piece has no valid RGB appearance samples.
+        """
+        if not isinstance(piece, Template):
+            raise TypeError("piece must be a puzzle.piece.Template instance.")
+        if self.centroids_ is None:
+            raise RuntimeError("Call .fit() or load a persisted model before extracting features.")
+
+        appearance = np.asarray(piece.y.appear)
+        if appearance.ndim != 2:
+            raise ValueError("piece.y.appear must be a two-dimensional RGB array.")
+
+        if appearance.shape[1] == 3:
+            group = appearance.T
+        elif appearance.shape[0] == 3:
+            group = appearance
+        else:
+            raise ValueError("piece.y.appear must contain RGB samples with three channels.")
+
+        if group.shape[1] == 0:
+            raise ValueError("Cannot extract a BoW feature from a piece with no foreground pixels.")
+
+        return encode_histogram(group, self.centroids_)
+
+    #=============================== score ===============================
+    #
+    def score(self, piece_A, piece_B) -> float:
+        """!
+        @brief  Compute BoW color similarity between two puzzle pieces.
+
+        The configured histogram metric is evaluated as a distance, then
+        normalized to a similarity in [0, 1] so this MatchSimilar-derived
+        matcher retains its higher-is-better score convention.
+
+        @param[in] piece_A  First Template puzzle piece.
+        @param[in] piece_B  Second Template puzzle piece.
+
+        @return Histogram similarity, where 1.0 denotes identical BoW features.
+        """
+        hist_A = piece_A.getFeature(self)
+        hist_B = piece_B.getFeature(self)
+        distance = histogram_distance(hist_A, hist_B, metric=self.metric)
+
+        # The maximum distances for L1-normalized histograms are 2 for chi2
+        # and sqrt(2) for L2.  All other supported metrics are already in [0, 1].
+        if self.metric == "chi2":
+            distance /= 2.0
+        elif self.metric == "l2":
+            distance /= np.sqrt(2.0)
+
+        return float(np.clip(1.0 - distance, 0.0, 1.0))
 
     # ------------------------------------------------------------------
     # Querying

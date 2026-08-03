@@ -47,10 +47,12 @@ from dataclasses import dataclass
 from scipy.optimize import linear_sum_assignment
 
 from detector.Configuration import AlgConfig
-from puzzle.pieces.matcher import MatchDifferent
-from puzzle.pieces.matcher import MatchSimilar
+from puzzle.pieces.matcher  import MatchDifferent
+from puzzle.pieces.matcher  import MatchSimilar
+from puzzle.pieces.BoW      import ColorBoWMatcher, CfgBoW  # Put in separate file.
+
 import puzzle.pieces.matchDifferent as diffScore
-import puzzle.pieces.matchSimilar as simScore
+import puzzle.pieces.matchSimilar   as simScore
 
 
 #
@@ -1135,6 +1137,13 @@ class Correspondences:
         # Save for debug
         self.scoreTable_shape = None
 
+    #============================== setBoard =============================
+    #
+    #
+    def setBoard(self, theBoard):
+
+      self.boardEstimate = theBoard
+
     #============================= correspond ============================
     #
     #
@@ -1180,7 +1189,7 @@ class Correspondences:
           #
           pFilteredAssignments = {}
           for assignment in self.pAssignments.items():
-              # @todo   If adding option to have no match, taht means a match to a garbage class
+              # @todo   If adding option to have no match, that means a match to a garbage class
               #         whose index will be greater than the number of pieces in the compared board.
               #         When that happens, the comparison should be rejected. ret = False.
               #         Need to add this when haveGarbage option is coded up.
@@ -1572,6 +1581,12 @@ class Correspondences:
       elif (typeStr == 'ColorHistCV'):
         theConfig = diffScore.CfgHistogramCV()
         matchType = diffScore.HistogramCV
+      elif (typeStr == 'BoW'):
+        # Takes advantage of approach to use a custom builder
+        # for the BoW matcher.  Supports different config types.
+        theConfig   = matchConfig
+        matchType   = ColorBoWMatcher.loader 
+        matchConfig = None
       elif (typeStr == 'SIFTCV'):
         theConfig = simScore.CfgSIFTCV()
         matchType = simScore.SIFTCV

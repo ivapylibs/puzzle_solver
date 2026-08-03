@@ -22,7 +22,7 @@ import ivapy.display_cv as display
 @dataclass
 class Sort_State:
     """!
-    @ingroup    Puzzle_Solver
+    @ingroup    Puzzle_Solving
     """
     SORT = 0
     OUTRIGHT = 1
@@ -226,9 +226,14 @@ class Sort_Mode(Base):
             pcnt = (int(pmatch.centroidLoc[0]),int(pmatch.centroidLoc[1]))
 
             zoneStr = str(pplan[3])
-            cv2.putText(I, zoneStr, ptxt, font,
-                      font_scale, ID_COLOR, 2, cv2.LINE_AA)
-            cv2.drawMarker(I, pcnt, MK_COLOR, cv2.MARKER_CROSS, 10, 2)
+            cv2.putText(I, zoneStr, ptxt, font, font_scale, ID_COLOR, 2, cv2.LINE_AA)
+            #cv2.drawMarker(I, pcnt, MK_COLOR, cv2.MARKER_CROSS, 10, 2)
+
+        lenPlan = len(sortPlan)
+        lenMeas = len(self.correspondence_tracker.boardMeasurement.pieces)
+        lenSol  = len(self.correspondence_tracker.boardEstimate.pieces)
+        cv2.putText(I, f"{lenPlan} of {lenMeas} / {lenSol}", (10, 15), 
+                    font, font_scale, ID_COLOR, 1, cv2.LINE_AA)
 
         if doRotate:
           I = cv2.rotate(I, cv2.ROTATE_180)
@@ -237,7 +242,7 @@ class Sort_Mode(Base):
 
     #============================= display_solution_hint ============================
     #
-    def display_solution_hint(self, Imeas, sortPlan, window_name="Sort Plan", doRotate=False):
+    def display_solution_hint(self, Imeas, sortPlan, window_name="Solution Match", doRotate=False):
         """!
         @brief  Display the solution as pick/place vector hints.  
 
@@ -251,7 +256,7 @@ class Sort_Mode(Base):
 
         @param[in]  IMeas       The measured image.
         @param[in]  sortPlan    Recovered plan.
-        @param[in]  window_name Optional window name (default:"Sort Plan")
+        @param[in]  window_name Optional window name (default:"Solution Match")
 
         @note   Quick and dirty solution given that I don't know code well.
                 2027/07/28 - PAV.

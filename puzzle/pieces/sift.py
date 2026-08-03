@@ -111,7 +111,7 @@ class Sift(MatchSimilar):
             The processed feature.
         """
 
-        return Sift.kpFeaExtract(piece)
+        return self.kpFeaExtract(piece)
 
 
     #=============================== score ===============================

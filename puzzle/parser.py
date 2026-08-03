@@ -101,7 +101,7 @@ class CfgBoardMeasure(CfgCentMulti):
           lengthThresholdLower = 1000,  \
           useRectExtentFilter = True,
           rectAspectMax = 3.0,
-          rectExtentMin = 0.50,
+          rectExtentMin = 0.42,
           pieceBuilder = 'Template', pieceStatus = PieceStatus.MEASURED.value))
 
     return default_dict
@@ -222,7 +222,7 @@ class boardMeasure(centroidMulti):
       return False
 
     aspect_ratio = max(bb_w, bb_h) / min(bb_w, bb_h)
-    extent = float(ri.area) / (bb_w * bb_h)
+    extent       = float(ri.area) / (bb_w * bb_h)
 
     if aspect_ratio > float(self.tparams.rectAspectMax):
       return False
@@ -320,6 +320,10 @@ class boardMeasure(centroidMulti):
       #         plot/display or place in image routine.  Need to double check code.
       #         09/08: Confirmed that place in image is weird. Push to later.
       #         09/15: There are weird adjustments to image size. Badly commented.
+
+      #DEBUGGING WHEN PIECES ARE REJECTED.
+      #else:
+      #  print(f"Piece failed test. {ri.area}, {ri.bbox[2] - ri.bbox[0]}, {ri.bbox[3] - ri.bbox[1]}")
 
 
   #xxxxxxxxxxxxxxxxxxxxxxx findCorrectedContours xxxxxxxxxxxxxxxxxxxxxxx

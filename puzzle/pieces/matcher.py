@@ -111,6 +111,53 @@ class Matcher:
         self.params = theParams  # @< Parameters to use when building and comparing features.
 
 
+    #------------------------------------------------------------------
+    # Fitting (vocabulary discovery + database encoding)
+    #------------------------------------------------------------------
+
+    #======================= fitFromImageSegmented =======================
+    #
+    def fitFromImageSegmented(self, Irgb, Iseg, hasLabs=False) -> "Matcher":
+        """!
+        @brief  Given an image and a segmentation, generate fit.
+
+        This base class does nothing. Overload as fitting.
+
+        Permits fitting based on two images, one with all objects of interest
+        in it as a color image and the second a segmentation isolating the objects.
+        It should be considered binary in nature, then no labels assumed.  If it
+        has labels (each unique value is the label), then snag from Iseg as labels.
+
+        @param[in]  Irgb    Source color image.
+        @param[in]  Iseg    Binary segmentation of image, or label segmentation.
+        @param[in]  hasLabs Iseg has labels and is interpreted as binary. Default: False.
+        """
+
+        return self
+
+
+    #================================= fit ===============================
+    #
+    def fit(self, groups, labels: list[str] | None = None,) -> "Matcher":
+        """!
+        @brief Given raw data regarding expected element instances, identify
+               model to differentiate them if possible for this matcher type.
+
+        This base class does nothing. Overload as fitting.
+
+        @param groups  List of (3, N) RGB matrices forming the database.
+        @param labels  Optional list of human-readable names, one per group.
+                       Auto-generated as "group_0", "group_1", ... if None.
+
+        @return Self, to allow method chaining (e.g., matcher.fit(groups).query(q)).
+        """
+
+        return self
+
+    #------------------------------------------------------------------
+    # Feature Extraction and Comparison
+    #------------------------------------------------------------------
+
     #=========================== extractFeature ==========================
     #
     def extractFeature(self, piece):
