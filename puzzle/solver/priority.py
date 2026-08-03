@@ -1,6 +1,6 @@
-#=============== puzzle.solver.priority.py =====================
+#============================ puzzle.solver.priority ===========================
 #
-# @class    puzzle.solver.priority.py
+# @package  puzzle.solver.priority
 # @brief    Priority based solving. Involves estimating the
 #           scene every k actions (sort, place, direct place)
 #           robot. After scene estimation performs a decision about
@@ -10,22 +10,24 @@
 #           to re-assess priorities and switch actions.
 #           Assumes continuous solving with human, so no tending.
 #         
-#
-#
-#
-#=============== puzzle.solver.priority.py =====================
+#============================ puzzle.solver.priority ===========================
 
-import rospy
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
-from Surveillance.layers.PuzzleScene import StatePuzzleScene
-from camera.base import ImageRGBD
 import numpy as np
-from puzzle.piece import PieceStatus
 from dataclasses import dataclass
 
+import rospy
+
+from camera.base import ImageRGBD
+from Surveillance.layers.PuzzleScene import StatePuzzleScene
+from puzzle.piece import PieceStatus
+
+from puzzle.solver.base_v2 import Base, Action , CfgSolver
 
 @dataclass
 class Priority_State:
+    """!
+    @ingroup    Puzzle_Solving
+    """
     DIRECT_PLACE = 0
     PLACE = 1
     SORT = 2
@@ -35,20 +37,50 @@ class Priority_State:
     num_pieces: int
     pc_list: any
 
+#============================ Priority_Solver ============================
+#
 class Priority_Solver(Base):
+    """!
+    @brief      Priority-driven approach to puzzle solving.
+    @ingroup    Puzzle_Solving
+
+    Each action type is assigned a score with the highest score winning.
+    The scores are established from an action priority specification.
+    The action types are: sort, place, direct place, and look at scene.
+    The look at scene action includes a request for the human worker to
+    move their hand out of the scene.
+    """
+
+
+    #============================= __init___ =============================
+    #
     def __init__(self, cfgSolver: CfgSolver):
+        """!
+        @brief  Constructor for Priority Solver instance.
+
+        @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
+        """
         super().__init__(cfgSolver)
         self.updatePriorities()
         self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
     
+    #========================== updatePriorities =========================
+    #
     def updatePriorities(self):
-        self.sort_pty = rospy.get_param('sort_priority')
-        self.place_pty = rospy.get_param('place_priority')
-        self.dir_place_pty = rospy.get_param('direct_place_priority')
+        """!
+        @brief  Update priorities by snagging from ROS1 dynamic parameter server.
+        """
+
+        self.sort_pty           = rospy.get_param('sort_priority')
+        self.place_pty          = rospy.get_param('place_priority')
+        self.dir_place_pty      = rospy.get_param('direct_place_priority')
+
         self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
     
+    #========================== computePlacePlan =========================
+    #
     def computePlacePlan(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
-        """
+        """!
         @brief  Computes a custom place plan. Starts by filling in pieces from 
                 most populated zones to least populated zones.
         """
@@ -80,21 +112,19 @@ class Priority_Solver(Base):
         return pieces
             
             
-        
-        
-        
+    #========================== getNextOperation =========================
+    #
     def getNextOperation(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
-        """
+        """!
         @brief  Compute the composite priority of each operation and
                 return the operation with highest composite priority.
-        Args:
-            rgbd:  RGBD image for the current scene.
-            scene:  current scene state.
+
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
         
-        Returns: 
-            List of pieces, Next operation state
-        
+        @return     Tuple: List of pieces, Next operation state
         """
+
         # Retreive the priorities and relevant rates.
         self.updatePriorities()
 
@@ -151,31 +181,28 @@ class Priority_Solver(Base):
             pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_State.DIRECT_PLACE
             
-            
-            
-        
-        
     
+    #=========================== getNextAction ===========================
+    #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
         """
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
+        @param[in]  rgbd    RGBD image for the current scene.
+        @param[in]  scene   Current scene state.
         
-        Returns:
-            Action
-        """
-        
-        '''
-        Logic
-        Assumption is that re-assessing
-        priorities / switching actions requires the robot
-        to measure again.
+        @return     Action to take.
+
+        Logic: Assumption is that re-assessing priorities / switching actions 
+        requires the robot to measure again.
         
         Assess -> perform -> assess
-        '''
+
+        @note   In this implementation, if performance of a pick/place action is 
+                rejected because piece is missing, then the action is presumed done
+                for this cycle. So it appears. 2026/08/02 - PAV.
+        """
+
         # Start of the solving logic
         
         if self.state is None:
@@ -185,10 +212,10 @@ class Priority_Solver(Base):
             self.state = Priority_State(operation=Priority_State.OUTRIGHT, num_pieces=0, pc_list=None)
             return action
         
-        previous = self.state
-        nextOperation = -1
-        nextNumPieces = -1
-        nextPcList = None
+        previous        = self.state
+        nextOperation   = -1
+        nextNumPieces   = -1
+        nextPcList      = None
         
         if previous.operation == Priority_State.OUTRIGHT:
             # Action was asking for estimation
@@ -260,11 +287,6 @@ class Priority_Solver(Base):
         # Send action
         return action
             
-    
 
-
-
-
-
-
-#=============== puzzle.solver.priority.py =====================
+#
+#============================ puzzle.solver.priority ===========================
