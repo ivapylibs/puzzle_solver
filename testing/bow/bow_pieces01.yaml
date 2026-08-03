@@ -1,0 +1,7 @@
+attempts: 5
+epsilon: 1.0
+max_iter: 100
+metric: chi2
+n_words: 25
+random_seed: 42
+tau: 0.5

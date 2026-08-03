@@ -9,6 +9,7 @@
 # @author   Antigravity + Patricio A. Vela, pvela@gatech.edu
 # @date     2026/07/30
 #
+# @quit
 #================================= bow01_fit =================================
 
 import numpy as np

@@ -8,6 +8,7 @@
 # @author   Antigravity + Patricio A. Vela, pvela@gatech.edu
 # @date     2026/07/30
 #
+# @quit
 #============================= bow04_persistence =============================
 
 import os

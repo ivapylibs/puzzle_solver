@@ -17,6 +17,7 @@
 # @author   Antigravity + Patricio A. Vela, pvela@gatech.edu
 # @date     2026/07/30
 #
+# @quit
 #============================ bow05_real_pieces ============================
 
 import os
@@ -138,9 +139,24 @@ def test_real_pieces(doDisp=False):
     cv2.putText(canvas, "Dataset 1: Database Pieces (Model)", (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
     cv2.putText(canvas, "Dataset 2: Query Pieces", (W + 20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
 
-    # 7. Save visualization artifacts
+    # 7. Generate quantized images using vocabulary centroids
+    quant1_rgb = matcher.quantizeImage(Irgb1, Iseg1_bin)
+    quant2_rgb = matcher.quantizeImage(Irgb2, Iseg2_bin)
+
+    quant1_bgr = cv2.cvtColor(quant1_rgb, cv2.COLOR_RGB2BGR)
+    quant2_bgr = cv2.cvtColor(quant2_rgb, cv2.COLOR_RGB2BGR)
+
+    quant_canvas = np.hstack([quant1_bgr, quant2_bgr])
+    cv2.putText(quant_canvas, "Dataset 1: Quantized (Centroid Colors)", (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255, 255, 255), 2)
+    cv2.putText(quant_canvas, "Dataset 2: Quantized (Centroid Colors)", (W + 20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255, 255, 255), 2)
+
+    # 8. Save visualization artifacts
     vis_path = os.path.join(cpath, 'pieces_match_visualization.png')
     cv2.imwrite(vis_path, canvas)
+
+    cv2.imwrite(os.path.join(cpath, 'pieces01_quantized.png'), quant1_bgr)
+    cv2.imwrite(os.path.join(cpath, 'pieces02_quantized.png'), quant2_bgr)
+    cv2.imwrite(os.path.join(cpath, 'pieces_quantized_comparison.png'), quant_canvas)
 
     vocab_swatch = matcher.vocabulary_as_image(swatch_size=40)
     cv2.imwrite(os.path.join(cpath, 'pieces_vocab_swatches.png'), vocab_swatch)
@@ -148,14 +164,16 @@ def test_real_pieces(doDisp=False):
     hist_vis = matcher.histogram_image(group_idx=0)
     cv2.imwrite(os.path.join(cpath, 'pieces01_histogram.png'), hist_vis)
 
-
     print(f"\n[Output] Saved side-by-side matching visualization to '{os.path.basename(vis_path)}'")
+    print("[Output] Saved quantized images to 'pieces01_quantized.png' and 'pieces02_quantized.png'")
+    print("[Output] Saved side-by-side quantized comparison to 'pieces_quantized_comparison.png'")
     print("[Output] Saved vocabulary swatches to 'pieces_vocab_swatches.png'")
     print("[Output] Saved sample histogram to 'pieces01_histogram.png'")
     print("\nTest bow05_real_pieces Passed Successfully!\n")
 
     if doDisp:
       display.bgr(canvas, window_name="Matches")
+      display.bgr(quant_canvas, window_name="Quantized Images")
       display.wait()
 
 if __name__ == "__main__":

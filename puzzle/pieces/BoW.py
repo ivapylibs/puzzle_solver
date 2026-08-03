@@ -248,9 +248,7 @@ def histogram_distance(
 #=================================== BoW Class =================================
 #===============================================================================
 
-#---------------------------------------------------------------------------
-#================----------------- CfgBoW ==================================
-#---------------------------------------------------------------------------
+#================================== CfgBoW =================================
 
 class CfgBoW(CfgSimilar):
     """!
@@ -644,6 +642,64 @@ class ColorBoWMatcher(MatchSimilar):
             cv2.rectangle(img, (x0, y0), (x1, y1), (50, 50, 50), 1)
 
         return img
+
+    #=========================== quantizeImage ===========================
+    #
+    def quantizeImage(self, Irgb: np.ndarray, Iseg: np.ndarray | None = None) -> np.ndarray:
+        """!
+        @brief  Quantize an RGB image using the learned vocabulary centroids.
+
+        @details
+        Replaces each pixel (or each foreground pixel where Iseg > 0) with the RGB
+        color of its nearest centroid in self.centroids_. Background pixels (where Iseg == 0)
+        are preserved as-is if Iseg is provided.
+
+        @param[in]  Irgb  Source RGB color image array.
+        @param[in]  Iseg  Optional binary or labeled segmentation mask. Default None.
+
+        @return Quantized RGB image array of shape matching Irgb with dtype uint8.
+
+        @throws RuntimeError if fit() has not been called (self.centroids_ is None).
+        """
+        if self.centroids_ is None:
+            raise RuntimeError("Call .fit() before quantizeImage().")
+
+        orig_shape = Irgb.shape
+        is_ch_last = (Irgb.ndim == 3 and Irgb.shape[2] == 3)
+
+        if is_ch_last:
+            pixels = Irgb.reshape(-1, 3).astype(np.float32)
+        else:
+            pixels = Irgb.reshape(3, -1).T.astype(np.float32)
+
+        centroids = self.centroids_.astype(np.float32)
+
+        if Iseg is not None:
+            Iseg_2d = np.squeeze(Iseg) if (Iseg.ndim == 3 and Iseg.shape[2] == 1) else Iseg
+            mask_flat = (Iseg_2d.reshape(-1) != 0)
+
+            quantized_pixels = pixels.copy()
+            if np.any(mask_flat):
+                fg_pixels = pixels[mask_flat]
+                diff = fg_pixels[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+                sq_dists = (diff ** 2).sum(axis=2)
+                assignments = sq_dists.argmin(axis=1)
+
+                quantized_pixels[mask_flat] = centroids[assignments]
+        else:
+            diff = pixels[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+            sq_dists = (diff ** 2).sum(axis=2)
+            assignments = sq_dists.argmin(axis=1)
+            quantized_pixels = centroids[assignments]
+
+        quantized_pixels = np.clip(quantized_pixels, 0, 255).astype(np.uint8)
+
+        if is_ch_last:
+            return quantized_pixels.reshape(orig_shape)
+        else:
+            return quantized_pixels.T.reshape(orig_shape)
+
+    quantize_image = quantizeImage
 
     # ------------------------------------------------------------------
     # Serialization / Persistence (YAML & HDF5)
