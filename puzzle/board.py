@@ -663,6 +663,49 @@ class Board:
             # theImage = theImage_enlarged
         return theImage
 
+    #======================= toImageAndSegmentation =====================
+    #
+    def toImageAndSegmentation(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
+                               ID_COLOR=(255, 255, 255), CONTOUR_DISPLAY=False,
+                               BOUNDING_BOX=False):
+        """!
+        @brief  Render the board image together with an ID-labelled segmentation image.
+
+        The returned segmentation shares the rendered image's coordinate system.
+        Background pixels are zero and each foreground puzzle-piece pixel is set
+        to that piece's ``id``.  Where pieces overlap, the later piece in board
+        iteration order overwrites the earlier one, matching @ref toImage.
+
+        @param[in] theImage        Optional canvas on which to render the board.
+        @param[in] ID_DISPLAY      Whether to draw IDs on the rendered image.
+        @param[in] COLOR           Rendered image background color.
+        @param[in] ID_COLOR        Rendered image ID text color.
+        @param[in] CONTOUR_DISPLAY Whether to draw contours on the rendered image.
+        @param[in] BOUNDING_BOX    Whether a generated image uses the board bounding box.
+
+        @return Tuple ``(image, segmentation)``.  Segmentation has dtype int32.
+        """
+        renderedImage = self.toImage(theImage=theImage, ID_DISPLAY=ID_DISPLAY,
+                                     COLOR=COLOR, ID_COLOR=ID_COLOR,
+                                     CONTOUR_DISPLAY=CONTOUR_DISPLAY,
+                                     BOUNDING_BOX=BOUNDING_BOX)
+        segmentation = np.zeros(renderedImage.shape[:2], dtype=np.int32)
+
+        if not self.pieces:
+            return renderedImage, segmentation
+
+        if theImage is None and BOUNDING_BOX:
+            offset = -self.boundingBox().astype(int)[0]
+        else:
+            offset = np.zeros(2, dtype=int)
+
+        for piece in self.pieces.values():
+            rcoords = (offset.reshape(-1, 1) + piece.rLoc.reshape(-1, 1)
+                       + piece.y.rcoords).astype(int)
+            segmentation[rcoords[1], rcoords[0]] = piece.id
+
+        return renderedImage, segmentation
+
 
     #============================= toImageExpaned =====================
     def toImageExpanded(self, theImage=None, ID_DISPLAY=False, COLOR=(0, 0, 0),
