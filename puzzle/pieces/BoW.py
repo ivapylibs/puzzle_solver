@@ -590,6 +590,26 @@ class ColorBoWMatcher(MatchSimilar):
 
         return float(np.clip(1.0 - distance, 0.0, 1.0))
 
+    #============================== compare =============================
+    #
+    def compare(self, piece_A, piece_B, tauMatch: float | None = None):
+        """!
+        @brief  Compare two pieces and, for a match, return their rigid alignment.
+
+        @return ``(is_match, rotation_degrees, affine)``.  The rotation and
+                affine transform map @p piece_A onto @p piece_B.  A failed
+                match returns ``(False, 0.0, None)``.
+        """
+        if tauMatch is None:
+            tauMatch = self.params.tau
+
+        is_match = self.score(piece_A, piece_B) > tauMatch
+        if not is_match:
+            return False, 0.0, None
+
+        rotation_degrees, affine = self.estimateAffineMatch(piece_A, piece_B)
+        return True, rotation_degrees, affine
+
     # ------------------------------------------------------------------
     # Querying
     # ------------------------------------------------------------------

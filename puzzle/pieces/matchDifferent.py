@@ -273,6 +273,25 @@ class HistogramCV(MatchDifferent):
     theScore =  cv2.compareHist(hist_A, hist_B, cv2.HISTCMP_BHATTACHARYYA)
     return theScore
 
+  #============================= compare =============================
+  #
+  def compare(self, piece_A, piece_B, tauMatch=None):
+    """
+    @brief Compare histogram features and return the shared PCA alignment.
+
+    @return Tuple of ``(is_match, rotation_degrees, affine)``.  The affine
+            transform maps @p piece_A global pixels onto @p piece_B.
+    """
+    if tauMatch is None:
+      tauMatch = self.params.tau
+
+    isMatch = self.score(piece_A, piece_B) < tauMatch
+    if not isMatch:
+      return False, 0.0, None
+
+    rotation, affine = self.estimateAffineMatch(piece_A, piece_B)
+    return True, rotation, affine
+
 #
 #---------------------------------------------------------------------------
 #================================= Moments =================================

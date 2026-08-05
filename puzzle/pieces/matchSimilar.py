@@ -37,9 +37,6 @@ import copyreg
 #-- Standard numerical and image processing imports.
 import cv2
 import numpy as np
-from skimage.measure    import ransac               # Not used. Commented and to be deleted.
-from skimage.transform  import AffineTransform      # Will be deleted or moved at some point.
-
 #-- Puzzle processing imports.
 from puzzle.pieces.matcher   import CfgSimilar, MatchSimilar
 from puzzle.piece  import Template
@@ -304,33 +301,10 @@ class SIFTCV(MatchSimilar):
     if not isaMatch:
       return False, 0, None     # Not a match, no rotation, no match parameters.
 
-    # If a match, then continue with additional calculations: estimate affine
-    # transform model using keypoint coordinates and matched descriptors.
-    # Being a match means that there are sufficient matched keypoints.
-
-    src = []
-    dst = []
-
-    for match in matches:
-      src.append(feat_A[0][match[0].queryIdx].pt)
-      dst.append(feat_B[0][match[0].trainIdx].pt)
-
-    src = np.array(src)
-    dst = np.array(dst)
-
-    #DEBUG
-    #print([src, dst])
-    # It only makes sense for translation if both piece images have the same origin
-    src = np.array(src) + piece_A.rLoc
-    dst = np.array(dst) + piece_B.rLoc
-
-    model = AffineTransform()
-    model.estimate(src, dst)
-
-    # Note: model.translation is not 100% consistent with what we want. Use pieceLocation instead.
-
-    return True, np.rad2deg(model.rotation), model.params
-    # @todo Why converted to degrees?  Seems superfluous. Review subsequent code to see if needed.
+    # Use the same PCA-frame alignment returned by other matchers.  It maps
+    # the whole piece shape (not only the matched keypoints) from A to B.
+    rotation, affine = self.estimateAffineMatch(piece_A, piece_B)
+    return True, rotation, affine
 
     # NOT NEEDED TESTED EARLIER.
     # @todo Delete when done and verified to work.

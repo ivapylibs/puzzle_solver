@@ -37,6 +37,7 @@
 
 import numpy as np
 from detector.Configuration import AlgConfig
+from puzzle.piece import Template
 
 #
 #---------------------------------------------------------------------------
@@ -109,6 +110,80 @@ class Matcher:
         """
 
         self.params = theParams  # @< Parameters to use when building and comparing features.
+
+    #============================ pcaFrame =============================
+    #
+    @staticmethod
+    def pcaFrame(piece) -> tuple[np.ndarray, np.ndarray]:
+        """!
+        @brief  Estimate a signed PCA frame from a puzzle piece's foreground pixels.
+
+        @param[in] piece  Template puzzle piece.
+
+        @return ``(center, frame)`` where ``center`` is the global pixel centroid
+                and ``frame`` is a 2x2 right-handed rotation matrix whose first
+                column is the major PCA axis.
+        """
+        if not isinstance(piece, Template):
+            raise TypeError("piece must be a puzzle.piece.Template instance.")
+
+        local_points = np.asarray(piece.y.rcoords, dtype=np.float64).T
+        if local_points.ndim != 2 or local_points.shape[1] != 2 or len(local_points) < 3:
+            raise ValueError("piece must contain at least three foreground pixel coordinates.")
+
+        points       = local_points + np.asarray(piece.rLoc, dtype=np.float64)
+        center       = points.mean(axis=0)
+        centered     = points - center
+        covariance   = centered.T @ centered / len(centered)
+        eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+
+        if eigenvalues[-1] <= np.finfo(float).eps:
+            raise ValueError("Cannot estimate a PCA frame from a degenerate puzzle piece.")
+
+        major_axis = eigenvectors[:, np.argmax(eigenvalues)]
+
+        # Eigenvectors are sign-ambiguous.  Give the major axis a repeatable
+        # direction using the shape's third moment; fall back to its dominant
+        # coordinate for shapes whose third moment is symmetric.  Perfectly
+        # symmetric shapes retain an unavoidable 180-degree ambiguity.
+        projections = centered @ major_axis
+        skewness = float(np.mean(projections ** 3))
+        if abs(skewness) > np.finfo(float).eps:
+            if skewness < 0:
+                major_axis *= -1
+        else:
+            dominant_coordinate = int(np.argmax(np.abs(major_axis)))
+            if major_axis[dominant_coordinate] < 0:
+                major_axis *= -1
+
+        minor_axis = np.array([-major_axis[1], major_axis[0]])
+        return center, np.column_stack((major_axis, minor_axis))
+
+    #========================= estimateAffineMatch ======================
+    #
+    def estimateAffineMatch(self, piece_A, piece_B) -> tuple[float, np.ndarray]:
+        """!
+        @brief  Estimate the rigid affine transform that aligns piece A to piece B.
+
+        The transform maps global pixel coordinates from @p piece_A into the
+        global coordinate frame of @p piece_B.  Its rotation is determined by
+        their signed PCA frames and its translation maps the A centroid onto
+        the B centroid.
+
+        @return ``(rotation_degrees, affine)`` where ``affine`` is a 3x3
+                homogeneous rigid transform.
+        """
+        center_A, frame_A = self.pcaFrame(piece_A)
+        center_B, frame_B = self.pcaFrame(piece_B)
+
+        rotation = frame_B @ frame_A.T
+        translation = center_B - rotation @ center_A
+        affine = np.eye(3, dtype=np.float64)
+        affine[:2, :2] = rotation
+        affine[:2, 2] = translation
+
+        rotation_degrees = float(np.rad2deg(np.arctan2(rotation[1, 0], rotation[0, 0])))
+        return rotation_degrees, affine
 
 
     #------------------------------------------------------------------
