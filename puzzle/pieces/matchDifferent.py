@@ -173,8 +173,8 @@ class CfgHistogramCV(CfgDifferent):
                               default settings.
     '''
     default_dict = CfgDifferent.get_default_settings()
-    default_dict.update( dict( tau = 0.3 , colorSpace = 'toHSV', bins = [36, 32], \
-                                                                 ranges = [0, 180, 0, 256]) )
+    default_dict.update( dict( tau = 0.3 , colorSpace = 'toHSV', bins = [25, 25, 4], \
+                                                                 ranges = [0, 180, 0, 256, 0, 256]) )
     return default_dict
 
   #============================ build_for_RGB ============================
@@ -243,8 +243,8 @@ class HistogramCV(MatchDifferent):
     # Convert to HSV space for comparison, see https://theailearner.com/tag/cv2-comparehist/
     if (self.params.colorSpace == 'toHSV'):
       img_hsv = cv2.cvtColor(piece.y.image.astype('uint8'), cv2.COLOR_RGB2HSV)
-      hist = cv2.calcHist([img_hsv], [0, 1], piece.y.mask, self.params.bins,\
-                                                           self.params.ranges) 
+      hist = cv2.calcHist([img_hsv], [0, 1, 2], piece.y.mask, self.params.bins,\
+                                                              self.params.ranges) 
       cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
       # @todo   Why is MINMAX the one to choose.  Seems weird.  I think this may affect
       #         how Bhattacharya works and converts it to a difference type.  Normally

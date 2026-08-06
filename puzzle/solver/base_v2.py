@@ -133,6 +133,18 @@ class Base(ABC):
         for key in self.board_estimate.pieces:
             self.board_estimate.pieces[key].setStatus(PieceStatus.GONE)
            
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief: Rests the solver to begin with new puzzle (or start). 
+                
+        Resets the board estimate to all pieces unsolved, based on 
+        the solution board.  Also resets the state.
+        """
+        self.reset_estimate_board()
+        self.state = None
+
     #===================== updateSolutionRegEstimate =====================
     #
     def updateSolutionRegEstimate(self, scene:StatePuzzleScene):
@@ -338,9 +350,10 @@ class Base(ABC):
         score = np.mean(filtered[rows - y0, cols - x0])
 
         is_occluded = np.any(occlusion_mask[rows, cols])
-        is_visible = score > 0.5
+        is_visible  = score > 0.5
         if self.verbose:
-            print(f"Pieces if {is_visible} with score {score} and occlusion {is_occluded}")
+            print(f"Pieces | visible = {is_visible} ; vi-score {score} ; occlusion {is_occluded}")
+
         return is_visible and not is_occluded  # Assuming a threshold of 0.5 for presence
     
     #========================= getSequentialPlan =========================
@@ -355,9 +368,19 @@ class Base(ABC):
         
         @return List of tuples containing (measured_piece, solution_piece, rotation).
         """
+
+        #print("===SSSS===")
+        #print(self.correspondence_tracker.pAssignments)
         
         plan = []
         for key in list(measured_board.pieces):
+            if key not in self.correspondence_tracker.pAssignments:
+                continue
+                # This condition will be hit if an unknown puzzle piece is forced
+                # to be associated and there are more pieces than there should
+                # be in the measured board (say 13 pieces to 12 pieces in solution).
+                # Happens when in correct piece is taken out from puzzle.
+                # 2026/08/06 - PAV.
             solKey = self.correspondence_tracker.pAssignments[key]
             solID = solution_board.pieces[solKey].id 
             plan.append((key, solID))

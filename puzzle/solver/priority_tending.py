@@ -29,6 +29,9 @@ from puzzle.solver.base_v2 import Base, Action , CfgSolver
 from puzzle.solver.priority import Priority_Solver
 
 
+STR_ARRANGE_PIECES  = "Please arrange the pieces neatly"
+STR_LOOK            = "Please let me see"
+
 @dataclass
 class Priority_Tending_State:
     """!
@@ -74,6 +77,18 @@ class Priority_Tending_Solver(Priority_Solver):
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
 
         
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief: Rests the solver to begin with new puzzle (or start). 
+                
+        Resets the board estimate to all pieces unsolved, based on 
+        the solution board.  Also resets the state.
+        """
+        super().reset_solver()
+        self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
+
     #========================== getNextOperation =========================
     #
     def getNextOperation(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
@@ -180,10 +195,10 @@ class Priority_Tending_Solver(Priority_Solver):
         # Start of the solving logic
         
         if self.state is None:
-            # Start by estimating scene and solving
-            # for first k pieces
-            action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
+            # Start by estimating scene and solving for first k pieces
+            action      = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+            self.state  = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
+
             return action
         
         previous        = self.state
@@ -209,19 +224,25 @@ class Priority_Tending_Solver(Priority_Solver):
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
                 # Move to next state if direct place / sort, but if place, then go to left.
-                if nextOperation == Priority_Tending_State.PLACE:
-                    action = Action(type=Action.OUTLEFT, estimate_zone=[])
-                else:
-                    action = Action(type=Action.NULL)
+                #if nextOperation == Priority_Tending_State.PLACE:
+                #    action = Action(type=Action.OUTLEFT, estimate_zone=[])
+                #else:
+                #    action = Action(type=Action.NULL)
+
+                # Just skip to the next step.
+                action = Action(type=Action.NULL)
                 nextNumPieces = 0
+
             nextTendCounter = previous.tend_counter
+
+
         elif previous.operation == Priority_Tending_State.DIRECT_PLACE or previous.operation == Priority_Tending_State.PLACE:
             # previous action was an estimation followed with a place
             # this one is going to be a place / or go back to estimation
 
             if previous.tend_counter == self.PIECES_BEFORE_TEND:
                 # Ask for help
-                action = Action(type=Action.HELP, help="Fix the solution")
+                action = Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
                 nextOperation = Priority_Tending_State.ASKHELP
                 nextNumPieces = -1
                 nextTendCounter = -1
@@ -242,10 +263,12 @@ class Priority_Tending_Solver(Priority_Solver):
                 nextOperation = previous.operation
                 nextNumPieces = previous.num_pieces + 1
                 nextTendCounter = previous.tend_counter + 1
+
+
         elif previous.operation == Priority_Tending_State.SORT:
             if previous.tend_counter == self.PIECES_BEFORE_TEND:
                 # Ask for help
-                action = Action(type=Action.HELP, help="Fix the solution")
+                action = Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
                 nextOperation = Priority_Tending_State.ASKHELP
                 nextNumPieces = -1
                 nextTendCounter = -1
@@ -267,6 +290,8 @@ class Priority_Tending_Solver(Priority_Solver):
                 nextOperation = previous.operation
                 nextNumPieces = previous.num_pieces + 1
                 nextTendCounter = previous.tend_counter + 1
+
+
         elif previous.operation == Priority_Tending_State.ASKHELP:
             # last step was to ask help, 
             # Next: estimate board again

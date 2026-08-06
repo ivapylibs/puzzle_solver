@@ -71,7 +71,7 @@ class Priority_Solver(Base):
         @brief  Update priorities by snagging from ROS1 dynamic parameter server.
         """
 
-        if rospy.has_param('sort_priority') and rosport.has_param('place_priority') \
+        if rospy.has_param('sort_priority') and rospy.has_param('place_priority') \
                                             and rospy.has_param('direct_place_priority'):
             self.sort_pty           = rospy.get_param('sort_priority')
             self.place_pty          = rospy.get_param('place_priority')
@@ -82,7 +82,7 @@ class Priority_Solver(Base):
             self.place_pty     = 0.33
             self.dir_place_pty = 0.33
 
-        if rospy.has_param('look_rate') 
+        if rospy.has_param('look_rate'):
             self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
         else:
             rospy.logerror('The look paramaters are not set. Check ROS params.')
@@ -244,11 +244,15 @@ class Priority_Solver(Base):
                 action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             else:
                 # Move to next state if direct place / sort, but if place, then go to left.
-                if nextOperation == Priority_State.PLACE:
-                    action = Action(type=Action.OUTLEFT, estimate_zone=[])
-                else:
-                    action = Action(type=Action.NULL)
+                #if nextOperation == Priority_State.PLACE:
+                #    action = Action(type=Action.OUTLEFT, estimate_zone=[])
+                #else:
+                #    action = Action(type=Action.NULL)
+
+                action = Action(type=Action.NULL)
                 nextNumPieces = 0
+
+
         elif previous.operation == Priority_State.DIRECT_PLACE or previous.operation == Priority_State.PLACE:
             # previous action was an estimation followed with a place
             # this one is going to be a place / or go back to estimation

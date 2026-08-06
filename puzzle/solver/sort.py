@@ -78,17 +78,33 @@ class Sort_Mode(Base):
         # Perform matching
         self.performMatching(unorganized_measured_board, solution_board)
 
+        #DEBUG show matches.
+        #print("===MMMM===")
+        #print(self.correspondence_tracker.pAssignments)
+
         # Sort plan based on the 4 policies
         if self.policy == Sort_Mode.STRUCTURED_ORDERED:
             plans = [[], [], [], []]
+
             for key in unorganized_measured_board.pieces:
+
+                if key not in self.correspondence_tracker.pAssignments:
+                  continue
+                  # This condition will be hit if an unknown puzzle piece is forced
+                  # to be associated and there are more pieces than there should
+                  # be in the measured board (say 13 pieces to 12 pieces in solution).
+                  # Happens when in correct piece is taken out from puzzle.
+                  # 2026/08/06 - PAV.
+
                 pieceMea = unorganized_measured_board.pieces[key]
-                solKey = self.correspondence_tracker.pAssignments[key]
+                solKey   = self.correspondence_tracker.pAssignments[key]
                 pieceSol = solution_board.pieces[solKey]
-                rot = self.correspondence_tracker.pAssignments_rotation[key]
-                zone = solution_board.zones[solKey]
+                rot      = self.correspondence_tracker.pAssignments_rotation[key]
+                zone     = solution_board.zones[solKey]
+
                 if zone != 0:
                     plans[zone - 1].append((pieceMea, pieceSol, rot, zone))
+
             # Sort each plan
             for i in range(Base.NUM_ZONES):
                 plans[i].sort(key= lambda x: x[1].id)
