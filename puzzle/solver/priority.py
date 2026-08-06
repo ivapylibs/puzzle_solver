@@ -71,11 +71,22 @@ class Priority_Solver(Base):
         @brief  Update priorities by snagging from ROS1 dynamic parameter server.
         """
 
-        self.sort_pty           = rospy.get_param('sort_priority')
-        self.place_pty          = rospy.get_param('place_priority')
-        self.dir_place_pty      = rospy.get_param('direct_place_priority')
+        if rospy.has_param('sort_priority') and rosport.has_param('place_priority') \
+                                            and rospy.has_param('direct_place_priority'):
+            self.sort_pty           = rospy.get_param('sort_priority')
+            self.place_pty          = rospy.get_param('place_priority')
+            self.dir_place_pty      = rospy.get_param('direct_place_priority')
+        else:
+            rospy.logwarn('The priority paramaters are not set. Check ROS params.')
+            self.sort_pty      = 0.33
+            self.place_pty     = 0.33
+            self.dir_place_pty = 0.33
 
-        self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
+        if rospy.has_param('look_rate') 
+            self.PIECES_BEFORE_LOOK = rospy.get_param('look_rate')
+        else:
+            rospy.logerror('The look paramaters are not set. Check ROS params.')
+            self.PIECES_BEFORE_LOOK = 5
     
     #========================== computePlacePlan =========================
     #
