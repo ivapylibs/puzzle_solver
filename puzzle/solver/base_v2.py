@@ -37,6 +37,11 @@ import matplotlib.pyplot as plt
 #===== Helper Elements
 #
 
+@dataclass
+class Mode:
+    WAIT     = 0
+    PERCEIVE = 1
+    ACT      = 2
 
 @dataclass
 class Action:
@@ -103,17 +108,19 @@ class Base(ABC):
 
         @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
         """
-        self.display = cfgSolver.display                    #< Debug display
-        self.reference_board = cfgSolver.reference_board    #< Solution reference 
-        self.cfgMatching = cfgSolver.cfgMatching            #< Correspondences configs
-        self.imRegions = cfgSolver.imRegions                #< Region definitions for puzzle zones
-        self.puzzle_params = cfgSolver.puzzle_params        #< Puzzle-specific parameters for arrangement building
-        
-        self.state = None                                   #< Internal state.
-        self.board_estimate = None                          #< Board estimate from state history.
-        self.correspondence_tracker = None                  #< Puzzle piece correspondence tracker.
+        self.display         = cfgSolver.display            #< Debug display
+        self.imRegions       = cfgSolver.imRegions          #< Region definitions for puzzle zones
 
+        self.reference_board = cfgSolver.reference_board    #< Solution reference 
+        self.puzzle_params   = cfgSolver.puzzle_params      #< Puzzle-specific parameters for arrangement building
+        
+        self.cfgMatching            = cfgSolver.cfgMatching #< Correspondences configs
+        self.board_estimate         = None                  #< Board estimate from state history.
+        self.correspondence_tracker = None                  #< Puzzle piece correspondence tracker.
         self.correspondence_tracker = Correspondences(self.cfgMatching)
+
+        self.state = None                                   #< Internal activity state.
+        self.mode  = Mode.PERCEIVE                          #< Higher level mode regulating activities. Perceive to start.
 
         self.verbose = 1                                    #< Verbosity level.
         
@@ -144,6 +151,7 @@ class Base(ABC):
         """
         self.reset_estimate_board()
         self.state = None
+        self.mode  = Mode.PERCEIVE
 
     #===================== updateSolutionRegEstimate =====================
     #
