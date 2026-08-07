@@ -21,7 +21,7 @@ from camera.base import ImageRGBD
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from puzzle.piece import PieceStatus
 
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
+from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 
 @dataclass
 class Priority_State:
@@ -31,11 +31,11 @@ class Priority_State:
     DIRECT_PLACE = 0
     PLACE = 1
     SORT = 2
-    OUTRIGHT = 3
     END = 4
     operation: int
     num_pieces: int
     pc_list: any
+    needs_look: bool = True
 
 #============================ Priority_Solver ============================
 #
@@ -63,6 +63,18 @@ class Priority_Solver(Base):
         super().__init__(cfgSolver)
         self.updatePriorities()
         self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
+    
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief  Reset the solver state and mode.
+        """
+        super().reset_solver()
+        self.state = Priority_State(
+            operation=-1, num_pieces=0, pc_list=None, needs_look=True
+        )
+        self.mode = Mode.PERCEIVE
     
     #========================== updatePriorities =========================
     #
@@ -176,7 +188,7 @@ class Priority_Solver(Base):
 
         if scores[i] == 0:
             # No piece to perform highest priority task, keep looking
-            return [], Priority_State.OUTRIGHT
+            return [], -1
         if i == 0:
             # Sort
             self.performMatching(unorganized_measured_board, solution_board)
@@ -204,103 +216,90 @@ class Priority_Solver(Base):
         
         @return     Action to take.
 
-        Logic: Assumption is that re-assessing priorities / switching actions 
-        requires the robot to measure again.
-        
-        Assess -> perform -> assess
-
-        @note   In this implementation, if performance of a pick/place action is 
-                rejected because piece is missing, then the action is presumed done
-                for this cycle. So it appears. 2026/08/02 - PAV.
+        Uses a two-mode state machine:
+          PERCEIVE - handles looking (scene estimation) and priority planning.
+          ACT      - executes sort / place / direct-place operations.
+                     When the piece list is exhausted, mode switches back to PERCEIVE.
         """
 
-        # Start of the solving logic
-        
+        # First ever call: initialize state and request a look.
         if self.state is None:
-            # Start by estimating scene and solving
-            # for first k pieces
-            action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state = Priority_State(operation=Priority_State.OUTRIGHT, num_pieces=0, pc_list=None)
+            action      = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+            self.state  = Priority_State(
+                operation=-1, num_pieces=0, pc_list=None, needs_look=True
+            )
+            self.mode   = Mode.PERCEIVE
             return action
-        
-        previous        = self.state
-        nextOperation   = -1
-        nextNumPieces   = -1
-        nextPcList      = None
-        
-        if previous.operation == Priority_State.OUTRIGHT:
-            # Action was asking for estimation
-            if scene is None or rgbd is None:
-                print("ERROR: Expected scene information")
-                return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            # Compute the priorities and action plan
-            nextPcList, nextOperation = self.getNextOperation(scene, rgbd)
-            print("Next operation: ", nextOperation, " with pieces: ", len(nextPcList))
 
-            # End if no empty spots in solution board
-            if nextOperation == Priority_State.END:
-                action  = Action(type=Action.END)
-            elif nextOperation == Priority_State.OUTRIGHT:
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            else:
-                # Move to next state if direct place / sort, but if place, then go to left.
-                #if nextOperation == Priority_State.PLACE:
-                #    action = Action(type=Action.OUTLEFT, estimate_zone=[])
-                #else:
-                #    action = Action(type=Action.NULL)
+        # -----------------------------------------------------------------
+        #  PERCEIVE mode: handle looking / planning.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.PERCEIVE:
+            if self.state.needs_look:
+                if scene is None or rgbd is None:
+                    # Scene data not yet available — request estimation.
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
 
-                action = Action(type=Action.NULL)
-                nextNumPieces = 0
+                # Scene received — compute priorities and plan.
+                pc_list, operation = self.getNextOperation(scene, rgbd)
+                print("Next operation: ", operation, " with pieces: ", len(pc_list))
 
+                if operation == Priority_State.END:
+                    print("Ending operations")
+                    return Action(type=Action.END)
 
-        elif previous.operation == Priority_State.DIRECT_PLACE or previous.operation == Priority_State.PLACE:
-            # previous action was an estimation followed with a place
-            # this one is going to be a place / or go back to estimation
-            if previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Priority_State.OUTRIGHT
-                nextNumPieces = -1
-            else:
-                meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
-                # Add a check to see if the piece is already placed correctly, if so skip
+                if len(pc_list) == 0:
+                    # No actionable pieces — re-look.
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+
+                # Plan ready — transition to ACT.
+                self.state.needs_look  = False
+                self.state.operation   = operation
+                self.state.pc_list     = pc_list
+                self.state.num_pieces  = 0
+                self.mode              = Mode.ACT
+                return Action(type=Action.NULL)
+
+        # -----------------------------------------------------------------
+        #  ACT mode: execute sort / place / direct-place from pc_list.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.ACT:
+
+            # Check exit condition: pieces exhausted.
+            if self.state.num_pieces >= len(self.state.pc_list):
+                self.mode               = Mode.PERCEIVE
+                self.state.needs_look   = True
+                return Action(type=Action.NULL)
+
+            # Execute the next piece in the plan.
+            if self.state.operation == Priority_State.SORT:
+                meaPiece, solPiece, rot, tgt_zone = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                    nextOperation = previous.operation
-                    nextNumPieces = previous.num_pieces + 1
-                else:
-                    action = Action(type=Action.PICKPLACE, \
-                                    measured_pc=meaPiece,\
-                                    solution_pc=solPiece, rotation=rot)
-                    nextOperation = previous.operation
-                    nextNumPieces = previous.num_pieces + 1
-        elif previous.operation == Priority_State.SORT:
-            if previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Priority_State.OUTRIGHT
-                nextNumPieces = -1
+                    return Action(type=Action.NULL)
+
+                return Action(type=Action.SORT,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot,
+                              tgt_zone=tgt_zone)
             else:
-                meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
+                # DIRECT_PLACE or PLACE
+                meaPiece, solPiece, rot, _ = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                    nextOperation = previous.operation
-                    nextNumPieces = previous.num_pieces + 1
-                else:
-                    action = Action(type=Action.SORT, \
-                                    measured_pc=meaPiece,\
-                                    solution_pc=solPiece, rotation=rot,
-                                    tgt_zone=tgt_zone)
-                    nextOperation = previous.operation
-                    nextNumPieces = previous.num_pieces + 1
-        
-        # Update state
-        self.state.operation = nextOperation
-        self.state.num_pieces = nextNumPieces
-        if nextPcList is not None:
-            self.state.pc_list = nextPcList
-        # Send action
-        return action
+                    return Action(type=Action.NULL)
+
+                return Action(type=Action.PICKPLACE,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot)
+
+        # Fallback — should not be reached.
+        print("WARNING: getNextAction fell through. Requesting estimation.")
+        self.mode = Mode.PERCEIVE
+        self.state.needs_look = True
+        return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             
 
 #

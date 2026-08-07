@@ -25,7 +25,7 @@ from camera.base import ImageRGBD
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from puzzle.piece import PieceStatus
 
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
+from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from puzzle.solver.priority import Priority_Solver
 
 
@@ -40,13 +40,13 @@ class Priority_Tending_State:
     DIRECT_PLACE = 0
     PLACE = 1
     SORT = 2
-    OUTRIGHT = 3
     END = 4
-    ASKHELP = 5
     operation: int
     num_pieces: int
     tend_counter: int
     pc_list: any
+    needs_look: bool = True
+    needs_tend: bool = False
 
 class Priority_Tending_Solver(Priority_Solver):
     """!
@@ -84,10 +84,15 @@ class Priority_Tending_Solver(Priority_Solver):
         @brief: Rests the solver to begin with new puzzle (or start). 
                 
         Resets the board estimate to all pieces unsolved, based on 
-        the solution board.  Also resets the state.
+        the solution board.  Also resets the state and mode.
         """
         super().reset_solver()
-        self.state = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
+        self.state = Priority_Tending_State(
+            operation=-1, num_pieces=0,
+            tend_counter=self.PIECES_BEFORE_TEND,
+            pc_list=None, needs_look=True, needs_tend=False
+        )
+        self.mode = Mode.PERCEIVE
 
     #========================== getNextOperation =========================
     #
@@ -156,7 +161,7 @@ class Priority_Tending_Solver(Priority_Solver):
 
         if scores[i] == 0:
             # No piece to perform highest priority task, keep looking
-            return [], Priority_Tending_State.OUTRIGHT
+            return [], -1
         if i == 0:
             # Sort
             self.performMatching(unorganized_measured_board, solution_board)
@@ -183,130 +188,121 @@ class Priority_Tending_Solver(Priority_Solver):
         
         @return     Action to take.
         
-        Logic: Assumption is that re-assessing priorities / switching actions 
-        requires the robot to measure again.
-        
-        Assess -> perform -> assess
-
-        @note   In this implementation, if performance of a pick/place action is 
-                rejected because piece is missing, then the action is presumed done
-                for this cycle. So it appears. 2026/08/02 - PAV.
+        Uses a two-mode state machine:
+          PERCEIVE - handles tending (human help) and looking (scene estimation).
+                     Tending is requested first so the human can fix pieces
+                     before the robot re-estimates the scene.
+          ACT      - executes sort / place / direct-place operations.
+                     The tend counter decrements only after an actual action.
+                     When it hits zero or the piece list is exhausted, mode
+                     switches back to PERCEIVE.
         """
-        # Start of the solving logic
-        
+
+        # First ever call: initialize state and request a look.
         if self.state is None:
-            # Start by estimating scene and solving for first k pieces
             action      = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state  = Priority_Tending_State(operation=Priority_Tending_State.OUTRIGHT, num_pieces=0, tend_counter=0, pc_list=None)
-
+            self.state  = Priority_Tending_State(
+                operation=-1, num_pieces=0,
+                tend_counter=self.PIECES_BEFORE_TEND,
+                pc_list=None, needs_look=True, needs_tend=False
+            )
+            self.mode   = Mode.PERCEIVE
             return action
-        
-        previous        = self.state
-        nextOperation   = -1
-        nextNumPieces   = -1
-        nextPcList      = None
-        nextTendCounter = -1
-        
-        if previous.operation == Priority_Tending_State.OUTRIGHT:
-            # Action was asking for estimation
-            if scene is None or rgbd is None:
-                print("ERROR: Expected scene information")
-                return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            # Compute the priorities and action plan
-            nextPcList, nextOperation = self.getNextOperation(scene, rgbd)
-            print("Next operation: ", nextOperation, " with pieces: ", len(nextPcList))
 
-            # End if no empty spots in solution board
-            if nextOperation == Priority_Tending_State.END:
+        # -----------------------------------------------------------------
+        #  PERCEIVE mode: handle tending, then looking / planning.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.PERCEIVE:
+
+            # --- Solved: request final tend, then end --------------------
+            if self.state.operation == Priority_Tending_State.END:
+                if self.state.needs_tend:
+                    self.state.needs_tend = False
+                    return Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
                 print("Ending operations")
-                action  = Action(type=Action.END)
-            elif nextOperation == Priority_Tending_State.OUTRIGHT:
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            else:
-                # Move to next state if direct place / sort, but if place, then go to left.
-                #if nextOperation == Priority_Tending_State.PLACE:
-                #    action = Action(type=Action.OUTLEFT, estimate_zone=[])
-                #else:
-                #    action = Action(type=Action.NULL)
+                return Action(type=Action.END)
 
-                # Just skip to the next step.
-                action = Action(type=Action.NULL)
-                nextNumPieces = 0
+            # --- Sub-step 1: Tending (if triggered) ----------------------
+            if self.state.needs_tend:
+                # Request human help, then reset counter and clear flag.
+                self.state.needs_tend   = False
+                self.state.tend_counter = self.PIECES_BEFORE_TEND
+                self.state.needs_look   = True   # Must re-look after tend.
+                return Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
 
-            nextTendCounter = previous.tend_counter
+            # --- Sub-step 2: Look / plan ---------------------------------
+            if self.state.needs_look:
+                if scene is None or rgbd is None:
+                    # Scene data not yet available — request estimation.
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
 
+                # Scene received — compute priorities and plan.
+                pc_list, operation = self.getNextOperation(scene, rgbd)
+                print("Next operation: ", operation, " with pieces: ", len(pc_list))
 
-        elif previous.operation == Priority_Tending_State.DIRECT_PLACE or previous.operation == Priority_Tending_State.PLACE:
-            # previous action was an estimation followed with a place
-            # this one is going to be a place / or go back to estimation
+                if operation == Priority_Tending_State.END:
+                    print("Puzzle solved — requesting final tend before ending.")
+                    self.state.operation   = Priority_Tending_State.END
+                    self.state.needs_tend  = True
+                    self.state.needs_look  = False
+                    return Action(type=Action.NULL)
 
-            if previous.tend_counter == self.PIECES_BEFORE_TEND:
-                # Ask for help
-                action = Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
-                nextOperation = Priority_Tending_State.ASKHELP
-                nextNumPieces = -1
-                nextTendCounter = -1
-            elif previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Priority_Tending_State.OUTRIGHT
-                nextNumPieces = -1
-                nextTendCounter = previous.tend_counter
-            else:
-                meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
+                if len(pc_list) == 0:
+                    # No actionable pieces — re-look.
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+
+                # Plan ready — transition to ACT.
+                self.state.needs_look  = False
+                self.state.operation   = operation
+                self.state.pc_list     = pc_list
+                self.state.num_pieces  = 0
+                self.mode              = Mode.ACT
+                return Action(type=Action.NULL)
+
+        # -----------------------------------------------------------------
+        #  ACT mode: execute sort / place / direct-place from pc_list.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.ACT:
+
+            # Check exit conditions: pieces exhausted or tend counter hit zero.
+            if self.state.num_pieces >= len(self.state.pc_list) or \
+               self.state.tend_counter <= 0:
+                self.mode               = Mode.PERCEIVE
+                self.state.needs_look   = True
+                self.state.needs_tend   = (self.state.tend_counter <= 0)
+                return Action(type=Action.NULL)
+
+            # Execute the next piece in the plan.
+            if self.state.operation == Priority_Tending_State.SORT:
+                meaPiece, solPiece, rot, tgt_zone = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                else:
-                    action = Action(type=Action.PICKPLACE, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot)
-                nextOperation = previous.operation
-                nextNumPieces = previous.num_pieces + 1
-                nextTendCounter = previous.tend_counter + 1
+                    return Action(type=Action.NULL)
 
-
-        elif previous.operation == Priority_Tending_State.SORT:
-            if previous.tend_counter == self.PIECES_BEFORE_TEND:
-                # Ask for help
-                action = Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
-                nextOperation = Priority_Tending_State.ASKHELP
-                nextNumPieces = -1
-                nextTendCounter = -1
-            elif previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Priority_Tending_State.OUTRIGHT
-                nextNumPieces = -1
-                nextTendCounter = previous.tend_counter
+                self.state.tend_counter -= 1
+                return Action(type=Action.SORT,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot,
+                              tgt_zone=tgt_zone)
             else:
-                meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
+                # DIRECT_PLACE or PLACE
+                meaPiece, solPiece, rot, _ = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                else:
-                    action = Action(type=Action.SORT, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot,
-                                tgt_zone=tgt_zone)
-                nextOperation = previous.operation
-                nextNumPieces = previous.num_pieces + 1
-                nextTendCounter = previous.tend_counter + 1
+                    return Action(type=Action.NULL)
 
+                self.state.tend_counter -= 1
+                return Action(type=Action.PICKPLACE,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot)
 
-        elif previous.operation == Priority_Tending_State.ASKHELP:
-            # last step was to ask help, 
-            # Next: estimate board again
-            action = Action(type=Action.NULL)
-            nextOperation = Priority_Tending_State.OUTRIGHT
-            nextTendCounter = 0
-        
-        # Update state
-        self.state.operation = nextOperation
-        self.state.num_pieces = nextNumPieces
-        self.state.tend_counter = nextTendCounter
-        if nextPcList is not None:
-            self.state.pc_list = nextPcList
-        # Send action
-        return action
+        # Fallback — should not be reached.
+        print("WARNING: getNextAction fell through. Requesting estimation.")
+        self.mode = Mode.PERCEIVE
+        self.state.needs_look = True
+        return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             
 
 #
