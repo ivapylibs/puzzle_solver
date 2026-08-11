@@ -10,7 +10,7 @@
 #============================== puzzle.solver.sort =============================
 
 import rospy
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
+from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from camera.base import ImageRGBD
 import numpy as np
@@ -22,14 +22,15 @@ import ivapy.display_cv as display
 @dataclass
 class Sort_State:
     """!
+    @brief      State for the sort-only solver.
     @ingroup    Puzzle_Solving
     """
     SORT = 0
-    OUTRIGHT = 1
     END = 2
     operation: int
     num_pieces: int
     pc_list: any
+    needs_look: bool = True
 
 
 class Sort_Mode(Base):
@@ -58,16 +59,29 @@ class Sort_Mode(Base):
         
         self.zones_to_estimate = [Base.SOL, Base.UNORGANIZED] + [i for i in range(1, Base.NUM_ZONES + 1)]
 
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief  Reset the solver state and mode.
+        """
+        super().reset_solver()
+        self.state = Sort_State(
+            operation=-1, num_pieces=0, pc_list=None, needs_look=True
+        )
+        self.mode = Mode.PERCEIVE
+
     #============================ getSortPlan ============================
     #
     def getSortPlan(self, rgbd: ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the sort plan with correct piece ordering for robot
                 to execute. Based on the policy set initially
         
-        Args:
-            rgbd: Image details
-            scene: Segmented scene information
+        @param[in]  rgbd   RGBD image for the current scene.
+        @param[in]  scene  Segmented puzzle scene state.
+
+        @return  Sort plan for the current solver policy.
         """
 
         # Create unorganized region board
@@ -157,59 +171,81 @@ class Sort_Mode(Base):
     #=========================== getNextAction ===========================
     #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
 
         @param[in]  rgbd    RGBD image for the current scene.
         @param[in]  scene   Current scene state.
         
         @return     Action to take.
+
+        @note  Uses a two-mode state machine:
+          PERCEIVE - handles looking (scene estimation) and sort planning.
+          ACT      - executes sort operations for pieces in the sort plan.
+                     When all pieces are sorted, ends operations.
         """
         
-        # Start by estimation
+        # First ever call: initialize state and request a look.
         if self.state is None:
-            action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state = Sort_State(operation=Sort_State.OUTRIGHT, num_pieces=0, pc_list=None)
+            action      = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+            self.state  = Sort_State(
+                operation=-1, num_pieces=0, pc_list=None, needs_look=True
+            )
+            self.mode   = Mode.PERCEIVE
             return action
-        
-        previous = self.state
-        nextOperation = -1
-        nextNumPieces = -1
-        nextPcList = None
 
-        if previous.operation == Sort_State.OUTRIGHT:
-            # Action was asking for estimation
-            if scene is None or rgbd is None:
-                print("ERROR: Expected scene information")
-                return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            # Compute the priorities and action plan
-            nextPcList = self.getSortPlan(rgbd, scene)
-            action = Action(type=Action.NULL)
-            # Simply move to next state to start sorting
-            nextOperation = Sort_State.SORT
-            nextNumPieces = 0
-        elif previous.operation == Sort_State.SORT:
-            if previous.num_pieces == len(previous.pc_list):
-                # End of Operations
-                action  = Action(type=Action.END)
-                nextOperation = Sort_State.END
-                nextNumPieces = -1
-            else:
-                meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
-                action = Action(type=Action.SORT, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot,
-                                tgt_zone=tgt_zone)
-                nextOperation = previous.operation
-                nextNumPieces = previous.num_pieces + 1
-        
-        # Update state
-        self.state.operation = nextOperation
-        self.state.num_pieces = nextNumPieces
-        if nextPcList is not None:
-            self.state.pc_list = nextPcList
-        # Send action
-        return action
+        # -----------------------------------------------------------------
+        #  PERCEIVE mode: handle looking / planning.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.PERCEIVE:
+            if self.state.needs_look:
+                if scene is None or rgbd is None:
+                    # Scene data not yet available — request estimation.
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+
+                # Scene received — compute sort plan.
+                pc_list = self.getSortPlan(rgbd, scene)
+                print("Sort plan computed with pieces: ", len(pc_list))
+
+                if len(pc_list) == 0:
+                    # No pieces to sort — end operations.
+                    print("No pieces to sort, ending operations.")
+                    self.state.operation = Sort_State.END
+                    return Action(type=Action.END)
+
+                # Plan ready — transition to ACT.
+                self.state.needs_look  = False
+                self.state.operation   = Sort_State.SORT
+                self.state.pc_list     = pc_list
+                self.state.num_pieces  = 0
+                self.mode              = Mode.ACT
+                return Action(type=Action.NULL)
+
+        # -----------------------------------------------------------------
+        #  ACT mode: execute sort operations from pc_list.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.ACT:
+
+            # Check exit condition: all sorted.
+            if self.state.num_pieces >= len(self.state.pc_list):
+                print("Completed sort plan, ending operations.")
+                self.state.operation = Sort_State.END
+                return Action(type=Action.END)
+
+            # Execute next sort action.
+            meaPiece, solPiece, rot, tgt_zone = self.state.pc_list[self.state.num_pieces]
+            self.state.num_pieces += 1
+
+            return Action(type=Action.SORT,
+                          measured_pc=meaPiece,
+                          solution_pc=solPiece, rotation=rot,
+                          tgt_zone=tgt_zone)
+
+        # Fallback — should not be reached.
+        print("WARNING: getNextAction fell through. Requesting estimation.")
+        self.mode = Mode.PERCEIVE
+        self.state.needs_look = True
+        return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
 
 
     #============================= display_plan ============================

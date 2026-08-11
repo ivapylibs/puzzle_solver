@@ -39,6 +39,10 @@ import matplotlib.pyplot as plt
 
 @dataclass
 class Mode:
+    """!
+    @brief      Execution modes shared by puzzle solvers.
+    @ingroup    Puzzle_Solving
+    """
     WAIT     = 0
     PERCEIVE = 1
     ACT      = 2
@@ -103,7 +107,7 @@ class Base(ABC):
     #============================= __init___ =============================
     #
     def __init__(self, cfgSolver: CfgSolver):
-        """
+        """!
         @brief  Constructor for the abstract base puzzle solver.
 
         @param[in]  cfgSolver   Configuration for the solver, including reference board and parameters.
@@ -133,7 +137,7 @@ class Base(ABC):
     #
     def reset_estimate_board(self):
         """!
-        @brief: Sets the estimate board to all pieces unsolved,
+        @brief  Set the estimate board to all pieces unsolved,
                 based on the solution board.
         """
         self.board_estimate = copy.deepcopy(self.reference_board)
@@ -144,7 +148,7 @@ class Base(ABC):
     #
     def reset_solver(self):
         """!
-        @brief: Rests the solver to begin with new puzzle (or start). 
+        @brief  Reset the solver to begin with a new puzzle or start.
                 
         Resets the board estimate to all pieces unsolved, based on 
         the solution board.  Also resets the state.
@@ -308,7 +312,7 @@ class Base(ABC):
     #============================ isPieceThere ===========================
     #
     def isPieceThere(self, meaPiece, scene:StatePuzzleScene):
-        """
+        """!
         @brief  Check if the measured piece is actually present in the scene by analyzing the segmentation mask.
 
         @param[in]  meaPiece    Measured piece whose presence we want to verify.
@@ -367,7 +371,7 @@ class Base(ABC):
     #========================= getSequentialPlan =========================
     #
     def getSequentialPlan(self, measured_board, solution_board, numPieces):
-        """
+        """!
         @brief  Generate a sequential placement plan by sorting matched pieces by solution ID.
         
         @param[in]  measured_board  The board with measured/detected pieces.
@@ -426,7 +430,7 @@ class Base(ABC):
     #
     @abstractmethod
     def getNextAction(self):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
 
         @param[in]  thePlan     Optional desired action plan.

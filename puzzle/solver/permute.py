@@ -13,7 +13,7 @@
 #=============== puzzle.solver.permute.py =====================
 
 import rospy
-from puzzle.solver.base_v2 import Base, Action , CfgSolver
+from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from puzzle.solver.priority import Priority_Solver
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from camera.base import ImageRGBD
@@ -24,18 +24,23 @@ from dataclasses import dataclass
 
 @dataclass
 class Permute_State:
+    """!
+    @brief      State for the permutation-driven solver.
+    @ingroup    Puzzle_Solving
+    """
     DIRECT_PLACE = 0
     PLACE = 1
     SORT = 2
-    OUTRIGHT = 3
     END = 4
-    ASKHELP = 5
     operation: int
     op_list: any # List of next operations
     num_pieces: int
     tend_counter: int
     pc_list: any # List of next pieces
     operation_index: int  # index within the larger order
+    needs_look: bool = True
+    needs_tend: bool = False
+    last_action_was_tend: bool = False
 
 
 '''
@@ -45,7 +50,18 @@ Core Tasks:
 press into a single plan- min of left operations in the plan, and look rate.
 '''
 class Permute_Solver(Priority_Solver):
+    """!
+    @brief      Execute a configured permutation of puzzle operations.
+    @ingroup    Puzzle_Solving
+    """
+
     def __init__(self, cfgSolver: CfgSolver, permutation=[]):
+        """!
+        @brief  Construct a permutation-driven solver.
+
+        @param[in]  cfgSolver    Configuration for the solver.
+        @param[in]  permutation  Ordered sequence of solver operations.
+        """
         super().__init__(cfgSolver)
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
 
@@ -54,19 +70,33 @@ class Permute_Solver(Priority_Solver):
         self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
 
         self.order = permutation
+
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief  Reset the solver state and mode.
+        """
+        super().reset_solver()
+        self.state = Permute_State(
+            operation=-1, op_list=None, num_pieces=0,
+            tend_counter=self.PIECES_BEFORE_TEND,
+            pc_list=None, operation_index=0,
+            needs_look=True, needs_tend=False,
+            last_action_was_tend=False
+        )
+        self.mode = Mode.PERCEIVE
         
         
     def getNextOperation(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
-        """
+        """!
         @brief  Compute the composite priority of each operation and
                 return the operation with highest composite priority.
-        Args:
-            rgbd:  RGBD image for the current scene.
-            scene:  current scene state.
+
+        @param[in]  rgbd   RGBD image for the current scene.
+        @param[in]  scene  Current puzzle scene state.
         
-        Returns: 
-            List of pieces, List of OPERATIONS
-        
+        @return  Tuple containing the piece list and operation list.
         """
         # Retreive the priorities and relevant rates.
         self.updatePriorities()
@@ -134,156 +164,131 @@ class Permute_Solver(Priority_Solver):
         
         return pieces, op_list
         
-            
-            
-            
-        
-        
     
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
+        @param[in]  rgbd   Optional RGBD image for the current scene.
+        @param[in]  scene  Optional current puzzle scene state.
         
-        Returns:
-            Action
+        @return  Action to take.
+
+        @note  Uses PERCEIVE mode to plan and request tending, then ACT mode
+               to execute the planned operations.
         """
         
-        '''
-        Logic
-        Assumption is that re-assessing
-        priorities / switching actions requires the robot
-        to measure again.
-        
-        Assess -> perform -> assess
-        '''
-        # Start of the solving logic
-        
+        # First ever call: initialize state and request a look.
         if self.state is None:
-            # Start by estimating scene and solving
-            # for first k pieces
             action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            self.state = Permute_State(operation=Permute_State.OUTRIGHT, num_pieces=0, \
-                                       tend_counter=0, pc_list=None, operation_index=0, \
-                                        op_list=None)
+            self.state = Permute_State(
+                operation=-1, op_list=None, num_pieces=0,
+                tend_counter=self.PIECES_BEFORE_TEND,
+                pc_list=None, operation_index=0,
+                needs_look=True, needs_tend=False
+            )
+            self.mode = Mode.PERCEIVE
             return action
-        
-        previous = self.state
-        nextOperation = -1
-        nextNumPieces = -1
-        nextPcList = None
-        nextTendCounter = -1
-        nextOpList = None
-        
-        if previous.operation == Permute_State.OUTRIGHT:
-            # Action was asking for estimation
-            if scene is None or rgbd is None:
-                print("ERROR: Expected scene information")
-                return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-            # Compute the priorities and action plan
-            nextPcList, nextOpList = self.getNextOperation(scene, rgbd)
-            if nextOpList is not None and nextPcList is not None:
-                print("Next operations: ", nextOpList, " with pieces: ", len(nextPcList))
 
-            # End if no operations available (e.g., solved)
-            if nextPcList is None:
+        # -----------------------------------------------------------------
+        #  PERCEIVE mode: handle tending, then looking / planning.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.PERCEIVE:
+
+            # --- Solved: request final tend, then end --------------------
+            if self.state.operation == Permute_State.END:
+                if self.state.needs_tend:
+                    self.state.needs_tend = False
+                    return Action(type=Action.HELP, help="Fix the solution")
                 print("Ending operations")
-                action  = Action(type=Action.END)
-                nextOperation = Permute_State.END
-                nextNumPieces = -1
-            elif len(nextPcList) == 0:
-                print("No pieces to operate on, re-assessing")
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Permute_State.OUTRIGHT
-                nextNumPieces = -1
-            else:
-                nextNumPieces = 0
-                nextOperation = nextOpList[nextNumPieces]
-                # Move to next state if direct place / sort, but if place, then go to left.
-                if nextOperation == Permute_State.PLACE:
-                    action = Action(type=Action.OUTLEFT, estimate_zone=[])
-                else:
-                    action = Action(type=Action.NULL)
-                
-            nextTendCounter = previous.tend_counter
-        elif previous.operation == Permute_State.DIRECT_PLACE or previous.operation == Permute_State.PLACE:
-            # previous action was an estimation followed with a place
-            # this one is going to be a place / or go back to estimation
+                return Action(type=Action.END)
 
-            if previous.tend_counter == self.PIECES_BEFORE_TEND:
-                # Ask for help
-                action = Action(type=Action.HELP, help="Fix the solution")
-                nextOperation = Permute_State.ASKHELP
-                nextNumPieces = -1
-                nextTendCounter = -1
-            elif previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Permute_State.OUTRIGHT
-                nextNumPieces = -1
-                nextTendCounter = previous.tend_counter
-            else:
-                meaPiece, solPiece, rot, _ = previous.pc_list[previous.num_pieces]
+            # --- Sub-step 1: Tending (if triggered) ----------------------
+            if self.state.needs_tend:
+                self.state.needs_tend   = False
+                self.state.tend_counter = self.PIECES_BEFORE_TEND
+                self.state.needs_look   = True
+                self.state.last_action_was_tend = True
+                return Action(type=Action.HELP, help="Fix the solution")
+
+            # --- Sub-step 2: Look / plan ---------------------------------
+            if self.state.needs_look:
+                if scene is None or rgbd is None:
+                    return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
+
+                pc_list, op_list = self.getNextOperation(scene, rgbd)
+                if op_list is not None and pc_list is not None:
+                    print("Next operations: ", op_list, " with pieces: ", len(pc_list))
+
+                if pc_list is None or len(pc_list) == 0:
+                    if self.state.last_action_was_tend:
+                        print("Puzzle solved and tend was already performed — ending operations.")
+                        self.state.operation = Permute_State.END
+                        return Action(type=Action.END)
+                    else:
+                        print("Puzzle solved — requesting final tend before ending.")
+                        self.state.operation  = Permute_State.END
+                        self.state.needs_tend = True
+                        self.state.needs_look = False
+                        return Action(type=Action.NULL)
+
+                # Plan ready — transition to ACT.
+                self.state.needs_look = False
+                self.state.operation  = op_list[0]
+                self.state.pc_list    = pc_list
+                self.state.op_list    = op_list
+                self.state.num_pieces = 0
+                self.mode             = Mode.ACT
+                return Action(type=Action.NULL)
+
+        # -----------------------------------------------------------------
+        #  ACT mode: execute sequence of operations from pc_list & op_list.
+        # -----------------------------------------------------------------
+        if self.mode == Mode.ACT:
+
+            # Check exit conditions: pieces exhausted or tend counter hit zero.
+            if self.state.num_pieces >= len(self.state.pc_list) or \
+               self.state.tend_counter <= 0:
+                self.mode               = Mode.PERCEIVE
+                self.state.needs_look   = True
+                self.state.needs_tend   = (self.state.tend_counter <= 0)
+                return Action(type=Action.NULL)
+
+            op = self.state.op_list[self.state.num_pieces]
+            self.state.operation = op
+
+            if op == Permute_State.SORT:
+                meaPiece, solPiece, rot, tgt_zone = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                else:
-                    action = Action(type=Action.PICKPLACE, \
-                                    measured_pc=meaPiece,\
-                                    solution_pc=solPiece, rotation=rot)
-                nextNumPieces = previous.num_pieces + 1
-                if nextNumPieces == len(previous.pc_list):
-                    nextOperation = previous.operation
-                else:
-                    nextOperation = previous.op_list[nextNumPieces]
-                nextTendCounter = previous.tend_counter + 1
-        elif previous.operation == Permute_State.SORT:
-            if previous.tend_counter == self.PIECES_BEFORE_TEND:
-                # Ask for help
-                action = Action(type=Action.HELP, help="Fix the solution")
-                nextOperation = Permute_State.ASKHELP
-                nextNumPieces = -1
-                nextTendCounter = -1
-            elif previous.num_pieces == len(previous.pc_list):
-                # Re-estimate
-                action = Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
-                nextOperation = Permute_State.OUTRIGHT
-                nextNumPieces = -1
-                nextTendCounter = previous.tend_counter
+                    return Action(type=Action.NULL)
+
+                self.state.tend_counter -= 1
+                self.state.last_action_was_tend = False
+                return Action(type=Action.SORT,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot,
+                              tgt_zone=tgt_zone)
             else:
-                meaPiece, solPiece, rot, tgt_zone = previous.pc_list[previous.num_pieces]
+                # DIRECT_PLACE or PLACE
+                meaPiece, solPiece, rot, _ = self.state.pc_list[self.state.num_pieces]
+                self.state.num_pieces += 1
+
                 if not self.isPieceThere(meaPiece, scene):
-                    action = Action(type=Action.NULL)
-                else:
-                    action = Action(type=Action.SORT, \
-                                measured_pc=meaPiece,\
-                                solution_pc=solPiece, rotation=rot,
-                                tgt_zone=tgt_zone)
-                nextNumPieces = previous.num_pieces + 1
-                if nextNumPieces == len(previous.pc_list):
-                    nextOperation = previous.operation
-                else:
-                    nextOperation = previous.op_list[nextNumPieces]
-                nextTendCounter = previous.tend_counter + 1
-        elif previous.operation == Permute_State.ASKHELP:
-            # last step was to ask help, 
-            # Next: estimate board again
-            action = Action(type=Action.NULL)
-            nextOperation = Permute_State.OUTRIGHT
-            nextTendCounter = 0
-        
-        # Update state
-        self.state.operation = nextOperation
-        self.state.num_pieces = nextNumPieces
-        self.state.tend_counter = nextTendCounter
-        if nextPcList is not None:
-            self.state.pc_list = nextPcList
-        if nextOpList is not None:
-            self.state.op_list = nextOpList
-        # Send action
-        return action
+                    return Action(type=Action.NULL)
+
+                self.state.tend_counter -= 1
+                self.state.last_action_was_tend = False
+                return Action(type=Action.PICKPLACE,
+                              measured_pc=meaPiece,
+                              solution_pc=solPiece, rotation=rot)
+
+        # Fallback
+        print("WARNING: getNextAction fell through. Requesting estimation.")
+        self.mode = Mode.PERCEIVE
+        self.state.needs_look = True
+        return Action(type=Action.OUTRIGHT, estimate_zone=self.zones_to_estimate)
             
     
 

@@ -11,7 +11,7 @@
 
 from dataclasses import dataclass
 
-from puzzle.solver.base_v2 import Base, Action, CfgSolver
+from puzzle.solver.base_v2 import Base, Action, CfgSolver, Mode
 from Surveillance.layers.PuzzleScene import StatePuzzleScene
 from camera.base import ImageRGBD
 import numpy as np
@@ -19,28 +19,50 @@ from puzzle.piece import PieceStatus
 
 @dataclass
 class Cycle_State:
+    """!
+    @brief      State for the cyclic placement solver.
+    @ingroup    Puzzle_Solving
+    """
     DIRECT_PLACE = 0
     PLACE = 1
-    OUTRIGHT = 2
-    OUTLEFT = 3
+    END = 4
     operation: int
     zone: int
+    needs_look: bool = True
 
 
 
 class Cycle_Place(Base):
+    """!
+    @brief      Cycle through direct placement and organized-zone placement.
+    @ingroup    Puzzle_Solving
+    """
 
     def __init__(self, cfgSolver: CfgSolver):
+        """!
+        @brief  Construct a cyclic placement solver.
+
+        @param[in]  cfgSolver  Configuration for the solver.
+        """
         super().__init__(cfgSolver)
      
-    def getNextPiece(self, zone: int, scene: StatePuzzleScene, rgbd: ImageRGBD):
+    #============================ reset_solver ===========================
+    #
+    def reset_solver(self):
+        """!
+        @brief  Reset the solver state and mode.
         """
+        super().reset_solver()
+        self.state = Cycle_State(operation=-1, zone=-1, needs_look=True)
+        self.mode = Mode.PERCEIVE
+
+    def getNextPiece(self, zone: int, scene: StatePuzzleScene, rgbd: ImageRGBD):
+        """!
         @brief  Get the next piece to place from the given zone.
 
-        Args:
-            zone: The zone from which to get the next piece.
-            scene: The current state of the puzzle scene.
-            rgbd: The RGBD image of the current scene.
+        @param[in]  zone   Zone from which to get the next piece.
+        @param[in]  scene  Current puzzle scene state.
+        @param[in]  rgbd   RGBD image of the current scene.
         """
         # Update solution estimate
         self.updateSolutionRegEstimate(scene)
@@ -75,107 +97,90 @@ class Cycle_Place(Base):
             meaPiece = None
             solPiece = None
             rot = None
-        
+
         solved = self.isBoardSolved()
         
         return meaPiece, solPiece, rot, solved
 
         
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
 
-        Args:
-            rgbd: Optional RGBD image for the current scene.
-            scene: Optional current scene state.
-        """
-        # Start of the cycling place logic
-        if self.state == None:
-            # Start by asking it to estimate solution region
-            action = Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])
-            self.state = Cycle_State(operation=Cycle_State.OUTRIGHT, zone=-1)
-            return action
-        
-        # State transitions
-        # OUTRIGHT -> DIRECT place, -> outleft -> place -> outleft -> place -> ...
-        
-        previous = self.state
-        nextZone = -1
-        nextOperation = -1
-           
-        if previous.operation == Cycle_State.OUTRIGHT:
-            #  action was asking robot to move out and get an estimate
-            # of the solution region and unorganized region
-            # NEXT: Do a direct place
-            if scene is None:
-                print("ERROR: Expected scene information after robot out of way in right.")
-                return Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])
-            
-            meaPiece, solPiece, rot, complete = self.getNextPiece(Base.UNORGANIZED, scene, rgbd)
+        @param[in]  rgbd   Optional RGBD image for the current scene.
+        @param[in]  scene  Optional current puzzle scene state.
 
-            # If no piece found in unorganized zone,
-            # cycle to next state.
+        @note  Uses a two-mode state machine:
+          PERCEIVE - requests scene estimation (OUTRIGHT or OUTLEFT depending on zone).
+          ACT      - evaluates piece placement for the current zone, then advances zone.
+        """
+        # First ever call: initialize state and request estimation
+        if self.state is None:
+            action = Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])
+            self.state = Cycle_State(operation=-1, zone=-1, needs_look=True)
+            self.mode = Mode.PERCEIVE
+            return action
+
+        # -----------------------------------------------------------------
+        #  PERCEIVE mode: request scene estimation (OUTRIGHT or OUTLEFT)
+        # -----------------------------------------------------------------
+        if self.mode == Mode.PERCEIVE:
+            if self.state.needs_look:
+                if scene is None:
+                    # Scene data not yet available — request estimation
+                    if self.state.operation == Cycle_State.PLACE and self.state.zone > 0:
+                        return Action(type=Action.OUTLEFT, estimate_zone=[Base.SOL, self.state.zone])
+                    else:
+                        return Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])
+
+                # Scene received — transition to ACT.
+                self.state.needs_look = False
+                self.mode = Mode.ACT
+                return Action(type=Action.NULL)
+
+        # -----------------------------------------------------------------
+        #  ACT mode: perform placement from current zone, then advance zone
+        # -----------------------------------------------------------------
+        if self.mode == Mode.ACT:
+            current_zone = Base.UNORGANIZED if self.state.zone == -1 else self.state.zone
+            meaPiece, solPiece, rot, complete = self.getNextPiece(current_zone, scene, rgbd)
+
             if complete:
                 print("Board is full.")
-                action = Action(type=Action.END)
-            elif meaPiece is None:
-                print(f"No placeable piece in zone {Base.UNORGANIZED}")
-                action = Action(type=Action.NULL)
-            else:
-                action = Action(type=Action.PICKPLACE, \
-                                            measured_pc=meaPiece,\
-                                                solution_pc=solPiece, rotation=rot)
-            nextOperation = Cycle_State.DIRECT_PLACE
-            nextZone = Base.UNORGANIZED   
-        elif previous.operation == Cycle_State.DIRECT_PLACE:
-            #  action was a direct place,
-            # NEXT: we ask to go out left and get an estimate of the
-            # solution region and zone to place from next.
-            nextZone = 1
-            action = Action(type=Action.OUTLEFT, estimate_zone=[Base.SOL, nextZone])
-            nextOperation = Cycle_State.OUTLEFT
-        elif previous.operation == Cycle_State.OUTLEFT:
-            #  action was asking robot to move out left and get an estimate
-            # of the solution region and current zone to place from
-            # NEXT: Do a place from the current zone
-            if scene is None:
-                print("ERROR: Expected scene information after robot out of way in left.")
-                return Action(type=Action.OUTLEFT, estimate_zone=[Base.SOL, previous.zone])
-            
-            meaPiece, solPiece, rot, complete = self.getNextPiece(previous.zone, scene, rgbd)
-            # if no piece in current zone
-            # cycle to next state
-            if complete:
-                print("Board is full")
-                action = Action(type=Action.END)
-            elif meaPiece is None:
-                print(f"No placeable piece in zone {previous.zone}")
-                action = Action(type=Action.NULL)
-            else:
-                action = Action(type=Action.PICKPLACE,\
-                                                  measured_pc=meaPiece,\
-                                                    solution_pc=solPiece, rotation=rot)
-            nextOperation = Cycle_State.PLACE
-            nextZone = previous.zone
+                self.state.operation = Cycle_State.END
+                return Action(type=Action.END)
 
-        elif previous.operation == Cycle_State.PLACE:
-            # action was a place from a zone, we want to continue placing from zones until all zones are done
-            # NEXT: we ask to go out left and get an estimate of the solution region and zone to place from next, until all zones are done, then we ask for final estimate and place
-            # else, we go to estimate unorganized zone.
-            nextZone = previous.zone + 1
-            if nextZone > Base.NUM_ZONES:
-                action = Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])
-                nextOperation = Cycle_State.OUTRIGHT
-                nextZone = -1
+            if meaPiece is None:
+                print(f"No placeable piece in zone {current_zone}")
+                act = Action(type=Action.NULL)
             else:
-                action = Action(type=Action.OUTLEFT, estimate_zone=[Base.SOL, previous.zone])
-                nextOperation = Cycle_State.OUTLEFT
-            
-            
-            
-        # Update state
-        self.state.operation = nextOperation
-        self.state.zone = nextZone
-        # Send action
-        return action
+                act = Action(type=Action.PICKPLACE,
+                             measured_pc=meaPiece,
+                             solution_pc=solPiece, rotation=rot)
 
+            # Advance to next cycle stage and request next look in PERCEIVE mode
+            self.mode = Mode.PERCEIVE
+            self.state.needs_look = True
+
+            if self.state.zone == -1:
+                # After DIRECT_PLACE (unorganized), move to zone 1 with OUTLEFT
+                self.state.zone = 1
+                self.state.operation = Cycle_State.PLACE
+            else:
+                # After PLACE from zone N, move to N + 1
+                next_zone = self.state.zone + 1
+                if next_zone > Base.NUM_ZONES:
+                    # Done with all zones, cycle back to UNORGANIZED (OUTRIGHT)
+                    self.state.zone = -1
+                    self.state.operation = Cycle_State.DIRECT_PLACE
+                else:
+                    self.state.zone = next_zone
+                    self.state.operation = Cycle_State.PLACE
+
+            return act
+
+        # Fallback
+        print("WARNING: getNextAction fell through. Requesting estimation.")
+        self.mode = Mode.PERCEIVE
+        self.state.needs_look = True
+        return Action(type=Action.OUTRIGHT, estimate_zone=[Base.SOL, Base.UNORGANIZED])

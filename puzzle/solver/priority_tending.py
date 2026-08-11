@@ -35,6 +35,7 @@ STR_LOOK            = "Please let me see"
 @dataclass
 class Priority_Tending_State:
     """!
+    @brief      State for priority-driven solving with periodic tending.
     @ingroup    Puzzle_Solving
     """
     DIRECT_PLACE = 0
@@ -47,6 +48,7 @@ class Priority_Tending_State:
     pc_list: any
     needs_look: bool = True
     needs_tend: bool = False
+    last_action_was_tend: bool = False
 
 class Priority_Tending_Solver(Priority_Solver):
     """!
@@ -81,7 +83,7 @@ class Priority_Tending_Solver(Priority_Solver):
     #
     def reset_solver(self):
         """!
-        @brief: Rests the solver to begin with new puzzle (or start). 
+        @brief  Reset the solver to begin with a new puzzle or start.
                 
         Resets the board estimate to all pieces unsolved, based on 
         the solution board.  Also resets the state and mode.
@@ -90,7 +92,8 @@ class Priority_Tending_Solver(Priority_Solver):
         self.state = Priority_Tending_State(
             operation=-1, num_pieces=0,
             tend_counter=self.PIECES_BEFORE_TEND,
-            pc_list=None, needs_look=True, needs_tend=False
+            pc_list=None, needs_look=True, needs_tend=False,
+            last_action_was_tend=False
         )
         self.mode = Mode.PERCEIVE
 
@@ -180,7 +183,7 @@ class Priority_Tending_Solver(Priority_Solver):
     #=========================== getNextAction ===========================
     #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
        
         @param[in]  rgbd    RGBD image for the current scene.
@@ -188,7 +191,7 @@ class Priority_Tending_Solver(Priority_Solver):
         
         @return     Action to take.
         
-        Uses a two-mode state machine:
+        @note  Uses a two-mode state machine:
           PERCEIVE - handles tending (human help) and looking (scene estimation).
                      Tending is requested first so the human can fix pieces
                      before the robot re-estimates the scene.
@@ -228,6 +231,7 @@ class Priority_Tending_Solver(Priority_Solver):
                 self.state.needs_tend   = False
                 self.state.tend_counter = self.PIECES_BEFORE_TEND
                 self.state.needs_look   = True   # Must re-look after tend.
+                self.state.last_action_was_tend = True
                 return Action(type=Action.HELP, help=STR_ARRANGE_PIECES)
 
             # --- Sub-step 2: Look / plan ---------------------------------
@@ -241,11 +245,15 @@ class Priority_Tending_Solver(Priority_Solver):
                 print("Next operation: ", operation, " with pieces: ", len(pc_list))
 
                 if operation == Priority_Tending_State.END:
-                    print("Puzzle solved — requesting final tend before ending.")
-                    self.state.operation   = Priority_Tending_State.END
-                    self.state.needs_tend  = True
-                    self.state.needs_look  = False
-                    return Action(type=Action.NULL)
+                    if self.state.last_action_was_tend:
+                        print("Puzzle solved and tend was already performed — ending operations.")
+                        return Action(type=Action.END)
+                    else:
+                        print("Puzzle solved — requesting final tend before ending.")
+                        self.state.operation   = Priority_Tending_State.END
+                        self.state.needs_tend  = True
+                        self.state.needs_look  = False
+                        return Action(type=Action.NULL)
 
                 if len(pc_list) == 0:
                     # No actionable pieces — re-look.
@@ -281,6 +289,7 @@ class Priority_Tending_Solver(Priority_Solver):
                     return Action(type=Action.NULL)
 
                 self.state.tend_counter -= 1
+                self.state.last_action_was_tend = False
                 return Action(type=Action.SORT,
                               measured_pc=meaPiece,
                               solution_pc=solPiece, rotation=rot,
@@ -294,6 +303,7 @@ class Priority_Tending_Solver(Priority_Solver):
                     return Action(type=Action.NULL)
 
                 self.state.tend_counter -= 1
+                self.state.last_action_was_tend = False
                 return Action(type=Action.PICKPLACE,
                               measured_pc=meaPiece,
                               solution_pc=solPiece, rotation=rot)

@@ -208,7 +208,7 @@ class Priority_Solver(Base):
     #=========================== getNextAction ===========================
     #
     def getNextAction(self, rgbd:ImageRGBD=None, scene:StatePuzzleScene=None):
-        """
+        """!
         @brief  Return the next action to execute from current solver state.
 
         @param[in]  rgbd    RGBD image for the current scene.
@@ -216,7 +216,7 @@ class Priority_Solver(Base):
         
         @return     Action to take.
 
-        Uses a two-mode state machine:
+        @note  Uses a two-mode state machine:
           PERCEIVE - handles looking (scene estimation) and priority planning.
           ACT      - executes sort / place / direct-place operations.
                      When the piece list is exhausted, mode switches back to PERCEIVE.
