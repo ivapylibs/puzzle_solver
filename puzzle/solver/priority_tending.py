@@ -29,8 +29,10 @@ from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from puzzle.solver.priority import Priority_Solver
 
 
-STR_ARRANGE_PIECES  = "Please arrange the pieces neatly"
+STR_START           = "Let's start solving."
 STR_LOOK            = "Please let me see"
+STR_ARRANGE_PIECES  = "Please adjust the pieces"
+STR_END             = "We are done solving."
 
 @dataclass
 class Priority_Tending_State:
