@@ -299,19 +299,22 @@ class Template:
         """
         if self.gLoc is not None:
             return self.gLoc
+
         kernel = np.ones((kernel_size,kernel_size))
 
         # Convolve across image with 1 piece to get scores
         output_scores = convolve2d(self.y.mask, kernel, mode='same', boundary='fill', fillvalue=0)
-        max_val = np.max(output_scores)
+
+        max_val     = np.max(output_scores)
         max_val_loc = np.where(output_scores == max_val)
         max_val_loc = np.array(max_val_loc).T
   
-        diff = max_val_loc - np.array([self.y.size[1] / 2, self.y.size[0] / 2])
+        diff      = max_val_loc - np.array([self.y.size[1] / 2, self.y.size[0] / 2])
         distances = np.linalg.norm(diff, axis=1)
 
-        target = max_val_loc[np.argmin(distances)] + self.y.pcorner[::-1]
+        target    = max_val_loc[np.argmin(distances)] + self.y.pcorner[::-1]
         self.gLoc = target[::-1]
+
         return self.gLoc
 
     #============================== placeInImage =============================
