@@ -297,6 +297,12 @@ class Template:
         Returns:
             loc:    [x, y] coordinates in image to send suction cup
         """
+
+        self.gLoc = self.centroidLoc
+        return self.gLoc
+
+        #===== CODE BELOW IS IGNORED.  WAS RETURNING BAD PIECES.  NEED TO
+        #===== REVIEW WHAT IS GOING ON.  2026/08/28 - PAV.
         if self.gLoc is not None:
             return self.gLoc
 

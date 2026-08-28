@@ -1,15 +1,19 @@
 #============================ puzzle.solver.priority ===========================
 #
 # @package  puzzle.solver.priority
-# @brief    Priority based solving. Involves estimating the
-#           scene every k actions (sort, place, direct place)
-#           robot. After scene estimation performs a decision about
-#           which action to perform based on priorities.
-#           After performing action, repeat the process.
-#           Uses the look rate to determine how often
-#           to re-assess priorities and switch actions.
-#           Assumes continuous solving with human, so no tending.
+# @brief    Priority based solving. 
+
+# Puzzlebot estimates the scene every k actions (sort, place, direct place).
+# After scene estimation, performs a decision about which action to perform based on
+# priorities.  After performing action, repeat the process.  Uses the look rate 
+# to determine how often to re-assess priorities and switch actions.  Assumes 
+# continuous solving with human, no tending.
 #         
+#
+# @note The could might be wrong.  Priority tending was wrong in terms of how
+#       the counter oeprated.  That means Priority is probably wrong unless it
+#       was fixed.  Not sure taht happened.  Needs review. 2026/08/28 - PAV.
+#
 #============================ puzzle.solver.priority ===========================
 
 import numpy as np
@@ -99,17 +103,19 @@ class Priority_Solver(Base):
         else:
             rospy.logerror('The look paramaters are not set. Check ROS params.')
             self.PIECES_BEFORE_LOOK = 5
-    
+
     #========================== computePlacePlan =========================
     #
     def computePlacePlan(self, scene:StatePuzzleScene, rgbd:ImageRGBD):
         """!
-        @brief  Computes a custom place plan. Starts by filling in pieces from 
-                most populated zones to least populated zones.
+        @brief  Computes a custom place plan. 
+
+        Starts by filling in pieces from most populated zones to least populated zones.
         """
         
         pieces_left = self.PIECES_BEFORE_LOOK
-        plan = []
+        plan        = []
+
         for zone in range(1, Base.NUM_ZONES + 1):
             measured_board = self.createMeasuredBoard(rgbd, scene, [zone])
             solution_board = self.createSolutionBoard(zone)
@@ -132,6 +138,14 @@ class Priority_Solver(Base):
                 pieces_left -= len(zone_pieces)
             i += 1
         
+        #
+        # @todo Here is where problem lies because the plan is strongly bound to the
+        #       sort zone location of the piece rather than an internally estimated
+        #       sort assignment.  We need to add sort assignment to each piece
+        #       or at least get it here when acting on the piece.  
+        #       Problem = Heather found that intentionally mis-sorting led to definitive
+        #       mis-placement.  Oops!!!  Fix me.
+        #
         return pieces
             
             

@@ -1,20 +1,18 @@
 #======================== puzzle.solver.priority_tending =======================
+##
+# @package  puzzle.solver.priority_tending
+# @brief    Priority based solving with tending state. 
 #
-# @class    puzzle.solver.priority_tending.py
-# @brief    Priority based solving. Involves estimating the
-#           scene every k actions (sort, place, direct place)
-#           robot. After scene estimation performs a decision about
-#           which action to perform based on priorities.
-#           After performing action, repeat the process.
-#           Uses the look rate to determine how often
-#           to re-assess priorities and switch actions.
-#           Assumes continuous solving with human, so no tending.
-#         
+# The robot estimates the scene every k actions (sort, place, direct place).
+# After scene estimation, the observed puzzle layout and priority weighting
+# determines which (k-)action group to execute.  Repeats this plan and
+# execute process until the k actions have been implemented.  A moved puzzle
+# piece will trigger an action skip.  Uses the look rate to determine how
+# often to re-assess priorities and switch actions.  
 #
-#
+# @ingroup  Puzzle_Solving
 #
 #======================== puzzle.solver.priority_tending =======================
-
 
 import numpy as np
 from dataclasses import dataclass
@@ -27,7 +25,6 @@ from puzzle.piece import PieceStatus
 
 from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from puzzle.solver.priority import Priority_Solver
-
 
 STR_START           = "Let's start solving."
 STR_LOOK            = "Please let me see"
@@ -75,10 +72,9 @@ class Priority_Tending_Solver(Priority_Solver):
 
         super().__init__(cfgSolver)
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
-
-        # Logically, the robot can estimate when in ask for help state
-        # so, the pices before look is the minimum of (look_rate, tend_rate)
-        self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
+        self.PIECES_BEFORE_LOOK = min(rospy.get_param('look_rate') , self.PIECES_BEFORE_TEND)
+        # The robot can estimate when before leaving tend state.
+        # The pieces before look is the minimum of (look_rate, tend_rate).
 
         
     #============================ reset_solver ===========================
@@ -118,66 +114,98 @@ class Priority_Tending_Solver(Priority_Solver):
                 and iterating towards final implementation. 2026/08/02 - PAV.
         """
 
-        # Retreive the priorities and relevant rates.
+        # Retreive relevant rates and compute the priority scores. 
         #
         self.updatePriorities()
         self.PIECES_BEFORE_TEND = rospy.get_param('tend_rate')
-        self.PIECES_BEFORE_LOOK = min(self.PIECES_BEFORE_LOOK, self.PIECES_BEFORE_TEND)
+        self.PIECES_BEFORE_LOOK = min(rospy.get_param('look_rate') , self.PIECES_BEFORE_TEND)
+        # @todo Overload updatePriorities to include tending.  Above two line go elsewhere.
+        #       2026/08/28 - PAV.
+
+        scores = []         # Empty out to populate.
+
         # @note Looks like minimum of tend and look will dominate.  How does that actually
         #       implement what is specified?  Will not interleave.  These two actions
         #       are fundamentally different.  Web priority interface miscontrues the
         #       values. 2026/08/02 - PAV.
+        # @note Code changes since previous note better align parameters with expected
+        #       implementation.  The earlier note may not be so relevant.  Need more
+        #       playing with design to determine if important or not.  If not, should
+        #       remove the notes.  Recommending removal at 2026/10/02 if nothing changes.
+        #       2026/08/28 - PAV.
 
-        scores = []
-        # Sort score
-        # Number of pieces in unorganized zone
-        # Create a measured board for unorganized region
-        unorganized_measured_board = self.createMeasuredBoard(rgbd, scene, [Base.UNORGANIZED])
-        unorganized_zone_pieces = len(unorganized_measured_board.pieces)
-        sort_score = unorganized_zone_pieces * self.sort_pty
+        # @todo For sure the computations of the priority scores should be centralized.
+        #       Makes absolutely no sense to replicate same code across classes.
+        #       2026/08/28 - PAV.
+
+        # [1] Sort score: Based on number of pieces in unorganized zone.
+        #
+        unorganized_measured_board  = self.createMeasuredBoard(rgbd, scene, [Base.UNORGANIZED])
+        unorganized_zone_pieces     = len(unorganized_measured_board.pieces)
+        sort_score                  = unorganized_zone_pieces * self.sort_pty
+
         scores.append(sort_score)
         
-        # Place priority
-        # Number of pieces in organized zone
+        # [2] Place score: Based on number of pieces in organized zone
+        #
         zones = [i for i in range(1, Base.NUM_ZONES + 1)]
         organized_measured_board = self.createMeasuredBoard(rgbd, scene, zones)
-        organized_zone_pieces = len(organized_measured_board.pieces)
+        organized_zone_pieces    = len(organized_measured_board.pieces)
         
         place_score = organized_zone_pieces * self.place_pty
         scores.append(place_score)
         
-        # Direct Place priority
-        # Update solution estimate
+        # [3] Direct Place score: Also based on number of pieces in unorganized zone.
+        #     Originally based on empty solution pieces, but the robot placement is
+        #     messy and solution estimate does not always match unorganized zone
+        #     cardinality.  
+        #
+        #     Furthermore, using only unsolved pieces does not factor
+        #     in the fact that the pieces could be all sorted.  Then the system might
+        #     trigger a direct place, but then find no pieces in the unorganized area
+        #     and bonk out, leading to odd behavior.  That is the main reason for
+        #     removing the dependency on solution area.
+        #
+        #  Code immediately below is not used in new direct place score.
+        #  Kept in case needed elsewhere.
         self.updateSolutionRegEstimate(scene)
         solution_board = self.createSolutionBoard(Base.UNORGANIZED)
-        empty_spots = len(solution_board.pieces)
+        empty_spots    = len(solution_board.pieces)
 
         direct_place_score = unorganized_zone_pieces * self.dir_place_pty
         scores.append(direct_place_score)
         
-        # Pre-emptively finish if no empty spots in solution board
+        # If no empty spots in solution board, consider problem solved.
         if empty_spots == 0:
             return [], Priority_Tending_State.END
 
-        # Pick the highest priority score
-        print("Pieces in organized zones: ", organized_zone_pieces, " and in unorganized zone: ", unorganized_zone_pieces, " with empty spots in solution board: ", empty_spots)
-        print("Scores: Sort: ", sort_score, " Place: ", place_score, " Direct Place: ", direct_place_score)
+        # Otherwise, pick the highest priority score
+        print("Pieces in organized zones: ", organized_zone_pieces, \
+              " and in unorganized zone:  ", unorganized_zone_pieces, \
+              " with empty spots in solution board: ", empty_spots)
+        print("Scores: Sort: ", sort_score, \
+                    " Place: ", place_score, \
+             " Direct Place: ", direct_place_score)
         i = np.argmax(scores)
 
         if scores[i] == 0:
             # No piece to perform highest priority task, keep looking
+            # Really, this should not be happening, but good to catch.
             return [], -1
-        if i == 0:
-            # Sort
+
+        if i == 0:              # Sort Actions.
+
             self.performMatching(unorganized_measured_board, solution_board)
             pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_Tending_State.SORT
-        elif i == 1:
-            # Place
+
+        elif i == 1:            # Place Actions.
+
             pieces = self.computePlacePlan(scene, rgbd)
             return pieces, Priority_Tending_State.PLACE
-        else:
-            # Direct Place
+
+        else:                   # Direct Place Actions.
+
             self.performMatching(unorganized_measured_board, solution_board)
             pieces = self.getSequentialPlan(unorganized_measured_board, solution_board, self.PIECES_BEFORE_LOOK)
             return pieces, Priority_Tending_State.DIRECT_PLACE
