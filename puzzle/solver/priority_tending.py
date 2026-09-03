@@ -26,7 +26,7 @@ from puzzle.piece import PieceStatus
 from puzzle.solver.base_v2 import Base, Action , CfgSolver, Mode
 from puzzle.solver.priority import Priority_Solver
 
-STR_START           = "Let's start solving."
+STR_START           = "Let's start solving. Wait for me to look first."
 STR_LOOK            = "Please let me see"
 STR_ARRANGE_PIECES  = "Please adjust the pieces"
 STR_END             = "We are done solving."
