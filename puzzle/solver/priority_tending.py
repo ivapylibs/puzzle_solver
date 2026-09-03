@@ -274,6 +274,14 @@ class Priority_Tending_Solver(Priority_Solver):
                 pc_list, operation = self.getNextOperation(scene, rgbd)
                 print("Next operation: ", operation, " with pieces: ", len(pc_list))
 
+                if operation == -1:
+                    # No valid robot operation: request tending.  On the
+                    # following call, the existing needs_tend branch emits
+                    # HELP and resets the tending counter before re-looking.
+                    self.state.needs_tend = True
+                    self.state.needs_look = False
+                    return Action(type=Action.NULL)
+
                 if operation == Priority_Tending_State.END:
                     if self.state.last_action_was_tend:
                         print("Puzzle solved and tend was already performed — ending operations.")

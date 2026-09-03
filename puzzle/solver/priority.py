@@ -116,10 +116,28 @@ class Priority_Solver(Base):
         pieces_left = self.PIECES_BEFORE_LOOK
         plan        = []
 
-        for zone in range(1, Base.NUM_ZONES + 1):
-            measured_board = self.createMeasuredBoard(rgbd, scene, [zone])
-            solution_board = self.createSolutionBoard(zone)
+        # Create set of measured boards that are based on zone placement of pieces.
+        # There may be errors in the actual pieces placed within the zone, thus it
+        # does nto serve as a strong prior.  Usually yes, but not if the worker
+        # is mistaken or intentionally adversarial.  We need a scheme to correct.
+        #
+        all_zones = list(range(1, Base.NUM_ZONES + 1))
+        for zone in all_zones:
+            measured_board  = self.createMeasuredBoard(rgbd, scene, [zone])
+
+            # Match against the reference board to reveal each observed
+            # piece's intended zone without trusting its physical sort zone.
+            zone_matches = self.performZoneMatch(measured_board)
+            match_zones  = list(dict.fromkeys(zone_matches.values()))
+
+            # This is the board used for planning: it includes only the
+            # destination zones associated with pieces in measured_board.
+            solution_board = self.createSolutionBoard(match_zones)
             plan.append((len(measured_board.pieces), measured_board, solution_board))
+
+            # @note Looks like only attempts to solve measured_board elements.  What is
+            #       going on here.  The code is weird.  Why did Nihit not document the
+            #       workflow?? 2026/09/03 - PAV.
         
         # Sort most to least pieces
         plan.sort(key=lambda x: x[0], reverse=True)
@@ -138,14 +156,6 @@ class Priority_Solver(Base):
                 pieces_left -= len(zone_pieces)
             i += 1
         
-        #
-        # @todo Here is where problem lies because the plan is strongly bound to the
-        #       sort zone location of the piece rather than an internally estimated
-        #       sort assignment.  We need to add sort assignment to each piece
-        #       or at least get it here when acting on the piece.  
-        #       Problem = Heather found that intentionally mis-sorting led to definitive
-        #       mis-placement.  Oops!!!  Fix me.
-        #
         return pieces
             
             

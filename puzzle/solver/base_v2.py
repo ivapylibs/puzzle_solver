@@ -16,7 +16,7 @@
 #
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 import cv2
 import numpy as np
 import copy
@@ -232,16 +232,31 @@ class Base(ABC):
     
     #======================== createSolutionBoard ========================
     #
-    def createSolutionBoard(self, zone_to_match: int):
+    def createSolutionBoard(self, zone_to_match: Union[int, List[int]]):
         """!
-        @brief  Create a solution board based on the zone we want to match against
+        @brief  Create a solution board based on one or more zones to match against.
         """
 
         solution_board = board.SolutionBoard()
-        if zone_to_match == Base.UNORGANIZED:
+        zones = zone_to_match if isinstance(zone_to_match, list) else [zone_to_match]
+
+        # UNORGANIZED means every currently unplaced piece, independent of
+        # its assigned sort zone.  It therefore cannot be combined with
+        # ordinary zone selectors.
+        if zones == [Base.UNORGANIZED]:
             solution_board.createBoardByStatus(self.board_estimate, PieceStatus.GONE)
         else:
-            solution_board.createBoardByZone(self.board_estimate, zone_to_match, PieceStatus.GONE)
+            if Base.UNORGANIZED in zones:
+                raise ValueError(
+                    "UNORGANIZED must be supplied alone, not with other zones."
+                )
+
+            # Repeating a zone must not add its pieces more than once.  A
+            # dict preserves the caller's zone ordering while removing repeats.
+            for zone in dict.fromkeys(zones):
+                solution_board.createBoardByZone(
+                    self.board_estimate, zone, PieceStatus.GONE
+                )
 
         # DEBUG
         # print(f"Created solution board with {len(solution_board.pieces)} pieces")
@@ -263,6 +278,32 @@ class Base(ABC):
         #       as it is a strong assumption on how correspondences work. 2026/08/02 - PAV.
         self.correspondence_tracker.setBoard(solution_board)
         self.correspondence_tracker.process(measured_board)
+
+    #========================= performZoneMatch =========================
+    #
+    def performZoneMatch(self, measured_board: Arrangement,
+                         matching_board: SolutionBoard = None):
+        """!
+        @brief  Match measured pieces and return their associated solution zones.
+
+        @param[in]  measured_board  Board whose pieces are to be assigned zones.
+        @param[in]  matching_board  Optional solution board to match against.
+                                    Defaults to the reference board.
+        @return     Mapping from measured-board piece key to solution zone.
+        """
+
+        if matching_board is None:
+            matching_board = self.reference_board
+
+        if not measured_board.pieces or not matching_board.pieces:
+            return {}
+
+        self.performMatching(measured_board, matching_board)
+        return {
+            measured_key: matching_board.zones[solution_key]
+            for measured_key, solution_key
+            in self.correspondence_tracker.pAssignments.items()
+        }
 
     #======================== checkIDplaceability =======================
     #
